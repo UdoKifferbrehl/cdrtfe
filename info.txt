@@ -1,0 +1,20 @@
+Quelltexte von cdrtfe 1.1
+=========================
+
+/classes        Deklaration von Objekttypen und Klassen für cdrtfe
+
+/forms          GUI
+
+/funcs		Funktionen und Prozeduren von cdrtfe
+
+/import         weitere Funktionen und Prozeduren
+
+/resource       Icons, Bitmaps, ...
+
+/support        sonstige, allgemeine Funktionen, Prozeduren, Klassen
+
+/system		Systemfunktionen (meist Win32-API), Dateifunktionen
+
+/units          kompilierte Units (*.dcu)
+
+
