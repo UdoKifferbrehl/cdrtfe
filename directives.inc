@@ -319,10 +319,6 @@
          // hält die Programmausführung nach der Dateierstellung an
          //    - frm_main.pas
 
-{$DEFINE xDebugExp}
-         // zeigt Infos auf TExperiment
-         //    - betrifft: f_experiment.pas
-
 {$DEFINE xDebugDeviceList}
          // zeigt den Inhalt aller Laufwerkslisten
          //    - betrifft: cl_devices.pas

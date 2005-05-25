@@ -3,7 +3,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.042005
+  letzte Änderung  14.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@
   exportierte Funktionen/Prozeduren:
 
     CDLabelIsValid(const VolID: string):Boolean
-    ChooseDir(const Caption: String; const OwnerHandle: HWnd): String
+    ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
     DriveEmpty(const Drive: Integer): Boolean
     FilenameIsValid(const Name: string):Boolean
     FindInSearchPath(const Name: string): string
@@ -31,6 +31,7 @@
     GetFileSize(const Filename: string): Longint
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
+    OverrideProgDataDir
     ProgDataDir: string
     StartUpDir: string
 
@@ -50,7 +51,7 @@ const CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
       CSIDL_COMMON_APPDATA       = $0023; {All Users\Application Data}
 
 function CDLabelIsValid(const VolID: string):Boolean;
-function ChooseDir(const Caption: String; const OwnerHandle: HWnd): String;
+function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function DriveEmpty(const Drive: Integer): Boolean;
 function FilenameIsValid(const Name: string):Boolean;
 function FindInSearchPath(const Name: string): string;
@@ -61,10 +62,14 @@ function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function ProgDataDir: string;
 function StartUpDir: string;
+procedure OverrideProgDataDir;
 
 implementation
 
 uses f_largeint, f_wininfo, constant;
+
+    {'statische' Variablen}
+var ProgDataDirOverride: string;
 
 { StartUpDir -------------------------------------------------------------------
 
@@ -109,6 +114,23 @@ begin
   end else
   begin
     Result := StartUpDir;
+  end;
+  if ProgDataDirOverride <> '' then Result := ProgDataDirOverride;
+end;
+
+{ OverrideProgDataDir ----------------------------------------------------------
+
+  OverrideProgDataDir ermöglicht es, ein anderes Verzeichnis für die temporären
+  Dateien anzugeben, damit cdrtfe auch von CD läuft.}
+
+procedure OverrideProgDataDir;
+var Dir: string;
+begin
+  Dir := '';
+  while Dir = '' do
+  begin
+    Dir := ChooseDir('', Application.Handle);
+    if DirectoryExists(Dir) then ProgDataDirOverride := Dir;
   end;
 end;
 
@@ -218,14 +240,14 @@ end;
 
   zeigt einen Auswahldialog für Verzeichnisse an.                              }
 
-function ChooseDir(const Caption: String; const OwnerHandle: HWnd): String;
+function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 var
   lpItemID: PItemIDList;
   Malloc: IMalloc;
   BrowseInfo: TBrowseInfo;
   DisplayName: array[0..MAX_PATH] of char;
   TempPath: array[0..MAX_PATH] of char;
-  NewPath: String ;
+  NewPath: string ;
 begin
   Result := '' ;
   FillChar(BrowseInfo, sizeof(TBrowseInfo), #0);
@@ -358,5 +380,8 @@ begin
     end;
   end;
 end;
+
+initialization
+  ProgDataDirOverride := '';
 
 end.

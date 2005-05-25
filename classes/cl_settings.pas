@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.04.2005
+  letzte Änderung  14.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -81,6 +81,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        NoDevices     : Boolean;
        LastProject   : string;
        IniFile       : string;
+       TempFolder    : string;
+       AskForTempDir : Boolean;
      end;
 
      TWinPos = record
@@ -129,6 +131,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        VCDImOk    : Boolean;
        ShlExtDllOk: Boolean;
        ProDVD     : Boolean;
+       MadplayOk  : Boolean;
      end;
 
      TEnvironment = record
@@ -512,6 +515,8 @@ begin
     NoDevices := False;
     LastProject := '';
     IniFile := '';
+    TempFolder := '';
+    AskForTempDir := False;
   end;
 
   with WinPos do
@@ -563,6 +568,7 @@ begin
     VCDImOk     := True;
     ShlExtDllOk := True;
     ProDVD      := False;
+    MadplayOk   := True;
   end;
 
   with Environment do
@@ -1206,6 +1212,8 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'ImageRead', ImageRead);
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
+      WriteString(Section, 'TempFolder', TempFolder);
+      WriteBool(Section, 'AskForTempDir', AskForTempDir);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1542,6 +1550,8 @@ var PF: TIniFile; // ProjectFile
       ImageRead := ReadBool(Section, 'ImageRead', True);
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
+      TempFolder := ReadString(Section, 'TempFolder', '');
+      AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
     end;
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;
@@ -1903,6 +1913,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'ImageRead', ImageRead);
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
+      WriteString(Section, 'TempFolder', TempFolder);
     end;
 
     Section := 'WinPos';
@@ -2192,6 +2203,7 @@ var PF: TRegIniFile; // ProjectFile
       ImageRead := ReadBool(Section, 'ImageRead', True);
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
+      TempFolder := ReadString(Section, 'TempFolder', '');
     end;
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;

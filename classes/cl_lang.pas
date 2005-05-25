@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.04.2005
+  letzte Änderung  30.04.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -162,7 +162,7 @@ begin
     Add('f001=ISO-Image (*.iso)|*.iso|CUE-Image (*.cue)|*.cue');
     Add('f002=ISO-Image (*.iso)|*.iso');
     Add('f003=Namen ohne Endung eingeben!|*.*');
-    Add('f004=Wave-Dateien (*.wav)|*.wav');
+    Add('f004=Sound-Dateien (*.wav; *.mp3)|*.wav;*.mp3');
     Add('f005=Movie-Dateien (*.avi)|*.avi|Alle Dateien|*.*');
     Add('f006=cdrtfe Projekt-Dateien (*.cfp)|*.cfp');
     Add('f007=Image-Dateien (*.bin; *.img; *.ima)|*.bin;*.img;*.ima|Alle Dateien|*.*');
@@ -190,6 +190,7 @@ begin
     Add('e113=%s: Datei oder Ordner nicht gefunden.');
     Add('e114=%d Form2-Datei(en) gefunden mit weniger als 348.601 Bytes.\nXCDs mit so kleinen Dateien können nur als ''Single-Track-Image''\ngeschrieben werden. ');
     Add('e115=Angabe für Start- oder Endsektor fehlt.');
+    Add('e116=Kein Ordner für die temporären Dateien angegeben!');
     Add('m101=Image auswählen');
     Add('m102=Image speichern unter');
     Add('m103=Dateien auswählen');
@@ -236,6 +237,7 @@ begin
     {feprocs}
     Add('eprocs01=%s: falsches Wave-Format.');
     Add('eprocs02=%s: falsches MPEG-Format.');
+    Add('eprocs03=%s: falsches MP3-Format.');
     {feprefs}
     Add('mpref01=ShellExtensions registriert.');
     Add('mpref02=Registryeinträge der ShellExtensions entfernt.');

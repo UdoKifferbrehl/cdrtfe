@@ -1,7 +1,7 @@
 { Unit for accessing Windows PCM wave file informations
   By Ulli Conrad <uconrad@gmx.net>
 
-  Modified by Oliver Valencia, Nov. 2002 & Feb. 2005
+  Modified by Oliver Valencia, Nov. 2002, Feb. & May 2005
 
   This Unit (W32Waves.pas) is not explicitly published under the terms of the
   GNU General Public License. However, the original author (Ulli Conrad) has
@@ -150,9 +150,14 @@ begin
 
    Next problem: With long wave files we have an integer overflow.}
 
-  {Modification by Oliver Valencia, Feb. 2005: } 
-  Info^.Length := 8 / (Info^.Channels * Info^.BitsPerSample * Info^.Samplerate);
-  Info^.Length := Info^.Length * Info^.SamplesNumber;
+  {Modification by Oliver Valencia, Feb. & May 2005: }
+  if (Info^.Channels <> 0) and
+     (Info^.BitsPerSample <> 0) and
+     (Info^.Samplerate <> 0) then
+  begin
+    Info^.Length := 8 / (Info^.Channels * Info^.BitsPerSample * Info^.Samplerate);
+    Info^.Length := Info^.Length * Info^.SamplesNumber;
+  end;
 
   {We're done with the file, close it.}
   mmioClose(hdmmio, 0);

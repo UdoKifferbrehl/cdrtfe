@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2005 Oliver Valencia
 
-  letzte Änderung  09.04.2005
+  letzte Änderung  04.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -51,6 +51,7 @@ function ReplaceString(s: string; const SearchString, ReplaceString: string): st
 function SizeToString(const Size: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF}): string;
 function StringLeft(const Source, Delimiter: string): string;
 function StringRight(const Source, Delimiter: string): string;
+function StrToFloatDef(const S: string; Default: Extended): Extended;
 procedure SplitString(Source, Delimiter: string; var Target1, Target2: string);
 procedure SizeToStringSetUnits(const B, KiB, MiB, GiB: string);
 

@@ -5,11 +5,11 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.04.2005
+  letzte Änderung  01.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
   f_init.pas stellt Funktionen und Prozeduren zur Verfügung, die beim Start
   von cdrtfe benötigt werden:
@@ -126,6 +126,8 @@ begin
         Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
                            Lang.GMS('minit08') + CR;
       end;
+      {Ist Madplay da? Falls nicht, MP3-Dateien ignorieren}
+      MadplayOk := FileExists(StartUpDir + cMadplayBin + cExtExe);
       {Version von cdrecord/mkisofs prüfen}
       CheckVersion(Settings);
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei

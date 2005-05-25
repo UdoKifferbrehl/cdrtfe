@@ -15,6 +15,8 @@
 
 unit user_messages;
 
+{$I directives.inc}
+
 interface
 
 uses Messages;

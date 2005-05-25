@@ -1,9 +1,9 @@
 { cl_imagelists.pas: Zugriff auf SytemImageList und Icons
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.07.2004
+  letzte Änderung  25.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -57,6 +57,7 @@ constructor TImageLists.Create(AOwner: TComponent);
 var SysIL: uint;
     SFI  : TSHFileInfo;
     Icon : TIcon;
+    Dummy: HICON;
     i    : Integer;
 begin
   inherited Create;
@@ -81,8 +82,10 @@ begin
   {eigene Icons aus der Exe laden}
   IconImages := TImageList.Create(AOwner);
   Icon := TIcon.Create;
-  for i := 0 to ExtractIcon(Application.Handle,
-                            PChar(Application.ExeName), -1) - 1 do
+//  for i := 0 to ExtractIcon(Application.Handle,
+//                            PChar(Application.ExeName), -1) - 1 do
+  for i := 0 to ExtractIconEx(PChar(Application.ExeName), -1,
+                              Dummy, Dummy, 0) - 1 do
   begin
     Icon.Handle := ExtractIcon(Application.Handle,
                                PChar(Application.ExeName), i);
@@ -90,10 +93,10 @@ begin
   end;
   Icon.Free;
   {Icon-Indizes festlegen}
-  IconFolder := 2;
-  IconFolderSelected :=3;
-  IconCD := 4;
-  IconCDA := 5;
+  IconFolder := 1;
+  IconFolderSelected := 2;
+  IconCD := 3;
+  IconCDA := 4;
 end;
 
 destructor TImageLists.Destroy;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.04.2005
+  letzte Änderung  07.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,8 +70,10 @@
                  CDTextPresent
                  CDTime
                  LastError
+                 MP3FilesPresent
                  TrackCount
                  TrackPausePresent
+                 AcceptWaveOnly
 
     Methoden     AddTrack(const Name: string)
                  Create
@@ -130,6 +132,7 @@ const CD_NoError = 0;          {Fehlercodes}
       CD_InvalidWaveFile = 7;
       CD_InvalidLabel = 8;
       CD_InvalidMpegFile = 9;
+      CD_InvalidMP3File = 10;
 
 type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        Path           : string;
@@ -234,6 +237,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 
      TAudioCD = class(TObject)
      private
+       FAcceptWaveOnly: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
        FError: Byte;
@@ -253,6 +257,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetCDTextLength: Integer;
        function GetCDTextPresent: Boolean;
        function GetCDTime: Extended;
+       function GetMP3FilesPresent: Boolean;
        function GetTrackCount: Integer;
        function GetTrackPausePresent: Boolean;
        procedure ExportText(CDTextData: TStringList);
@@ -271,10 +276,12 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure MoveTrack(const Index: Integer; const Direction: TDirection);
        procedure SetCDText(const Index: Integer; TextData: TCDTextTrackData);
        procedure SetTrackPause(const Index: Integer; const Pause: string);
+       property AcceptWaveOnly: Boolean read FAcceptWaveOnly write FAcceptWaveOnly;
        property CDTextLength: Integer  read GetCDTextLength;
        property CDTextPresent: Boolean read GetCDTextPresent;
        property CDTime: Extended read GetCDTime;
        property LastError: Byte read GetLastError;
+       property MP3FilesPresent: Boolean read GetMP3FilesPresent;
        property TrackCount: Integer read GetTrackCount;
        property TrackPausePresent: Boolean read GetTrackPausePresent;
      end;
@@ -326,7 +333,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_filesystem, f_misc, f_strings;
+     f_filesystem, f_misc, f_strings, cl_mpeginfo;
 
 { TCD ------------------------------------------------------------------------ }
 
@@ -573,7 +580,7 @@ begin
     Delete(Temp, Pos('>', Temp), 1);
   end;
   {$IFDEF LargeFiles}
-  Result := StrToFloat(Temp);
+  Result := StrToFloatDef(Temp, 0);
   {$ELSE}
   Result := StrToIntDef(Temp, 0);
   {$ENDIF}
@@ -1606,7 +1613,7 @@ begin
         Delete(Temp, 1, Pos('*', Temp));
         Delete(Temp, Pos('>', Temp), 1);
         {$IFDEF LargeFiles}
-        if StrToFloat(Temp) < 348601 then
+        if StrToFloatDef(Temp, 0) < 348601 then
         {$ELSE}
         if StrToIntDef(Temp, 0) < 348601 then
         {$ENDIF}
@@ -1953,13 +1960,31 @@ begin
   end;
 end;
 
+{ GetMP3FilesPresent -----------------------------------------------------------
+
+  GetMP3FilesPresent gibt an, ob in der Auswahl MP3-Dateien vorhanden sind.    }
+
+function TAudioCD.GetMP3FilesPresent: Boolean;
+var i       : Integer;
+    List    : TStringList;
+begin
+  Result := False;
+  List := TStringList.Create;
+  CreateBurnList(List);
+  for i := 0 to List.Count - 1 do
+  begin
+    Result := Result or (LowerCase(ExtractFileExt(List[i])) = '.mp3');
+  end;
+  List.Free;
+end;
+
 { ExtractTimeFromEntry ---------------------------------------------------------
 
   ExtractTimeFromEntry gibt die Tracklänge in Sekunden zurück.                 }
 
 function TAudioCD.ExtractTimeFromEntry(const Entry: string): Extended;
 begin
-  Result := StrToFloat(StringRight(Entry, '*'));
+  Result := StrToFloatDef(StringRight(Entry, '*'), 0);
 end;
 
 { GetCDTextPresent -------------------------------------------------------------
@@ -2075,6 +2100,7 @@ begin
   FTrackCountChanged := False;
   FCDTime := 0;
   FCDTimeChanged := False;
+  FAcceptWaveOnly := False;
 end;
 
 destructor TAudioCD.Destroy;
@@ -2089,34 +2115,60 @@ end;
 
   AddTrack fügt die Audio-Datei Name in die TrackList ein.
 
-  Pfadlisten-Eintrag: <Quellpfad>:<Größe in Bytes>*<Länge in Sekunden>         }
+  Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TAudioCD.AddTrack(const Name: string);
-var Size: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
-    TrackLength: Extended;
-    Temp: string;
+var Size         : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+    TrackLength  : Extended;
+    Temp, CDText : string;
+    Ok, Wave, MP3: Boolean;
+    MPEGFile     : TMPEGFile;
 begin
   if FileExists(Name) then
   begin
-    if (Pos('.wav', LowerCase(Name)) > 0) then
+    Wave := LowerCase(ExtractFileExt(Name)) = '.wav';
+    MP3  := (LowerCase(ExtractFileExt(Name)) = '.mp3') and not FAcceptWaveOnly;
+    Ok := False;
+    Size := GetFileSize(Name);
+    TrackLength := 0;
+    CDText := '|||||';
+    if Wave then
     begin
       if WaveIsValid(Name) then
       begin
-        Size := GetFileSize(Name);
         TrackLength := GetWaveLength(Name);
-        Temp := Name + ':' +
-                {$IFDEF LargeFiles}FloatToStr(Size)
-                {$ELSE}            IntToStr(Size) {$ENDIF} +
-                '*' +  FloatToStr(TrackLength);
-        FTrackList.Add(Temp);
-        FTextInfo.Add('');                  // leerer Eintrag für CD-Text
-        FPauseInfo.Add('');                 // leerer Eintrag für Pausen-Info
-        FTrackCountChanged := True;
-        FCDTimeChanged := True;
+        Ok := True;
       end else
       begin
         FError := CD_InvalidWaveFile;
       end;
+    end else
+    if MP3 then
+    begin
+      {Bestimmung der Länge könnte etwas dauern}
+      Application.ProcessMessages;
+      MPEGFile := TMPEGFile.Create(Name);
+      MPEGFile.GetInfo;
+      TrackLength := MPEGFile.Length;
+      CDText := MPEGFile.TagTitle + '|' + MPEGFile.TagArtist + '||||';
+      MPEGFile.Free;
+      Ok := TrackLength > 0;
+      if not Ok then
+      begin
+        FError := CD_InvalidMP3File;
+      end;
+    end;
+    if Ok then
+    begin
+      Temp := Name + '|' +
+              {$IFDEF LargeFiles}FloatToStr(Size)
+              {$ELSE}            IntToStr(Size) {$ENDIF} +
+              '*' +  FloatToStr(TrackLength);
+      FTrackList.Add(Temp);
+      FTextInfo.Add(CDText);                  // Eintrag für CD-Text
+      FPauseInfo.Add('');                 // leerer Eintrag für Pausen-Info
+      FTrackCountChanged := True;
+      FCDTimeChanged := True;
     end;
   end else
   begin
@@ -2188,14 +2240,10 @@ end;
 
 procedure TAudioCD.CreateBurnList(List: TStringList);
 var i: Integer;
-    p: Integer;
-    Temp: string;
 begin
   for i := 0 to FTrackList.Count - 1 do
   begin
-    p := LastDelimiter(':', FTrackList[i]);
-    Temp := Copy(FTrackList[i], 1, p - 1);
-    List.Add(Temp);
+    List.Add(StringLeft(FTrackList[i], '|'));
   end;
 end;
 
@@ -2367,15 +2415,10 @@ end;
 function TVideoCD.ExtractFileSizeFromEntry(const Entry: string):
                               {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
 var Temp: string;
-    p: Integer;
 begin
-  Temp := Entry;
-  Temp := '0';
-  Temp := StringLeft(Entry, '*');
-  p := LastDelimiter(':', Temp);
-  if p > 2 then Delete(Temp, 1, p);
+  Temp := StringLeft(StringRight(Entry, '|'), '*');
   {$IFDEF LargeFiles}
-  Result := StrToFloat(Temp);
+  Result := StrToFloatDef(Temp, 0);
   {$ELSE}
   Result := StrToIntDef(Temp, 0);
   {$ENDIF}
@@ -2459,7 +2502,7 @@ end;
 
 function TVideoCD.ExtractTimeFromEntry(const Entry: string): Extended;
 begin
-  Result := StrToFloat(StringRight(Entry, '*'));
+  Result := StrToFloatDef(StringRight(Entry, '*'), 0);
 end;
 
 { TVideoCD - public }
@@ -2487,7 +2530,7 @@ end;
 
   AddTrack fügt die Audio-Datei Name in die TrackList ein.
 
-  Pfadlisten-Eintrag: <Quellpfad>:<Größe in Bytes>*<Länge in Sekunden>         }
+  Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TVideoCD.AddTrack(const Name: string);
 var Size: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
@@ -2502,7 +2545,7 @@ begin
       begin
         Size := GetFileSize(Name);
         TrackLength := 0; // GetMpegLength(Name);
-        Temp := Name + ':' +
+        Temp := Name + '|' +
                 {$IFDEF LargeFiles}FloatToStr(Size)
                 {$ELSE}            IntToStr(Size) {$ENDIF} +
                 '*' +  FloatToStr(TrackLength);
@@ -2570,14 +2613,10 @@ end;
 
 procedure TVideoCD.CreateBurnList(List: TStringList);
 var i: Integer;
-    p: Integer;
-    Temp: string;
 begin
   for i := 0 to FTrackList.Count - 1 do
   begin
-    p := LastDelimiter(':', FTrackList[i]);
-    Temp := Copy(FTrackList[i], 1, p - 1);
-    List.Add(Temp);
+    List.Add(StringLeft(FTrackList[i], '|'));
   end;
 end;
 

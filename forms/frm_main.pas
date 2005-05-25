@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.04.2005
+  letzte Änderung  25.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -469,7 +469,7 @@ var i, Anzahl, Size: Integer;
 begin
   inherited;
   FolderAdded := False;
-  Form1.StatusBar.Panels[0].Text := FLang.GMS('m118');
+  Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
   {Wieviele Objekte wurden auf cdrtfe gezogen?}
   Anzahl := DragQueryFile(Msg.WParam, $FFFFFFFF, nil, 0);
   for i := 0 to (Anzahl - 1) do
@@ -554,7 +554,7 @@ begin
   if (Msg.WParam = -1) and (Msg.LParam = -1) then
   begin
     {Suche wurde vom User abgebrochen}
-    DeleteFile(FSettings.XCD.XCDInfoFile);
+    FAction.CleanUp(1);
     SendMessage(Handle, WM_VTerminated, 0, 0);
   end else
   begin
@@ -576,45 +576,21 @@ begin
   {EnvironmentBlock entsorgen, falls nötig}
   CheckEnvironment(FSettings);
   {Aufräumen: aufgrund des Multithreadings hierher verschoben}
-  DeleteFile(FSettings.DataCD.PathListName);
-  DeleteFile(FSettings.DataCD.ShCmdName);
-  DeleteFile(FSettings.XCD.XCDParamFile);
-  //DeleteFile(FSettings.XCD.XCDInfoFile);
-  DeleteFile(FSettings.AudioCD.CDTextFile);
-  DeleteFile(FSettings.DVDVideo.ShCmdName);
-  if not (FSettings.DataCD.ImageOnly or FSettings.DataCD.KeepImage) then
-  begin
-    DeleteFile(FSettings.DataCD.IsoPath);
-  end;
-  if not (FSettings.XCD.ImageOnly or FSettings.XCD.KeepImage) and
-     (FSettings.General.Choice = cXCD) then
-  begin
-    DeleteFile(FSettings.XCD.IsoPath + cExtBin);
-    DeleteFile(FSettings.XCD.IsoPath + cExtToc);
-    DeleteFile(FSettings.XCD.IsoPath + cExtCue);
-  end;
-  if not (FSettings.VideoCD.ImageOnly or FSettings.VideoCD.KeepImage) and
-     (FSettings.General.Choice = cVideoCD) then
-  begin
-    DeleteFile(FSettings.VideoCD.IsoPath + cExtBin);
-    DeleteFile(FSettings.VideoCD.IsoPath + cExtCue);
-  end;
+  FAction.CleanUp(2);
   {Thread zu Vergleichen der Dateien starten}
-  if (FSettings.General.Choice = cDataCD) and FSettings.DataCD.Verify  and
+  if (FAction.LastAction = cDataCD) and FSettings.DataCD.Verify  and
      not (FSettings.DataCD.ImageOnly or FSettings.Cdrecord.Dummy) then
   begin
     FAction.Action := cVerify;
     FAction.StartAction;
   end else
-  if (FSettings.General.Choice = cXCD) and FSettings.XCD.Verify  and
+  if (FAction.LastAction = cXCD) and FSettings.XCD.Verify  and
      not (FSettings.XCD.ImageOnly or FSettings.Cdrecord.Dummy) then
   begin
     FAction.Action := cVerifyXCD;
     FAction.StartAction;
   end else
   begin
-    if FSettings.General.Choice = cFixCD then
-      FSettings.General.Choice := GetActivePage;
     {Falls kein Vergleich stattfindet, gleich weiter}
     SendMessage(Handle, WM_VTerminated, 0, 0);
   end;
@@ -629,9 +605,7 @@ procedure TForm1.WMVTerminated(var Msg: TMessage);
 var LogFile: string;
 begin
   {Die XCD-Info-Datei darf erst nach dem Vergleich entsorgt werden.}
-  if DeleteFile(FSettings.XCD.XCDInfoFile) then
-    FData.DeleteFromPathlistByName(ExtractFileName(FSettings.XCD.XCDInfoFile),
-                                   '', cXCD);
+  FAction.CleanUp(3);
   with FSettings.CmdLineFlags do
   begin
     {Flag für automatisches Brennen zurücksetzten}
@@ -1206,7 +1180,8 @@ begin
       PD_FileNotUnique  : Add(Format(FLang.GMS('e112'), [FileName]));
       PD_InvalidWaveFile: Add(Format(FLang.GMS('eprocs01'), [FileName]));
       PD_FileNotFound   : Add(Format(FLang.GMS('e113'), [FileName]));
-      PD_InvalidMpegFile: Add(Format(FLang.GMS('eprocs02'), [FileName]));      
+      PD_InvalidMpegFile: Add(Format(FLang.GMS('eprocs02'), [FileName]));
+      PD_InvalidMP3File : Add(Format(FLang.GMS('eprocs03'), [FileName]));
     end;
   end;
 end;
@@ -1767,6 +1742,7 @@ begin
     OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
     if OpenDialog1.Execute then
     begin
+      Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');    
       for i :=0 to OpenDialog1.Files.Count - 1 do
       begin
         case FSettings.General.Choice of
@@ -1774,15 +1750,13 @@ begin
           cVideoCD: FData.AddToPathlist(OpenDialog1.Files[i], '', cVideoCD);
         end;
         ErrorCode := FData.LastError;
-        if ErrorCode = PD_InvalidWaveFile then
-        begin
-          Form1.Memo1.Lines.Add(Format(FLang.GMS('eprocs01'),
-                                       [OpenDialog1.Files[i]]));
-        end else
-        if ErrorCode = PD_InvalidMpegFile then
-        begin
-          Form1.Memo1.Lines.Add(Format(FLang.GMS('eprocs02'),
-                                       [OpenDialog1.Files[i]]));
+        case ErrorCode of
+          PD_InvalidWaveFile: Form1.Memo1.Lines.Add(Format(
+                                FLang.GMS('eprocs01'), [OpenDialog1.Files[i]]));
+          PD_InvalidMP3File : Form1.Memo1.Lines.Add(Format(
+                                FLang.GMS('eprocs03'), [OpenDialog1.Files[i]]));
+          PD_InvalidMpegFile: Form1.Memo1.Lines.Add(Format(
+                                FLang.GMS('eprocs02'), [OpenDialog1.Files[i]]));
         end;
       end;
     end;
@@ -2550,7 +2524,7 @@ procedure TForm1.CheckControls;
     ComboBoxDrives.Items.Clear;
     for i := 0 to (DeviceList.Count - 1) do
     begin
-      ComboBoxDrives.Items[i] := DeviceList.Names[i];
+      ComboBoxDrives.Items.Add(DeviceList.Names[i]);
     end;
     i := FSettings.General.Choice;
     if ComboBoxDrives.Items.Count > FSettings.General.TabSheetDrive[i] then
@@ -3049,6 +3023,8 @@ begin
     {prüfen, ob alle Dateien da sind}
     if CheckFiles(FSettings, Memo1, FLang) then
     begin
+      {wenn Madplay.exe vorhanden ist, können auch MP3s verwendet werden}
+      FData.AcceptWaveOnly := not FSettings.FileFlags.MadplayOk;
       {$IFDEF RegistrySettings}
       {Einstellungen laden: Registry}
       FSettings.LoadFromRegistry;
@@ -3240,6 +3216,9 @@ begin
       Application.Restore;
     end;
   end;
+  {temporäres Verzeichnis erfragen, damit cdrtfe auch von einem read-only-Medium
+   gestartet werden kann.}
+  if FSettings.General.AskForTempDir then OverrideProgDataDir;
 end;
 
 { FormResize -------------------------------------------------------------------
@@ -3517,6 +3496,7 @@ var i: Integer;
 {$ENDIF}
 {$IFDEF ShowCDTextInfo}
 var i: Integer;
+    DummyC: Comp;
     DummyI, TrackCount: Integer;
     DummyE: Extended;
     TextTrackData: TCDTextTrackData;
@@ -3578,7 +3558,7 @@ begin
   end;
   {$ENDIF}
   {$IFDEF ShowCDTextInfo}
-  FData.GetProjectInfo(DummyI, DummyI, DummyI, DummyE, TrackCount, cAudioCD);
+  FData.GetProjectInfo(DummyI, DummyI, DummyC, DummyE, TrackCount, cAudioCD);
   for i := -1 to TrackCount - 1 do
   begin
     FData.GetCDText(i, TextTrackData);
@@ -4608,8 +4588,7 @@ begin
                                     FDevices.CDWriter.Names[
                                       FSettings.General.TabSheetDrive[
                                         FSettings.General.Choice]]];
-  FSettings.General.Choice := cFixCD;
-  FAction.Action := FSettings.General.Choice;
+  FAction.Action := cFixCD;
   FAction.StartAction;
 end;
 

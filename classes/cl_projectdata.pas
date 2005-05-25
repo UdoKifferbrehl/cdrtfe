@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.03.2005
+  letzte Änderung  04.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,7 +18,8 @@
 
   TProjectData
 
-    Properties   AddAsForm2
+    Properties   AcceptWaveOnly
+                 AddAsForm2
                  LastError
                  LastFolderAdded
                  OnMessageToShow
@@ -64,6 +65,7 @@
                  MoveFileByName(const Name, SourcePath, DestPath: string; const Choice: Byte)
                  MoveFolder(const SourcePath, DestPath: string; const Choice: Byte)
                  MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte)
+                 MP3FilesPresent: Boolean;                 
                  NewFolder(const Path, Name: string; const Choice: Byte)
                  RenameFileByIndex(const Index: Integer; const Path, Name: string; const MaxLength, Choice: Byte)
                  RenameFileByName(const Path, OldName, Name: string; const MaxLength, Choice: Byte)
@@ -106,9 +108,11 @@ const PD_NoError = 0;          {Fehlercodes}
       PD_InvalidWaveFile = 7;
       PD_InvalidLabel = 8;
       PD_InvalidMpegFile = 9;
+      PD_InvalidMP3File = 10;
 
 type TProjectData = class(TObject)
      private
+       FAcceptWaveOnly: Boolean;
        FLang: TLang;
        FDataCD: TCD;
        FAudioCD: TAudioCD;
@@ -125,13 +129,14 @@ type TProjectData = class(TObject)
        FOnUpdatePanels: TNotifyEvent;
        function GetLastError: Byte;
        function GetLastFolderAdded: string;
+       procedure SetAcceptWaveOnly(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
        {Events}
        procedure MessageToShow;
        procedure ProgressBarHide;
        procedure ProgressBarReset;
        procedure ProgressBarUpdate;
-       procedure UpdatePanels;       
+       procedure UpdatePanels;
      public
        DataCDFilesToSort: Boolean;
        DataCDFilesToSortFolder: string;
@@ -142,7 +147,7 @@ type TProjectData = class(TObject)
        ErrorListFiles: TStringList;
        ErrorListDir: TStringList;
        ErrorListIgnore: TStringList;
-       IgnoreNameLengthErrors: Boolean;  
+       IgnoreNameLengthErrors: Boolean;
        constructor Create;
        destructor Destroy; override;
        function CDTextLength: Integer;
@@ -153,6 +158,7 @@ type TProjectData = class(TObject)
        function GetProjectMaxLevel(const Choice: Byte): Integer;
        function GetSmallForm2FileCount: Integer;
        function GetTrackPause(const Index: Integer): string;
+       function MP3FilesPresent: Boolean;
        function TrackPausePresent: Boolean;
        procedure AddToPathlist(const AddName, DestPath: string; const Choice: Byte);
        procedure CheckDataCDFS(const Path: string; const MaxLength: Byte; const CheckFolder: Boolean);
@@ -188,6 +194,7 @@ type TProjectData = class(TObject)
 (*     property DataCD: TCD read FDataCD write FDataCD;
        property AudioCD: TAudioCD read FAudioCD write FAudioCD;
        property XCD: TXCD read FXCD write FXCD; *)
+       property AcceptWaveOnly: Boolean read FAcceptWaveOnly write SetAcceptWaveOnly;
        property Lang: TLang write FLang;
        property LastError: Byte read GetLastError;
        property LastFolderAdded: string read GetLastFolderAdded;
@@ -294,6 +301,17 @@ begin
   FXCD.AddAsForm2 := Mode;
 end;
 
+{ SetAcceptWaveOnly ------------------------------------------------------------
+
+  Bei Audio-CD können auch MP3s verwendet werden, es sei denn, Madplay.exe ist
+  nicht vorhanden.                                                             }
+
+procedure TProjectData.SetAcceptWaveOnly(Mode: Boolean);
+begin
+  FAcceptWaveOnly := Mode;
+  FAudioCD.AcceptWaveOnly := Mode;
+end;
+
 { TProjectData - public }
 
 constructor TProjectData.Create;
@@ -368,6 +386,7 @@ begin
     CD_FileNotFound: FError := PD_FileNotFound;
     CD_InvalidWaveFile: FError := PD_InvalidWaveFile;
     CD_InvalidMpegFile: FError := PD_InvalidMpegFile;
+    CD_InvalidMP3File: FError := PD_InvalidMP3File;    
   end;
 end;
 
@@ -889,7 +908,6 @@ var FL: TextFile; // FileList
   procedure SaveTrackList;
   var List: TStringList;
       i: Integer;
-      p: Integer;
   begin
     Writeln(FL, '<' + CDName + '>');
     if CDName = 'Audio-CD' then
@@ -908,8 +926,7 @@ var FL: TextFile; // FileList
     begin
       if (CDName = 'Audio-CD') or (CDName = 'Video-CD') then
       begin
-        p := LastDelimiter(':', List[i]);
-        Writeln(FL, Copy(List[i], 1, p - 1));
+        Writeln(FL, StringLeft(List[i], '|'));
       end else
       begin
         Writeln(FL, List[i]);
@@ -1410,6 +1427,15 @@ begin
   FAudioCD.SetTrackPause(Index, Pause);
 end;
 
+{ MP3FilesPresent --------------------------------------------------------------
+
+  liefert True, wenn in der Auswahl MP3-Dateien vorhanden sind.                }
+
+function TProjectData.MP3FilesPresent: Boolean;
+begin
+  Result := FAudioCD.MP3FilesPresent;
+end;
+
 
 { sonstige Funktionen/Prozeduren --------------------------------------------- }
 
@@ -1419,31 +1445,27 @@ end;
   Ziel-Dateiname, Quell-Dateiname (inkl.Pfad) und Dateilgröße auf. Eigentlich
   müßte diese Prozedur eine Methode der entsprechenden Pfadlisten-Objekte sein,
   aber der Einfachheit halber wird sie von cl_projectdata.pas zu Verfügung
-  gestellt, damit cl_cd.pas nicht in frm_main.pas eingebunden werden muß.    }
+  gestellt, damit cl_cd.pas nicht in frm_main.pas eingebunden werden muß.      }
 
 procedure ExtractFileInfoFromEntry(const Entry: string;
                                    var Name, Path: string;
                                    var Size: {$IFDEF LargeFiles} Comp
                                              {$ELSE} Longint {$ENDIF});
-var p: Integer;
-    Temp: string;
+var Temp: string;
 begin
   Temp := Entry;
   {Ziel-Name ist alles _vor_ dem ':'}
-  p := Pos(':', Temp);
-  Name := Copy(Temp, 1, p - 1);
+  Name := StringLeft(Entry, ':');
   {Dateinamen/-pfad extrahieren}
-  Delete(Temp, 1, p);
-  p := Pos('*', Temp);
-  Path := Copy(Temp, 1, p - 1);
+  Path := StringLeft(StringRight(Entry, ':'), '*');
   {Dateigröße extrahieren}
-  Delete(Temp, 1, p);
+  Temp := StringRight(Entry, '*');
   if Temp[Length(Temp)] = '>' then
   begin
     Delete(Temp, Length(Temp), 1);
   end;
   {$IFDEF LargeFiles}
-  Size := StrToFloat(Temp);  
+  Size := StrToFloatDef(Temp, 0);  
   {$ELSE}
   Size := StrToIntDef(Temp, 0);
   {$ENDIF}
@@ -1459,28 +1481,18 @@ procedure ExtractTrackInfoFromEntry(const Entry: string;
                                     var Size: {$IFDEF LargeFiles} Comp
                                               {$ELSE} Longint {$ENDIF};
                                     var TrackLength: Extended);
-var Temp, SizeStr: string;
-    p: Integer;
 begin
-  Temp := Entry;
   {Datei-Name ist alles _vor_ dem letzen ':'}
-  p := LastDelimiter(':', Temp); //Pos(':', Temp);
-  Path := Copy(Temp, 1, p - 1);
+  Path := StringLeft(Entry, '|');
   Name := ExtractFileName(Path);
   {Dateigröße extrahieren}
-  Delete(Temp, 1, p);
-  p := Pos('*', Temp);
-  SizeStr := Copy(Temp, 1, p - 1);
   {$IFDEf LargeFiles}
-  Size := StrToFloat(SizeStr);
+  Size := StrToFloatDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
   {$ELSE}
-  Size := StrToIntDef(SizeStr, 0);
+  Size := StrToIntDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
   {$ENDIF}
   {Länge der Wave-Datei}
-  Delete(Temp, 1, p);
-  TrackLength := StrToFloat(Temp);
+  TrackLength := StrToFloatDef(StringRight(Entry, '*'), 0);
 end;
-
-
 
 end.

@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2005 Oliver Valencia
 
-  letzte Änderung  08.01.2005
+  letzte Änderung  25.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,7 +26,7 @@ unit f_largeint;
 
 interface
 
-uses Windows;
+{ uses Windows; }
 
 function HiComp(const Value: Comp): Integer;
 function IntToComp(const LowInt, HighInt: Integer): Comp;
@@ -34,14 +34,24 @@ function LoComp(const Value: Comp): Integer;
 
 implementation
 
+{ Es wird eine eigene Typ-Deklaration benötigt, da TLargeInteger aus Delphi 3 in
+  späteren Versionen geändert wird.                                            }
+
+type TLargeInt = record
+       case Integer of
+       0: (LowPart : Integer;
+           HighPart: Integer);
+       1: (QuadPart: Comp);
+     end;
+
 { IntToComp --------------------------------------------------------------------
 
   erzeugt aus zwei Integerwerten einen 64-Bit-Integerwert.                     }
 
 function IntToComp(const LowInt, HighInt: Integer): Comp;
-var Value64: TLargeInteger;
+var Value64: TLargeInt;
 begin
-  Value64.LowPart:= LowInt;
+  Value64.LowPart := LowInt;
   Value64.HighPart := HighInt;
   Result := Value64.QuadPart;
 end;
@@ -51,7 +61,7 @@ end;
   liefert das high order longword eines Comp-Wertes.                           }
 
 function HiComp(const Value: Comp): Integer;
-var Value64: TLargeInteger;
+var Value64: TLargeInt;
 begin
   Value64.QuadPart := Value;
   Result := Value64.HighPart;
@@ -62,7 +72,7 @@ end;
   liefert das low order longword eines Comp-Wertes.                            }
 
 function LoComp(const Value: Comp): Integer;
-var Value64: TLargeInteger;
+var Value64: TLargeInt;
 begin
   Value64.QuadPart := Value;
   Result := Value64.LowPart;

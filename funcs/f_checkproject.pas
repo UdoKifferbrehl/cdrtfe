@@ -5,7 +5,7 @@
   Copyright (c) 2004 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.02.2005
+  letzte Änderung  30.04.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -102,6 +102,13 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
         Result := False;
         // zu viel CD-Text
         Application.MessageBox(PChar(GMS('ecdtext02')), PChar(GMS('g001')),
+          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+      end;
+      if FData.MP3FilesPresent and  (FSettings.General.TempFolder = '') then
+      begin
+        Result := False;
+        // es muß ein temp. Verzeichnis für die Konvertierung angegeben sein
+        Application.MessageBox(PChar(GMS('e116')), PChar(GMS('g001')),
           MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
       end;
     end;

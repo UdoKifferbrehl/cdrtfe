@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.03.2005
+  letzte Änderung  30.04.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,7 +20,7 @@ unit frm_settings;
 interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-     StdCtrls, ExtCtrls,
+     StdCtrls, ExtCtrls, FileCtrl,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_settings, ComCtrls;
 
@@ -65,6 +65,9 @@ type
     CheckBoxCdrecordAllowHigherSpeed: TCheckBox;
     GroupBoxCdrdaoCue: TGroupBox;
     CheckBoxCdrdaoCueImage: TCheckBox;
+    GroupBoxTempFolder: TGroupBox;
+    EditTempFolder: TEdit;
+    ButtonTempFolderBrowse: TButton;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -74,6 +77,8 @@ type
     procedure ComboBoxKeyPress(Sender: TObject; var Key: Char);
     procedure ComboBoxExit(Sender: TObject);
     procedure ButtonCustOptDeleteClick(Sender: TObject);
+    procedure ButtonTempFolderBrowseClick(Sender: TObject);
+    procedure EditTempFolderExit(Sender: TObject);
   private
     { Private declarations }
     FOnMessageToShow: TNotifyEvent;
@@ -103,7 +108,7 @@ implementation
 
 {$R *.DFM}
 
-uses f_shellext, f_wininfo, constant;
+uses f_shellext, f_wininfo, f_filesystem, constant;
 
 {var}
 
@@ -163,6 +168,7 @@ begin
     CheckBoxShellExt.Enabled := False;
     StaticText4.Enabled := False;
   end;
+  EditTempFolder.Text := FSettings.General.TempFolder;
   CheckBoxShellExt.Checked           := FShellExtIsSet;
   CheckBoxNoConfirm.Checked          := FSettings.General.NoConfirm;
   CheckBoxForceGenericMMC.Checked    := FSettings.Cdrdao.ForceGenericMmc;
@@ -200,7 +206,8 @@ begin
   FSettings.General.NoConfirm         := CheckBoxNoConfirm.Checked;
   FSettings.Cdrdao.ForceGenericMmc    := CheckBoxForceGenericMMC.Checked;
   FSettings.Cdrdao.ForceGenericMmcRaw := CheckBoxForceGenericMMCRaw.Checked;
-  Fsettings.Cdrdao.WriteCueImages     := CheckBoxCdrdaoCueImage.Checked;
+  FSettings.Cdrdao.WriteCueImages     := CheckBoxCdrdaoCueImage.Checked;
+  FSettings.General.TempFolder        := EditTempFolder.Text;
   with FSettings.Cdrecord do
   begin
     Verbose  := CheckBoxCdrecordVerbose.Checked;
@@ -403,6 +410,16 @@ begin
   ComboBox.Text := '';
 end;
 
+{ Select Temp Folder }
+
+procedure TFormSettings.ButtonTempFolderBrowseClick(Sender: TObject);
+var Dir: string;
+begin
+  Dir := ChooseDir(FLang.GMS('g002'), Self.Handle);
+  EditTempFolder.Text := Dir;
+  EditTempFolderExit(EditTempFolder)
+end;
+
 
 { Form-Events ---------------------------------------------------------------- }
 
@@ -464,20 +481,30 @@ end;
 
 { OnKeyPress -------------------------------------------------------------------
 
-  Die Combo-Boxes sollen auf ENTER reagieren.                                  }
+  Die Combo-Boxes sollen auf ENTER reagieren. Auch für Edits.                  }
 
 procedure TFormSettings.ComboBoxKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = EnterKey then
   begin
     Key := NoKey;
-    if (Sender as TComboBox) = ComboBoxCdrecordCustOpts then
+    if (Sender is TComboBox) then
     begin
-      CheckBoxMkisofsCustOpts.SetFocus;
+      if (Sender as TComboBox) = ComboBoxCdrecordCustOpts then
+      begin
+        CheckBoxMkisofsCustOpts.SetFocus;
+      end else
+      if (Sender as TComboBox) = ComboBoxMkisofsCustOpts then
+      begin
+        ButtonOk.SetFocus;
+      end;
     end else
-    if (Sender as TComboBox) = ComboBoxMkisofsCustOpts then
+    if (Sender is TEdit) then
     begin
-      ButtonOk.SetFocus;
+      if (Sender as TEdit) = EditTempFolder then
+      begin
+        ButtonOk.SetFocus;
+      end;
     end;
   end;
 end;
@@ -514,6 +541,22 @@ begin
     ComboBox.Items.Add(ComboBox.Text);
     ComboBox.ItemIndex := ComboBox.Items.Count - 1;
   end;
+end;
+
+{ Edit-Events ---------------------------------------------------------------- }
+
+{ OnExit -----------------------------------------------------------------------
+
+  Wir wollen Pfadangaben ohne Pfadtrenner am Ende.                             }
+
+procedure TFormSettings.EditTempFolderExit(Sender: TObject);
+var Text: string;
+begin
+  Text := (Sender as TEdit).Text;
+  if LastDelimiter('\', Text) = Length(Text) then Delete(Text, Length(Text), 1);
+  if DirectoryExists(Text) then
+    (Sender as TEdit).Text := Text else
+    (Sender as TEdit).Text := '';
 end;
 
 initialization

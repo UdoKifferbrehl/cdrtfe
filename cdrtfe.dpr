@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.04.2005
+  letzte Änderung  06.04.2005
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -30,6 +30,8 @@
 }
 
 program cdrtfe;
+
+{$I directives.inc}
 
 uses
   Forms,
@@ -58,8 +60,9 @@ uses
   f_checkproject in 'funcs\f_checkproject.pas',
   f_init in 'funcs\f_init.pas',
   f_shellext in 'funcs\f_shellext.pas',
-  f_helper in 'funcs\f_helper.pas',  
+  f_helper in 'funcs\f_helper.pas',
   cl_tree in 'support\cl_tree.pas',
+  cl_mpeginfo in 'support\cl_mpeginfo.pas',  
   f_misc in 'support\f_misc.pas',
   f_cygwin in 'support\f_cygwin.pas',
   f_strings in 'support\f_strings.pas',

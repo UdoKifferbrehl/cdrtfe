@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.04.2005
+  letzte Änderung  24.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -28,7 +28,8 @@
                  Settings
                  StatusBar
 
-    Methoden     Create
+    Methoden     CleanUp
+                 Create
                  StartAction
 
 
@@ -63,9 +64,24 @@ type TCDInfo = record
        IsDVD   : Boolean;
      end;
 
+     { TCheckMediumArgs faßt einige Varaiblen zusammen, die in den verschiedenen
+       Prozeduren benötigt werden, damit diese leichter an CheckMedium übergeben
+       werden können.}
+
+     TCheckMediumArgs = record
+       {allgemein}
+       Choice        : Byte;
+       {Daten-CD}
+       ForcedContinue: Boolean;
+       CDSize        : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       {Audio-CD}
+       CDTime        : Extended;
+     end;
+
      TCDAction = class(TObject)
      private
        FAction: Byte;
+       FLastAction: Byte;
        FActionThread: TActionThread;
        FVerificationThread: TVerificationThread;
        FVList: TStringList;
@@ -82,6 +98,7 @@ type TCDInfo = record
        FSettings: TSettings;
        FStatusBar: TStatusBar;
        FProgressBar: TProgressBar;
+       function CheckMedium(CD: TCDInfo; var Args: TCheckMediumArgs): Boolean;
        function GetAction: Byte;
        function MakePathConform(const Path: string): string;
        function MakePathEntryMkisofsConform(const Path: string): string;
@@ -108,9 +125,11 @@ type TCDInfo = record
        constructor Create;
        destructor Destroy; override;
        procedure AbortAction;
+       procedure CleanUp(const Phase: Byte);
        procedure Reset;
        procedure StartAction;
        property Action: Byte read GetAction write FAction;
+       property LastAction: Byte read FLastAction;
        property Data: TProjectData write FData;
        property Devices: TDevices write FDevices;
        property FormHandle: THandle write FFormHandle;
@@ -118,7 +137,7 @@ type TCDInfo = record
        property Memo: TMemo read FMemo write FMemo;
        property StatusBar: TStatusBar read FStatusBar write FStatusBar;
        property ProgressBar: TProgressBar read FProgressBar write FProgressBar;
-       property Reload: Boolean read FReload write FReload;       
+       property Reload: Boolean read FReload write FReload;
        property Settings: TSettings write FSettings;
        property DuplicateFileSize: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF} read FDupSize write FDupSize;
        {Events}
@@ -152,6 +171,7 @@ end;
 function TCDAction.GetAction: Byte;
 begin
   Result := FAction;
+  FLastAction := FAction;
   FAction := cNoAction;
 end;
 
@@ -394,6 +414,147 @@ begin
   end;
 end;
 
+{ CheckMedium ------------------------------------------------------------------
+
+  liefert True, wenn die Überprüfung des eingelegten Mediums erfolgreich war.  }
+
+function TCDAction.CheckMedium(CD: TCDInfo; var Args: TCheckMediumArgs): Boolean;
+var i      : Integer;
+    Temp   : string;
+    Meldung: PChar;
+begin
+  Result := True;
+  {allgemeine Fehler, unabhängig vom Projekt}
+  {Fehler: keine CD eingelegt}
+  if (CD.Size = 0) and (CD.MsInfo = '') then
+  begin
+    Application.MessageBox(PChar(FLang.GMS('eburn01')),
+                           PChar(FLang.GMS('g001')),
+                           MB_OK or MB_ICONEXCLAMATION);
+    Result := False;
+  end;
+  {Fehler: nächste Schreibadresse kann nicht gelesen werden}
+  if CD.MsInfo = 'no_address' then
+  begin
+    Application.MessageBox(PChar(FLang.GMS('eburn09')),
+                           PChar(FLang.GMS('g001')),
+                           MB_OK or MB_ICONEXCLAMATION);
+    Result := False;
+  end;
+  {Fehler: fixierte CD eingelegt}
+  if Pos('-1', CD.MsInfo) <> 0 then
+  begin
+    Application.MessageBox(PChar(FLang.GMS('eburn02')),
+                           PChar(FLang.GMS('g001')),
+                           MB_OK or MB_ICONEXCLAMATION);
+    Result := False;
+  end;
+
+  {Fehler: Daten-CD}
+  if Args.Choice = cDataCD then
+  begin
+    {Sessions vorhanden, aber nicht importieren}
+    if Result and not FSettings.DataCD.ContinueCD and (CD.MsInfo <> '') then
+    begin
+      if FSettings.General.NoConfirm then
+      begin
+        i := Application.MessageBox(PChar(FLang.GMS('eburn03')),
+                                    PChar(FLang.GMS('g004')),
+                                    MB_OKCancel or MB_ICONEXCLAMATION);
+        Result := i = 1;
+      end else
+      begin
+        Application.MessageBox(PChar(FLang.GMS('eburn03')),
+                               PChar(FLang.GMS('g004')),
+                               MB_OK or MB_ICONEXCLAMATION);
+      end;
+    end;
+    {wenn eine CD fortgesetzt werden soll}
+    if Result and (FSettings.DataCD.Multi and FSettings.DataCD.ContinueCD) then
+    begin
+      {keine Sessions gefunden}
+      if CD.MsInfo = '' then
+      begin
+        {weitermachen oder nicht?}
+        {$IFDEF Confirm}
+        if not (FSettings.CmdLineFlags.ExecuteProject or
+                FSettings.General.NoConfirm) then
+        begin
+          i := Application.MessageBox(PChar(FLang.GMS('eburn04')),
+                                      PChar(FLang.GMS('eburn05')),
+                                      MB_OKCANCEL or MB_ICONEXCLAMATION);
+        end else
+        {$ENDIF}
+        begin
+          i := 1;
+        end;
+        Result := i = 1;
+        {Wenn trotzdem geschrieben werden soll, dann aber ohne -C und -M}
+        if Result then
+        begin
+          Args.ForcedContinue := True;
+          FSettings.DataCD.ContinueCD := False;
+        end;
+      end;
+      FSettings.DataCD.MsInfo := CD.MsInfo;
+    end;
+    {Fehler: zu viele Daten}
+    if Result and not FSettings.DataCD.Overburn and
+      ((Args.CDSize / (1024*1024)) > CD.SizeFree) then
+    begin
+      Temp := FLang.GMS('eburn06') +
+              Format(FLang.GMS('eburn07'),
+                     [FormatFloat('###.##', CD.SizeFree)]);
+      Meldung := PChar(Temp);
+      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+      Result := False;
+    end;
+  end;
+
+  {Fehler: Audio-CD}
+  if Args.Choice = cAudioCD then
+  begin
+    {Fehler: Multisession-Daten-CD eingelegt -> man könnte eine Mixed-Mode-CD
+     machen, aber ich weiß nicht wie.}
+    if Result and (CD.MsInfo <> '') then
+    begin
+      Application.MessageBox(PChar(FLang.GMS('eburn08')),
+                             PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+
+      Result := False;
+    end;
+    {Fehler: Restkapazität nicht ausreichend}
+    if Result and (CD.TimeFree > 0) and (Args.CDTime > CD.TimeFree) then
+    begin
+      Temp := FLang.GMS('eburn06') +
+              Format(FLang.GMS('mburn04'),
+                     [IntToStr(Round(CD.TimeFree) div 60) + ':' +
+                      FormatFloat('0#.##',
+                            (CD.TimeFree - (Round(CD.TimeFree) div 60) * 60))]);
+      Meldung := PChar(Temp);
+      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+      Result := False;
+    end;
+   {Fehler: Gesamtspielzeit zu lang}
+    if Result and not FSettings.AudioCD.Overburn and
+       (Args.CDTime > CD.Time) then
+    begin
+      Temp := FLang.GMS('eburn06') +
+              Format(FLang.GMS('mburn04'),
+                     [IntToStr(Round(CD.Time) div 60) + ':' +
+                      FormatFloat('0#.##',
+                                  (CD.Time - (Round(CD.Time) div 60) * 60))]);
+      Meldung := PChar(Temp);
+      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+      Result := False;
+    end;
+  end;
+end;
+
 { GetSectorNumber --------------------------------------------------------------
 
   bestimmt die Länge des Datentracks in Sektoren. Nötig für DAO/RAW.           }
@@ -420,111 +581,21 @@ end;
   Daten-CDs erstellen und fortsetzen.                                          }
 
 procedure TCDAction.CreateDataCD;
-var i: Integer;
-    Temp: string;
-    ForcedContinue: Boolean;
-    BurnList: TStringList;
-    CmdC, CmdM, CmdOnTheFly: string;
-    FHPathList, FHShCmd: TextFile;
-    CD: TCDInfo;
-    DummyE: Extended;
-    DummyI: Integer;
-    CDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
-    Meldung: PChar;
-    Ok: Boolean;
-    SimulDev: string;
-
-  { CheckMedium ----------------------------------------------------------------
-
-    liefert True, wenn die Überprüfung des eingelegten Mediums erfolgreich war.
-    Dieser Code wurde nur der Übersicht wegen in eine eigene Funktion ausge-
-    lagert.                                                                    }
-
-  function CheckMedium: Boolean;
-  begin
-    Result := True;
-    {Fehler: keine CD eingelegt}
-    if (CD.Size = 0) and (CD.MsInfo = '') then
-    begin
-      Application.MessageBox(PChar(FLang.GMS('eburn01')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-    {Fehler: nächste Schreibadresse kann icht gelesen werden}
-    if CD.MsInfo = 'no_address' then
-    begin
-      Application.MessageBox(PChar(FLang.GMS('eburn09')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-    {Fehler: fixierte CD eingelegt}
-    if Pos('-1', CD.MsInfo) <> 0 then
-    begin
-      Application.MessageBox(PChar(FLang.GMS('eburn02')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-    {Sessions vorhanden, aber nicht importieren}
-    if Result and not FSettings.DataCD.ContinueCD and (CD.MsInfo <> '') then
-    begin
-      if FSettings.General.NoConfirm then
-      begin
-        i := Application.MessageBox(PChar(FLang.GMS('eburn03')),
-                                    PChar(FLang.GMS('g004')),
-                                    MB_OKCancel or MB_ICONEXCLAMATION);
-        Result := i = 1;
-      end else
-      begin
-        Application.MessageBox(PChar(FLang.GMS('eburn03')),
-                               PChar(FLang.GMS('g004')),
-                               MB_OK or MB_ICONEXCLAMATION);
-      end;
-    end;
-    {wenn eine CD fortgesetzt werden soll}
-    if Result and FSettings.DataCD.ContinueCD then
-    begin
-      {keine Sessions gefunden}
-      if CD.MsInfo = '' then
-      begin
-        {weitermachen oder nicht?}
-        {$IFDEF Confirm}
-        if not (FSettings.CmdLineFlags.ExecuteProject or
-                FSettings.General.NoConfirm) then
-        begin
-          i := Application.MessageBox(PChar(FLang.GMS('eburn04')),
-                                      PChar(FLang.GMS('eburn05')),
-                                      MB_OKCANCEL or MB_ICONEXCLAMATION);
-        end else
-        {$ENDIF}
-        begin
-          i := 1;
-        end;
-        Result := i = 1;
-        {Wenn trotzdem geschrieben werden soll, dann aber ohne -C und -M}
-        if Result then
-        begin
-          ForcedContinue := True;
-          FSettings.DataCD.ContinueCD := False;
-        end;
-      end;
-      FSettings.DataCD.MsInfo := CD.MsInfo;
-    end;
-    {Fehler: zu viele Daten}
-    if Result and not FSettings.DataCD.Overburn and
-      ((CDSize / (1024*1024)) > CD.SizeFree) then
-    begin
-      Temp := FLang.GMS('eburn06') +
-              Format(FLang.GMS('eburn07'),
-                     [FormatFloat('###.##', CD.SizeFree)]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-  end;
+var i              : Integer;
+    Temp           : string;
+    BurnList       : TStringList;
+    CmdC, CmdM,
+    CmdOnTheFly    : string;
+    FHPathList,
+    FHShCmd        : TextFile;
+    CD             : TCDInfo;
+    CMArgs         : TCheckMediumArgs;
+    DummyE         : Extended;
+    DummyI         : Integer;
+    Ok             : Boolean;
+    SimulDev       : string;
+ // CDSize         : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+ // ForcedContinue : Boolean;
 
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
@@ -532,9 +603,10 @@ begin
   FData.CreateBurnList(BurnList, cDataCD);
   Ok := True;
   SimulDev := 'cdr';
-  ForcedContinue := False;
+  CMArgs.ForcedContinue := False;
+  CMArgs.Choice := cDataCD;
   {Größe der Daten ermitteln}
-  FData.GetProjectInfo(DummyI, DummyI, CDSize, DummyE, DummyI, cDataCD);
+  FData.GetProjectInfo(DummyI, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
   {Dateiduplikate aufspüren}
   {$IFDEF ShowBurnList}
   FormDebug.Memo1.Lines.Assign(FVList);
@@ -555,7 +627,7 @@ begin
       FVList.Clear;
       if FDupSize > 0 then
       begin
-        CDSize := CDSize - FDupSize;
+        CMArgs.CDSize := CMArgs.CDSize - FDupSize;
         FDupSize := 0;
       end;
     end;
@@ -571,7 +643,7 @@ begin
      Simulationstreiber dvd_simul verwenden.}
     if not CD.IsDVD then
     begin
-      Ok := CheckMedium;
+      Ok := CheckMedium(CD, CMArgs);
     end else
     begin
       SimulDev := 'dvd';
@@ -630,16 +702,22 @@ begin
     if ISONoTrans  then CmdM := CmdM + ' -no-iso-translate';
     if ISODeepDir  then CmdM := CmdM + ' -disable-deep-relocation'; // ' -D';
     if ISONoVer    then CmdM := CmdM + ' -omit-version-number';     // ' -N';
-    if Boot        then begin
-                        CmdM := CmdM + ' -eltorito-boot '           // ' -b '
-                                     + QuotePath(ExtractFileName(BootImage));
-    if BootNoEmul  then CmdM := CmdM + ' -no-emul-boot';
-    if BootBinHide then CmdM := CmdM + ' -hide '
-                                     + QuotePath(ExtractFileName(BootImage))
-                                     + ' -hide-joliet '
-                                     + QuotePath(ExtractFileName(BootImage));
-    if BootCatHide then CmdM := CmdM + ' -hide boot.catalog'
-                                     + ' -hide-joliet boot.catalog'; end;
+    if Boot        then
+    begin
+      CmdM := CmdM + ' -eltorito-boot ' + QuotePath(ExtractFileName(BootImage));
+      if BootNoEmul  then CmdM := CmdM + ' -no-emul-boot';
+      if BootBinHide then
+      begin
+        CmdM := CmdM + ' -hide ' + QuotePath(ExtractFileName(BootImage));
+        if Joliet then CmdM := CmdM + ' -hide-joliet '
+                                    + QuotePath(ExtractFileName(BootImage));
+      end;
+      if BootCatHide then
+      begin
+        CmdM := CmdM + ' -hide boot.catalog';
+        if Joliet then CmdM := CmdM + ' -hide-joliet boot.catalog';
+      end;
+    end;
     if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + MsInfo
                                      + ' -prev-session ' + Device;
                                   // + ' -dev ' + Device;  ab mkisofs 2.01a22
@@ -732,7 +810,7 @@ begin
     end;
   end;
   BurnList.Free;
-  if ForcedContinue then
+  if CMArgs.ForcedContinue then
   begin
     FSettings.DataCD.ContinueCD := True;
   end;
@@ -806,78 +884,61 @@ end;
   Eine Audio-CD erstellen.                                                     }
 
 procedure TCDAction.CreateAudioCD;
-var i: Integer;
-    Ok: Boolean;
-    CD: TCDInfo;
-    CDTime: Extended;
-    DummyI: Integer;
-    DummyL: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
-    Meldung: PChar;
-    Temp: String;
-    Cmd: string;
-    BurnList: TStringList;
-begin
-  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  Ok := True;
-  BurnList := TStringList.Create;
-  FData.CreateBurnList(BurnList, cAudioCD);
-  {Spielzeit ermitteln}
-  FData.GetProjectInfo(DummyI, DummyI, DummyL, CDTime, DummyI, cAudioCD);
-  {Infos über eingelegte CD einlesen}
-  ReadCDInfo(CD, FSettings.AudioCD.Device, true);
-  with FLang do
+var i         : Integer;
+    Ok        : Boolean;
+    CD        : TCDInfo;
+    CMArgs    : TCheckMediumArgs;
+    DummyI    : Integer;
+    DummyL    : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+    Temp      : string;
+    Cmd, CmdMP: string;
+    BurnList  : TStringList;
+ // CDTime    : Extended;
+
+  { PrepareMP3ToWavConversion --------------------------------------------------
+
+    PrepareMP3ToWavConversion bereitet die Konvertierung der MP3-Dateien in
+    Wave-Dateien vor, d.h. es die BurnList wird angepaßt und die entsprechenden
+    Madplay-Aufrufe werden generiert. Die Namen der temporären Dateien werden in
+    FVList gespeichert.                                                        }
+
+  procedure PrepareMP3ToWavConversion;
+  var j             : Integer;
+      Source, Target: string;
+      CmdTemp       : string;
   begin
-    {Fehler: keine CD eingelegt}
-    if (CD.Size = 0) and (CD.MsInfo = '') then
+    CmdMP := '';
+    for j := 0 to BurnList.Count - 1 do
     begin
-      Application.MessageBox(PChar(GMS('eburn01')), PChar(GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Ok := False;
-    end;
-    {Fehler: fixierte CD eingelegt}
-    if Pos('-1', CD.MsInfo) <> 0 then
-    begin
-      Application.MessageBox(PChar(GMS('eburn02')), PChar(GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-
-      Ok := False;
-    end;
-    {Fehler: Multisession-Daten-CD eingelegt -> man könnte eine Mixed-Mode-CD
-     machen, aber ich weiß nicht wie.}
-    if Ok and (CD.MsInfo <> '') then
-    begin
-      Application.MessageBox(PChar(GMS('eburn08')), PChar(GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-
-      Ok := False;
-    end;
-    {Fehler: Restkapazität nicht ausreichend}
-    if Ok and (CD.TimeFree > 0) and (CDTime > CD.TimeFree) then
-    begin
-      Temp := GMS('eburn06') +
-              Format(GMS('mburn4'),
-                     [IntToStr(Round(CD.TimeFree) div 60) + ':' +
-                      FormatFloat('0#.##',
-                            (CD.TimeFree - (Round(CD.TimeFree) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Ok := False;
-    end;
-   {Fehler: Gesamtspielzeit zu lang}
-    if Ok and not FSettings.AudioCD.Overburn and (CDTime > CD.Time) then
-    begin
-      Temp := FLang.GMS('eburn06') +
-              Format(FLang.GMS('mburn04'),
-                     [IntToStr(Round(CD.Time) div 60) + ':' +
-                      FormatFloat('0#.##',
-                                  (CD.Time - (Round(CD.Time) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Ok := False;
+      Source := BurnList[j];
+      if (LowerCase(ExtractFileExt(BurnList[j])) = '.mp3') then
+      begin
+        Target := FSettings.General.TempFolder + '\' +
+                  ExtractFileName(Source) + '.wav';
+        BurnList[j] := Target;
+        CmdTemp := StartUpDir + cMadplayBin + ' -v -b 16 -R 44100 -o wave:' +
+                   QuotePath(Target) + ' ' + QuotePath(Source) + CR;
+        FVList.Add(Target);
+      end;
+      CmdMP := CmdMP + CmdTemp;
     end;
   end;
+
+begin
+  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  BurnList := TStringList.Create;
+  FData.CreateBurnList(BurnList, cAudioCD);
+  CMArgs.Choice := cAudioCD;
+  {$IFDEF ShowBurnList}
+  FormDebug.Memo2.Lines.Assign(BurnList);
+  {$ENDIF}
+  {Spielzeit ermitteln}
+  FData.GetProjectInfo(DummyI, DummyI, DummyL, CMArgs.CDTime, DummyI, cAudioCD);
+  {Infos über eingelegte CD einlesen}
+  ReadCDInfo(CD, FSettings.AudioCD.Device, True);
+  Ok := CheckMedium(CD, CMArgs);
+  {falls MP3s vorhanden, Konvertierung vorbereiten}
+  if FData.MP3FilesPresent then PrepareMP3ToWavConversion;
   {Pfadliste bearbeiten}
   for i := 0 to (BurnList.Count - 1) do
   begin
@@ -971,6 +1032,7 @@ begin
   end;
   if i = 1 then
   begin
+    if CmdMP <> '' then Cmd := CmdMP + Cmd;
     DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang, nil);
   end else
   begin
@@ -1530,7 +1592,8 @@ var i: Integer;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   {Kommandozeile zusammenstellen}
-  if Pos(cExtIso, FSettings.Image.IsoPath) > 0 then
+//  if Pos(cExtIso, LowerCase(FSettings.Image.IsoPath)) > 0 then
+  if Pos(cExtCue, LowerCase(FSettings.Image.IsoPath)) = 0 then
   begin
     with FSettings.Cdrecord, FSettings.Image do
     begin
@@ -1744,6 +1807,9 @@ begin
   {Dateiliste übernehmen}
   BurnList := TStringList.Create;
   FData.CreateBurnList(BurnList, cVideoCD);
+  {$IFDEF ShowBurnList}
+  FormDebug.Memo2.Lines.Assign(BurnList);
+  {$ENDIF}  
   with FSettings.VideoCD, FSettings.Cdrecord, FSettings.Cdrdao do
   begin
     {Kommandozeile für VCDImager zusammenstellen.}
@@ -2048,6 +2114,7 @@ constructor TCDAction.Create;
 begin
   inherited Create;
   FAction := cNoAction;
+  FLastAction := cNoAction;
   FVList := TSTringList.Create;
   // FTempBurnList := TStringList.Create;
   FReload := True;
@@ -2109,6 +2176,81 @@ end;
 procedure TCDAction.Reset;
 begin
   FVList.Clear;
+end;
+
+{ CleanUp ----------------------------------------------------------------------
+
+  CleanUp löscht temporäre Dateien.                                            }
+
+procedure TCDAction.CleanUp(const Phase: Byte);
+var i: Integer;
+begin
+  {Phase 1: TForm1.WMITerminated}
+  if Phase = 1 then
+  begin
+    DeleteFile(FSettings.XCD.XCDInfoFile);
+  end else
+  {Phase 2: TForm1.WMTTerminated}
+  if Phase = 2 then
+  begin
+    if FLastAction = cDataCD then
+    begin
+      DeleteFile(FSettings.DataCD.PathListName);
+      DeleteFile(FSettings.DataCD.ShCmdName);
+      if not (FSettings.DataCD.ImageOnly or FSettings.DataCD.KeepImage) then
+      begin
+        DeleteFile(FSettings.DataCD.IsoPath);
+      end;
+    end;
+
+    if FLastAction = cAudioCD then
+    begin
+      DeleteFile(FSettings.AudioCD.CDTextFile);
+      {temporäre Wave-Dateien löschen}
+      if FData.MP3FilesPresent then
+      begin
+        for i := 0 to FVList.Count - 1 do DeleteFile(FVList[i]);
+      end;
+    end;
+
+    if FLastAction = cXCD then
+    begin
+      DeleteFile(FSettings.XCD.XCDParamFile);
+      if not (FSettings.XCD.ImageOnly or FSettings.XCD.KeepImage) then
+      begin
+        DeleteFile(FSettings.XCD.IsoPath + cExtBin);
+        DeleteFile(FSettings.XCD.IsoPath + cExtToc);
+        DeleteFile(FSettings.XCD.IsoPath + cExtCue);
+      end;
+    end;
+
+    if FLastAction = cDVDVideo then
+    begin
+      DeleteFile(FSettings.DVDVideo.ShCmdName);
+    end;
+
+    if FLastAction = cVideoCD then
+    begin
+      if not (FSettings.VideoCD.ImageOnly or FSettings.VideoCD.KeepImage) then
+      begin
+        DeleteFile(FSettings.VideoCD.IsoPath + cExtBin);
+        DeleteFile(FSettings.VideoCD.IsoPath + cExtCue);
+      end;
+    end;
+
+  end else
+  {Phase 3: TForm1.WMVTerminated}
+  if Phase = 3 then
+  begin
+    if FLastAction = cXCD then
+    begin
+      {XCD-Info-Datei löschen und aus Dateiliste entfernen}
+      if DeleteFile(FSettings.XCD.XCDInfoFile) then
+        FData.DeleteFromPathlistByName(ExtractFileName(FSettings.XCD.XCDInfoFile),
+                                       '', cXCD);
+    end;
+    FLastAction := cNoAction;
+  end;
 end;
 
 end.
