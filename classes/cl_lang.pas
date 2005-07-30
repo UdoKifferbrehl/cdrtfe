@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.04.2005
+  letzte Änderung  14.07.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -168,7 +168,7 @@ begin
     Add('f007=Image-Dateien (*.bin; *.img; *.ima)|*.bin;*.img;*.ima|Alle Dateien|*.*');
     Add('f008=cdrtfe Dateilisten (*.cfp.files)|*.cfp.files');
     Add('f009=MPEG-Dateien (*.mpg)|*.mpg');
-    {Unit 1}
+    {GUI - Main}
     Add('c001=Brenngeschwindigkeit');
     Add('c002=Brenner');
     Add('c003=Laufwerk');
@@ -211,16 +211,17 @@ begin
     Add('m120=Dateiliste laden');
     Add('m121=Dateiliste speichern unter');
     Add('m122=%s Track(s): %s');
-    {Unit 2}
+    {GUI - Mkisofs}
     Add('e201=Name für das Boot-Image fehlt!');
     Add('m202=Boot-Image auswählen');
-    {Unit 3}
+    {GUI - Settings}
     Add('e301=Es wurden keine Kommandozeilenoptionen eingegeben.');
     Add('m301=Die aktuellen Einstellungen (mit Ausnahme der Datei- Listen) können in der Registry gespeichert werden.');
-    Add('m302=Die aktuellen Einstellungen (mit Ausnahme der Datei- Listen) können in der Datei cdrtfe.ini gespeichert werden.');    
-    {Unit 5}
+    Add('m302=Die aktuellen Einstellungen (mit Ausnahme der Datei- Listen) können in der Datei cdrtfe.ini gespeichert werden.');
+    {GUI - Filesystem check}
     Add('c501=Dateisystemüberprüfung: Dateinamen');
     Add('c502=Dateisystemüberprüfung: Ordner');
+    Add('c503=Dateisystemüberprüfung: Ungültige Quelldateien');
     Add('e501=Dateiname zu lang.');
     Add('m501=%d Dateien/Ordner mit zu langen Namen');
     Add('m502=Maximal zulässige Anzahl von Zeichen: %d');
@@ -234,11 +235,13 @@ begin
     Add('m510=Für Dateinamen mit mehr als 207 Zeichen kann ein UDF-Dateisystem erstellt werden.');
     Add('m511=Mehr als 247 Zeichen sind leider nicht möglich.');
     Add('m512=Um die Ordnerstruktur unverändert zu lassen, muß die Option ''tiefe Verzeichnisse nicht verschieben'' oder ''ISO-Level 4'' gewählt werden.');
-    {feprocs}
+    Add('m513=Die folgenden Dateien wurden aus der Dateiliste entfernt');
+    Add('m514=Die Namen der Quelldateien sollten auf unzulässige Sonderzeichen überprüft werden.');
+    {Messages - Add files, errors}
     Add('eprocs01=%s: falsches Wave-Format.');
     Add('eprocs02=%s: falsches MPEG-Format.');
     Add('eprocs03=%s: falsches MP3-Format.');
-    {feprefs}
+    {Messages - Preferences}
     Add('mpref01=ShellExtensions registriert.');
     Add('mpref02=Registryeinträge der ShellExtensions entfernt.');
     Add('mpref03=Kommandozeilenparameter in Registry gespeichert.');
@@ -255,10 +258,10 @@ begin
     Add('mpref14=XCD: Lade Dateien ...');
     Add('mpref15=Video-CD: Lade Tracks ...');
     Add('epref01=%s: Projekt-Datei nicht gefunden.');
-    {feoutput}
+    {Messages - Commandline}
     Add('moutput01=Ausführung beendet.');
     Add('moutput02=Ausführung durch Anwender abgebrochen.');
-    {feinit}
+    {Messages - Init}
     Add('einit01=Die cdrtools konnten nicht (vollständig) gefunden werden!\nFolgende Dateien werden unbedingt benötigt: cdrecord.exe,\nmkisofs.exe. Siehe auch readme.txt.');
     Add('einit02=Die Datei cygwin1.dll konnte nicht gefunden werden! Sie muß\nentweder im cdrtfe-Verzeichnis oder im Suchpfad vorhanden sein.');
     Add('minit01=Ohne die Datei cdda2wav.exe ist das Auslesen von Audio-Tracks nicht möglich.\n ');
@@ -269,7 +272,7 @@ begin
     Add('minit06=Ohne die Datei readcd.exe können keine Images von CDs angelegt weerden.\n ');
     Add('minit07=Mit der Mingw32-Version der cdrtools unter Win9x, ME kann cdrtfe zur\nZeit keine CDs on-the-fly schreiben.\n ');
     Add('minit08=Ohne die Datei vcdimager.exe können keine Video-CDs erstellt werden.\n ');
-    {feburn}
+    {Messages - Burning}
     Add('eburn01=Es ist keine CD eingelegt!');
     Add('eburn02=Diese CD kann nicht beschrieben werden. Entweder handelt es sich\num eine CD-ROM oder die CD-R(W) wurde bereits abgeschlossen.');
     Add('eburn03=Diese CD enthält bereits Daten und könnte fortgesetzt werden. Dafür\ndie Option ''vorhandene Sessions importieren'' aktivieren. Geschieht\ndies nicht, werden die vorhandenen Sessions unsichtbar.');
@@ -279,6 +282,9 @@ begin
     Add('eburn07=%s MiByte sind verfügbar.');
     Add('eburn08=Diese CD enthält bereits eine Daten-Session.\nAudio-Tracks können nicht hinzugefügt werden.');
     Add('eburn09=Erste zu schreibende Adresse konnte nicht gelesen werden.\nFalls es sich um eine CD-RW handelt, muß diese erst gelöscht werden.');
+    Add('eburn10=DVDs müssen im DAO-Modus geschrieben werden!');
+    Add('eburn11=Sorry, noch keine Unterstützung für Multisession-/Multiborder-DVDs.');
+    Add('eburn12=Unbekanntes DVD-Medium, unbekannte Kapazität.\nTrotzdem fortfahren?');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
@@ -289,7 +295,8 @@ begin
     Add('mburn08=noch verfügbar : %s MiByte; %s:%s min');
     Add('mburn09=Diese CD ist bereits fixiert.');
     Add('mburn10=Mode2CDMaker wird mit folgenden Optionen gestartet:');
-    Add('mburn11=CD fixieren?');    
+    Add('mburn11=CD fixieren?');
+    {Messages - Verify}
     Add('mverify01=Vergleiche Dateien ...');
     Add('mverify02=%d Fehler gefunden.');
     Add('mverify03=Vergleich durch Anwender abgebrochen!');
@@ -301,27 +308,27 @@ begin
     Add('everify04=Fehler beim Einlesen der CD');
     Add('everify05=Fehler beim erneuten Einlesen der CD. Vergleich abgebrochen.');
     Add('everify06=Fehler! Datei nicht gefunden   : %s');
-    {CD-Text}
+    {Messages - CD Text}
     Add('ccdtext01=Titel');
     Add('ccdtext02=Interpret');
     Add('ccdtext03=Pause');
     Add('ecdtext01=Option ''CD-Text schreiben'' gewählt, aber\nkeine CD-Text-Informationen vorhanden!');
     Add('ecdtext02=Zu viele CD-Text-Daten!');
     Add('epause01=Die Anzahl der Sekunden oder Sektoren muß als\nnicht negative, ganze Zahl angegeben werden.');
-    {Duplicates}
+    {Messages - Duplicates}
     Add('mdup01=Suche identische Dateien ...');
     Add('mdup02=Dateien sind identisch: %s <-> %s');
     Add('mdup03=%s in %d doppelten Datei(en) (%s).');
-    {Lang}
+    {Messages - Lang}
     Add('mlang01=Sprache wählen');
     Add('mlang02=Ok');
     Add('mlang03=Abbrechen');
-    {XCD-Infofile}
+    {Messages - XCD infofile}
     Add('mxcd01=Erstelle Info-Datei xcd.crc ...');
     Add('mxcd02=Lese Datei ...');
-    {Video-CD}
+    {Messages - Video CD}
     Add('evcd01=Keine MPEG-Dateien ausgewählt!');
-    {DVD-Video}
+    {Messages - DVD Video}
     Add('edvdv01=Bitte Quellverzeichnis angeben!');
   end;
 end;

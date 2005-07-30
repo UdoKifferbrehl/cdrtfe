@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.05.2005
+  letzte Änderung  15.07.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -141,7 +141,8 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        IgnoreFiles    : Boolean;
        ErrorListFiles,
        ErrorListDir,
-       ErrorListIgnore: TStringList;
+       ErrorListIgnore,
+       InvalidSrcFiles: TStringList;
      end;
 
      TCD = class(TObject)
@@ -333,7 +334,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_filesystem, f_misc, f_strings, cl_mpeginfo;
+     f_filesystem, f_misc, f_strings, cl_mpeginfo, f_wininfo;
 
 { TCD ------------------------------------------------------------------------ }
 
@@ -488,7 +489,7 @@ begin
   begin
     repeat
       if (SearchRec.Attr and faDirectory = faDirectory) and
-         (SearchRec.Name[1] <> '.') then
+         ((SearchRec.Name <> '.') and (SearchRec.Name <> '..')) then      
       begin {es ist ein Verzeichnis}
         if (SearchRec.Attr and faDirectory > 0) then
         begin
@@ -1366,16 +1367,31 @@ end;
 procedure TCD.CheckFS(var Args: TCheckFSArgs);
 var Folder: TNode;
 
-  {CheckFileNames prüft die Länge der Dateinamen.}
+  function SourceFileIsValid(const Name: string): Boolean;
+  var Temp: string;
+  begin
+    Temp := ExtractFileName(Name);
+    Result := not (LastDelimiter('\/:*?"<>|', Temp) > 0);
+    if not PlatformWinNT then
+    begin
+      if Pos('_', Temp) > 0 then Result := Result and FileExists(Name);
+    end;
+  end;
+
+  {CheckFileNames prüft die Länge der Ziel-Dateinamen. Prüft, ob die Namen der
+   Quelldateien gültig sind. In seltenen Fällen können Dateien ungültige Zeichen
+   enthalten (z.B. ?). Diese Dateien müssen aussortiert werden.                }
 
   procedure CheckFileNames(Root: TNode);
-  var Path: string;
-      Temp: string;
-      CDName: string;
-      FileList: TStringList;
-      i: Integer;
-      Node: TNode;
+  var Path           : string;
+      Temp           : string;
+      CDName, SrcName: string;
+      FileList       : TStringList;
+      IndexList      : TStringList;
+      i              : Integer;
+      Node           : TNode;
   begin
+    IndexList := TStringList.Create;
     {Pfadangabe für den aktuellen Knoten bestimmen}
     Path := GetPathFromFolder(Root);
     if Length(Root.Text) > Args.MaxLength then
@@ -1392,7 +1408,14 @@ var Folder: TNode;
     begin
       Temp := FileList[i];
       {Dateinamen extrahieren}
-      CDName := StringLeft(Temp, ':');
+      SplitString(Temp, ':', CDName, SrcName);
+      SrcName := StringLeft(SrcName, '*');
+      {Namen der Quelldatei überprüfen}
+      if not SourceFileIsValid(SrcName) then
+      begin
+        Args.InvalidSrcFiles.Add(SrcName);
+        IndexList.Add(IntToStr(i));
+      end else
       {Wenn Dateiname zu lang, dann in ErrorList eintragen}
       if Length(CDName) > Args.MaxLength then
       begin
@@ -1403,6 +1426,16 @@ var Folder: TNode;
         end;
       end;
     end;
+    {Unzulässige Dateien löschen}
+    if IndexList.Count > 0 then
+    begin
+      for i := IndexList.Count - 1 downto 0 do
+      begin
+
+        DeleteFromPathlistByIndex(StrToInt(IndexList[i]), Path);
+      end;
+    end;
+    IndexList.Free;
     {nächster Knoten}
     Node := Root.GetFirstChild;
     while Node <> nil do
@@ -1410,7 +1443,6 @@ var Folder: TNode;
       CheckFileNames(Node);
       Node := Root.GetNextChild(Node);
     end;
-
   end;
 
   {CheckFolderLevel ermittelt Ordner mit zu großer Verschachtelungstiefe}

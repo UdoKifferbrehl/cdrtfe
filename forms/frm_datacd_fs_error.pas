@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.03.2005
+  letzte Änderung  15.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,7 +26,7 @@ uses
   cl_projectdata, cl_lang, cl_imagelists, cl_settings;
 
 type
-  TFSEMode = (mFiles, mFolders);
+  TFSEMode = (mFiles, mFolders, mInvalidFiles);
 
   TFormDataCDFSError = class(TForm)
     ListView: TListView;
@@ -63,12 +63,14 @@ type
     FMaxLength: Byte;
     FMode: TFSEMode;
     FSettings: TSettings;
-    procedure AddErrorItemToListView(const Item: string; ListView: TListView; const Dir: Boolean);
+    procedure AddErrorItemToListView(const Item: string; ListView: TListView);
     procedure SetCorrectionMode(Mode: TFSEMode);
     procedure SetForFilenames;
     procedure SetForFolders;
+    procedure SetForInvalidFiles;
     procedure ShowErrorList;
     procedure ShowErrorListDir;
+    procedure ShowInvalidList;
   public
     { Public declarations }
     property Data: TProjectData write FData;
@@ -97,13 +99,10 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 procedure TFormDataCDFSError.SetCorrectionMode(Mode: TFSEMode);
 begin
   FMode := Mode;
-  if FMode = mFiles then
-  begin
-    SetForFilenames;
-  end else
-  if FMode = mFolders then
-  begin
-    SetForFolders;
+  case FMode of
+    mFiles       : SetForFilenames;
+    mFolders     : SetForFolders;
+    mInvalidFiles: SetForInvalidFiles;
   end;
 end;
 
@@ -176,7 +175,7 @@ end;
 
 { SetForFolders ----------------------------------------------------------------
 
- Wenn der Dialog für zu tief verschachtelte Ordner angezeigt werden soll.      }
+  Wenn der Dialog für zu tief verschachtelte Ordner angezeigt werden soll.     }
 
 procedure TFormDataCDFSError.SetForFolders;
 begin
@@ -201,13 +200,39 @@ begin
   ListView.TabStop := False;
 end;
 
+{ SetForInvalidFiles -----------------------------------------------------------
+
+  Wenn der Dialog für ungültige Quelldateien genutzt werden soll.              }
+
+procedure TFormDataCDFSError.SetForInvalidFiles;
+begin
+  FDirCheck := True;
+  {Dialog anpassen}
+  Rename.Visible := False;
+  Caption := FLang.GMS('c503');
+  ListView.Columns[0].Width := 600;
+  ListView.Columns[1].Width := 0;
+  ListView.Columns[2].Width := 0;
+  StaticText1.Visible := False;
+  StaticText2.Visible := False;
+  ButtonIgnore.Visible := False;
+
+  {worum es geht}
+  Label1.Caption := FLang.GMS('m513') + ':';
+  Label2.Caption := '';
+
+  {Hinweis}
+  Label3.Caption := FLang.GMS('m514');
+
+  ListView.TabStop := False;
+end;
+
 { AddErrorItemToListView -------------------------------------------------------
 
   Die in der ErrorList gespeicherten Dateien im ListView angezeigen.           }
 
 procedure TFormDataCDFSError.AddErrorItemToListView(const Item: string;
-                                                    ListView: TListView;
-                                                    const Dir: Boolean);
+                                                    ListView: TListView);
 var NewItem  : TListItem;
     Info     : TSHFileInfo;
     SearchRec: TSearchRec;
@@ -215,7 +240,7 @@ var NewItem  : TListItem;
     Name     : string;
     Caption  : string;
 begin
-  if not Dir then
+  if FMode = mFiles then
   begin
     Name := Item;
     {Caption ist alles _vor_ dem ':'}
@@ -264,6 +289,7 @@ begin
       end;
     end;
   end else                   // ErrorListDir
+  if FMode = mFolders then
   begin
     NewItem := ListView.Items.Add;
     NewItem.Caption := Item;
@@ -271,7 +297,15 @@ begin
                   SizeOf(TSHFileInfo),
                   SHGFI_SYSIconIndex or SHGFI_TYPENAME);
     NewItem.ImageIndex:=Info.IIcon;
-
+  end else
+  if FMode = mInvalidFiles then
+  begin
+    NewItem := ListView.Items.Add;
+    NewItem.Caption := Item;
+    SHGetFileInfo(PChar(Item), 0, Info,
+                  SizeOf(TSHFileInfo),
+                  SHGFI_SYSIconIndex or SHGFI_TYPENAME);
+    NewItem.ImageIndex:=Info.IIcon;
   end;
 end;
 
@@ -284,7 +318,7 @@ var i: Integer;
 begin
   for i := 0 to FData.ErrorListFiles.Count - 1 do
   begin
-    AddErrorItemToListView(FData.ErrorListFiles[i], ListView, False);
+    AddErrorItemToListView(FData.ErrorListFiles[i], ListView);
   end;
 end;
 
@@ -297,7 +331,20 @@ var i: Integer;
 begin
   for i := 0 to FData.ErrorListDir.Count - 1 do
   begin
-    AddErrorItemToListView(FData.ErrorListDir[i], ListView, True);
+    AddErrorItemToListView(FData.ErrorListDir[i], ListView);
+  end;
+end;
+
+{ ShowInvalidList --------------------------------------------------------------
+
+  Die Liste mit den unzulässigen Dateien zeigen.                               }
+
+procedure TFormDataCDFSError.ShowInvalidList;
+var i: Integer;
+begin
+  for i := 0 to FData.InvalidSrcFiles.Count - 1 do
+  begin
+    AddErrorItemToListView(FData.InvalidSrcFiles[i], ListView);
   end;
 end;
 
@@ -325,14 +372,13 @@ begin
   FLang.SetFormLang(self);
   {Liste anzeigen}
   ListView.Items.Clear;
-  if FMode = mFiles then
-  begin
-    ShowErrorList;
-    ListView.Selected := ListView.Items[0];
-  end else
-  if FMode = mFolders then
-  begin
-    ShowErrorListDir;
+  case FMode of
+    mFiles       : begin
+                     ShowErrorList;
+                     ListView.Selected := ListView.Items[0];
+                   end;
+    mFolders     : ShowErrorListDir;
+    mInvalidFiles: ShowInvalidList;
   end;
 end;
 

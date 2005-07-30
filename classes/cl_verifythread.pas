@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.04.2005
+  letzte Änderung  08.06.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -183,9 +183,7 @@ begin
 end;
 
 procedure TVerificationThread.SendTerminationMessage;
-var {$IFDEF LargeFiles}
-    SizeHigh: Integer;
-    {$ENDIF}
+var SizeHigh: Integer;
     SizeLow: Integer;
 begin
   FProgressBar.Visible := False;
@@ -280,6 +278,10 @@ begin
     {Laufwerk mit eingelegter CD suchen}
     for i := CDDrives.Count - 1 downto 0 do
     begin
+      {$IFDEF VerifyShowDetails}
+      FLine := 'Drive: ' + CDDrives[i];
+      Synchronize(DAddLine);
+      {$ENDIF}
       {Nummer des Laufwerks bestimmen}
       c := Ord(LowerCase(CDDrives[i])[1]) - 96;
       if DriveEmpty(c) then
@@ -365,7 +367,7 @@ function TVerificationThread.CompareFiles(const FileName1, FileName2: string):
                                           Boolean;
 var File1, File2: TFileStream;
     p1, p2: Pointer;
-    FSize1, FSize2: LongInt;
+    FSize1, FSize2: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
     BSize: Integer;
     NBytes: Integer; //Number of bytes to read
 begin
@@ -379,14 +381,24 @@ begin
     try
       File1 := TFileStream.Create(FileName1, fmOpenRead);
       File2 := TFileStream.Create(FileName2, fmOpenRead);
+      {$IFDEF LargeFiles}
+      FSize1 := GetFileSize(FileName1);
+      FSize2 := GetFileSize(FileName2);
+      {$ELSE}
       FSize1 := File1.Size;
       FSize2 := File2.Size;
+      {$ENDIF}
       if (FSize1 = FSize2) and (FSize1 > 0) then
       begin
-        while (FSize1 <> 0) and Result and not Terminated {FTerminate} do
+        while (FSize1 <> 0) and Result and not Terminated do
         begin
+          {$IFDEF LargeFiles}
+          if FSize1 > BSize then NBytes := BSize else NBytes := LoComp(FSize1);
+          FSize1 := FSize1 - NBytes;
+          {$ELSE}
           if FSize1 > BSize then NBytes := BSize else NBytes := FSize1;
           Dec(FSize1, NBytes);
+          {$ENDIF}
           File1.ReadBuffer(p1^, NBytes);
           File2.ReadBuffer(p2^, NBytes);
           Result := Result and CompareBufferA(p1, p2, NBytes);

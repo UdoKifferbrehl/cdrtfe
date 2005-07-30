@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.05.2005
+  letzte Änderung  14.07.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1131,6 +1131,21 @@ begin
       FormDataCDFSError.Lang := FLang;
       FormDataCDFSError.Settings := FSettings;
       FormDataCDFSError.Mode := mFolders;
+      FormDataCDFSError.ShowModal;
+    finally
+      FormDataCDFSError.Release;
+    end;
+  end;
+  {Quelldateien mit illegalen Dateinamen}
+  if FData.InvalidSrcFiles.Count > 0 then
+  begin
+    FormDataCDFSError := TFormDataCDFSError.Create(nil);
+    try
+      FormDataCDFSError.Data := FData;
+      FormDataCDFSError.ImageLists := FImageLists;
+      FormDataCDFSError.Lang := FLang;
+      FormDataCDFSError.Settings := FSettings;
+      FormDataCDFSError.Mode := mInvalidFiles;
       FormDataCDFSError.ShowModal;
     finally
       FormDataCDFSError.Release;

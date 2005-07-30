@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.05.2005
+  letzte Änderung  14.07.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -37,7 +37,8 @@
                  ErrorListFiles                       Listen für fehlerhafte
                  ErrorListDir                         Datei-/Ordnernamen
                  ErrorListIgnore                      ignorierte überlange Namen
-                 IgnoreName#LengthErrors               zu lange Namen ignorieren               
+                 IgnoreNameLengthErrors               zu lange Namen ignorieren
+                 InvalidSrcFiles                      unzulässige Quelldateien
 
     Methoden     AddToPathlist(const AddName, DestPath: string; const Choice: Byte)
                  CDTextLength: Integer
@@ -147,6 +148,7 @@ type TProjectData = class(TObject)
        ErrorListFiles: TStringList;
        ErrorListDir: TStringList;
        ErrorListIgnore: TStringList;
+       InvalidSrcFiles: TStringList;
        IgnoreNameLengthErrors: Boolean;
        constructor Create;
        destructor Destroy; override;
@@ -327,6 +329,7 @@ begin
   ErrorListFiles := TStringList.Create;
   ErrorListDir := TStringList.Create;
   ErrorListIgnore := TStringList.Create;
+  InvalidSrcFiles := TStringList.Create;
   IgnoreNameLengthErrors := False;
 end;
 
@@ -340,6 +343,7 @@ begin
   ErrorListFiles.Free;
   ErrorListDir.Free;
   ErrorListIgnore.Free;
+  InvalidSrcFiles.Free;
   inherited Destroy;
 end;
 
@@ -831,6 +835,7 @@ var CheckFSArgs: TCheckFSArgs;
 begin
   ErrorListFiles.Clear;
   ErrorListDir.Clear;
+  InvalidSrcFiles.Clear;
   {Argumente zusammenstellen}
   CheckFSArgs.Path := Path;
   CheckFSArgs.MaxLength := MaxLength;
@@ -839,6 +844,7 @@ begin
   CheckFSArgs.ErrorListFiles := ErrorListFiles;
   CheckFSArgs.ErrorListDir := ErrorListDir;
   CheckFSArgs.ErrorListIgnore := ErrorListIgnore;
+  CheckFSArgs.InvalidSrcFiles := InvalidSrcFiles;
   {Dateinamen prüfen}
   FDataCD.CheckFS(CheckFSArgs);
 end;
