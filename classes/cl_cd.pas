@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.07.2005
+  letzte Änderung  22.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -71,9 +71,11 @@
                  CDTime
                  LastError
                  MP3FilesPresent
+                 OggFilesPresent
                  TrackCount
                  TrackPausePresent
-                 AcceptWaveOnly
+                 AcceptMP3
+                 AcceptOgg
 
     Methoden     AddTrack(const Name: string)
                  Create
@@ -111,6 +113,13 @@
                  GetFileList: TStringList
                  MoveTrack(const Index: Integer; const Direction: TDirection)
 
+
+  TDVDVideo: wie TCD, zusätzlich
+
+    Properties   SourcePath: string
+
+    Methoden     Create
+
 }
 
 unit cl_cd;
@@ -133,6 +142,9 @@ const CD_NoError = 0;          {Fehlercodes}
       CD_InvalidLabel = 8;
       CD_InvalidMpegFile = 9;
       CD_InvalidMP3File = 10;
+      CD_InvalidOggFile = 11;
+      CD_NoMP3Support = 12;
+      CD_NoOggSupport = 13;
 
 type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        Path           : string;
@@ -238,7 +250,8 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 
      TAudioCD = class(TObject)
      private
-       FAcceptWaveOnly: Boolean;
+       FAcceptMP3: Boolean;
+       FAcceptOgg: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
        FError: Byte;
@@ -259,6 +272,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetCDTextPresent: Boolean;
        function GetCDTime: Extended;
        function GetMP3FilesPresent: Boolean;
+       function GetOggFilesPresent: Boolean;
        function GetTrackCount: Integer;
        function GetTrackPausePresent: Boolean;
        procedure ExportText(CDTextData: TStringList);
@@ -277,12 +291,14 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure MoveTrack(const Index: Integer; const Direction: TDirection);
        procedure SetCDText(const Index: Integer; TextData: TCDTextTrackData);
        procedure SetTrackPause(const Index: Integer; const Pause: string);
-       property AcceptWaveOnly: Boolean read FAcceptWaveOnly write FAcceptWaveOnly;
+       property AcceptMP3: Boolean read FAcceptMP3 write FAcceptMP3;
+       property AcceptOgg: Boolean read FAcceptOgg write FAcceptOgg;
        property CDTextLength: Integer  read GetCDTextLength;
        property CDTextPresent: Boolean read GetCDTextPresent;
        property CDTime: Extended read GetCDTime;
        property LastError: Byte read GetLastError;
        property MP3FilesPresent: Boolean read GetMP3FilesPresent;
+       property OggFilesPresent: Boolean read GetOggFilesPresent;
        property TrackCount: Integer read GetTrackCount;
        property TrackPausePresent: Boolean read GetTrackPausePresent;
      end;
@@ -329,11 +345,21 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property TrackCount: Integer read GetTrackCount;
      end;
 
+     TDVDVideo = class(TCD)
+     private
+       FSourcePath: string;
+       procedure SetSourcePath(Path: string);
+     public
+       constructor Create;
+       property SourcePath: string read FSourcePath write SetSourcePath;
+     end;
+
      TPList = ^TStringList;
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+     atl_oggvorbis,
      f_filesystem, f_misc, f_strings, cl_mpeginfo, f_wininfo;
 
 { TCD ------------------------------------------------------------------------ }
@@ -489,7 +515,7 @@ begin
   begin
     repeat
       if (SearchRec.Attr and faDirectory = faDirectory) and
-         ((SearchRec.Name <> '.') and (SearchRec.Name <> '..')) then      
+         ((SearchRec.Name <> '.') and (SearchRec.Name <> '..')) then
       begin {es ist ein Verzeichnis}
         if (SearchRec.Attr and faDirectory > 0) then
         begin
@@ -1394,6 +1420,7 @@ var Folder: TNode;
     IndexList := TStringList.Create;
     {Pfadangabe für den aktuellen Knoten bestimmen}
     Path := GetPathFromFolder(Root);
+    {Ordnername auf korrekte Länge prüfen}
     if Length(Root.Text) > Args.MaxLength then
     begin
       {nur eintragen, wenn nicht schon in Ignore-List enthalten}
@@ -1431,7 +1458,6 @@ var Folder: TNode;
     begin
       for i := IndexList.Count - 1 downto 0 do
       begin
-
         DeleteFromPathlistByIndex(StrToInt(IndexList[i]), Path);
       end;
     end;
@@ -1443,6 +1469,12 @@ var Folder: TNode;
       CheckFileNames(Node);
       Node := Root.GetNextChild(Node);
     end;
+    {Sonderfall: untergeordneter Ordner mit unerlaubtem Sonderzeichen}
+    if not FileNameIsValid(Root.Text) then
+    begin
+      Args.InvalidSrcFiles.Add(Path + ':');
+      DeleteFolder(Path);
+    end;    
   end;
 
   {CheckFolderLevel ermittelt Ordner mit zu großer Verschachtelungstiefe}
@@ -1529,7 +1561,7 @@ procedure TCD.CreateBurnList(List: TStringList);
 
   procedure CreateBurnListRek(Root: TNode);
   var Node: TNode;
-      i: Integer;
+      i   : Integer;
       Temp: string;
       Path: string;
   begin
@@ -1543,6 +1575,13 @@ procedure TCD.CreateBurnList(List: TStringList);
       Temp := StringLeft(Temp, '*');
       List.Add(Temp);
     end;
+    {Falls Verzeichnis leer ist (keine Dateien, keine Ordner), Dummy-Eintrag
+     erzeugen, aber nur, wenn es nicht das Root-Directory ist.}
+    if (Root.Level > 0) and
+       (TPList(Root.Data)^.Count = 0) and not Root.HasChildren then
+    begin
+      List.Add(Path + ':' + DummyDirName);
+    end;
     {nächster Knoten}
     Node := Root.GetFirstChild;
     while Node <> nil do
@@ -1554,6 +1593,7 @@ procedure TCD.CreateBurnList(List: TStringList);
 
 begin
   CreateBurnListRek(FRoot);
+  // FormDebug.Memo2.Lines.Assign(List);
 end;
 
 
@@ -2010,6 +2050,24 @@ begin
   List.Free;
 end;
 
+{ GetOggFilesPresent -----------------------------------------------------------
+
+  GetOggFilesPresent gibt an, ob in der Auswahl Ogg-Dateien vorhanden sind.    }
+
+function TAudioCD.GetOggFilesPresent: Boolean;
+var i       : Integer;
+    List    : TStringList;
+begin
+  Result := False;
+  List := TStringList.Create;
+  CreateBurnList(List);
+  for i := 0 to List.Count - 1 do
+  begin
+    Result := Result or (LowerCase(ExtractFileExt(List[i])) = '.ogg');
+  end;
+  List.Free;
+end;
+
 { ExtractTimeFromEntry ---------------------------------------------------------
 
   ExtractTimeFromEntry gibt die Tracklänge in Sekunden zurück.                 }
@@ -2132,7 +2190,8 @@ begin
   FTrackCountChanged := False;
   FCDTime := 0;
   FCDTimeChanged := False;
-  FAcceptWaveOnly := False;
+  FAcceptMP3 := True;
+  FAcceptOgg := True;
 end;
 
 destructor TAudioCD.Destroy;
@@ -2150,16 +2209,18 @@ end;
   Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TAudioCD.AddTrack(const Name: string);
-var Size         : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
-    TrackLength  : Extended;
-    Temp, CDText : string;
-    Ok, Wave, MP3: Boolean;
-    MPEGFile     : TMPEGFile;
+var Size              : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+    TrackLength       : Extended;
+    Temp, CDText      : string;
+    Ok, Wave, MP3, Ogg: Boolean;
+    MPEGFile          : TMPEGFile;
+    OggFile           : TOggVorbis;
 begin
   if FileExists(Name) then
   begin
     Wave := LowerCase(ExtractFileExt(Name)) = '.wav';
-    MP3  := (LowerCase(ExtractFileExt(Name)) = '.mp3') and not FAcceptWaveOnly;
+    MP3  := (LowerCase(ExtractFileExt(Name)) = '.mp3');
+    Ogg  := (LowerCase(ExtractFileExt(Name)) = '.ogg');
     Ok := False;
     Size := GetFileSize(Name);
     TrackLength := 0;
@@ -2177,17 +2238,49 @@ begin
     end else
     if MP3 then
     begin
-      {Bestimmung der Länge könnte etwas dauern}
-      Application.ProcessMessages;
-      MPEGFile := TMPEGFile.Create(Name);
-      MPEGFile.GetInfo;
-      TrackLength := MPEGFile.Length;
-      CDText := MPEGFile.TagTitle + '|' + MPEGFile.TagArtist + '||||';
-      MPEGFile.Free;
-      Ok := TrackLength > 0;
-      if not Ok then
+      if FAcceptMP3 then
       begin
-        FError := CD_InvalidMP3File;
+        {Bestimmung der Länge könnte etwas dauern}
+        Application.ProcessMessages;
+        MPEGFile := TMPEGFile.Create(Name);
+        MPEGFile.GetInfo;
+        TrackLength := MPEGFile.Length;
+        CDText := MPEGFile.TagTitle + '|' + MPEGFile.TagArtist + '||||';
+        MPEGFile.Free;
+        Ok := TrackLength > 0;
+        if not Ok then
+        begin
+          FError := CD_InvalidMP3File;
+        end;
+      end else
+      begin
+        FError := CD_NoMP3Support;
+      end;
+    end;
+    if Ogg then
+    begin
+      if FAcceptOgg then
+      begin
+        {Bestimmung der Länge könnte etwas dauern}
+        Application.ProcessMessages;
+        OggFile := TOggVorbis.Create;
+        if OggFile.ReadFromFile(Name) then
+        begin
+          if OggFile.Valid then
+          begin
+            TrackLength := StrToInt(FormatFloat('0', OggFile.Duration));
+            CDText := Trim(OggFile.Title) + '|' + Trim(OggFile.Artist) + '||||';
+          end;
+        end;
+        OggFile.Free;
+        Ok := TrackLength > 0;
+        if not Ok then
+        begin
+          FError := CD_InvalidOggFile;
+        end;
+      end else
+      begin
+        FError := CD_NoOggSupport;
       end;
     end;
     if Ok then
@@ -2661,6 +2754,46 @@ begin
   FTrackList.Clear;
   FTrackCount := 0;
   FCDTime := 0;
+end;
+
+
+{ TDVDVideo ------------------------------------------------------------------ }
+
+{ TDVDVideo - private }
+
+procedure TDVDVideo.SetSourcePath(Path: string);
+var SearchRec  : TSearchRec;
+begin
+  FSourcePath := Path;
+  DeleteAll;
+  {Jetzt muß der Inhalt des Quellordners zum Wurzelverzeichnis hinzugefügt
+   werden.}
+  if FSourcePath[Length(FSourcePath)] <> '\' then
+  begin
+    FSourcePath := FSourcePath + '\';
+  end;
+  if FindFirst(FSourcePath + '*.*',
+               faDirectory or faAnyFile, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      begin
+        AddFile(FSourcePath + SearchRec.Name, '');
+        {$IFDEF DebugDVDVideoLists}
+        Deb(SearchRec.Name, 1);
+        {$ENDIF}
+      end;
+    until FindNext(SearchRec) <> 0;
+    FindClose(SearchRec);
+  end;
+end;
+
+{ TDVDVideo - public }
+
+constructor TDVDVideo.Create;
+begin
+  inherited Create;
+  FSourcePath := '';
 end;
 
 end.

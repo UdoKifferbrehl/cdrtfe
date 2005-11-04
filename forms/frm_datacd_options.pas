@@ -1,11 +1,11 @@
 { cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
 
-  frm_datacd_options.pas: Daten-CD: Optionen
+  frm_datacd_options.pas: Daten-CD: Optionen, DVD-Video: Image-Optionen
 
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.03.2005
+  letzte Änderung  16.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,10 +52,12 @@ type
     procedure CheckBoxClick(Sender: TObject);
     procedure ButtonImageSelectClick(Sender: TObject);
     procedure EditKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     FSettings: TSettings;
     FLang: TLang;
+    FDVDOptions: Boolean;
     function InputOk: Boolean;
     procedure CheckControls(Sender: TObject);
     procedure GetSettings;
@@ -63,7 +65,8 @@ type
   public
     { Public declarations }
     property Lang: TLang read FLang write FLang;
-    property Settings: TSettings read FSettings write FSettings;    
+    property Settings: TSettings read FSettings write FSettings;
+    property DVDOptions: Boolean read FDVDOptions write FDVDOptions;    
   end;
 
 { var }
@@ -72,7 +75,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant;
+uses constant, f_misc;
 
 {var}
 
@@ -100,42 +103,64 @@ end;
 
 procedure TFormDataCDOptions.GetSettings;
 begin
-  // if not FSettings.FileFlags.ShOk then
-  if FSEttings.FileFlags.ShNeeded and not FSettings.FileFlags.ShOk then
+  if not FDVDOptions then
   begin
-    FSettings.DataCD.OnTheFly := False;
-    RadioButtonOnTheFly.Enabled := False;
-  end;
-  with FSettings.DataCD do
+    if FSettings.FileFlags.ShNeeded and not FSettings.FileFlags.ShOk then
+    begin
+      FSettings.DataCD.OnTheFly := False;
+      RadioButtonOnTheFly.Enabled := False;
+    end;
+    with FSettings.DataCD do
+    begin
+      CheckBoxMulti.Checked     := Multi;
+      CheckBoxContinue.Checked  := ContinueCD;
+      CheckBoxImageOnly.Checked := ImageOnly;
+      CheckBoxImageKeep.Checked := KeepImage;
+      EditIsoPath.Text          := IsoPath;
+      if OnTheFly then
+      begin
+        RadioButtonOnTheFly.Checked := True;
+      end else
+      begin
+        RadioButtonImage.Checked := True;
+      end;
+      RadioButtonTAO.Checked    := TAO;
+      RadioButtonDAO.Checked    := DAO;
+      RadioButtonRAW.Checked    := RAW;
+      if RawMode = 'raw96r' then
+      begin
+        RadioButtonRaw96r.Checked := True;
+      end else
+      if RawMode = 'raw96p' then
+      begin
+        RadioButtonRaw96p.Checked := True;
+      end else
+      if RawMode = 'raw16' then
+      begin
+        RadioButtonRaw16.Checked := True;
+      end;
+      CheckBoxOverburn.Checked := Overburn;
+    end;
+  end else
   begin
-    CheckBoxMulti.Checked     := Multi;
-    CheckBoxContinue.Checked  := ContinueCD;
-    CheckBoxImageOnly.Checked := ImageOnly;
-    CheckBoxImageKeep.Checked := KeepImage;
-    EditIsoPath.Text          := IsoPath;
-    if OnTheFly then
+    if FSettings.FileFlags.ShNeeded and not FSettings.FileFlags.ShOk then
     begin
-      RadioButtonOnTheFly.Checked := True;
-    end else
-    begin
-      RadioButtonImage.Checked := True;
+      FSettings.DVDVideo.OnTheFly := False;
+      RadioButtonOnTheFly.Enabled := False;
     end;
-    RadioButtonTAO.Checked    := TAO;
-    RadioButtonDAO.Checked    := DAO;
-    RadioButtonRAW.Checked    := RAW;
-    if RawMode = 'raw96r' then
+    with FSettings.DVDVideo do
     begin
-      RadioButtonRaw96r.Checked := True;
-    end else
-    if RawMode = 'raw96p' then
-    begin
-      RadioButtonRaw96p.Checked := True;
-    end else
-    if RawMode = 'raw16' then
-    begin
-      RadioButtonRaw16.Checked := True;
+      CheckBoxImageOnly.Checked := ImageOnly;
+      CheckBoxImageKeep.Checked := KeepImage;
+      EditIsoPath.Text          := IsoPath;
+      if OnTheFly then
+      begin
+        RadioButtonOnTheFly.Checked := True;
+      end else
+      begin
+        RadioButtonImage.Checked := True;
+      end;
     end;
-    CheckBoxOverburn.Checked := Overburn;
   end;
 end;
 
@@ -145,34 +170,46 @@ end;
 
 procedure TFormDataCDOptions.SetSettings;
 begin
-  with FSettings.DataCD do
+  if not FDVDOptions then
   begin
-    Multi      := CheckBoxMulti.Checked;
-    ContinueCD := CheckBoxContinue.Checked;
-    ImageOnly  := CheckBoxImageOnly.Checked;
-    KeepImage  := CheckBoxImageKeep.Checked;
-    IsoPath    := EditIsoPath.Text;
-    OnTheFly   := RadioButtonOnTheFly.Checked;
-    TAO        := RadioButtonTAO.Checked;
-    DAO        := RadioButtonDAO.Checked;
-    RAW        := RadioButtonRAW.Checked;
-    if RadioButtonRaw96r.Checked then
+    with FSettings.DataCD do
     begin
-      RawMode := 'raw96r';
-    end else
-    if RadioButtonRaw96p.Checked then
-    begin
-      RawMode := 'raw96p';
-    end else
-    if  RadioButtonRaw16.Checked then
-    begin
-      RawMode := 'raw16';
+      Multi      := CheckBoxMulti.Checked;
+      ContinueCD := CheckBoxContinue.Checked;
+      ImageOnly  := CheckBoxImageOnly.Checked;
+      KeepImage  := CheckBoxImageKeep.Checked;
+      IsoPath    := EditIsoPath.Text;
+      OnTheFly   := RadioButtonOnTheFly.Checked;
+      TAO        := RadioButtonTAO.Checked;
+      DAO        := RadioButtonDAO.Checked;
+      RAW        := RadioButtonRAW.Checked;
+      if RadioButtonRaw96r.Checked then
+      begin
+        RawMode := 'raw96r';
+      end else
+      if RadioButtonRaw96p.Checked then
+      begin
+        RawMode := 'raw96p';
+      end else
+      if  RadioButtonRaw16.Checked then
+      begin
+        RawMode := 'raw16';
+      end;
+      OverBurn := CheckBoxOverburn.Checked;
+      {wenn Multisession, dann muß auch Rockridge aktiviert werden}
+      if Multi then
+      begin
+        RockRidge := True;
+      end;
     end;
-    OverBurn := CheckBoxOverburn.Checked;
-    {wenn Multisession, dann muß auch Rockridge aktiviert werden}
-    if Multi then
+  end else
+  begin
+    with FSettings.DVDVideo do
     begin
-      RockRidge := True;
+      ImageOnly  := CheckBoxImageOnly.Checked;
+      KeepImage  := CheckBoxImageKeep.Checked;
+      IsoPath    := EditIsoPath.Text;
+      OnTheFly   := RadioButtonOnTheFly.Checked;
     end;
   end;
 end;
@@ -278,16 +315,39 @@ end;
 
 { Form-Events ---------------------------------------------------------------- }
 
+{ OnCreate ---------------------------------------------------------------------
+
+  Standardmäßig soll dies der Daten-CD-Dialog sein.                            }
+
+procedure TFormDataCDOptions.FormCreate(Sender: TObject);
+begin
+  FDVDOptions := False;
+end;  
+
 { OnFormShow -------------------------------------------------------------------
 
   Wenn das Fenster gezeigt wird, müssen die Controls den Daten in FSettings
   entsprechend gesetzt werden.                                                 }
 
 procedure TFormDataCDOptions.FormShow(Sender: TObject);
+var Diff: Integer;
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);
+  {Falls DVD-Optionen, Fenster anpassen}
+  if FDVDOptions then
+  begin
+    GroupBoxCD.Visible := not FDVDOptions;
+    GroupBoxWritingMode.Visible := not FDVDOptions;
+    Diff := (GroupBoxWritingMode.Left + GroupBoxWritingMode.Width) -
+            (GroupBoxImage.Left + GroupBoxImage.Width);
+    ButtonOk.Left := ButtonOk.Left - Diff;
+    ButtonCancel.Left := ButtonCancel.Left - Diff;
+    Self.Width := Self.Width - Diff;
+    Self.Caption := FLang.GMS('c201');
+  end;
 end;
 
 

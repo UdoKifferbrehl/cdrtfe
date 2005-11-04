@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.07.2005
+  letzte Änderung  22.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -231,6 +231,12 @@ type
     LabelVideoCDVCD2: TLabel;
     LabelVideoCDSVCD: TLabel;
     LabelVideoCDOverburn: TLabel;
+    MiscPopupEject: TMenuItem;
+    MiscPopupLoad: TMenuItem;
+    LabelDVDVideoVolID: TLabel;
+    EditDVDVideoVolID: TEdit;
+    ButtonDVDVideoOptions: TButton;
+    CheckBoxDVDVideoVerify: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -334,6 +340,10 @@ type
     procedure VideoListViewEditing(Sender: TObject; Item: TListItem; var AllowEdit: Boolean);
     procedure VideoListViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ButtonVideoCDOptionsClick(Sender: TObject);
+    procedure MiscPopupEjectClick(Sender: TObject);
+    procedure MiscPopupLoadClick(Sender: TObject);
+    procedure EditChange(Sender: TObject);
+    procedure ButtonDVDVideoOptionsClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -345,6 +355,9 @@ type
     FCmdLineParser: TCmdLineParser;        // FormCreate - FormDestroy
     FDevices: TDevices;                    // FormCreate - FormDestroy
     FInstanceTermination: Boolean;
+    {$IFDEF ShowCmdError}
+    FExitCode: Integer;
+    {$ENDIF}
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
@@ -353,6 +366,9 @@ type
     procedure AddItemToListView(const Item: string; ListView: TListView);
     procedure CheckDataCDFS;
     procedure CheckControls;
+    {$IFDEF ShowCmdError}
+    procedure CheckExitCode;
+    {$ENDIF}
     procedure GetSettings;
     procedure InitMainform;
     procedure InitTreeView(Tree: TTreeView; const Choice: Byte);
@@ -431,7 +447,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
-     f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init,
+     f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init, f_helper,
      f_checkproject;
 
 {$IFDEF ShowTime}
@@ -573,8 +589,11 @@ end;
 
 procedure TForm1.WMTTerminated(var Msg: TMessage);
 begin
+  {$IFDEF ShowCmdError}
+  FExitCode := Msg.wParam;
+  {$ENDIF}
   {EnvironmentBlock entsorgen, falls nötig}
-  CheckEnvironment(FSettings);
+  if FSettings.Environment.EnvironmentSize > 0 then CheckEnvironment(FSettings);
   {Aufräumen: aufgrund des Multithreadings hierher verschoben}
   FAction.CleanUp(2);
   {Thread zu Vergleichen der Dateien starten}
@@ -588,6 +607,12 @@ begin
      not (FSettings.XCD.ImageOnly or FSettings.Cdrecord.Dummy) then
   begin
     FAction.Action := cVerifyXCD;
+    FAction.StartAction;
+  end else
+  if (FAction.LastAction = cDVDVideo) and FSettings.DVDVideo.Verify  and
+     not (FSettings.DVDVideo.ImageOnly or FSettings.Cdrecord.Dummy) then
+  begin
+    FAction.Action := cVerifyDVDVideo;
     FAction.StartAction;
   end else
   begin
@@ -632,6 +657,10 @@ begin
       Application.Terminate;
     end;
   end;
+  {Hinweis, falls Fehler aufgetreten ist}
+  {$IFDEF ShowCmdError}
+  CheckExitCode;
+  {$ENDIF}
 end;
 
 { WMActivate[Data|Audio|Xcd|Vcd]Tab --------------------------------------------
@@ -806,6 +835,8 @@ begin
   with FSettings.DVDVideo do
   begin
     EditDVDVideoSourcePath.Text := SourcePath;
+    EditDVDVideoVolID.Text := VolID;
+    CheckBoxDVDVideoVerify.Checked := Verify;
   end;
 end;
 
@@ -971,8 +1002,10 @@ begin
   with FSettings.DVDVideo do
   begin
     SourcePath := EditDVDVideoSourcePath.Text;
+    VolID    := EditDVDVideoVolID.Text;
     Device   := GetDevice(cDVDVideo);
     Speed    := GetSpeed(cDVDVideo);
+    Verify   := CheckBoxDVDVideoVerify.Checked;
   end;
 end;
 
@@ -1197,6 +1230,9 @@ begin
       PD_FileNotFound   : Add(Format(FLang.GMS('e113'), [FileName]));
       PD_InvalidMpegFile: Add(Format(FLang.GMS('eprocs02'), [FileName]));
       PD_InvalidMP3File : Add(Format(FLang.GMS('eprocs03'), [FileName]));
+      PD_InvalidOggFile : Add(Format(FLang.GMS('eprocs04'), [FileName]));
+      PD_NoMP3Support   : Add(FileName + ': ' + FLang.GMS('minit09'));
+      PD_NoOggSupport   : Add(FileName + ': ' + FLang.GMS('minit10'));
     end;
   end;
 end;
@@ -1352,8 +1388,8 @@ begin
     end else
     begin
       {Änderungen im GUI nachvollziehen}
-      UserAddFolderUpdateTree(Tree);
       CheckDataCDFS;
+      UserAddFolderUpdateTree(Tree);
       UpdateGauges;
     end;
   end;
@@ -1772,6 +1808,12 @@ begin
                                 FLang.GMS('eprocs03'), [OpenDialog1.Files[i]]));
           PD_InvalidMpegFile: Form1.Memo1.Lines.Add(Format(
                                 FLang.GMS('eprocs02'), [OpenDialog1.Files[i]]));
+          PD_InvalidOggFile : Form1.Memo1.Lines.Add(Format(
+                                FLang.GMS('eprocs04'), [OpenDialog1.Files[i]]));
+          PD_NoMP3Support   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
+                                ': ' + FLang.GMS('minit09'));
+          PD_NoOggSupport   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] + 
+                                ': ' + FLang.GMS('minit10'));
         end;
       end;
     end;
@@ -2064,15 +2106,15 @@ begin
   {Fensterposition merken}
   with FSettings.WinPos do
   begin
-    if self.WindowState = wsMaximized then
+    if Self.WindowState = wsMaximized then
     begin
       MainMaximized := True;
     end else
     begin
-      MainTop := self.Top;
-      MainLeft := self.Left;
-      MainWidth := self.Width;
-      MainHeight := self.Height;
+      MainTop := Self.Top;
+      MainLeft := Self.Left;
+      MainWidth := Self.Width;
+      MainHeight := Self.Height;
       MainMaximized := False;
     end;
   end;
@@ -2090,10 +2132,10 @@ begin
   begin
     if (MainWidth <> 0) and (MainHeight <> 0) then
     begin
-      self.Top := MainTop;
-      self.Left := MainLeft;
-      self.Width := MainWidth;
-      self.Height := MainHeight;
+      Self.Top := MainTop;
+      Self.Left := MainLeft;
+      Self.Width := MainWidth;
+      Self.Height := MainHeight;
     end else
     begin
       {Falls keine Werte vorhanden, dann Fenster zentrieren. Die muß hier
@@ -2101,21 +2143,21 @@ begin
        Eigenschaften führt. Deshalb muß poDefault verwendet werden.}
       if (Screen.PixelsPerInch = 96) then
       begin
-        self.Width := dWidth;
-        self.Height := dHeight;
+        Self.Width := dWidth;
+        Self.Height := dHeight;
       end else
       if (Screen.PixelsPerInch > 96) then
       begin
-        self.Width := dWidthBigFont;
-        self.Height := dHeightBigFont;
+        Self.Width := dWidthBigFont;
+        Self.Height := dHeightBigFont;
       end;
-      self.Top := (Screen.Height - self.Height) div 2;
-      self.Left := (Screen.Width - self.Width) div 2;
+      Self.Top := (Screen.Height - Self.Height) div 2;
+      Self.Left := (Screen.Width - Self.Width) div 2;
     end;
     if MainMaximized then
     begin
-      self.Position := poDefault;
-      self.WindowState := wsMaximized;
+      Self.Position := poDefault;
+      Self.WindowState := wsMaximized;
     end;
   end;
 end;
@@ -2750,7 +2792,7 @@ begin
     ButtonSettings.Enabled := False;
     ButtonAbort.Visible := True;
     SpeedButtonFixCD.Enabled := False;
-    self.Update; {damit die Änderngen sofort wirksam werden}
+    Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
     ButtonStart.Enabled := True;
@@ -2760,6 +2802,26 @@ begin
     SpeedButtonFixCD.Enabled := True;    
   end;
 end;
+
+{ CheckExitCode ----------------------------------------------------------------
+
+  CheckExitCode prüft, ob ein Fehler aufgetreten ist und gibt einen Hinweis
+  aus.                                                                         }
+
+{$IFDEF ShowCmdError}  
+procedure TForm1.CheckExitCode;
+begin
+  if FExitCode = 142 then
+    {ProDVD-Lizenz-Fehler}
+    Application.MessageBox(PChar(FLang.GMS('e002')), PChar(FLang.GMS('g001')),
+      MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL) else
+  if FExitCode <> 0 then
+    {sonstiger Fehler}
+    Application.MessageBox(PChar(FLang.GMS('e001')), PChar(FLang.GMS('g001')),
+      MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+  FExitCode := 0;
+end;
+{$ENDIF}
 
 
 { Initialisierungen -----------------------------------------------------------}
@@ -2988,6 +3050,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice: Byte;
 begin
+  SetFont(Self);  
   FInstanceTermination := False;
   {Ein paar Objekte brauchen wir, egal ob es sich um die erste oder zweite
    Instanz handelt.}
@@ -2999,7 +3062,7 @@ begin
     SizeToStringSetUnits(GMS('g005'), GMS('g006'), GMS('g007'), GMS('g008'));
     MainMenuSetLang.Enabled := LangFileFound;
     {Spracheinstellungen setzen}
-    SetFormLang(self);
+    SetFormLang(Self);
   end;
   {Objekt mit den Laufwerksinfos}
   FDevices := TDevices.Create;
@@ -3028,7 +3091,7 @@ begin
   if IsFirstInstance(DummyHandle, 'TForm1', Form1.Caption) then
   begin {die aktuelle Instanz ist die erste}
     {Image-Listen erzeugen}
-    FImageLists := TImageLists.Create(self);
+    FImageLists := TImageLists.Create(Self);
     {Hautpfenster initialisieren}
     InitMainForm;
     {Tree-Views initialisieren}
@@ -3039,7 +3102,9 @@ begin
     if CheckFiles(FSettings, Memo1, FLang) then
     begin
       {wenn Madplay.exe vorhanden ist, können auch MP3s verwendet werden}
-      FData.AcceptWaveOnly := not FSettings.FileFlags.MadplayOk;
+      FData.AcceptMP3 := FSettings.FileFlags.MP3Ok;
+      {wenn Oggdec.exe vorhanden ist, können auch Oggs verwendet werden}
+      FData.AcceptOgg := FSettings.FileFlags.OggOk;
       {$IFDEF RegistrySettings}
       {Einstellungen laden: Registry}
       FSettings.LoadFromRegistry;
@@ -3091,7 +3156,7 @@ begin
       FAction.Memo := Form1.Memo1;
       FAction.ProgressBar := Form1.ProgressBar;
       FAction.StatusBar := Form1.StatusBar;
-      FAction.FormHandle := self.Handle;
+      FAction.FormHandle := Self.Handle;
       FAction.OnMessageToShow := MessageShow;
     end;
     {falls der Aufruf mit /hide erfolgte, Hauptfenster verstecken}
@@ -3101,8 +3166,8 @@ begin
       {Wir haben jetzt verhindert, daß das Fenster angezeigt wird, also werden
        FormShow und FormActivate nich ausgelöst. Also die Eventhandler manuell
        auslösen.}
-      FormShow(self);
-      FormActivate(self);
+      FormShow(Self);
+      FormActivate(Self);
     end;
   end else
   begin {es gibt eine weitere Instanz}
@@ -3151,7 +3216,7 @@ begin
    mit FImageLists.Free.
    Wenn jedoch abgebrochen wird, weil eine weitere Instanz gefunden wurde, dann
    muß das Icon von TApplication.Destroy abgeräumt werden.}
-   if not FInstanceTermination then Application.Icon.ReleaseHandle;
+  if not FInstanceTermination then Application.Icon.ReleaseHandle;
 end;
 
 { FormShow ---------------------------------------------------------------------
@@ -3536,6 +3601,9 @@ begin
   {$IFDEF ExportControls}
   ExportControls;
   {$ENDIF}
+  {$IFDEF ExportFontList}
+  ExportFontList;
+  {$ENDIF}
   {$IFDEF CreateAllForms}
   FormDataCDOptions.Free;
   FormDataCDFS.Free;
@@ -3548,7 +3616,7 @@ begin
   FormAbout.Free;
   {$ENDIF}
   {$IFDEF TestVerify}
-  SendMessage(self.Handle, WM_ButtonsOff, 0, 0);
+  SendMessage(Self.Handle, WM_ButtonsOff, 0, 0);
   FAction.Action := cVerify{XCD};
   FAction.StartAction;
   {$ENDIF}
@@ -3766,6 +3834,22 @@ begin
   if dir <> '' then
   begin
     EditDVDVideoSourcePath.Text := dir;
+  end;
+end;
+
+{ DVD Video: Options }
+
+procedure TForm1.ButtonDVDVideoOptionsClick(Sender: TObject);
+var FormDataCDOptions: TFormDataCDOptions;
+begin
+  FormDataCDOptions := TFormDataCDOptions.Create(nil);
+  try
+    FormDataCDOptions.Settings := FSettings;
+    FormDataCDOptions.Lang := FLang;
+    FormDataCDOptions.DVDOptions := True;
+    FormDataCDOptions.ShowModal;
+  finally
+    FormDataCDOptions.Release;
   end;
 end;
 
@@ -4607,6 +4691,7 @@ begin
   FAction.StartAction;
 end;
 
+
 { Kontextmenü-Events ----------------------------------------------------------}
 
 { Kontextmenü der Tree-Views ---------------------------------------------------
@@ -4946,15 +5031,27 @@ end;
 procedure TForm1.MiscPopupMenuPopup(Sender: TObject);
 begin
   if ((Sender as TPopupMenu).PopupComponent = CheckBoxDataCDVerify) or
-     ((Sender as TPopupMenu).PopupComponent = CheckBoxXCDVerify) then
+     ((Sender as TPopupMenu).PopupComponent = CheckBoxXCDVerify) or
+     ((Sender as TPopupMenu).PopupComponent = CheckBoxDVDVideoVerify) then
   begin
     MiscPopupVerify.Visible := True;
     MiscPopupClearOutput.Visible := False;
+    MiscPopupEject.Visible := False;
+    MiscPopupLoad.Visible := False;
   end else
   if ((Sender as TPopupMenu).PopupComponent = ButtonShowOutput) then
   begin
     MiscPopupVerify.Visible := False;
     MiscPopupClearOutput.Visible := True;
+    MiscPopupEject.Visible := False;
+    MiscPopupLoad.Visible := False;
+  end else
+  if ((Sender as TPopupMenu).PopupComponent = ComboBoxDrives) then
+  begin
+    MiscPopupVerify.Visible := False;
+    MiscPopupClearOutput.Visible := False;
+    MiscPopupEject.Visible := True;
+    MiscPopupLoad.Visible := True;
   end;
 end;
 
@@ -4987,6 +5084,12 @@ begin
     FAction.Reload := False;
     FAction.StartAction;
   end;
+  if (FSettings.General.Choice = cDVDVideo) and InputOk then
+  begin
+    FAction.Action := cVerifyDVDVideo;
+    FAction.Reload := False;
+    FAction.StartAction;
+  end;
   {Alten Wert wiederherstellen.}
   FSettings.DataCD.OnTheFly := OTF;
   FSettings.XCD.IsoPath := XCDPath;
@@ -4997,6 +5100,20 @@ end;
 procedure TForm1.MiscPopupClearOutputClick(Sender: TObject);
 begin
   Memo1.Lines.Clear;
+end;
+
+{ Load/Eject Disk }
+
+procedure TForm1.MiscPopupEjectClick(Sender: TObject);
+begin
+  EjectDisk(FDevices.CDDevices.Values[ComboBoxDrives.Items[
+                                       ComboBoxDrives.ItemIndex]]);
+end;
+
+procedure TForm1.MiscPopupLoadClick(Sender: TObject);
+begin
+  LoadDisk(FDevices.CDDevices.Values[ComboBoxDrives.Items[
+                                      ComboBoxDrives.ItemIndex]]);
 end;
 
 
@@ -5059,20 +5176,44 @@ begin
     if C = ComboBoxSpeed then
     begin
       ButtonStart.SetFocus;
+    end else
+    if C = EditDVDVideoSourcePath then
+    begin
+      EditDVDVideoVolID.SetFocus;
+    end else
+    if C = EditDVDVideoVolID then
+    begin
+      ButtonStart.SetFocus;
     end;
   end;
 end;
 
 { OnExit -----------------------------------------------------------------------
 
-  Wenn das EditImageIsoPath verlassen wird, müssenin Abhänigkeit der Dateiendung
-  des Images die Controls angepaßt werden.                                     }
+  Wenn das EditImageIsoPath verlassen wird, müssen in Abhänigkeit der Datei-
+  endung des Images die Controls angepaßt werden.                              }
 
 procedure TForm1.EditExit(Sender: TObject);
 begin
   if (Sender as TEdit) = EditImageIsoPath then
   begin
     CheckControls;
+  end;
+end;
+
+{ OnChange ---------------------------------------------------------------------
+
+  Labels dürfen max. 32 Zeichen lang sein.                                     }
+
+procedure TForm1.EditChange(Sender: TObject);
+begin
+  if (Sender as TEdit) = EditDVDVideoVolID then
+  begin
+    if not CDLabelIsValid(EditDVDVideoVolID.Text) then
+    begin
+      EditDVDVideoVolID.Text := Copy(EditDVDVideoVolID.Text, 1, 32);
+      EditDVDVideoVolID.SelStart := 32;
+    end;
   end;
 end;
 

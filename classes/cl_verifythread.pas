@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.06.2005
+  letzte Änderung  22.08.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,7 +45,7 @@ unit cl_verifythread;
 
 interface
 
-uses Windows, SysUtils, Classes, StdCtrls, ComCtrls, Forms,
+uses Windows, SysUtils, Classes, StdCtrls, ComCtrls, Forms, FileCtrl,
      cl_lang;
 
 type TVerificationThread = class(TThread)
@@ -72,6 +72,7 @@ type TVerificationThread = class(TThread)
        {mehrfach verwendete Variablen}
        FLang        : TLang;       
        FVerifyList  : TStringList;
+       procedure CleanUpList(List: TStringList);
        procedure CreateInfoFile;
        procedure CreateInfoFileInit;
        procedure FindDuplicateFiles;
@@ -177,7 +178,7 @@ begin
                              MB_OKCANCEL or MB_APPLMODAL or MB_ICONEXCLAMATION);
   if i <> 1 then
   begin
-    Terminate; // FTerminate := True;
+    Terminate;
     FReloadError := False;
   end;
 end;
@@ -206,6 +207,17 @@ begin
   else
     SendMessage(FHandle, WM_VTerminated, 0, 0);
   end;
+end;
+
+{ CleanUpList ------------------------------------------------------------------
+
+  CleanUpList entfernt aus den Listen die Dummy-Einträge für leere Ordner.     }
+
+procedure TVerificationThread.CleanUpList(List: TStringList);
+var i: Integer;
+begin
+  for i := (List.Count - 1) downto 0 do
+    if Pos(DummyDirName, List[i]) > 0 then List.Delete(i);
 end;
 
 { ReloadMedium -----------------------------------------------------------------
@@ -297,7 +309,7 @@ begin
     begin
       Temp := CDDrives[i] {+ '\'} + Temp;
       Temp := ReplaceChar(Temp, '/', '\');
-      if not FileExists(Temp) then
+      if not FileExists(Temp) and not DirectoryExists(Temp) then
       begin
         CDDrives.Delete(i);
       end;
@@ -683,18 +695,18 @@ end;
   prüft werden.                                                                }
 
 procedure TVerificationThread.Verify(const Drive: string);
-var i: Integer;
-    p: Integer;
-    ErrorCount: Integer;
+var i                     : Integer;
+    p                     : Integer;
+    ErrorCount            : Integer;
     SourceFile, TargetFile: string;
-    IsForm2: Boolean;
+    IsForm2               : Boolean;
     {$IFNDEF BitwiseVerify}
-    SourceCRC, TargetCRC: LongInt;
+    SourceCRC, TargetCRC  : LongInt;
     {$ELSE}
-    Ok: Boolean;
+    Ok                    : Boolean;
     {$ENDIF}
     {$IFDEF ShowVerifyTime}
-    TimeCount: TTimeCount;
+    TimeCount             : TTimeCount;
     {$ENDIF}
 begin
   {$IFDEF ShowVerifyTime}
@@ -745,7 +757,7 @@ begin
       GetFileCRC32(TargetFile, TargetCRC);
     end;
     {CRC32 identisch?}
-    if (SourceCRC <> TargetCRC) and not Terminated {FTerminate} then
+    if (SourceCRC <> TargetCRC) and not Terminated then
     begin
       ErrorCount := ErrorCount + 1;
       if not FileExists(SourceFile) then
@@ -767,7 +779,7 @@ begin
     begin
       Ok := CompareFiles(SourceFile, TargetFile);
     end;
-    if not Ok and not Terminated {FTerminate} then
+    if not Ok and not Terminated then
     begin
       ErrorCount := ErrorCount + 1;
       if not FileExists(SourceFile) then
@@ -781,7 +793,7 @@ begin
     {$ENDIF}
 
     i := i + 1;
-  until (i = FVerifyList.Count) or Terminated {FTerminate};
+  until (i = FVerifyList.Count) or Terminated;
 
   if ErrorCount > 0 then
   begin
@@ -830,6 +842,7 @@ begin
       Synchronize(DAddLine);
     end else
     begin
+      CleanUpList(FVerifyList);
       FLine := Format(FLang.GMS('mverify05'), [FVerifyList.Count]);
       Synchronize(DAddLine);
       FLine := '';
@@ -886,36 +899,40 @@ begin
     Synchronize(DStatusBarPanel0);
     {Dateinamen aus Liste}
     SplitString(FVerifyList[i], ':', TargetFile, SourceFile);
-    HashValue := 0;
-    FLine := SourceFile;
-    Synchronize(DStatusBarPanel1);
-    GetFileCRC32(SourceFile, HashValue);
-    HashValueStr := IntToStr(HashValue);
-    {Kam der Hashwert schon einmal vor?}
-    HashFile := HashTable.Values[HashValueStr];
-    SourceFileSize := GetFileSize(SourceFile);
-    TotalSize := TotalSize + SourceFileSize;
-    if HashFile = '' then
+    {Das Dummy-Verzeichnis ignorieren.}
+    if SourceFile <> DummyDirName then
     begin
-      {neuer Wert, also speichern}
-      HashTable.Add(HashValueStr + '=' + SourceFile);
-    end else
-    begin
-      {Bekannter Wert, Datei könnte identisch sein. Auch Größe muß überein-
-       stimmen}
-      HashFileSize   := GetFileSize(HashFile);
-      if SourceFileSize = HashFileSize then
+      HashValue := 0;
+      FLine := SourceFile;
+      Synchronize(DStatusBarPanel1);
+      GetFileCRC32(SourceFile, HashValue);
+      HashValueStr := IntToStr(HashValue);
+      {Kam der Hashwert schon einmal vor?}
+      HashFile := HashTable.Values[HashValueStr];
+      SourceFileSize := GetFileSize(SourceFile);
+      TotalSize := TotalSize + SourceFileSize;
+      if HashFile = '' then
       begin
-        {Pfad ersetzen}
-        FVerifyList[i] := TargetFile + ':' + HashFile;
-        Inc(Count);
-        DuplicateSize := DuplicateSize + SourceFileSize;
-        FLine := Format(Flang.GMS('mdup02'), [SourceFile, HashFile]);
-        Synchronize(DAddLine);
+        {neuer Wert, also speichern}
+        HashTable.Add(HashValueStr + '=' + SourceFile);
+      end else
+      begin
+        {Bekannter Wert, Datei könnte identisch sein. Auch Größe muß überein-
+         stimmen}
+        HashFileSize   := GetFileSize(HashFile);
+        if SourceFileSize = HashFileSize then
+        begin
+          {Pfad ersetzen}
+          FVerifyList[i] := TargetFile + ':' + HashFile;
+          Inc(Count);
+          DuplicateSize := DuplicateSize + SourceFileSize;
+          FLine := Format(Flang.GMS('mdup02'), [SourceFile, HashFile]);
+          Synchronize(DAddLine);
+        end;
       end;
     end;
     i := i + 1;
-  until (i = FVerifyList.Count) or Terminated {FTerminate};
+  until (i = FVerifyList.Count) or Terminated;
   FDupSize := DuplicateSize;
   Quota := (DuplicateSize / TotalSize) * 100;
   FLine := '';

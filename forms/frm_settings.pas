@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.04.2005
+  letzte Änderung  12.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,6 +68,8 @@ type
     GroupBoxTempFolder: TGroupBox;
     EditTempFolder: TEdit;
     ButtonTempFolderBrowse: TButton;
+    GroupBoxCdrecordEject: TGroupBox;
+    CheckBoxCdrecordEject: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -108,7 +110,7 @@ implementation
 
 {$R *.DFM}
 
-uses f_shellext, f_wininfo, f_filesystem, constant;
+uses f_shellext, f_wininfo, f_filesystem, f_misc, constant;
 
 {var}
 
@@ -188,6 +190,7 @@ begin
     ComboBoxMkisofsCustOpts.Items.Assign(MkisofsCustOpts);
     ComboBoxMkisofsCustOpts.ItemIndex        := MkisofsCustOptsIndex;
     CheckBoxCdrecordAllowHigherSpeed.Checked := ForceSpeed;
+    CheckBoxCdrecordEject.Checked            := Eject;
   end;
   CheckBoxCdrdaoCueImage.Enabled := FSettings.FileFlags.CdrdaoOk and
                                     FSettings.Cdrecord.CanWriteCueImage;
@@ -222,6 +225,7 @@ begin
     MkisofsCustOptsIndex  := ComboBoxMkisofsCustOpts.ItemIndex;
     MkisofsCustOpts.Assign(ComboBoxMkisofsCustOpts.Items);
     ForceSpeed := CheckBoxCdrecordAllowHigherSpeed.Checked;
+    Eject := CheckBoxCdrecordEject.Checked;
   end;
   FSettings.General.TabFrmSettings := GetActivePage;
 end;
@@ -430,7 +434,8 @@ end;
 
 procedure TFormSettings.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   {$IFDEF RegistrySettings}
   StaticText5.Caption := FLang.GMS('m301');
   {$ENDIF}

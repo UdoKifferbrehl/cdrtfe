@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.04.2005
+  letzte Änderung 17.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,6 +59,7 @@ const {die GUID für cdrtfe}
       cVerifyXCD      = 23;
       cFindDuplicates = 24;
       cCreateInfoFile = 25;
+      cVerifyDVDVideo = 26;
       cNoAction       = 0;
 
       {für TSettings.General.TabFrmSettings}
@@ -80,6 +81,7 @@ const {die GUID für cdrtfe}
       cVCDImagerBin    : string = '\vcdimager';
       cCdrdaoBin       : string = '\cdrdao';
       cMadplayBin      : string = '\madplay';
+      cOggdecBin       : string = '\oggdec';
 
       {Dateinamen}
       cCdrtfeShlExDll  : string = '\cdrtfeShlEx.dll';
@@ -89,6 +91,7 @@ const {die GUID für cdrtfe}
       cXCDInfoFile     : string = '\xcd.crc';
       cXCDParamFile    : string = '\xcd.txt';
       cIniFile         : string = '\cdrtfe.ini';
+      cDefaultIsoName  : string = '\image';
       cM2F2ExtractBin  : string = '\m2f2extract.exe';
       cDat2FileBin     : string = '\dat2file.exe';
       cD2FGuiBin       : string = '\d2fgui.exe';
@@ -101,7 +104,7 @@ const {die GUID für cdrtfe}
       cExtToc          : string = '.toc';
       cExtIso          : string = '.iso';                        
 
-      {Orndernamen}
+      {Ordnernamen}
       cDataDir         : string = '\cdrtfe';
 
       {Umgebungsvariablen}

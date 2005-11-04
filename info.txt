@@ -1,20 +1,26 @@
-Quelltexte von cdrtfe 1.1
-=========================
+cdrtfe - cdrtools/Mode2CDMaker/VCDImager Front End
+==================================================
 
-/classes        Deklaration von Objekttypen und Klassen für cdrtfe
+  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-/forms          GUI
 
-/funcs		Funktionen und Prozeduren von cdrtfe
+Credits
+=======
 
-/import         weitere Funktionen und Prozeduren
+  Ogg Vorbis support by Jared Breland (jbreland@legroom.net).
 
-/resource       Icons, Bitmaps, ...
+  W32waves.pas - Unit for accessing Windows PCM wave file information -
+  by Ulli Conrad.
 
-/support        sonstige, allgemeine Funktionen, Prozeduren, Klassen
+  atl_oggvorbis.pas: Audio Tools Library, Class TOggVorbis - for extracting
+  information from Ogg Vorbis file header. Copyright (c) 2001 by Jurgen Faul.
 
-/system		Systemfunktionen (meist Win32-API), Dateifunktionen
+  cl_peheader.pas - Unit for accessing Windows PE file information - is based
+  on pe.pas by K. Karthik.
 
-/units          kompilierte Units (*.dcu)
+  f_wininfo.pas is partly based on WinFuncs.pas by Simon Reinhardt.
+
+  f_cdtext.pas is partly based on cdtext.c and cdtext.h by J. Schilling.
 
 

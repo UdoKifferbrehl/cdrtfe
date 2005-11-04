@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.07.2005
+  letzte Änderung  17.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,7 +18,8 @@
 
   TProjectData
 
-    Properties   AcceptWaveOnly
+    Properties   AcceptMP3
+                 AcceptOgg
                  AddAsForm2
                  LastError
                  LastFolderAdded
@@ -66,7 +67,8 @@
                  MoveFileByName(const Name, SourcePath, DestPath: string; const Choice: Byte)
                  MoveFolder(const SourcePath, DestPath: string; const Choice: Byte)
                  MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte)
-                 MP3FilesPresent: Boolean;                 
+                 MP3FilesPresent: Boolean;
+                 OggFilesPresent: Boolean;
                  NewFolder(const Path, Name: string; const Choice: Byte)
                  RenameFileByIndex(const Index: Integer; const Path, Name: string; const MaxLength, Choice: Byte)
                  RenameFileByName(const Path, OldName, Name: string; const MaxLength, Choice: Byte)
@@ -74,7 +76,8 @@
                  SaveToFile(const Name: string)
                  SetCDLabel(const Name: string; const Choice: Byte)
                  SetCDText(const Index: Integer;  TextData: TCDTextTrackData)
-                 setTrackPause(const Index: Integer; const Pause: string)
+                 SetDVDSourcePath(const Path: string)
+                 SetTrackPause(const Index: Integer; const Pause: string)
                  SortFileList(const Path: string; const Choice: Byte)
                  SortFolder(const Path: string; const Choice: Byte)
                  TrackPausePresen: Boolean
@@ -110,16 +113,21 @@ const PD_NoError = 0;          {Fehlercodes}
       PD_InvalidLabel = 8;
       PD_InvalidMpegFile = 9;
       PD_InvalidMP3File = 10;
+      PD_InvalidOggFile = 11;
+      PD_NoMP3Support = 12;
+      PD_NoOggSupport = 13;
 
 type TProjectData = class(TObject)
      private
-       FAcceptWaveOnly: Boolean;
+       FAcceptMP3: Boolean;
+       FAcceptOgg: Boolean;
        FLang: TLang;
        FDataCD: TCD;
        FAudioCD: TAudioCD;
        FXCD: TXCD;
        FDAE: TDAE;
        FVideoCD: TVideoCD;
+       FDVDVideo: TDVDVideo;
        FError: Byte;
        FFolderAdded: string;
        FAddAsForm2: Boolean;
@@ -130,7 +138,8 @@ type TProjectData = class(TObject)
        FOnUpdatePanels: TNotifyEvent;
        function GetLastError: Byte;
        function GetLastFolderAdded: string;
-       procedure SetAcceptWaveOnly(Mode: Boolean);
+       procedure SetAcceptMP3(Mode: Boolean);
+       procedure SetAcceptOgg(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
        {Events}
        procedure MessageToShow;
@@ -161,6 +170,7 @@ type TProjectData = class(TObject)
        function GetSmallForm2FileCount: Integer;
        function GetTrackPause(const Index: Integer): string;
        function MP3FilesPresent: Boolean;
+       function OggFilesPresent: Boolean;
        function TrackPausePresent: Boolean;
        procedure AddToPathlist(const AddName, DestPath: string; const Choice: Byte);
        procedure CheckDataCDFS(const Path: string; const MaxLength: Byte; const CheckFolder: Boolean);
@@ -187,6 +197,7 @@ type TProjectData = class(TObject)
        procedure SaveToFile(const Name: string);
        procedure SetCDLabel(const Name: string; const Choice: Byte);
        procedure SetCDText(const Index: Integer;  TextData: TCDTextTrackData);
+       procedure SetDVDSourcePath(const Path: string);
        procedure SetTrackPause(const Index: Integer; const Pause: string);
        procedure SortFileList(const Path: string; const Choice: Byte);
        procedure SortFolder(const Path: string; const Choice: Byte);
@@ -196,7 +207,8 @@ type TProjectData = class(TObject)
 (*     property DataCD: TCD read FDataCD write FDataCD;
        property AudioCD: TAudioCD read FAudioCD write FAudioCD;
        property XCD: TXCD read FXCD write FXCD; *)
-       property AcceptWaveOnly: Boolean read FAcceptWaveOnly write SetAcceptWaveOnly;
+       property AcceptMP3: Boolean read FAcceptMP3 write SetAcceptMP3;
+       property AcceptOgg: Boolean read FAcceptOgg write SetAcceptOgg;
        property Lang: TLang write FLang;
        property LastError: Byte read GetLastError;
        property LastFolderAdded: string read GetLastFolderAdded;
@@ -303,15 +315,25 @@ begin
   FXCD.AddAsForm2 := Mode;
 end;
 
-{ SetAcceptWaveOnly ------------------------------------------------------------
+{ SetAcceptMP3 -----------------------------------------------------------------
 
   Bei Audio-CD können auch MP3s verwendet werden, es sei denn, Madplay.exe ist
   nicht vorhanden.                                                             }
 
-procedure TProjectData.SetAcceptWaveOnly(Mode: Boolean);
+procedure TProjectData.SetAcceptMP3(Mode: Boolean);
 begin
-  FAcceptWaveOnly := Mode;
-  FAudioCD.AcceptWaveOnly := Mode;
+  FAcceptMP3 := Mode;
+  FAudioCD.AcceptMP3 := Mode;
+end;
+
+{ SetAcceptOgg -----------------------------------------------------------------
+
+  If OggdecBin exists, then we can support Ogg files for Audio CDs.            }
+
+procedure TProjectData.SetAcceptOgg(Mode: Boolean);
+begin
+  FAcceptOgg := Mode;
+  FAudioCD.AcceptOgg := Mode;
 end;
 
 { TProjectData - public }
@@ -325,6 +347,7 @@ begin
   FXCD := TXCD.Create;
   FDAE := TDAE.Create;
   FVideoCD := TVideoCD.Create;
+  FDVDVideo := TDVDVideo.Create;
   AddAsForm2 := False; // als Property angesprochen, um Änderung durchzureichen
   ErrorListFiles := TStringList.Create;
   ErrorListDir := TStringList.Create;
@@ -340,6 +363,7 @@ begin
   FXCD.Free;
   FDAE.Free;
   FVideoCD.Free;
+  FDVDVideo.Free;
   ErrorListFiles.Free;
   ErrorListDir.Free;
   ErrorListIgnore.Free;
@@ -390,7 +414,10 @@ begin
     CD_FileNotFound: FError := PD_FileNotFound;
     CD_InvalidWaveFile: FError := PD_InvalidWaveFile;
     CD_InvalidMpegFile: FError := PD_InvalidMpegFile;
-    CD_InvalidMP3File: FError := PD_InvalidMP3File;    
+    CD_InvalidMP3File: FError := PD_InvalidMP3File;
+    CD_InvalidOggFile: FError := PD_InvalidOggFile;
+    CD_NoMP3Support: FError := PD_NoMP3Support;
+    CD_NoOggSupport: FError := PD_NoOggSupport;
   end;
 end;
 
@@ -1350,8 +1377,9 @@ end;
 procedure TProjectData.CreateVerifyList(List: TStringList; const Choice: Byte);
 begin
   case Choice of
-    cDataCD: FDataCD.CreateBurnList(List);
-    cXCD   : FXCD.CreateVerifyList(List);
+    cDataCD  : FDataCD.CreateBurnList(List);
+    cXCD     : FXCD.CreateVerifyList(List);
+    cDVDVideo: FDVDVideo.CreateBurnList(List);
   end;
 end;
 
@@ -1440,6 +1468,24 @@ end;
 function TProjectData.MP3FilesPresent: Boolean;
 begin
   Result := FAudioCD.MP3FilesPresent;
+end;
+
+{ OggFilesPresent --------------------------------------------------------------
+
+  liefert True, wenn in der Auswahl Ogg-Dateien vorhanden sind.                }
+
+function TProjectData.OggFilesPresent: Boolean;
+begin
+  Result := FAudioCD.OggFilesPresent;
+end;
+
+{ SetDVDSourcePath -------------------------------------------------------------
+
+  Quellpfad für DVD-Video festlegen.                                           }
+
+procedure TProjectData.SetDVDSourcePath(const Path: string);
+begin
+  FDVDVideo.SourcePath := Path;
 end;
 
 

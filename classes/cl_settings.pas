@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.05.2005
+  letzte Änderung  16.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -131,7 +131,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        VCDImOk    : Boolean;
        ShlExtDllOk: Boolean;
        ProDVD     : Boolean;
-       MadplayOk  : Boolean;
+       MP3Ok      : Boolean;
+       OggOk      : Boolean;
      end;
 
      TEnvironment = record
@@ -155,6 +156,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
      TSettingsCdrecord = record
        FixDevice : string;  // Laufwerk zum fixieren, nur temporär
        Dummy     : Boolean; // gilt auch für cdrdao
+       Eject     : Boolean;
        Verbose   : Boolean;
        Burnfree  : Boolean;
        SimulDrv  : Boolean;
@@ -195,7 +197,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        {Einstellungen: mkisofs}
        Joliet      : Boolean;
        JolietLong  : Boolean;
-       RockRidge   : Boolean;
+       RockRidge   : Boolean;   // -R -rock
+       RationalRock: Boolean;   // -r -rational-rock
        ISO31Chars  : Boolean;   // -l
        ISOLevel    : Boolean;
        ISOLevelNr  : Integer;   // 1 - 4; 0 = keine Angabe
@@ -356,6 +359,12 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Device    : string;
        Speed     : string;
        SourcePath: string;
+       VolID     : string;
+       IsoPath   : string;
+       OnTheFly  : Boolean;
+       ImageOnly : Boolean;
+       KeepImage : Boolean;
+       Verify    : Boolean;
        ShCmdName : string;
      end;
 
@@ -365,6 +374,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        CDReader : TStringList;
        CDDevices: TStringList;
      end;                    *)
+
+     { Hilfsvariablen }
 
      { Objekt mit den Einstellungen }
      TSettings = class(TObject)
@@ -412,6 +423,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        function GetMaxFileNameLength: Byte;
        procedure LoadFromFile(const Name: string);
        procedure SaveToFile(const Name: string);
+       procedure SetDefaultPaths;
+       procedure UnsetDefaultPaths;
        {$IFDEF RegistrySettings}
        procedure DeleteFromRegistry;
        procedure LoadFromRegistry;
@@ -568,7 +581,8 @@ begin
     VCDImOk     := True;
     ShlExtDllOk := True;
     ProDVD      := False;
-    MadplayOk   := True;
+    MP3Ok       := True;
+    OggOk       := True;
   end;
 
   with Environment do
@@ -592,6 +606,7 @@ begin
   begin
     FixDevice  := '';
     Dummy      := False;
+    Eject      := False;
     Verbose    := False;
     Burnfree   := True;
     SimulDrv   := False;
@@ -620,48 +635,49 @@ begin
   begin
     {allgemeine Einstellungen}
     PathListName := '';
-    ShCmdName   := '';
-    IsoPath     := '';
-    OnTheFly    := False;
-    ImageOnly   := False;
-    KeepImage   := False;
-    ContinueCD  := False;
-    Verify      := False;
+    ShCmdName    := '';
+    IsoPath      := '';
+    OnTheFly     := False;
+    ImageOnly    := False;
+    KeepImage    := False;
+    ContinueCD   := False;
+    Verify       := False;
     {Einstellungen: mkisofs}
-    Joliet      := True;
-    JolietLong  := False;
-    RockRidge   := False;
-    ISO31Chars  := False;
-    ISOLevel    := False;
-    ISOLevelNr  := 0;
-    ISOOutChar  := -1;
-    ISO37Chars  := False;
-    ISONoDot    := False;
-    ISOStartDot := False;
-    ISOMultiDot := False;
-    ISOASCII    := False;
-    ISOLower    := False;
-    ISONoTrans  := False;
-    ISODeepDir  := False;
-    ISONoVer    := False;
-    UDF         := False;
-    Boot        := False;
-    BootImage   := '';
-    BootCatHide := False;
-    BootBinHide := False;
-    BootNoEmul  := False;
-    VolId       := '';
-    MsInfo      := '';
-    FindDups    := False;
+    Joliet       := True;
+    JolietLong   := False;
+    RockRidge    := False;
+    RationalRock := True;
+    ISO31Chars   := False;
+    ISOLevel     := False;
+    ISOLevelNr   := 0;
+    ISOOutChar   := -1;
+    ISO37Chars   := False;
+    ISONoDot     := False;
+    ISOStartDot  := False;
+    ISOMultiDot  := False;
+    ISOASCII     := False;
+    ISOLower     := False;
+    ISONoTrans   := False;
+    ISODeepDir   := False;
+    ISONoVer     := False;
+    UDF          := False;
+    Boot         := False;
+    BootImage    := '';
+    BootCatHide  := False;
+    BootBinHide  := False;
+    BootNoEmul   := False;
+    VolId        := '';
+    MsInfo       := '';
+    FindDups     := False;
     {Einstellungen: cdrecord}
-    Device      := '';
-    Speed       := '';
-    Multi       := False;
-    DAO         := False;
-    TAO         := True;
-    RAW         := False;
-    RAWMode     := 'raw96r';
-    Overburn    := False;
+    Device       := '';
+    Speed        := '';
+    Multi        := False;
+    DAO          := False;
+    TAO          := True;
+    RAW          := False;
+    RAWMode      := 'raw96r';
+    Overburn     := False;
   end;
 
   {Audio-CD}
@@ -801,6 +817,12 @@ begin
     Device     := '';
     Speed      := '';
     SourcePath := '';
+    VolID      := '';
+    IsoPath    := '';
+    OnTheFly   := True;
+    ImageOnly  := False;
+    KeepImage  := False;
+    Verify     := False;
     ShCmdName  := '';
   end;
 end;
@@ -889,6 +911,49 @@ begin
   end;
 end;
 {$ENDIF}
+
+{ SetDefaultPath ---------------------------------------------------------------
+
+  SetDefaultPaths setzt die Standardwerte für die Pfade zur Image-Datei und zum
+  temporären Ordner.}
+
+procedure TSettings.SetDefaultPaths;
+var DefaultDir      : string;
+    DefaultImageName: string;
+    DefaultImageFile: string;
+begin
+  DefaultDir       := f_filesystem.TempDir;
+  DefaultImageName := DefaultDir + cDefaultIsoName;
+  DefaultImageFile := DefaultImageName + cExtIso;
+  if DefaultDir <> '' then
+  begin
+    if DataCD.IsoPath     = '' then DataCD.IsoPath     := DefaultImageFile;
+    if XCD.IsoPath        = '' then XCD.IsoPath        := DefaultImageName;
+    if VideoCD.IsoPath    = '' then VideoCD.IsoPath    := DefaultImageName;
+    if DVDVideo.IsoPath   = '' then DVDVideo.IsoPath   := DefaultImageFile;
+    if General.TempFolder = '' then General.TempFolder := DefaultDir;
+  end;
+end;
+
+{ UnsetDefaultPaths ------------------------------------------------------------
+
+  UnsetDefaultPaths löscht die Pfadangaben für Image-Datei und temporären
+  Ordner.                                                                      }
+
+procedure TSettings.UnsetDefaultPaths;
+var DefaultDir      : string;
+    DefaultImageName: string;
+    DefaultImageFile: string;
+begin
+  DefaultDir       := f_filesystem.TempDir;
+  DefaultImageName := DefaultDir + cDefaultIsoName;
+  DefaultImageFile := DefaultImageName + cExtIso;
+  if DataCD.IsoPath     = DefaultImageFile then DataCD.IsoPath     := '';
+  if XCD.IsoPath        = DefaultImageName then XCD.IsoPath        := '';
+  if VideoCD.IsoPath    = DefaultImageName then VideoCD.IsoPath    := '';
+  if DVDVideo.IsoPath   = DefaultImageFile then DVDVideo.IsoPath   := '';
+  if General.TempFolder = DefaultDir       then General.TempFolder := '';
+end;
 
 { TSettings - public }
 
@@ -1253,6 +1318,7 @@ var PF: TIniFile; // ProjectFile
     with PF, Cdrecord do
     begin
       WriteBool(Section, 'Dummy', Dummy);
+      WriteBool(Section, 'Eject', Eject);
       WriteBool(Section, 'Verbose', Verbose);
       WriteBool(Section, 'Burnfree', Burnfree);
       WriteBool(Section, 'SimulDrv', SimulDrv);
@@ -1301,6 +1367,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'Joliet', Joliet);
       WriteBool(Section, 'JolietLong', JolietLong);
       WriteBool(Section, 'RockRidge', RockRidge);
+      WriteBool(Section, 'RationalRock', RationalRock);
       WriteBool(Section, 'ISO31Chars', ISO31Chars);
       WriteBool(Section, 'ISOLevel', ISOLevel);
       WriteInteger(Section, 'ISOLevelNr', ISOLevelNr);
@@ -1476,6 +1543,12 @@ var PF: TIniFile; // ProjectFile
       WriteString(Section, 'Device', Device);
       WriteString(Section, 'Speed', Speed);
       WriteString(Section, 'SourcePath', SourcePath);
+      WriteString(Section, 'VolID', VolID);
+      WriteString(Section, 'IsoPath', IsoPath);
+      WriteBool(Section, 'OnTheFly', OnTheFly);
+      WriteBool(Section, 'ImageOnly', ImageOnly);
+      WriteBool(Section, 'KeepImage', KeepImage);
+      WriteBool(Section, 'Verify', Verify);
     end;
   end;
 
@@ -1505,7 +1578,11 @@ begin
     {Datei speichern}
     PF := TIniFile.Create(IniPath + Name);
     General.IniFile := IniPath + Name;
+    {Default-Pfade nicht speichern, also löschen}
+    UnsetDefaultPaths;
     SaveSettings;
+    {Default-Pfade wiederherstellen}
+    SetDefaultPaths;
     PF.Free;
     FileFlags.IniFileOk := True;
   end else
@@ -1531,9 +1608,9 @@ var PF: TIniFile; // ProjectFile
   {lokale Prozedur, die die Einstellungen aus der Datei PF liest, wobei PF
    entweder eine Ini-Datei oder auch die Registry sein kann.}
   procedure LoadSettings;
-  var Section: string;
-      i: Integer;
-      c: Integer;
+  var Section  : string;
+      i        : Integer;
+      c        : Integer;
   begin
     {allgemeine Einstellungen/Statusvaraiblen}
     Section := 'General';
@@ -1596,6 +1673,7 @@ var PF: TIniFile; // ProjectFile
     with PF, Cdrecord do
     begin
       Dummy := ReadBool(Section, 'Dummy', False);
+      Eject := ReadBool(Section, 'Eject', False);
       Verbose := ReadBool(Section, 'Verbose', False);
       Burnfree := ReadBool(Section, 'Burnfree', False);
       SimulDrv := ReadBool(Section, 'SimulDrv', False);
@@ -1651,6 +1729,7 @@ var PF: TIniFile; // ProjectFile
       Joliet := ReadBool(Section, 'Joliet', True);
       JolietLong := ReadBool(Section, 'JolietLong', False);
       RockRidge := ReadBool(Section, 'RockRidge', False);
+      RationalRock := ReadBool(Section, 'RationalRock', True);
       ISO31Chars := ReadBool(Section, 'ISO31Chars', False);
       ISOLevel := ReadBool(Section, 'ISOLevel', False);
       ISOLevelNr := ReadInteger(Section, 'ISOLevelNr', 0);
@@ -1844,6 +1923,13 @@ var PF: TIniFile; // ProjectFile
       Device := ReadString(Section, 'Device', '');
       Speed := ReadString(Section, 'Speed', '');
       SourcePath := ReadString(Section, 'SourcePath', '');
+      VolID := ReadString(Section, 'VolID', '');
+      IsoPath := ReadString(Section, 'IsoPath', '');
+      OnTheFly := ReadBool(Section, 'OnTheFly', True) and
+                  (FileFlags.ShOk or not FileFlags.ShNeeded);
+      ImageOnly := ReadBool(Section, 'ImageOnly', False);
+      KeepImage := ReadBool(Section, 'KeepImage', False);
+      Verify := ReadBool(Section, 'Verify', False);
     end;
     Shared.ProgressBarPosition := 13;
     ProgressBarUpdate;
@@ -1865,6 +1951,8 @@ begin
     begin
       FileFlags.IniFileOk := False;
     end;
+    {Vorbelegungen für Pfade zum Image und temporären Ordner}
+    SetDefaultPaths;
   end else
   {$ENDIF}
   begin
@@ -1937,6 +2025,7 @@ var PF: TRegIniFile; // ProjectFile
     with PF, Cdrecord do
     begin
       WriteBool(Section, 'Dummy', Dummy);
+      WriteBool(Section, 'Eject', Eject);
       WriteBool(Section, 'Verbose', Verbose);
       WriteBool(Section, 'Burnfree', Burnfree);
       WriteBool(Section, 'SimulDrv', SimulDrv);
@@ -1987,6 +2076,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'Joliet', Joliet);
       WriteBool(Section, 'JolietLong', JolietLong);
       WriteBool(Section, 'RockRidge', RockRidge);
+      WriteBool(Section, 'RationalRock', RationalRock);
       WriteBool(Section, 'ISO31Chars', ISO31Chars);
       WriteBool(Section, 'ISOLevel', ISOLevel);
       WriteInteger(Section, 'ISOLevelNr', ISOLevelNr);
@@ -2163,12 +2253,21 @@ var PF: TRegIniFile; // ProjectFile
       WriteString(Section, 'Device', Device);
       WriteString(Section, 'Speed', Speed);
       WriteString(Section, 'SourcePath', SourcePath);
+      WriteString(Section, 'VolID', VolID);
+      WriteBool(Section, 'OnTheFly', OnTheFly);
+      WriteBool(Section, 'ImageOnly', ImageOnly);
+      WriteBool(Section, 'KeepImage', KeepImage);
+      WriteBool(Section, 'Verify', Verify);      
     end;
   end;
 
 begin
   PF := TRegIniFile.Create('Software\cdrtfe');
+  {Default-Pfade nicht speichern, also löschen}
+  UnsetDefaultPaths;
   SaveSettings;
+  {Default-Pfade wiederherstellen}
+  SetDefaultPaths;
   PF.Free;
 end;
 {$ENDIF}
@@ -2229,6 +2328,7 @@ var PF: TRegIniFile; // ProjectFile
     with PF, Cdrecord do
     begin
       Dummy := ReadBool(Section, 'Dummy', False);
+      Eject := ReadBool(Section, 'Eject', False);
       Verbose := ReadBool(Section, 'Verbose', False);
       Burnfree := ReadBool(Section, 'Burnfree', False);
       SimulDrv := ReadBool(Section, 'SimulDrv', False);
@@ -2288,6 +2388,7 @@ var PF: TRegIniFile; // ProjectFile
       Joliet := ReadBool(Section, 'Joliet', True);
       JolietLong := ReadBool(Section, 'JolietLong', False);
       RockRidge := ReadBool(Section, 'RockRidge', False);
+      RationalRock := ReadBool(Section, 'RationalRock', True);
       ISO31Chars := ReadBool(Section, 'ISO31Chars', False);
       ISOLevel := ReadBool(Section, 'ISOLevel', False);
       ISOLevelNr := ReadInteger(Section, 'ISOLevelNr', 0);
@@ -2482,6 +2583,13 @@ var PF: TRegIniFile; // ProjectFile
       Device := ReadString(Section, 'Device', '');
       Speed := ReadString(Section, 'Speed', '');
       SourcePath := ReadString(Section, 'SourcePath', '');
+      VolID := ReadString(Section, 'VolID', '');
+      IsoPath := ReadString(Section, 'IsoPath', '');
+      OnTheFly := ReadBool(Section, 'OnTheFly', True) and
+                  (FileFlags.ShOk or not FileFlags.ShNeeded);
+      ImageOnly := ReadBool(Section, 'ImageOnly', False);
+      KeepImage := ReadBool(Section, 'KeepImage', False);
+      Verify := ReadBool(Section, 'Verify', False);
     end;
     Shared.ProgressBarPosition := 13;
     ProgressBarUpdate;
@@ -2496,6 +2604,8 @@ begin
     LoadSettings;
     PF.Free;
   end;
+  {Vorbelegungen für Pfade zum Image und temporären Ordner}
+  SetDefaultPaths;
 end;
 {$ENDIF}
 

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.06.2005
+  letzte Änderung  11.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -56,11 +56,11 @@ implementation
 
 {$R ../resource/license.res}
 
-uses constant;
+uses constant, f_misc;
 
-const Cdrtfe_Version     = 'cdrtfe 1.1pre6'
+const Cdrtfe_Version     = 'cdrtfe 1.1'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
-      Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Front End';
+      Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2005  O. Valencia';
       Cdrtfe_Copyright2  = 'Copyright © 2002-2004  O. Valencia, O. Kutsche';
       Cdrtfe_Homepage    = 'http://www.cdrtfe.de.vu';
@@ -77,6 +77,7 @@ const Cdrtfe_Version     = 'cdrtfe 1.1pre6'
 procedure TFormAbout.FormCreate(Sender: TObject);
 var TempStream : TResourceStream;
 begin
+  SetFont(Self);
   StaticText1.Caption := Cdrtfe_Version;
   StaticText2.Caption := Cdrtfe_Description;
   StaticText3.Caption := Cdrtfe_Copyright;

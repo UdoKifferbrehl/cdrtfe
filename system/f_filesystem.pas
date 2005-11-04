@@ -3,7 +3,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.05.2005
+  letzte Änderung  30.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -24,6 +24,7 @@
     CDLabelIsValid(const VolID: string):Boolean
     ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
     DriveEmpty(const Drive: Integer): Boolean
+    DummyDir(Mode: Boolean)
     FilenameIsValid(const Name: string):Boolean
     FindInSearchPath(const Name: string): string
     GetDirSize(Verzeichnis: string): Longint
@@ -34,6 +35,7 @@
     OverrideProgDataDir
     ProgDataDir: string
     StartUpDir: string
+    TempDir: string
 
 }
 
@@ -53,6 +55,7 @@ const CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function DriveEmpty(const Drive: Integer): Boolean;
+function DummyDirName: string;
 function FilenameIsValid(const Name: string):Boolean;
 function FindInSearchPath(const Name: string): string;
 function GetDirSize(Verzeichnis: string): Longint;
@@ -62,11 +65,13 @@ function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function ProgDataDir: string;
 function StartUpDir: string;
+function TempDir: string;
+procedure DummyDir(Mode: Boolean);
 procedure OverrideProgDataDir;
 
 implementation
 
-uses f_largeint, f_wininfo, constant;
+uses f_largeint, f_wininfo, f_environment, constant;
 
     {'statische' Variablen}
 var ProgDataDirOverride: string;
@@ -118,6 +123,16 @@ begin
   if ProgDataDirOverride <> '' then Result := ProgDataDirOverride;
 end;
 
+{ TempDir ----------------------------------------------------------------------
+
+  TempDir liefert das %Temp%- bzw. %TMP%-Verzeichnis.                          }
+
+function TempDir: string;
+begin
+  Result := GetEnvVarValue('TEMP');
+  if Result = '' then Result := GetEnvVarValue('TMP');
+end;
+
 { OverrideProgDataDir ----------------------------------------------------------
 
   OverrideProgDataDir ermöglicht es, ein anderes Verzeichnis für die temporären
@@ -131,6 +146,29 @@ begin
   begin
     Dir := ChooseDir('', Application.Handle);
     if DirectoryExists(Dir) then ProgDataDirOverride := Dir;
+  end;
+end;
+
+{ DummyDirName -----------------------------------------------------------------
+
+  Name des Dummy-Verzeichnisses.                                               }
+
+function DummyDirName: string;
+begin
+  Result := ProgDataDir + '\dummy';
+end;
+
+{ DummyDir ---------------------------------------------------------------------
+
+  Um auch leere Verzeichnisse auf die CD schreiben zu können, benötigen wir ein
+  leeres Dummy-Verzeichnis. Mode: True   - Verzeichnis erstellen
+                                  Falase - Verzeichnis löschen                 }
+
+procedure DummyDir(Mode: Boolean);
+begin
+  case Mode of
+    True : if not DirectoryExists(DummyDirName) then MkDir(DummyDirName);
+    False: if DirectoryExists(DummyDirName) then RemoveDir(DummyDirName);
   end;
 end;
 

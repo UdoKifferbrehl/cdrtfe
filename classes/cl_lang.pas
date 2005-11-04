@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.07.2005
+  letzte Änderung  04.11.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,7 +38,7 @@ unit cl_lang;
 
 interface
 
-uses Classes, Forms, SysUtils, inifiles, TypInfo, Controls, StdCtrls, ComCtrls;
+uses Classes, Forms, SysUtils, Inifiles, Controls, StdCtrls, ComCtrls;
 
 type TLang = class(TObject)
      private
@@ -89,53 +89,6 @@ type TFormSelectLang = class(TForm)
        property CurrentLang: string read FCurrentLang write FCurrentLang;
      end;
 
-{ Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }
-
-{ GetCompProp ------------------------------------------------------------------
-
-  GetCompProp gibt den Wert von Comp.Name zurück, falls Property 'Name' vor-
-  handen ist. Ist nur auf String-Properties anwendbar.                         }
-
-function GetCompProp(Comp: TComponent; Name: string): string;
-var PropInf: PPropInfo;
-begin
-  PropInf := GetPropInfo(Comp.ClassInfo, Name);
-  if Assigned(PropInf) then
-  begin
-    Result := GetStrProp(Comp, PropInf);
-  end else
-  begin
-    Result := '';
-  end;
-end;
-
-{ SetCompProp ------------------------------------------------------------------
-
-  SetCompProp setzt Comp.Name := Value. Nur für Strings.                       }
-
-procedure SetCompProp(Comp: TComponent; const Name, Value: string);
-var PropInf: PPropInfo;
-begin
-  if Value <> '' then
-  begin
-    PropInf := GetPropInfo(Comp.ClassInfo, Name);
-    if Assigned(PropInf) then
-    begin
-      SetStrProp(Comp, PropInf, Value);
-    end;
-  end;
-end;
-
-{ PropertyExists ---------------------------------------------------------------
-
-  PropertyExist liefert True, wenn Comp.Name existiert, sonst False.           }
-
-function PropertyExists(Comp: TComponent; Name: string): Boolean;
-begin
-  Result := (Comp.Name <> '') and (GetPropInfo(Comp.ClassInfo, Name) <> nil);
-end;
-
-
 { TLang ---------------------------------------------------------------------- }
 
 { TLang - private }
@@ -158,11 +111,15 @@ begin
     Add('g006=KiByte');
     Add('g007=MiByte');
     Add('g008=GiByte');
+    {$IFDEF ShowCmdError}
+    Add('e001=Es ist ein Fehler aufgetreten!');
+    Add('e002=cdrecord-ProDVD: Lizenzfehler!');
+    {$ENDIF}
     {Filter}
     Add('f001=ISO-Image (*.iso)|*.iso|CUE-Image (*.cue)|*.cue');
     Add('f002=ISO-Image (*.iso)|*.iso');
     Add('f003=Namen ohne Endung eingeben!|*.*');
-    Add('f004=Sound-Dateien (*.wav; *.mp3)|*.wav;*.mp3');
+    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg)|*.wav;*.mp3;*.ogg');
     Add('f005=Movie-Dateien (*.avi)|*.avi|Alle Dateien|*.*');
     Add('f006=cdrtfe Projekt-Dateien (*.cfp)|*.cfp');
     Add('f007=Image-Dateien (*.bin; *.img; *.ima)|*.bin;*.img;*.ima|Alle Dateien|*.*');
@@ -212,6 +169,7 @@ begin
     Add('m121=Dateiliste speichern unter');
     Add('m122=%s Track(s): %s');
     {GUI - Mkisofs}
+    Add('c201=DVD-Video - Optionen');
     Add('e201=Name für das Boot-Image fehlt!');
     Add('m202=Boot-Image auswählen');
     {GUI - Settings}
@@ -241,6 +199,7 @@ begin
     Add('eprocs01=%s: falsches Wave-Format.');
     Add('eprocs02=%s: falsches MPEG-Format.');
     Add('eprocs03=%s: falsches MP3-Format.');
+    Add('eprocs04=%s: falsches Ogg-Format.');
     {Messages - Preferences}
     Add('mpref01=ShellExtensions registriert.');
     Add('mpref02=Registryeinträge der ShellExtensions entfernt.');
@@ -272,6 +231,8 @@ begin
     Add('minit06=Ohne die Datei readcd.exe können keine Images von CDs angelegt weerden.\n ');
     Add('minit07=Mit der Mingw32-Version der cdrtools unter Win9x, ME kann cdrtfe zur\nZeit keine CDs on-the-fly schreiben.\n ');
     Add('minit08=Ohne die Datei vcdimager.exe können keine Video-CDs erstellt werden.\n ');
+    Add('minit09=Ohne madplay.exe werden MP3-Tracks nicht unterstützt.\n ');
+    Add('minit10=Ohne oggdec.exe werden Ogg-Vorbis-Tracks nicht unterstützt.\n ');
     {Messages - Burning}
     Add('eburn01=Es ist keine CD eingelegt!');
     Add('eburn02=Diese CD kann nicht beschrieben werden. Entweder handelt es sich\num eine CD-ROM oder die CD-R(W) wurde bereits abgeschlossen.');
@@ -815,12 +776,13 @@ end;
 procedure TFormSelectLang.Init;
 var i: Integer;
 begin
+  SetFont(Self);
   {Form}
   Caption := FLang.GMS('mlang01');
   Position := poScreenCenter;
   BorderIcons := [biSystemMenu];
-  Height := 98;
-  Width := 227;
+  ClientHeight := 70; // Height := 98;
+  ClientWidth := 220; // Width := 227;
   OnShow := FormShow;
   {ComboBox}
   ComboBox := TComboBox.Create(Self);

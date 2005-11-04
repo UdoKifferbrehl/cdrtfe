@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2005 Oliver Valencia
 
-  letzte Änderung  31.03.2005
+  letzte Änderung  18.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -63,6 +63,14 @@
          //    - betrifft: cl_action
 
 
+(* -------------------------------------------- expliziter Hinweis auf Fehler *)
+
+{$DEFINE xShowCmdError}
+         // Falls beim Ausführen der Kommandozeile ein Fehler auftritt (d.h.
+         // ProcessExitCode <> 0), wird eine Warnung ausgegeben.
+         //    - betrifft: frm_main.pas, cl_actionthread.pas, cl_lang.pas
+
+
 (* --------------------------------------------------------- Optionen togglen *)
 
 {$DEFINE AllowToggle}
@@ -104,6 +112,11 @@
          // Größe und Position aller Controls exportieren
          //    - auszulösen durch Doppelklick auf Hintergrund von Form 1
          //    - betriff: frm_main.pas
+
+{$DEFINE xExportFontList}
+         // Alle verwendeten Fonts ausgeben
+         //    - auszulösen durch Doppelklick auf Hintergrund von Form 1
+         //    - betrifft: frm_main.pas
 
 
 (* ---------------------------------------------------------- Verify-Funktion *)
@@ -226,6 +239,10 @@
          // Anzeige der internen Dateilisten:
          //   - für die Anzeige wird das Debugfenster verwendet
          //   - betrifft: frm_main.pas
+
+{$DEFINE xDebugDVDVideoLists}
+         // Anzeige der gefundenen Einträge im Quellordner
+         //   - betrifft: cl_cd.pas
 
 {$DEFINE xDebugAddFiles}
          // Anzeige der Prozeduraufrufe, wenn Dateien oder Ordner

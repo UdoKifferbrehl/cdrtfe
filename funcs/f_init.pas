@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2005
+  letzte Änderung  02.08.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -127,7 +127,19 @@ begin
                            Lang.GMS('minit08') + CR;
       end;
       {Ist Madplay da? Falls nicht, MP3-Dateien ignorieren}
-      MadplayOk := FileExists(StartUpDir + cMadplayBin + cExtExe);
+      MP3Ok := FileExists(StartUpDir + cMadplayBin + cExtExe);
+      if not MP3Ok then
+      begin
+        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
+                           Lang.GMS('minit09') + CR;
+      end;
+      {Ist Oggdec da? Falls nicht, Ogg-Dateien ignorieren}
+      OggOk := FileExists(StartUpDir + cOggdecBin + cExtExe);
+      if not OggOk then
+      begin
+        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
+                           Lang.GMS('minit10') + CR;
+      end;
       {Version von cdrecord/mkisofs prüfen}
       CheckVersion(Settings);
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei
@@ -308,7 +320,7 @@ end;
   CDR_SECURITY ein, wenn der Key (aus cdrtfe.ini) bekannt ist und noch nicht im
   aktuellen Environment Block gespeichert ist.
   Nach Ablauf des Threads muß der Block wieder freigegeben werden! Dies kann
-  durch einen Aufruf von CheckEnvironment erfolgen, wenn EnvionmentBlock nicht
+  durch einen Aufruf von CheckEnvironment erfolgen, wenn EnvironmentBlock nicht
   nil ist und EnvironmentSize > 0.                                             }
 
 procedure CheckEnvironment(Settings: TSettings);
@@ -320,7 +332,7 @@ begin
   begin
     with Settings.Environment do
     begin
-      {$IFDEF DebugCheckEnv}Deb('  Key: ' + ProDVDKey, 1);{$ENDIF}
+      //{$IFDEF DebugCheckEnv}Deb('  Key: ' + ProDVDKey, 1);{$ENDIF}
       {Das ganze nur, wenn cdrecord-ProDVD und ein Lizenzkey aus der cdrtfe.ini
        vorhanden sind und das Environment noch keinen Schlüssel enthält.}
       if Settings.FileFlags.ProDVD and

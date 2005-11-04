@@ -2,10 +2,10 @@
 
   frm_audiocd_options.pas: Audio-CD: Optionen
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.06.2004
+  letzte Änderung  26.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,6 +68,8 @@ type
 implementation
 
 {$R *.DFM}
+
+uses f_misc;
 
 { InputOk ----------------------------------------------------------------------
 
@@ -213,7 +215,8 @@ end;
 
 procedure TFormAudioCDOptions.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);
 end;

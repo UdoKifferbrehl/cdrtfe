@@ -5,11 +5,11 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.03.2005
+  letzte Änderung  26.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
 }
 
@@ -70,7 +70,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant, f_cdtext;
+uses constant, f_cdtext, f_misc;
 
 { InputOk ----------------------------------------------------------------------
 
@@ -299,7 +299,8 @@ end;
 
 procedure TFormAudioCDTracks.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);
 end;

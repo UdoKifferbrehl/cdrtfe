@@ -3,7 +3,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.04.2005
+  letzte Änderung  26.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,6 +15,7 @@
     * Wave-File-Fuktionen
     * Funktionen für String-Listen
     * Funktionen zur Zeitmessung
+    * Umgang mit Komponenten
 
 
   exportierte Funktionen/Prozeduren:
@@ -22,12 +23,17 @@
     AddLog(const Value: string; const Show: Byte)
     AddLogAddStringList(List: TStringList)
     ExportControls
+    ExportFontList
+    GetCompProp(Comp: TComponent; Name: string): string
     GetPathFromNode(Root: TTreeNode): string
     GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode
     GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean
     GetWaveLength(const Name: string): Extended
     ListViewSelectAll(ListView: TListView)
+    PropertyExists(Comp: TComponent; Name: string): Boolean
     SelectRootIfNoneSelected(Tree: TTreeView)
+    SetCompProp(Comp: TComponent; const Name, Value: string)
+    SetFont(Form: TForm)
     WaveIsValid(const Name: string): Boolean
 
 
@@ -44,18 +50,24 @@ unit f_misc;
 
 interface
 
-uses Classes, Forms, Controls, ComCtrls, SysUtils, Windows;
+uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, SysUtils,
+     Windows, TypInfo;
 
 function GetPathFromNode(Root: TTreeNode): string;
 function GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode;
 function GetWaveLength(const Name: string): Extended;
 function GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean;
+function GetCompProp(Comp: TComponent; Name: string): string;
+function PropertyExists(Comp: TComponent; Name: string): Boolean;
 function WaveIsValid(const Name: string): Boolean;
 procedure AddLog(const Value: string; const Show: Byte);
 procedure AddLogAddStringList(List: TStringList);
 procedure ExportControls;
+procedure ExportFontList;
 procedure ListViewSelectAll(ListView: TListView);
 procedure SelectRootIfNoneSelected(Tree: TTreeView);
+procedure SetCompProp(Comp: TComponent; const Name, Value: string);
+procedure SetFont(Form: TForm);
 
 type TTimeCount = class(TObject)
      private
@@ -75,7 +87,7 @@ type TTimeCount = class(TObject)
 
 implementation
 
-uses f_filesystem, w32waves;
+uses f_filesystem, f_wininfo, w32waves;
 
 { 'statische' Variablen }
 var AddLogFirstRun: Boolean;          // Flag für AddLog
@@ -340,6 +352,67 @@ begin
   end;
 end;
 
+{ SetFont ----------------------------------------------------------------------
+
+  SetFont sorgt unter Windows XP dafür, daß eine Schriftart verwendet wird, die
+  ClearType (Kantenglättung) unterstützt.                                      }
+
+procedure SetFont(Form: TForm);
+begin
+  if PlatformWin2kXP and (Win32MinorVersion > 0) then
+  begin
+    if Screen.Fonts.IndexOf('Microsoft Sans Serif') >= 0 then
+      Form.Font.Name := 'Microsoft Sans Serif';
+  end;
+end;
+                         
+{ Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }
+
+{ GetCompProp ------------------------------------------------------------------
+
+  GetCompProp gibt den Wert von Comp.Name zurück, falls Property 'Name' vor-
+  handen ist. Ist nur auf String-Properties anwendbar.                         }
+
+function GetCompProp(Comp: TComponent; Name: string): string;
+var PropInf: PPropInfo;
+begin
+  PropInf := GetPropInfo(Comp.ClassInfo, Name);
+  if Assigned(PropInf) then
+  begin
+    Result := GetStrProp(Comp, PropInf);
+  end else
+  begin
+    Result := '';
+  end;
+end;
+
+{ SetCompProp ------------------------------------------------------------------
+
+  SetCompProp setzt Comp.Name := Value. Nur für Strings.                       }
+
+procedure SetCompProp(Comp: TComponent; const Name, Value: string);
+var PropInf: PPropInfo;
+begin
+  if Value <> '' then
+  begin
+    PropInf := GetPropInfo(Comp.ClassInfo, Name);
+    if Assigned(PropInf) then
+    begin
+      SetStrProp(Comp, PropInf, Value);
+    end;
+  end;
+end;
+
+{ PropertyExists ---------------------------------------------------------------
+
+  PropertyExist liefert True, wenn Comp.Name existiert, sonst False.           }
+
+function PropertyExists(Comp: TComponent; Name: string): Boolean;
+begin
+  Result := (Comp.Name <> '') and (GetPropInfo(Comp.ClassInfo, Name) <> nil);
+end;
+
+
 { ExportControls ---------------------------------------------------------------
 
   ExportControls schreibt die Position und Größe alle Controls in eine Datei.  }
@@ -382,6 +455,62 @@ begin
     end;
   end;
   List.SaveToFile(StartUpDir + '\controls.txt');
+  List.Free;
+end;
+
+{ ExportFontList ---------------------------------------------------------------
+
+  ExportFontList schreibt eine List der verwendeten Schriftarten in eine Datei.}
+
+procedure ExportFontList;
+var i: Integer;
+    List: TStringList;
+
+  procedure ExportFontsRek(Comp: TComponent);
+  var i: Integer;
+      s: string;
+  begin
+    if (Comp.Name <> '') and PropertyExists(Comp, 'Font') then
+    begin
+      if Comp is TMemo        then s := (Comp as TMemo).Font.Name else
+      if Comp is TLabel       then s := (Comp as TLabel).Font.Name else
+      if Comp is TForm        then s := (Comp as TForm).Font.Name else
+      if Comp is TGroupBox    then s := (Comp as TGroupBox).Font.Name else
+      if Comp is TButton      then s := (Comp as TButton).Font.Name else
+      if Comp is TRadioButton then s := (Comp as TRadioButton).Font.Name else
+      if Comp is TCheckBox    then s := (Comp as TCheckBox).Font.Name else
+      if Comp is TComboBox    then s := (Comp as TComboBox).Font.Name else
+      if Comp is TEdit        then s := (Comp as TEdit).Font.Name else
+      if Comp is TTabSheet    then s := (Comp as TTabSheet).Font.Name else
+      if Comp is TPanel       then s := (Comp as TPanel).Font.Name else
+      if Comp is TPageControl then s := (Comp as TPageControl).Font.Name else
+      if Comp is TTreeView    then s := (Comp as TTreeView).Font.Name else
+      if Comp is TListView    then s := (Comp as TListView).Font.Name else
+      if Comp is TStatusBar   then s := (Comp as TStatusBar).Font.Name else
+      if Comp is TStaticText  then s := (Comp as TStaticText).Font.Name else
+      if Comp is TSpeedButton then s := (Comp as TSpeedButton).Font.Name;
+      List.Add(s + ' <- ' + Comp.Name);
+    end;
+    if Comp.ComponentCount > 0 then
+    begin
+      for i := 0 to Comp.ComponentCount - 1 do
+      begin
+        ExportFontsRek(Comp.Components[i]);
+      end;
+    end;
+  end;
+
+begin
+  List := TStringList.Create;
+  for i:= 0 to Application.ComponentCount - 1 do
+  begin
+    if Application.Components[i] is TForm then
+    begin
+      ExportFontsRek(Application.Components[i]);
+      List.Add('');
+    end;
+  end;
+  List.SaveToFile(StartUpDir + '\fonts.txt');
   List.Free;
 end;
 

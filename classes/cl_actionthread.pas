@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.04.2005
+  letzte Änderung  18.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -32,6 +32,8 @@
 
 unit cl_actionthread;
 
+{$I directives.inc}
+
 interface
 
 uses Classes, Forms, StdCtrls, Windows, SysUtils,
@@ -40,6 +42,9 @@ uses Classes, Forms, StdCtrls, Windows, SysUtils,
 type TActionThread = class(TThread)
      private
        FCommandLine: string;
+       {$IFDEF ShowCmdError}
+       FExitCode: Integer;
+       {$ENDIF}
        FLine: string;
        FBSCount: Integer;
        FMemo: TMemo;
@@ -119,7 +124,11 @@ end;
 
 procedure TActionThread.SendTerminationMessage;
 begin
+  {$IFDEF ShowCmdError}
+  SendMessage(FHandle, WM_TTerminated, FExitCode, 0);
+  {$ELSE}
   SendMessage(FHandle, WM_TTerminated, 0, 0);
+  {$ENDIF}
 end;
 
 { ProcessOutput ----------------------------------------------------------------
@@ -254,6 +263,9 @@ var lpPipeAttributes: TSecurityAttributes;
     Temp: string;
     StartWithNewLine: Boolean;
     OnlyBS: Boolean;
+    {$IFDEF ShowCmdError}
+    ExitCode: Integer;
+    {$ENDIF}
 begin
   FLine := FCommandLine;
   Synchronize(DAddLine);
@@ -330,6 +342,12 @@ begin
         FLine := '';
         Synchronize(DAddLine);
       finally
+        {$IFDEF ShowCmdError}
+        repeat
+          GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
+        until ExitCode <> STILL_ACTIVE;
+        if FExitCode = 0 then FExitCode := ExitCode;
+        {$ENDIF}
         // CloseHandle(hReadPipe);
         CloseHandle(NewStdIn);
         CloseHandle(NewStdOut);
@@ -380,6 +398,9 @@ begin
   FHandle := (Memo.Owner as TForm).Handle;
   FCommandLine := CmdLine;
   FEnvironmentBlock := nil;
+  {$IFDEF ShowCmdError}
+  FExitCode := 0;
+  {$ENDIF}
 end;
 
 

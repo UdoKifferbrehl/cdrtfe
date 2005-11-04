@@ -4,7 +4,7 @@
 
   Copyright (c) 2005 Oliver Valencia
 
-  letzte Änderung  27.03.2005
+  letzte Änderung  26.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -65,7 +65,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant;
+uses f_misc, constant;
 
 { InputOk ----------------------------------------------------------------------
 
@@ -213,7 +213,8 @@ end;
 
 procedure TFormVideoCDOptions.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);
 end;

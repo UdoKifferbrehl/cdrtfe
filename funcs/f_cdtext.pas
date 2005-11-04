@@ -566,6 +566,67 @@ begin
   OutFile.Free;
 end;
 
+
+{ Die folgenden 2 Funktionen werden zum Erzeugen von cdtext.dat nicht benötigt.}
+
+{ eight2six --------------------------------------------------------------------
+
+  3 input bytes (8 bit based) are converted into 4 output bytes (6 bit based). }
+
+procedure eight2six(inbuffer, outbuffer: Pointer);
+type ta = array[0..2] of Byte;
+     tb = array[0..3] of Byte;
+var a: ^ta;
+    b: ^tb;
+    c: Integer;
+begin
+  a := inbuffer;
+  b := outbuffer;
+
+  c := a^[0];                            // c = in[0];
+  b^[0] := (c shr 2) and $3F;            // out[0]  = (c >> 2) & 0x3F;
+  b^[1] := (c and $03) shl 4;            // out[1]  = (c & 0x03) << 4;
+
+  c := a^[1];                            // c = in[1];
+  b^[1] := b^[1] or ((c and $F0) shr 4); // out[1] |= (c & 0xF0) >> 4;
+  b^[2] := (c and $0F) shl 2;            // out[2]  = (c & 0x0F) << 2;
+
+  c := a^[2];                            // c = in[2];
+  b^[2] := b^[2] or ((c and $C0) shr 6); // out[2] |= (c & 0xC0) >> 6;
+  b^[3] := c and $3F;                    // out[3]  = c & 0x3F;
+
+end;
+
+{ six2eight --------------------------------------------------------------------
+
+  4 input bytes (6 bit based) are converted into 3 output bytes (8 bit based). }
+
+procedure six2eight(inbuffer, outbuffer: Pointer);
+type ta = array[0..3] of Byte;
+     tb = array[0..2] of Byte;
+var a: ^ta;
+    b: ^tb;
+    c: Integer;
+begin
+  a := inbuffer;
+  b := outbuffer;
+
+  c := a^[0] and $3F;                    // c = in[0] & 0x3F;
+  b^[0] := c shl 2;                      // out[0]  = c << 2;
+
+  c := a^[1] and $3F;                    // c = in[1] & 0x3F;
+  b^[0] := b^[0] or  (c shr 4);           // out[0] |= c >> 4;
+  b^[1] := c shl 4;                      // out[1]  = c << 4;
+
+  c := a^[2] and $3F;                    // c = in[2] & 0x3F;
+  b^[1] := b^[1] or (c shr 2);           // out[1] |= c >> 2;
+  b^[2] := c shl 6;                      // out[2]  = c << 6;
+
+  c := a^[3] and $3F;                    // c = in[3] & 0x3F;
+  b^[2] := b^[2] or c;                   // out[2] |= c; *)
+end;
+
+
 { TextTrackDataToString --------------------------------------------------------
 
   setzt die Daten aus dem Record zu einem String zusammen.                     }

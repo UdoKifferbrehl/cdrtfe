@@ -2,10 +2,10 @@
 
   frm_output.pas: Darstellung der Ausgabe der Konsolenprogramme
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.07.2004
+  letzte Änderung  26.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,12 +47,13 @@ type
 
 implementation
 
-uses frm_main;
+uses frm_main, f_misc;
 
 {$R *.DFM}
 
 procedure TFormOutput.FormCreate(Sender: TObject);
 begin
+  SetFont(Self);
   if Screen.PixelsPerInch > 96 then
   begin
     self.Width := 756;

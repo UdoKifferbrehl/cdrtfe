@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.07.2005
+  letzte Änderung  17.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -96,6 +96,7 @@ type TDiskType = (DT_CD, DT_DVD_ROM, DT_DVD_R, DT_DVD_RW, DT_DVD_PlusR,
        // FTempBurnList: TStringList;
        FDupSize: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
        FSplitOutput: Boolean;
+       FEjectDevice: string;
        {Variablen zur Ausgabe}
        FFormHandle: THandle;
        FMemo: TMemo;
@@ -117,6 +118,7 @@ type TDiskType = (DT_CD, DT_DVD_ROM, DT_DVD_R, DT_DVD_RW, DT_DVD_PlusR,
        procedure DAEGrabTracks;
        procedure DAEReadTOC;
        procedure DeleteCDRW;
+       procedure Eject;
        procedure FindDuplicateFiles(List: TStringList);
        procedure GetCDInfos;
        procedure ReadCDInfo(var CD: TCDInfo; const Device: string; const Audio: Boolean);
@@ -153,7 +155,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,
-     constant, user_messages;
+     f_helper, constant, user_messages;
 
 { TCDAction ------------------------------------------------------------------ }
 
@@ -253,6 +255,24 @@ begin
   begin
     Result := MakePathMkisofsConform(Path);
   end;
+end;
+
+{ Eject ------------------------------------------------------------------------
+
+  wirft, falls gewünscht, die CD/DVD aus.                                      }
+
+procedure TCDAction.Eject;
+begin
+  if FSettings.Cdrecord.Eject and not FSettings.Cdrecord.Dummy then
+  begin
+    {Wenn nur ein Image erstellt wurde, bleibt das Laufwerk zu.}
+    if ((FLastAction = cDataCD) and FSettings.DataCD.ImageOnly) or
+       ((FLastAction = cXCD) and FSettings.XCD.ImageOnly) or
+       ((FLAstAction = cVIdeoCD) and FSettings.VideoCD.ImageOnly) then
+      FEjectDevice := '';
+    if FEjectDevice <> '' then EjectDisk(FEjectDevice);
+  end;
+  FEjectDevice := '';
 end;
 
 { ReadCDInfos ------------------------------------------------------------------
@@ -749,6 +769,7 @@ var i              : Integer;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   BurnList := TStringList.Create;
+  DummyDir(True);
   FData.CreateBurnList(BurnList, cDataCD);
   Ok := True;
   SimulDev := 'cdr';
@@ -836,27 +857,29 @@ begin
   CmdM := ' -graft-points';
   with FSettings.DataCD, FSettings.General, FSettings.Cdrecord do
   begin
-    if FindDups    then CmdM := CmdM + ' -cache-inodes';
-    if Joliet      then
-    if JolietLong  then CmdM := CmdM + ' -joliet-long' else
-                        CmdM := CmdM + ' -joliet';                  // ' -J';
-    if RockRidge   then CmdM := CmdM + ' -rock';                    // ' -R';
-    if UDF         then CmdM := CmdM + ' -udf';
-    if ISO31Chars  then CmdM := CmdM + ' -full-iso9660-filenames';  // ' -l';
-    if ISOLevel    then CmdM := CmdM + ' -iso-level ' + IntToStr(ISOLevelNr);
+    if FindDups     then CmdM := CmdM + ' -cache-inodes';
+    if Joliet       then
+    if JolietLong   then CmdM := CmdM + ' -joliet-long' else
+                         CmdM := CmdM + ' -joliet';                  // ' -J';
+    if RockRidge    then
+    if RationalRock then CmdM := CmdM + ' -rational-rock' else       // ' -r';
+                         CmdM := CmdM + ' -rock';                    // ' -R';
+    if UDF          then CmdM := CmdM + ' -udf';
+    if ISO31Chars   then CmdM := CmdM + ' -full-iso9660-filenames';  // ' -l';
+    if ISOLevel     then CmdM := CmdM + ' -iso-level ' + IntToStr(ISOLevelNr);
     if ISOLevel and (ISOOutChar > -1)
-                   then CmdM := CmdM + ' -output-charset '
-                                     + CharSets[ISOOutChar];
-    if ISO37Chars  then CmdM := CmdM + ' -max-iso-filenames';
-    if ISONoDot    then CmdM := CmdM + ' -omit-period';             // ' -d';
-    if ISOStartDot then CmdM := CmdM + ' -allow-leading-dots';      // ' -L';
-    if ISOMultiDot then CmdM := CmdM + ' -allow-multidot';
-    if ISOASCII    then CmdM := CmdM + ' -relaxed-filenames';
-    if ISOLower    then CmdM := CmdM + ' -allow-lowercase';
-    if ISONoTrans  then CmdM := CmdM + ' -no-iso-translate';
-    if ISODeepDir  then CmdM := CmdM + ' -disable-deep-relocation'; // ' -D';
-    if ISONoVer    then CmdM := CmdM + ' -omit-version-number';     // ' -N';
-    if Boot        then
+                    then CmdM := CmdM + ' -output-charset '
+                                      + CharSets[ISOOutChar];
+    if ISO37Chars   then CmdM := CmdM + ' -max-iso-filenames';
+    if ISONoDot     then CmdM := CmdM + ' -omit-period';             // ' -d';
+    if ISOStartDot  then CmdM := CmdM + ' -allow-leading-dots';      // ' -L';
+    if ISOMultiDot  then CmdM := CmdM + ' -allow-multidot';
+    if ISOASCII     then CmdM := CmdM + ' -relaxed-filenames';
+    if ISOLower     then CmdM := CmdM + ' -allow-lowercase';
+    if ISONoTrans   then CmdM := CmdM + ' -no-iso-translate';
+    if ISODeepDir   then CmdM := CmdM + ' -disable-deep-relocation'; // ' -D';
+    if ISONoVer     then CmdM := CmdM + ' -omit-version-number';     // ' -N';
+    if Boot         then
     begin
       CmdM := CmdM + ' -eltorito-boot ' + QuotePath(ExtractFileName(BootImage));
       if BootNoEmul  then CmdM := CmdM + ' -no-emul-boot';
@@ -1045,6 +1068,7 @@ begin
     SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
     DeleteFile(FSettings.DataCD.PathListName);
     DeleteFile(FSettings.DataCD.ShCmdName);
+    DummyDir(False);
   end;
 end;
 
@@ -1064,14 +1088,14 @@ var i         : Integer;
     BurnList  : TStringList;
  // CDTime    : Extended;
 
-  { PrepareMP3ToWavConversion --------------------------------------------------
+  { PrepareCompressedToWavConversion -------------------------------------------
 
-    PrepareMP3ToWavConversion bereitet die Konvertierung der MP3-Dateien in
-    Wave-Dateien vor, d.h. es die BurnList wird angepaßt und die entsprechenden
-    Madplay-Aufrufe werden generiert. Die Namen der temporären Dateien werden in
-    FVList gespeichert.                                                        }
+    PrepareCompressedToWavConversion bereitet die Konvertierung der MP3-Dateien
+    und Ogg-Dateien in Wave-Dateien vor, d.h. die BurnList wird angepaßt und die
+    entsprechenden Madplay-Aufrufe werden generiert. Die Namen der temporären
+    Dateien werden in FVList gespeichert.                                      }
 
-  procedure PrepareMP3ToWavConversion;
+  procedure PrepareCompressedToWavConversion;
   var j             : Integer;
       Source, Target: string;
       CmdTemp       : string;
@@ -1079,14 +1103,23 @@ var i         : Integer;
     CmdMP := '';
     for j := 0 to BurnList.Count - 1 do
     begin
+      CmdTemp := '';
       Source := BurnList[j];
-      if (LowerCase(ExtractFileExt(BurnList[j])) = '.mp3') then
+      if (LowerCase(ExtractFileExt(BurnList[j])) <> '.wav') then
       begin
         Target := FSettings.General.TempFolder + '\' +
                   ExtractFileName(Source) + '.wav';
         BurnList[j] := Target;
-        CmdTemp := StartUpDir + cMadplayBin + ' -v -b 16 -R 44100 -o wave:' +
-                   QuotePath(Target) + ' ' + QuotePath(Source) + CR;
+        if (LowerCase(ExtractFileExt(Source)) = '.mp3') then
+        begin
+          CmdTemp := StartUpDir + cMadplayBin + ' -v -b 16 -R 44100 -o wave:' +
+                     QuotePath(Target) + ' ' + QuotePath(Source) + CR
+        end else
+        if (LowerCase(ExtractFileExt(Source)) = '.ogg') then
+        begin
+          CmdTemp := StartUpDir + cOggdecBin + ' -b 16 -o ' +
+                     QuotePath(Target) + ' ' + QuotePath(Source) + CR
+        end;
         FVList.Add(Target);
       end;
       CmdMP := CmdMP + CmdTemp;
@@ -1107,7 +1140,8 @@ begin
   ReadCDInfo(CD, FSettings.AudioCD.Device, True);
   Ok := CheckMedium(CD, CMArgs);
   {falls MP3s vorhanden, Konvertierung vorbereiten}
-  if FData.MP3FilesPresent then PrepareMP3ToWavConversion;
+  if FData.MP3FilesPresent or
+     FData.OggFilesPresent then PrepareCompressedToWavConversion;
   {Pfadliste bearbeiten}
   for i := 0 to (BurnList.Count - 1) do
   begin
@@ -1928,14 +1962,18 @@ begin
   {Pfadlisten in FVList laden}
   FVList.Clear;
   case Action of
-    cVerify   : begin
-                  Device := FSettings.DataCD.Device;
-                  FData.CreateVerifyList(FVList, cDataCD);
-                end;
-    cVerifyXCD: begin
-                  Device := FSettings.XCD.Device;
-                  FData.CreateVerifyList(FVList, cXCD);
-                end;
+    cVerify        : begin
+                       Device := FSettings.DataCD.Device;
+                       FData.CreateVerifyList(FVList, cDataCD);
+                     end;
+    cVerifyXCD     : begin
+                       Device := FSettings.XCD.Device;
+                       FData.CreateVerifyList(FVList, cXCD);
+                     end;
+    cVerifyDVDVideo: begin
+                       Device := FSettings.DVDVideo.Device;
+                       FData.CreateVerifyList(FVList, cDVDVideo);
+                     end;
   end;
   Drive := FDevices.GetDriveLetter(Device);
   {Thread starten}
@@ -2131,14 +2169,16 @@ begin
   Ok := True;
   if FSettings.FileFlags.ProDVD then SimulDev := 'dvd' else SimulDev := 'cdr';
   {Hier sollte noch beispielsweise das Medium überprüft werden ...}
-
+  {Falls ein Vergleich sattfinden soll, benötigen wir die Dateinamen.}
+  FData.SetDVDSourcePath(FSettings.DVDVideo.SourcePath);
   CmdM := ' -dvd-video';
   with FSettings.DVDVideo, FSettings.General, FSettings.Cdrecord do
   begin
     {mkisofs}
     if MkisofsUseCustOpts then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
-    CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
+    if VolID <> '' then CmdM := CmdM + ' -volid "' + VolID + '"';  
+    // CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
     {cdrecord}
     CmdC := ' gracetime=5 dev=' + Device;
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
@@ -2154,8 +2194,9 @@ begin
     CmdC := CmdC + ' -dao';
 
     {on-the-fly}
-    if True {FSettings.DVDVideo.OnTheFly} then
+    if FSettings.DVDVideo.OnTheFly then
     begin
+      CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
       {DVDs werden immer in DAO geschrieben, also Sektoranzahl ermitteln}
       CmdC := CmdC + ' -tsize=' + GetSectorNumber(CmdM) + 's';
       {ab Win2k ist die Ausführung mit sh.exe nicht mehr nötig.}
@@ -2189,11 +2230,11 @@ begin
       end;
     end else
     begin
-      (*
       {den Pfad für das Image anhängen}
       Temp := QuotePath(MakePathConform(IsoPath));
       CmdM := CmdM + ' -output ' + Temp;                            // ' -o '
       CmdC := CmdC + ' ' + Temp;
+      CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
       {Pfad zu den Programmen erstellen}
       Temp := StartUpDir + cMkisofsBin;
       {$IFDEF QuoteCommandlinePath}
@@ -2205,7 +2246,6 @@ begin
       Temp := QuotePath(Temp);
       {$ENDIF}
       CmdC := Temp + CmdC;
-      *)
     end;
   end;
 
@@ -2233,9 +2273,8 @@ begin
   begin
     CheckEnvironment(FSettings);
     {Zur Zeir nichts anderes als otf möglich!}
-    if True {FSettings.DVDVideo.OnTheFly} then
+    if FSettings.DVDVideo.OnTheFly then
     begin
-      CheckEnvironment(FSettings);
       {ab Win2k ist die Ausführung mit sh.exe nicht mehr nötig.}
       if FSettings.FileFlags.UseSh then
       begin
@@ -2258,7 +2297,6 @@ begin
       end;
     end else
     begin
-      {
       if not FSettings.DVDVideo.ImageOnly then
       begin
         DisplayDOSOutput(CmdM + CR + CmdC, FMemo, FActionThread, FLang,
@@ -2267,7 +2305,6 @@ begin
       begin
         DisplayDOSOutput(CmdM, FMemo, FActionThread, FLang, nil);
       end
-      }
     end;
   end else
   {falls Fehler, Button wieder aktivieren}
@@ -2289,6 +2326,7 @@ begin
   FReload := True;
   FDupSize := 0;
   FSplitOutput := False;
+  FEjectDevice := '';
 end;
 
 destructor TCDAction.Destroy;
@@ -2308,24 +2346,25 @@ var TempAction: Byte;
 begin
   TempAction := Action;
   case TempAction of
-    cDataCD    : CreateDataCD;
-    cAudioCD   : CreateAudioCD;
-    cXCD       : CreateXCD;
-    cCDRW      : DeleteCDRW;
-    cCDInfos   : GetCDInfos;
-    cDAE       : DAEGrabTracks;
-    cCDImage   : begin
-                   case FSettings.General.ImageRead of
-                     True : ReadImage;
-                     False: WriteImage;
-                   end;
-                 end;
-    cVideoCD   : CreateVideoCD;
-    cDVDVideo  : CreateVideoDVD;
-    cDAEReadTOC: DAEReadTOC;
-    cFixCD     : WriteTOC;
+    cDataCD        : CreateDataCD;
+    cAudioCD       : CreateAudioCD;
+    cXCD           : CreateXCD;
+    cCDRW          : DeleteCDRW;
+    cCDInfos       : GetCDInfos;
+    cDAE           : DAEGrabTracks;
+    cCDImage       : begin
+                       case FSettings.General.ImageRead of
+                         True : ReadImage;
+                         False: WriteImage;
+                       end;
+                     end;
+    cVideoCD       : CreateVideoCD;
+    cDVDVideo      : CreateVideoDVD;
+    cDAEReadTOC    : DAEReadTOC;
+    cFixCD         : WriteTOC;
     cVerify,
-    cVerifyXCD : StartVerification(TempAction);
+    cVerifyXCD,
+    cVerifyDVDVideo: StartVerification(TempAction);
   end;
 end;
 
@@ -2365,8 +2404,10 @@ begin
   begin
     if FLastAction = cDataCD then
     begin
+      FEjectDevice := FSettings.DataCD.Device;
       DeleteFile(FSettings.DataCD.PathListName);
       DeleteFile(FSettings.DataCD.ShCmdName);
+      DummyDir(False);
       if not (FSettings.DataCD.ImageOnly or FSettings.DataCD.KeepImage) then
       begin
         if not FSplitOutput then
@@ -2387,9 +2428,10 @@ begin
 
     if FLastAction = cAudioCD then
     begin
+      FEjectDevice := FSettings.AudioCD.Device;
       DeleteFile(FSettings.AudioCD.CDTextFile);
       {temporäre Wave-Dateien löschen}
-      if FData.MP3FilesPresent then
+      if FData.MP3FilesPresent or FData.OggFilesPresent then
       begin
         for i := 0 to FVList.Count - 1 do DeleteFile(FVList[i]);
       end;
@@ -2397,6 +2439,7 @@ begin
 
     if FLastAction = cXCD then
     begin
+      FEjectDevice := FSettings.XCD.Device;
       DeleteFile(FSettings.XCD.XCDParamFile);
       if not (FSettings.XCD.ImageOnly or FSettings.XCD.KeepImage) then
       begin
@@ -2408,16 +2451,44 @@ begin
 
     if FLastAction = cDVDVideo then
     begin
+      FEjectDevice := FSettings.DVDVideo.Device;
       DeleteFile(FSettings.DVDVideo.ShCmdName);
+      if not (FSettings.DVDVideo.ImageOnly or FSettings.DVDVideo.KeepImage) then
+      begin    (*
+        if not FSplitOutput then
+        begin *)
+          DeleteFile(FSettings.DVDVideo.IsoPath); (*
+        end else
+        begin
+          i := 0;
+          while FileExists(FSettings.DVDVideo.IsoPath + '_' +
+                           Format('%2.2d', [i])) do
+          begin
+            DeleteFile(FSettings.DVDVideo.IsoPath + '_' + Format('%2.2d', [i]));
+            Inc(i);
+          end;
+        end; *)
+      end;
     end;
 
     if FLastAction = cVideoCD then
     begin
+      FEjectDevice := FSettings.VideoCD.Device;
       if not (FSettings.VideoCD.ImageOnly or FSettings.VideoCD.KeepImage) then
       begin
         DeleteFile(FSettings.VideoCD.IsoPath + cExtBin);
         DeleteFile(FSettings.VideoCD.IsoPath + cExtCue);
       end;
+    end;
+
+    if FLastAction = cCDRW then
+    begin
+      FEjectDevice := FSettings.CDRW.Device;
+    end;
+
+    if (FLastAction = cCDImage) and not FSettings.General.ImageRead then
+    begin
+      FEjectDevice := FSettings.Image.Device;
     end;
 
   end else
@@ -2431,6 +2502,7 @@ begin
         FData.DeleteFromPathlistByName(ExtractFileName(FSettings.XCD.XCDInfoFile),
                                        '', cXCD);
     end;
+    Eject;
     FLastAction := cNoAction;
   end;
 end;

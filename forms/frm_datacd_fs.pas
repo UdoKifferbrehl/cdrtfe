@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.03.2005
+  letzte Änderung  26.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -63,6 +63,7 @@ type
     CheckBoxRockRidge: TCheckBox;
     GroupBoxDuplicateFiles: TGroupBox;
     CheckBoxFindDups: TCheckBox;
+    CheckBoxRationalRock: TCheckBox;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -88,7 +89,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant;
+uses constant, f_misc;
 
 {uses ;}
 
@@ -132,10 +133,11 @@ procedure TFormDataCDFS.GetSettings;
 begin
   with FSettings.DataCD do
   begin
-    CheckBoxJoliet.Checked      := Joliet;
-    CheckBoxJolietLong.Checked  := JolietLong;
-    CheckBoxRockRidge.Checked   := RockRidge;
-    CheckBoxISO31Chars.Checked  := ISO31Chars;
+    CheckBoxJoliet.Checked       := Joliet;
+    CheckBoxJolietLong.Checked   := JolietLong;
+    CheckBoxRockRidge.Checked    := RockRidge;
+    CheckBoxRationalRock.Checked := RationalRock;
+    CheckBoxISO31Chars.Checked   := ISO31Chars;
     if ISOLevel then
     begin
       CheckBoxISOLevel.Checked := True;
@@ -172,6 +174,7 @@ begin
     Joliet        := CheckBoxJoliet.Checked;
     JolietLong    := CheckBoxJolietLong.Checked;
     RockRidge     := CheckBoxRockRidge.Checked;
+    RationalRock  := CheckBoxRationalRock.Checked;
     ISO31Chars    := CheckBoxISO31Chars.Checked;
     ISOLevel      := CheckBoxIsoLevel.Checked;
     ISOLevelNr    := ComboBoxISOLevel.ItemIndex + 1;
@@ -216,6 +219,14 @@ begin
   begin
     CheckBoxJolietLong.Enabled := False;
     Label2.Enabled := False;
+  end;
+  {Rock-Ridge-Optionen}
+  if CheckBoxRockRidge.Checked then
+  begin
+    CheckBoxRationalRock.Enabled := True;
+  end else
+  begin
+    CheckBoxRationalRock.Enabled := False;
   end;
   {ISO-Level-Optionen}
   if CheckBoxISOLevel.Checked then
@@ -295,7 +306,8 @@ end;
 
 procedure TFormDataCDFS.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   ComboBoxISOOutChar.Items.Assign(Fsettings.General.Charsets);
   GetSettings;
   CheckControls;

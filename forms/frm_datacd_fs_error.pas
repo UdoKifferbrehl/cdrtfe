@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2005
+  letzte Änderung  22.10.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -87,7 +87,7 @@ implementation
 {$R *.DFM}
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_strings, f_filesystem, constant;
+     f_strings, f_filesystem, f_misc, constant;
 
 {var}
 
@@ -285,8 +285,8 @@ begin
             FLongestName := Length(Caption);
           end;
         end;
-        FindClose(SearchRec);
       end;
+      FindClose(SearchRec);
     end;
   end else                   // ErrorListDir
   if FMode = mFolders then
@@ -359,6 +359,7 @@ end;
 procedure TFormDataCDFSError.FormCreate(Sender: TObject);
 begin
   FItemToDelete := -1;
+  SetFont(Self);
 end;
 
 { OnShow -----------------------------------------------------------------------
@@ -369,7 +370,7 @@ procedure TFormDataCDFSError.FormShow(Sender: TObject);
 begin
   ListView.LargeImages := FImageLists.LargeImages;
   ListView.SmallImages := FImageLists.SmallImages;
-  FLang.SetFormLang(self);
+  FLang.SetFormLang(Self);
   {Liste anzeigen}
   ListView.Items.Clear;
   case FMode of
