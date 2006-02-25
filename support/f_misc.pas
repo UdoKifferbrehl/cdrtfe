@@ -1,9 +1,9 @@
 { f_misc.pas: unterstützende Funktionen (sonstiges)
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.09.2005
+  letzte Änderung  17.01.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,6 +22,7 @@
 
     AddLog(const Value: string; const Show: Byte)
     AddLogAddStringList(List: TStringList)
+    AddCRStringToList(s: string; List: TStringList)
     ExportControls
     ExportFontList
     GetCompProp(Comp: TComponent; Name: string): string
@@ -48,6 +49,8 @@
 
 unit f_misc;
 
+{$I directives.inc}
+
 interface
 
 uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, SysUtils,
@@ -62,6 +65,7 @@ function PropertyExists(Comp: TComponent; Name: string): Boolean;
 function WaveIsValid(const Name: string): Boolean;
 procedure AddLog(const Value: string; const Show: Byte);
 procedure AddLogAddStringList(List: TStringList);
+procedure AddCRStringToList(s: string; List: TStrings);
 procedure ExportControls;
 procedure ExportFontList;
 procedure ListViewSelectAll(ListView: TListView);
@@ -87,7 +91,8 @@ type TTimeCount = class(TObject)
 
 implementation
 
-uses f_filesystem, f_wininfo, w32waves;
+uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+     f_filesystem, f_wininfo, f_strings, w32waves, constant;
 
 { 'statische' Variablen }
 var AddLogFirstRun: Boolean;          // Flag für AddLog
@@ -248,6 +253,21 @@ begin
   Close(Log);
 end;
 
+{ AddCRStringToList ------------------------------------------------------------
+
+  Fügt einen String, der mehrere durch CR(LF) getrennte Zeilen enthält an die
+  Liste an.                                                                    }
+
+procedure AddCRStringToList(s: string; List: TStrings);
+var TempList: TStrings;
+    i       : Integer;
+begin
+  TempList := TStringList.Create;
+  TempList.Text := s;
+  for i := 0 to TempList.Count - 1 do List.Add(TempList[i]);
+  TempList.Free;
+end;
+
 { WaveIsValid ------------------------------------------------------------------
 
   WaveIsValid  prüft, ob die angegebene Datei eine gültige Wave-Datei ist.     }
@@ -330,6 +350,7 @@ function GetSection(Source, Target: TSTringList;
                      const StartTag, EndTag: string): Boolean;
 var i, p: Integer;
 begin
+(*
   {Liste von Source nach Target kopieren}
   Target.Assign(Source);
   {Anfang der Sektion finden}
@@ -348,6 +369,21 @@ begin
       begin
         Target.Delete(i);
       end;
+    end;
+  end;
+*)
+  {Anfang der Sektion finden}
+  p := Source.IndexOf(StartTag);
+  Result := p > -1;
+  {Falls Sektion gefunden wurde, kopieren}
+  if Result then
+  begin
+    i := p + 1;
+    Target.Capacity := 1;
+    while (i < Source.Count) and (Source[i] <> EndTag) do
+    begin
+      Target.Add(Source[i]);
+      Inc(i);
     end;
   end;
 end;
@@ -411,7 +447,6 @@ function PropertyExists(Comp: TComponent; Name: string): Boolean;
 begin
   Result := (Comp.Name <> '') and (GetPropInfo(Comp.ClassInfo, Name) <> nil);
 end;
-
 
 { ExportControls ---------------------------------------------------------------
 

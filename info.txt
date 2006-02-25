@@ -1,12 +1,14 @@
 cdrtfe - cdrtools/Mode2CDMaker/VCDImager Front End
 ==================================================
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
 
 Credits
 =======
+
+  Parts of the XCD Error Protection support by Oleg S. Rudyk aka Elic.
 
   Ogg Vorbis support by Jared Breland (jbreland@legroom.net).
 

@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.08.2005
+  letzte Änderung  20.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -32,7 +32,7 @@ unit f_init;
 
 interface
 
-uses Windows, Classes, Forms, StdCtrls, SysUtils, Dialogs, FileCtrl,
+uses Windows, Classes, Forms, StdCtrls, SysUtils, Dialogs, FileCtrl, IniFiles,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_settings, cl_peheader;
 
@@ -45,6 +45,45 @@ implementation
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_filesystem, f_process, f_wininfo, f_environment, f_strings, constant;
 
+{ GetToolNames -----------------------------------------------------------------
+
+  Die Dateinamen der Tools aus der cdrtfe_tools.ini lesen, sofern diese vor-
+  handen ist.                                                                  }
+
+procedure GetToolNames;
+const T : string = 'Tools';
+var Ini: TIniFile;
+begin
+  if FileExists(StartUpDir + cIniFileTools) then
+  begin
+    Ini := TIniFile.Create(StartUpDir + cIniFileTools);
+    {Namen lesen}
+    with Ini do
+    begin
+      cCdrecordBin     := ReadString(T, 'CdrecordBin', cCdrecordBin);
+      cMkisofsBin      := ReadString(T, 'MkisofsBin', cMkisofsBin);
+      cCdda2wavBin     := ReadString(T, 'Cdda2wavBin', cCdda2wavBin);
+      cReadcdBin       := ReadString(T, 'ReadcdBin', cReadcdBin);
+      cShBin           := ReadString(T, 'ShBin', cShBin);
+      cMode2CDMakerBin := ReadString(T, 'Mode2CDMakerBin', cMode2CDMakerBin);
+      cVCDImagerBin    := ReadString(T, 'VCDImagerBin', cVCDImagerBin);
+      cCdrdaoBin       := ReadString(T, 'CdrdaoBin', cCdrdaoBin);
+      cMadplayBin      := ReadString(T, 'MadplayBin', cMadplayBin);
+      cOggdecBin       := ReadString(T, 'OggdecBin', cOggdecBin);
+      cFLACBin         := ReadString(T, 'FLACBin', cFLACBin);
+      cRrencBin        := ReadString(T, 'RrencBin', cRrencBin);
+      cRrdecBin        := ReadString(T, 'RrdecBin', cRrdecBin);
+      cM2F2ExtractBin  := ReadString(T, 'M2F2ExtractBin', cM2F2ExtractBin);
+      cDat2FileBin     := ReadString(T, 'Dat2FileBin', cDat2FileBin);
+      cD2FGuiBin       := ReadString(T, 'D2FGuiBin', cD2FGuiBin);
+      {cygwin1.dll}
+      cCygwin1Dll      := ExtractFilePath(cCdrecordBin) + cCygwin1Dll;
+      if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
+    end;
+    Ini.Free;
+  end;
+end;
+
 { CheckFiles -------------------------------------------------------------------
 
   Prüfen, ob alle benötigten Dateien vorhanden sind. Von den cdrtools werden
@@ -56,13 +95,15 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 function CheckFiles(Settings: TSettings; Memo: TMemo; Lang:TLang): Boolean;
 var Ok: Boolean;
 begin
+  GetToolNames;
   with Settings.FileFlags do
   begin
     {Sind die cdrtools da?}
     CdrtoolsOk := FileExists(StartUpDir + cCdrecordBin + cExtExe) and
                   FileExists(StartUpDir + cMkisofsBin + cExtExe);
     {Haben wir es mit der Mingw32-Version zu tun?}
-    Mingw := not ImportsDll(StartUpDir + cCdrecordBin + cExtExe, cCygwin1Dll);
+    Mingw := not ImportsDll(StartUpDir + cCdrecordBin + cExtExe,
+                            ExtractFileName(cCygwin1Dll));
     {Ist die cygwin1.dll im cdrtfe-Verzeichnis oder Suchpfad?}
     CygwinOk := FileExists(StartUpDir + '\' + cCygwin1Dll) or
                 (FindInSearchPath(cCygwin1Dll) <> '');
@@ -119,6 +160,9 @@ begin
         Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
                            Lang.GMS('minit03') + CR;
       end;
+      {ind rrenc/rrdec da? Falls nicht, keine Fehlerkorrektur bei XCDs}
+      RrencOk := FileExists(StartUpDir + cRrencBin + cExtExe);
+      RrdecOk := FileExists(StartUpDir + cRrdecBin + cExtExe);
       {Ist der VCDImager da? Falls nicht, Menüpunkt VideoCD deaktivieren}
       VCDImOk := FileExists(StartUpDir + cVCDImagerBin + cExtExe);
       if not VCDImOk then
@@ -139,6 +183,13 @@ begin
       begin
         Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
                            Lang.GMS('minit10') + CR;
+      end;
+      {Ist FLAC da? Falls nicht, FLAC-Dateien ignorieren}
+      FLACOk := FileExists(StartUpDir + cFLACBin + cExtExe);
+      if not FLACOk then
+      begin
+        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
+                           Lang.GMS('minit11') + CR;
       end;
       {Version von cdrecord/mkisofs prüfen}
       CheckVersion(Settings);

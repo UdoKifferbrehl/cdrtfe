@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.10.2005
+  letzte Änderung  17.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -344,6 +344,7 @@ type
     procedure MiscPopupLoadClick(Sender: TObject);
     procedure EditChange(Sender: TObject);
     procedure ButtonDVDVideoOptionsClick(Sender: TObject);
+    procedure EditDblClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -444,6 +445,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
      frm_xcd_options, frm_settings, frm_about, frm_output,
      frm_videocd_options,
+     cl_cdrtfedata,
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
@@ -1200,16 +1202,18 @@ var ErrorCode: Byte;
 begin
   {sicherstellen, daß ein Knoten selektiert ist, und Pfad bestimmen}
   case FSettings.General.Choice of
-    cDataCD : begin
-                SelectRootIfNoneSelected(CDETreeView);
-                Path := GetPathFromNode(CDETreeView.Selected);
-              end;
-    cXCD    : begin
-                SelectRootIfNoneSelected(XCDETreeView);
-                Path := GetPathFromNode(XCDETreeView.Selected);
-              end;
-    cAudioCD: Path := '';
-    cVideoCD: Path := '';
+    cDataCD  : begin
+                 SelectRootIfNoneSelected(CDETreeView);
+                 Path := GetPathFromNode(CDETreeView.Selected);
+               end;
+    cXCD     : begin
+                 SelectRootIfNoneSelected(XCDETreeView);
+                 Path := GetPathFromNode(XCDETreeView.Selected);
+               end;
+    cAudioCD : Path := '';
+    cVideoCD : Path := '';
+    cDVDVideo: if DirectoryExists(FileName) then
+                 EditDVDVideoSourcePath.Text := FileName;
   end;
   {$IFDEF DebugAddFilesDragDrop}
   Deb('Dateiname: ' + FileName, 3);
@@ -1231,8 +1235,10 @@ begin
       PD_InvalidMpegFile: Add(Format(FLang.GMS('eprocs02'), [FileName]));
       PD_InvalidMP3File : Add(Format(FLang.GMS('eprocs03'), [FileName]));
       PD_InvalidOggFile : Add(Format(FLang.GMS('eprocs04'), [FileName]));
+      PD_InvalidFLACFile: Add(Format(FLang.GMS('eprocs05'), [FileName]));
       PD_NoMP3Support   : Add(FileName + ': ' + FLang.GMS('minit09'));
       PD_NoOggSupport   : Add(FileName + ': ' + FLang.GMS('minit10'));
+      PD_NoFLACSupport  : Add(FileName + ': ' + FLang.GMS('minit11'));      
     end;
   end;
 end;
@@ -1810,10 +1816,14 @@ begin
                                 FLang.GMS('eprocs02'), [OpenDialog1.Files[i]]));
           PD_InvalidOggFile : Form1.Memo1.Lines.Add(Format(
                                 FLang.GMS('eprocs04'), [OpenDialog1.Files[i]]));
+          PD_InvalidFLACFile: Form1.Memo1.Lines.Add(Format(
+                                FLang.GMS('eprocs05'), [OpenDialog1.Files[i]]));
           PD_NoMP3Support   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
                                 ': ' + FLang.GMS('minit09'));
-          PD_NoOggSupport   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] + 
+          PD_NoOggSupport   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
                                 ': ' + FLang.GMS('minit10'));
+          PD_NoFLACSupport  : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
+                                ': ' + FLang.GMS('minit11'));
         end;
       end;
     end;
@@ -3080,7 +3090,9 @@ begin
   FData.OnProgressBarHide := ProgressBarHide;
   FData.OnProgressBarReset := ProgressBarReset;
   FData.OnProgressBarUpdate := ProgressBarUpdate;
-  FData.OnMessageToShow := MessageShow;  
+  FData.OnMessageToShow := MessageShow;
+  {Diese wichtigen drei Objekte global verfügbar machen.}
+  TCdrtfeData.Instance.SetObjects(FLang, FSettings, FData);  
   {Kommandzeile auswerten}
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
@@ -3101,10 +3113,11 @@ begin
     {prüfen, ob alle Dateien da sind}
     if CheckFiles(FSettings, Memo1, FLang) then
     begin
-      {wenn Madplay.exe vorhanden ist, können auch MP3s verwendet werden}
+      {Wenn die entrpechenden Programme vorhanden sind, können MP3-, Ogg- und
+       FLAC-DAteien verwendet werden.}
       FData.AcceptMP3 := FSettings.FileFlags.MP3Ok;
-      {wenn Oggdec.exe vorhanden ist, können auch Oggs verwendet werden}
       FData.AcceptOgg := FSettings.FileFlags.OggOk;
+      FData.AcceptFLAC := FSettings.FileFlags.FLACOk;
       {$IFDEF RegistrySettings}
       {Einstellungen laden: Registry}
       FSettings.LoadFromRegistry;
@@ -5215,6 +5228,19 @@ begin
       EditDVDVideoVolID.SelStart := 32;
     end;
   end;
+end;
+
+{ OnDblClick -------------------------------------------------------------------
+
+  Bei Doppelklick auf das Edit für das DVD-Video-Label soll der Name übernommen
+  werden.                                                                      }
+
+procedure TForm1.EditDblClick(Sender: TObject);
+var Temp: string;
+begin
+  Temp := EditDVDVideoSourcePath.Text;
+  Delete(Temp, 1, LastDelimiter('\', Temp));
+  EditDVDVideoVolID.Text := Temp;
 end;
 
 

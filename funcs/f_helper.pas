@@ -13,6 +13,7 @@
   f_helper.pas stellt Hilfsfunktionen zur Verfügung
     * Reload bei einem Laufwerk durchführen
     * Laufwerk öffenen/schließen
+    * Eingabe-Liste für rrenc erzeugen
 
 
   exportierte Funktionen/Prozeduren:
@@ -29,9 +30,12 @@ unit f_helper;
 
 interface
 
+uses Classes;
+
 function ReloadDisk(const Dev: string): Boolean;
 procedure EjectDisk(const Dev: string);
 procedure LoadDisk(const Dev: string);
+procedure ConvertXCDParamListToRrencInputList(Source, Dest: TStringList);
 
 implementation
 
@@ -97,6 +101,33 @@ begin
   {$ENDIF}
   Temp := Temp + ' dev=' + Dev + ' -load';
   Temp := GetDosOutput(PChar(Temp), True);
+end;
+
+{ ConvertXCDParamListToRrencInputList ------------------------------------------
+
+  konvertiert die XCd-Pfadliste in eine Eingabeliste für rrenc.                }
+
+procedure ConvertXCDParamListToRrencInputList(Source, Dest: TStringList);
+var i   : Integer;
+    Temp: string;
+begin
+  Dest.Clear;
+  i := 0;
+  while i < Source.Count do
+  begin
+    Temp := Source[i];
+    if (Temp = '-m') or (Temp = '-f') or (Temp = '-d') then
+    begin
+      if Temp = '-m' then Temp := '-x ' + Source[i + 1] else
+      if Temp = '-f' then Temp := '-i ' + Source[i + 1] else
+      if Temp = '-d' then Temp := '-d ' + Source[i + 1];
+      Dest.Add(Temp);
+    end;
+    Inc(i);
+  end;
+  Dest.Add('-d _rec_');
+  Dest.Add('-@');
+  Dest.Add('-r');
 end;
 
 end.

@@ -2,9 +2,9 @@
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  18.10.2005
+  letzte Änderung  09.01.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -23,6 +23,11 @@
          // kennzeichnet cdrtfe als Testversion
          //    - betrifft: frm_about.pas
 
+(* --------------------------------------------------------------- Experiment *)
+
+{$DEFINE xExperiment}
+         // Experimentelle Funktionen aktivieren
+         //    - betrifft: frm_main.pas
 
 (* ------------------------------------- Einstellungen in Registry spreichern *)
 
@@ -194,6 +199,15 @@
          //   - Die Funktion GetFileSize verwendet Daten aus TWin32FindData
          //   - betrifft:
 
+{$DEFINE xForceUnknownMedium}
+         // Erzwingt das Nicht-Erkennen des DVD-Rohlings. Zu Testzwecken.
+         //   - betrifft: f_diskinfo.pas
+
+{$DEFINE UseCurrentProfile}
+         // Verwendet zur Erkennung des DVD-Typs die Angabe von cdrecord zum
+         // Current Profile. Andernfalls wird die Angabe zum Booktype benutzt.
+         //   - betrifft: f_diskinfo.pas
+
 {$ENDIF}
 
 
@@ -303,7 +317,7 @@
 
 {$DEFINE xDebugReadCDInfo}
          // zeigt Zwischenergebnisse in TAction.ReadCDInfo an
-         //    - betrifft: cl_action.pas
+         //    - betrifft: cl_action.pas, f_diskinfo.pas
 
 {$DEFINE xShowCDTextInfo}
          // zeigt die CD-Text-Informationen an (Doppelklick auf Hintergrund)
@@ -335,6 +349,10 @@
 {$DEFINE xDebugCreateInfoFile}
          // hält die Programmausführung nach der Dateierstellung an
          //    - frm_main.pas
+
+{$DEFINE xDebugExp}
+         // zeigt Infos auf TExperiment
+         //    - betrifft: f_experiment.pas
 
 {$DEFINE xDebugDeviceList}
          // zeigt den Inhalt aller Laufwerkslisten

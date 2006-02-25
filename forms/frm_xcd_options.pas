@@ -1,11 +1,11 @@
 { cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
 
-  frm_audiocd_options.pas: Audio-CD: Optionen
+  frm_xcd_options.pas: XCD-CD: Optionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.09.2005
+  letzte Änderung  20.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,10 @@ type
     CheckBoxOverburn: TCheckBox;
     GroupBoxInfoFile: TGroupBox;
     CheckBoxCreateInfoFile: TCheckBox;
+    GroupBoxErrorProtection: TGroupBox;
+    CheckBoxUseErrorProtection: TCheckBox;
+    LabelSecCount: TLabel;
+    EditSecCount: TEdit;
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonImageSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -98,17 +102,19 @@ procedure TFormXCDOptions.GetSettings;
 begin
   with FSettings.XCD do
   begin
-    EditIsoPath.Text               := IsoPath;
-    CheckBoxImageOnly.Checked      := ImageOnly;
-    CheckBoxImageKeep.Checked      := KeepImage;
-    CheckBoxSingle.Checked         := Single;
-    CheckBoxKeepExt.Checked        := KeepExt;
-    EditExt.Text                   := Ext;
-    RadioButtonISOLevelX.Checked   := not (ISOLevel1 or ISOLevel2);
-    RadioButtonISOLevel1.Checked   := IsoLevel1;
-    RadioButtonISOLevel2.Checked   := IsoLevel2;
-    CheckBoxOverburn.Checked       := Overburn;
-    CheckBoxCreateInfoFile.Checked := CreateInfoFile;
+    EditIsoPath.Text                   := IsoPath;
+    CheckBoxImageOnly.Checked          := ImageOnly;
+    CheckBoxImageKeep.Checked          := KeepImage;
+    CheckBoxSingle.Checked             := Single;
+    CheckBoxKeepExt.Checked            := KeepExt;
+    EditExt.Text                       := Ext;
+    RadioButtonISOLevelX.Checked       := not (ISOLevel1 or ISOLevel2);
+    RadioButtonISOLevel1.Checked       := IsoLevel1;
+    RadioButtonISOLevel2.Checked       := IsoLevel2;
+    CheckBoxOverburn.Checked           := Overburn;
+    CheckBoxCreateInfoFile.Checked     := CreateInfoFile;
+    CheckBoxUseErrorProtection.Checked := UseErrorProtection;
+    EditSecCount.Text                  := IntToStr(SecCount);
   end;
   {falls cdrdao nicht vorhanden ist, kann nur ein Image erzeugt werden.}
   if not (FSettings.FileFlags.CdrdaoOk or
@@ -129,16 +135,18 @@ procedure TFormXCDOptions.SetSettings;
 begin
   with FSettings.XCD do
   begin
-    IsoPath        := EditIsoPath.Text;
-    ImageOnly      := CheckBoxImageOnly.Checked;
-    KeepImage      := CheckBoxImageKeep.Checked;
-    Single         := CheckBoxSingle.Checked;
-    KeepExt        := CheckBoxKeepExt.Checked;
-    Ext            := EditExt.Text;
-    IsoLevel1      := RadioButtonISOLevel1.Checked;
-    IsoLevel2      := RadioButtonISOLevel2.Checked;
-    OverBurn       := CheckBoxOverburn.Checked;
-    CreateInfoFile := CheckBoxCreateInfoFile.Checked;
+    IsoPath            := EditIsoPath.Text;
+    ImageOnly          := CheckBoxImageOnly.Checked;
+    KeepImage          := CheckBoxImageKeep.Checked;
+    Single             := CheckBoxSingle.Checked;
+    KeepExt            := CheckBoxKeepExt.Checked;
+    Ext                := EditExt.Text;
+    IsoLevel1          := RadioButtonISOLevel1.Checked;
+    IsoLevel2          := RadioButtonISOLevel2.Checked;
+    OverBurn           := CheckBoxOverburn.Checked;
+    CreateInfoFile     := CheckBoxCreateInfoFile.Checked;
+    UseErrorProtection := CheckBoxUseErrorProtection.Checked;
+    SecCount           := StrToIntDef(EditSecCount.Text, 3600);
   end;
 end;
 
@@ -152,13 +160,17 @@ begin
   if Sender is TCheckBox then
   begin
     {Info-Datei nur ohne ISO-Level 1/2}
-    if (Sender as TCheckBox) = CheckBoxCreateInfoFile then
+    if ((Sender as TCheckBox) = CheckBoxCreateInfoFile) or
+       ((Sender as TCheckBox) = CheckBoxUseErrorProtection) then
     begin
-      if CheckBoxCreateInfoFile.Checked then
+      if CheckBoxCreateInfoFile.Checked or
+         CheckBoxUseErrorProtection.Checked then
       begin
         RadioButtonIsoLevel1.Enabled := False;
         RadioButtonIsoLevel2.Enabled := False;
       end else
+      if not (CheckBoxCreateInfoFile.Checked or
+              CheckBoxUseErrorProtection.Checked) then
       begin
         RadioButtonIsoLevel1.Enabled := True;
         RadioButtonIsoLevel2.Enabled := True;
@@ -182,14 +194,22 @@ begin
   end;
   if Sender is TRadioButton then
   begin
-    {bei ISO-Level 1/2 keine Info-Datei}
+    {bei ISO-Level 1/2 keine Info-Datei und kein rrenc}
     if RadioButtonIsoLevel1.Checked or RadioButtonIsoLevel2.Checked then
     begin
       CheckBoxCreateInfoFile.Enabled := False;
+      CheckBoxUseErrorProtection.Enabled := False;
     end else
     begin
       CheckBoxCreateInfoFile.Enabled := True;
+      CheckBoxUseErrorProtection.Enabled := True;;
     end;
+  end;
+  {Ohne rrenc keine Fehlerkorrektur}
+  if Sender is TForm then
+  begin
+    CheckBoxUseErrorProtection.Enabled := FSettings.FileFlags.RrencOk;
+    EditSecCount.Enabled := FSettings.FileFlags.RrencOk;
   end;
 end;
 

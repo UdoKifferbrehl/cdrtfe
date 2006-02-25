@@ -2,10 +2,10 @@
 
   constant.pas: Konstanten-Deklaration
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 17.10.2005
+  letzte Änderung 20.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -67,11 +67,13 @@ const {die GUID für cdrtfe}
       cCdrecord  = 2;
       cCdrecord2 = 3;
       cCdrdao    = 4;
+      cCDAudio   = 5;
 
       {Standard-Puffergröße}
       cBufSize = $800;
 
-      {Programmnamen}
+      {Dateinamen - Kommandozeilenprogramme}
+      {$J+}
       cCdrecordBin     : string = '\cdrecord';
       cMkisofsBin      : string = '\mkisofs';
       cCdda2wavBin     : string = '\cdda2wav';
@@ -82,27 +84,45 @@ const {die GUID für cdrtfe}
       cCdrdaoBin       : string = '\cdrdao';
       cMadplayBin      : string = '\madplay';
       cOggdecBin       : string = '\oggdec';
+      cFLACBin         : string = '\flac';
+      cRrencBin        : string = '\rrenc';
+      cRrdecBin        : string = '\rrdec';
+      {$J-}
+
+      {Dateinamen - Tools/DLLs}
+      cCdrtfeShlExDll  : string = '\cdrtfeShlEx.dll';
+      {$J+}
+      cM2F2ExtractBin  : string = '\m2f2extract.exe';
+      cDat2FileBin     : string = '\dat2file.exe';
+      cD2FGuiBin       : string = '\d2fgui.exe';
+      cCygwin1Dll      : string = 'cygwin1.dll';
+      {$J-}
 
       {Dateinamen}
-      cCdrtfeShlExDll  : string = '\cdrtfeShlEx.dll';
       cPathListFile    : string = '\pathlist.txt';
       cCDTextFile      : string = '\cdtext.dat';
       cShCmdFile       : string = '\cmd.cdr';
       cXCDInfoFile     : string = '\xcd.crc';
       cXCDParamFile    : string = '\xcd.txt';
+      cRrencInputFile  : string = '\xcd.rr';
+      cRrencOutputFile : string = '\xcd';
+      cRrencRRTFile    : string = '\protect.rrt';
+      cRrencRRDFile    : string = '\protect.rrd';
       cIniFile         : string = '\cdrtfe.ini';
+      cIniFileTools    : string = '\cdrtfe_tools.ini';
       cDefaultIsoName  : string = '\image';
-      cM2F2ExtractBin  : string = '\m2f2extract.exe';
-      cDat2FileBin     : string = '\dat2file.exe';
-      cD2FGuiBin       : string = '\d2fgui.exe';
-      cCygwin1Dll      : string = 'cygwin1.dll';
 
       {Dateiendungen}
       cExtExe          : string = '.exe';
       cExtBin          : string = '.bin';
       cExtCue          : string = '.cue';
       cExtToc          : string = '.toc';
-      cExtIso          : string = '.iso';                        
+      cExtIso          : string = '.iso';
+      cExtWav          : string = '.wav';
+      cExtMP3          : string = '.mp3';
+      cExtOgg          : string = '.ogg';
+      cExtFlac         : string = '.flac';
+      cExtUm2          : string = '.um2';
 
       {Ordnernamen}
       cDataDir         : string = '\cdrtfe';

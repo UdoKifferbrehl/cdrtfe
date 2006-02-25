@@ -2,10 +2,10 @@
 
   cl_cd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.10.2005
+  letzte Änderung  14.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,12 +70,12 @@
                  CDTextPresent
                  CDTime
                  LastError
-                 MP3FilesPresent
-                 OggFilesPresent
+                 CompressedFilesPresent
                  TrackCount
                  TrackPausePresent
                  AcceptMP3
                  AcceptOgg
+                 AcceptFLAC
 
     Methoden     AddTrack(const Name: string)
                  Create
@@ -143,8 +143,10 @@ const CD_NoError = 0;          {Fehlercodes}
       CD_InvalidMpegFile = 9;
       CD_InvalidMP3File = 10;
       CD_InvalidOggFile = 11;
-      CD_NoMP3Support = 12;
-      CD_NoOggSupport = 13;
+      CD_InvalidFLACFile = 12;
+      CD_NoMP3Support = 13;
+      CD_NoOggSupport = 14;
+      CD_NoFLACSupport = 15;
 
 type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        Path           : string;
@@ -252,6 +254,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
      private
        FAcceptMP3: Boolean;
        FAcceptOgg: Boolean;
+       FAcceptFLAC: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
        FError: Byte;
@@ -271,8 +274,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetCDTextLength: Integer;
        function GetCDTextPresent: Boolean;
        function GetCDTime: Extended;
-       function GetMP3FilesPresent: Boolean;
-       function GetOggFilesPresent: Boolean;
+       function GetCompressedFilesPresent: Boolean;
        function GetTrackCount: Integer;
        function GetTrackPausePresent: Boolean;
        procedure ExportText(CDTextData: TStringList);
@@ -293,12 +295,12 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure SetTrackPause(const Index: Integer; const Pause: string);
        property AcceptMP3: Boolean read FAcceptMP3 write FAcceptMP3;
        property AcceptOgg: Boolean read FAcceptOgg write FAcceptOgg;
+       property AcceptFLAC: Boolean read FAcceptFLAC write FAcceptFLAC;
        property CDTextLength: Integer  read GetCDTextLength;
        property CDTextPresent: Boolean read GetCDTextPresent;
        property CDTime: Extended read GetCDTime;
        property LastError: Byte read GetLastError;
-       property MP3FilesPresent: Boolean read GetMP3FilesPresent;
-       property OggFilesPresent: Boolean read GetOggFilesPresent;
+       property CompresedFilesPresent: Boolean read GetCompressedFilesPresent;
        property TrackCount: Integer read GetTrackCount;
        property TrackPausePresent: Boolean read GetTrackPausePresent;
      end;
@@ -360,7 +362,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      atl_oggvorbis,
-     f_filesystem, f_misc, f_strings, cl_mpeginfo, f_wininfo;
+     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo;
 
 { TCD ------------------------------------------------------------------------ }
 
@@ -1879,7 +1881,7 @@ end;
 
 { CreateBurnList ---------------------------------------------------------------
 
-  CreateBurnList erzeugt aus den Daten in der Baumstruktur die Pfadlist, die an
+  CreateBurnList erzeugt aus den Daten in der Baumstruktur die Pfadliste, die an
   mode2cdmaker übergeben wird.                                                 }
 
 procedure TXCD.CreateBurnList(List: TStringList);
@@ -1930,10 +1932,10 @@ begin
   CreateXCDBurnList(FRoot);
 end;
 
-{ CreateBurnList ---------------------------------------------------------------
+{ CreateVerifyList -------------------------------------------------------------
 
-  CreateBurnList erzeugt aus den Daten in der Baumstruktur die Pfadlist, die an
-  mkisofs übergeben wird.                                                      }
+  CreateVerifyList erzeugt aus den Daten in der Baumstruktur die Pfadliste für
+  den abschließenden Vergleich.                                                }
 
 procedure TXCD.CreateVerifyList(List: TStringList);
 
@@ -2032,38 +2034,24 @@ begin
   end;
 end;
 
-{ GetMP3FilesPresent -----------------------------------------------------------
+{ GetCompressedFilesPresent ----------------------------------------------------
 
-  GetMP3FilesPresent gibt an, ob in der Auswahl MP3-Dateien vorhanden sind.    }
+  True, wenn komprimierte Audio-Dateien in der Auswahl vorhanden sind.         }
 
-function TAudioCD.GetMP3FilesPresent: Boolean;
+function TAudioCD.GetCompressedFilesPresent: Boolean;
 var i       : Integer;
     List    : TStringList;
+    Ext     : string;
 begin
   Result := False;
   List := TStringList.Create;
   CreateBurnList(List);
   for i := 0 to List.Count - 1 do
   begin
-    Result := Result or (LowerCase(ExtractFileExt(List[i])) = '.mp3');
-  end;
-  List.Free;
-end;
-
-{ GetOggFilesPresent -----------------------------------------------------------
-
-  GetOggFilesPresent gibt an, ob in der Auswahl Ogg-Dateien vorhanden sind.    }
-
-function TAudioCD.GetOggFilesPresent: Boolean;
-var i       : Integer;
-    List    : TStringList;
-begin
-  Result := False;
-  List := TStringList.Create;
-  CreateBurnList(List);
-  for i := 0 to List.Count - 1 do
-  begin
-    Result := Result or (LowerCase(ExtractFileExt(List[i])) = '.ogg');
+    Ext := LowerCase(ExtractFileExt(List[i]));
+    Result := Result or (Ext = cExtMP3)
+                     or (Ext = cExtOgg)
+                     or (Ext = cExtFlac);
   end;
   List.Free;
 end;
@@ -2192,6 +2180,7 @@ begin
   FCDTimeChanged := False;
   FAcceptMP3 := True;
   FAcceptOgg := True;
+  FAcceptFLAC := True;
 end;
 
 destructor TAudioCD.Destroy;
@@ -2212,15 +2201,19 @@ procedure TAudioCD.AddTrack(const Name: string);
 var Size              : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
     TrackLength       : Extended;
     Temp, CDText      : string;
-    Ok, Wave, MP3, Ogg: Boolean;
+    CDTextArgs        : TAutoCDText;
+    Ok, Wave, MP3,
+    Ogg, FLAC         : Boolean;
     MPEGFile          : TMPEGFile;
     OggFile           : TOggVorbis;
+    FLACFile          : TFLACFile;
 begin
   if FileExists(Name) then
   begin
-    Wave := LowerCase(ExtractFileExt(Name)) = '.wav';
-    MP3  := (LowerCase(ExtractFileExt(Name)) = '.mp3');
-    Ogg  := (LowerCase(ExtractFileExt(Name)) = '.ogg');
+    Wave := LowerCase(ExtractFileExt(Name)) = cExtWav;
+    MP3  := (LowerCase(ExtractFileExt(Name)) = cExtMP3);
+    Ogg  := (LowerCase(ExtractFileExt(Name)) = cExtOgg);
+    FLAC := (LowerCase(ExtractFileExt(Name)) = cExtFlac);
     Ok := False;
     Size := GetFileSize(Name);
     TrackLength := 0;
@@ -2230,6 +2223,11 @@ begin
       if WaveIsValid(Name) then
       begin
         TrackLength := GetWaveLength(Name);
+        CDTextArgs.Title := '';
+        CDTextArgs.Performer :='';
+        CDTextArgs.FileName := Name;
+        CDTextArgs.IsWave := Wave;
+        CDText := AutoCDText(CDTextArgs);
         Ok := True;
       end else
       begin
@@ -2245,7 +2243,11 @@ begin
         MPEGFile := TMPEGFile.Create(Name);
         MPEGFile.GetInfo;
         TrackLength := MPEGFile.Length;
-        CDText := MPEGFile.TagTitle + '|' + MPEGFile.TagArtist + '||||';
+        CDTextArgs.Title := MPEGFile.TagTitle;
+        CDTextArgs.Performer := MPEGFile.TagArtist;
+        CDTextArgs.FileName := Name;
+        CDTextArgs.IsWave := Wave;
+        CDText := AutoCDText(CDTextArgs);
         MPEGFile.Free;
         Ok := TrackLength > 0;
         if not Ok then
@@ -2269,7 +2271,11 @@ begin
           if OggFile.Valid then
           begin
             TrackLength := StrToInt(FormatFloat('0', OggFile.Duration));
-            CDText := Trim(OggFile.Title) + '|' + Trim(OggFile.Artist) + '||||';
+            CDTextArgs.Title := Trim(OggFile.Title);
+            CDTextArgs.Performer := Trim(OggFile.Artist);
+            CDTextArgs.FileName := Name;
+            CDTextArgs.IsWave := Wave;
+            CDText := AutoCDText(CDTextArgs);
           end;
         end;
         OggFile.Free;
@@ -2281,6 +2287,31 @@ begin
       end else
       begin
         FError := CD_NoOggSupport;
+      end;
+    end else
+    if FLAC then
+    begin
+      if FAcceptFLAC then
+      begin
+        {Bestimmung der Länge könnte etwas dauern}
+        Application.ProcessMessages;
+        FLACFile := TFLACFile.Create(Name);
+        FLACFile.GetInfo;
+        TrackLength := FLACFile.Length;
+        CDTextArgs.Title := FLACFile.TagTitle;
+        CDTextArgs.Performer := FLACFile.TagArtist;
+        CDTextArgs.FileName := Name;
+        CDTextArgs.IsWave := Wave;
+        CDText := AutoCDText(CDTextArgs);
+        FLACFile.Free;
+        Ok := TrackLength > 0;
+        if not Ok then
+        begin
+          FError := CD_InvalidFLACFile;
+        end;
+      end else
+      begin
+        FError := CD_NoFLACSupport;
       end;
     end;
     if Ok then

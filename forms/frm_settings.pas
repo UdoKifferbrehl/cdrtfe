@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.10.2005
+  letzte Änderung  26.01.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,6 +70,13 @@ type
     ButtonTempFolderBrowse: TButton;
     GroupBoxCdrecordEject: TGroupBox;
     CheckBoxCdrecordEject: TCheckBox;
+    TabSheetAudioCD: TTabSheet;
+    GroupBoxAudioCDText: TGroupBox;
+    RadioButtonCDTextUseTags: TRadioButton;
+    RadioButtonCDTextUseName: TRadioButton;
+    PanelCDText: TPanel;
+    RadioButtonCDTextPT: TRadioButton;
+    RadioButtonCDTextTP: TRadioButton;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -196,6 +203,10 @@ begin
                                     FSettings.Cdrecord.CanWriteCueImage;
   CheckBoxForceGenericMMC.Enabled := FSettings.FileFlags.CdrdaoOk;
   CheckBoxForceGenericMMCRaw.Enabled := FSettings.FileFlags.CdrdaoOk;
+  RadioButtonCDTextUseTags.Checked := FSettings.General.CDTextUseTags;
+  RadioButtonCDTextUseName.Checked := not FSettings.General.CDTextUseTags;
+  RadioButtonCDTextPT.Checked := not FSettings.General.CDTextTP;
+  RadioButtonCDTextTP.Checked := FSettings.General.CDTextTP;
   ActivateTab;
 end;
 
@@ -228,6 +239,8 @@ begin
     Eject := CheckBoxCdrecordEject.Checked;
   end;
   FSettings.General.TabFrmSettings := GetActivePage;
+  FSettings.General.CDTextUseTags := RadioButtonCDTextUseTags.Checked;
+  FSettings.General.CDTextTP := RadioButtonCDTextTP.Checked;
 end;
 
 { CheckControls ----------------------------------------------------------------
@@ -290,6 +303,18 @@ begin
         ComboBoxMkisofsCustOpts.Enabled := False;
         ButtonMkisofsCustOptDelete.Enabled := False;
       end;
+    end;
+  end else
+  if Sender is TRadioButton then
+  begin
+    if RadioButtonCDTextUseName.Checked then
+    begin
+      RadioButtonCDTextTP.Enabled := True;
+      RadioButtonCDTextPT.Enabled := True;
+    end else
+    begin
+      RadioButtonCDTextTP.Enabled := False;
+      RadioButtonCDTextPT.Enabled := False;
     end;
   end else
   if Sender is TForm then

@@ -39,6 +39,9 @@ const WM_CDRTFE           = WM_APP;
       WM_FTerminated      = WM_CDRTFE + 13;
       WM_ITerminated      = WM_CDRTFE + 14;
       WM_ACTIVATEVCDTAB   = WM_CDRTFE + 15;
+      {$IFDEF Experiment}
+      WM_Experiment       = WM_CDRTFE + 20;
+      {$ENDIF}
 
 implementation
 

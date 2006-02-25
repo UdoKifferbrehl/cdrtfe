@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.11.2005
+  letzte Änderung  11.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -116,10 +116,10 @@ begin
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');
     {$ENDIF}
     {Filter}
-    Add('f001=ISO-Image (*.iso)|*.iso|CUE-Image (*.cue)|*.cue');
-    Add('f002=ISO-Image (*.iso)|*.iso');
+    Add('f001=ISO-Image (*.iso)|*.iso;*.iso_00|CUE-Image (*.cue)|*.cue');
+    Add('f002=ISO-Image (*.iso)|*.iso;*.iso_00');
     Add('f003=Namen ohne Endung eingeben!|*.*');
-    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg)|*.wav;*.mp3;*.ogg');
+    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg; *.flac)|*.wav;*.mp3;*.ogg;*.flac');
     Add('f005=Movie-Dateien (*.avi)|*.avi|Alle Dateien|*.*');
     Add('f006=cdrtfe Projekt-Dateien (*.cfp)|*.cfp');
     Add('f007=Image-Dateien (*.bin; *.img; *.ima)|*.bin;*.img;*.ima|Alle Dateien|*.*');
@@ -200,6 +200,7 @@ begin
     Add('eprocs02=%s: falsches MPEG-Format.');
     Add('eprocs03=%s: falsches MP3-Format.');
     Add('eprocs04=%s: falsches Ogg-Format.');
+    Add('eprocs05=%s: falsches FLAC-Format.');
     {Messages - Preferences}
     Add('mpref01=ShellExtensions registriert.');
     Add('mpref02=Registryeinträge der ShellExtensions entfernt.');
@@ -233,6 +234,7 @@ begin
     Add('minit08=Ohne die Datei vcdimager.exe können keine Video-CDs erstellt werden.\n ');
     Add('minit09=Ohne madplay.exe werden MP3-Tracks nicht unterstützt.\n ');
     Add('minit10=Ohne oggdec.exe werden Ogg-Vorbis-Tracks nicht unterstützt.\n ');
+    Add('minit11=Ohne flac.exe werden FLAC-Tracks nicht unterstützt.\n ');    
     {Messages - Burning}
     Add('eburn01=Es ist keine CD eingelegt!');
     Add('eburn02=Diese CD kann nicht beschrieben werden. Entweder handelt es sich\num eine CD-ROM oder die CD-R(W) wurde bereits abgeschlossen.');
@@ -245,7 +247,8 @@ begin
     Add('eburn09=Erste zu schreibende Adresse konnte nicht gelesen werden.\nFalls es sich um eine CD-RW handelt, muß diese erst gelöscht werden.');
     Add('eburn10=DVDs müssen im DAO-Modus geschrieben werden!');
     Add('eburn11=Sorry, noch keine Unterstützung für Multisession-/Multiborder-DVDs.');
-    Add('eburn12=Unbekanntes DVD-Medium, unbekannte Kapazität.\nTrotzdem fortfahren?');
+    Add('eburn12=Unbekanntes DVD-Medium, unbekannte Kapazität. Trotzdem fortfahren?');
+    Add('eburn13=Sie können auch die Art des Mediums angeben.');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
@@ -381,6 +384,7 @@ begin
     FMessageStrings.Clear;
     FMessageStrings.Assign(NewStrings);
   end;
+  NewStrings.Clear;
   {ComponentStrings laden}
   Ok := GetSection(List, NewStrings, '[Components_' + FDefaultLang + ']', '');
   if Ok then

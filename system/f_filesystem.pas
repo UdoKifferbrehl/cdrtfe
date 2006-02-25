@@ -1,9 +1,9 @@
 { f_filesystem.pas: Dateisystemfunktionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.09.2005
+  letzte Änderung  23.01.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -17,6 +17,7 @@
     * Laufwerk auf eingelegtes Medium prüfen
     * Auswahldialog für Ordner
     * Funktionen, um bestimmte Ordner zu finden
+    * Infos über Laufwerke (Name, Dateisystem, Seriennummer, ...)
 
 
   exportierte Funktionen/Prozeduren:
@@ -26,12 +27,14 @@
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)
     FilenameIsValid(const Name: string):Boolean
+    FileSystemIsFAT(const Path: string): Boolean
     FindInSearchPath(const Name: string): string
     GetDirSize(Verzeichnis: string): Longint
     GetDriveList(const DriveType: Integer; DriveList: TStringList): Byte
     GetFileSize(const Filename: string): Longint
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
+    GetVolumeInfo(var VolInfo: TVolumeInfo)
     OverrideProgDataDir
     ProgDataDir: string
     StartUpDir: string
@@ -47,16 +50,26 @@ interface
 
 uses Forms, Windows, Classes, SysUtils, ShlObj, FileCtrl, ActiveX, Registry;
 
-      {IDs für spezielle Ordner}
-const CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
+const {IDs für spezielle Ordner}
+      CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
       CSIDL_LOCAL_APPDATA        = $001C; {user\Local Settings\Application Data}
       CSIDL_COMMON_APPDATA       = $0023; {All Users\Application Data}
+
+type {Datentype für Laufwerksinfos}
+     TVolumeInfo = record
+       Drive             : string;
+       Name              : string;
+       FileSystem        : string;
+       SerialNum         : Integer;
+       MaxComponentLength: Integer;
+     end;
 
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
-function FilenameIsValid(const Name: string):Boolean;
+function FilenameIsValid(const Name: string): Boolean;
+function FileSystemIsFAT(const Path: string): Boolean;
 function FindInSearchPath(const Name: string): string;
 function GetDirSize(Verzeichnis: string): Longint;
 function GetDriveList(const DriveType: Integer; DriveList: TStringList): Byte;
@@ -67,6 +80,7 @@ function ProgDataDir: string;
 function StartUpDir: string;
 function TempDir: string;
 procedure DummyDir(Mode: Boolean);
+procedure GetVolumeInfo(var VolInfo: TVolumeInfo);
 procedure OverrideProgDataDir;
 
 implementation
@@ -417,6 +431,50 @@ begin
       end;
     end;
   end;
+end;
+
+{ GetVolumeInfo ----------------------------------------------------------------
+
+  GetVolumeInfo liefert Informationen über das Laufwerk VolInfo.Drive.         }
+
+procedure GetVolumeInfo(var VolInfo: TVolumeInfo);
+var Root              : string;
+    VolumeNameBuffer  : PChar;
+    FileSystemBuffer  : PChar;
+    VolumeSerialNum,
+    MaxComponentLength,
+    FileSystemFlags   : DWord;
+begin
+  {Initialisierungen}
+  Root := ExtractFileDrive(VolInfo.Drive) + '\';
+  GetMem(VolumeNameBuffer, 256);
+  GetMem(FileSystemBuffer, 256);
+  {Informationen holen}
+  if GetVolumeInformation(PChar(Root), VolumeNameBuffer, 255, @VolumeSerialNum,
+                          MaxComponentLength, FileSystemFlags, FileSystemBuffer,
+                          255) then
+  begin
+    VolInfo.Name := StrPas(VolumeNameBuffer);
+    VolInfo.FileSystem := StrPas(FileSystemBuffer);
+    VolInfo.SerialNum := VolumeSerialNum;
+    VolInfo.MaxComponentLength := MaxComponentLength;
+  end;
+  {Aufräumen}
+  FreeMem(VolumeNameBuffer);
+  FreeMem(FileSystemBuffer);
+end;
+
+{ FileSystemIsFAT --------------------------------------------------------------
+
+  FileSystemIsFAT liefert True, wenn das Dateisystem von Path FAT oder FAT32
+  ist.                                                                         }
+
+function FileSystemIsFAT(const Path: string): Boolean;
+var VolInfo: TVolumeInfo;
+begin
+  VolInfo.Drive := Path;
+  GetVolumeInfo(VolInfo);
+  Result := (VolInfo.FileSystem = 'FAT') or (VolInfo.FileSystem = 'FAT32');
 end;
 
 initialization

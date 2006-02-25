@@ -1,8 +1,8 @@
 { cl_mpeginfo.pas: Funktionen für MPEG-Audio-Dateien
 
-  Copyright (c) 2005 Oliver Valencia
+  Copyright (c) 2006 Oliver Valencia
 
-  letzte Änderung  06.05.2005
+  letzte Änderung  12.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -44,7 +44,7 @@ unit cl_mpeginfo;
 
 interface
 
-uses Classes, SysUtils, Windows;
+uses Classes, SysUtils, Windows, Dialogs;
 
 type TMPEGInfoError = (MIE_NoError, MIE_FileNotFound, MIE_InvalidMPEGFile);
 
@@ -413,6 +413,66 @@ end;
   MaxHeader legt fest, wieviele aufeinanderfolgende Frames gültig sein müssen,
   damit die Datei als gültige MPEG-Audio akzeptiert wird.                      }
 
+function TMPEGFile.FindFirstMPEGHeader(FileIn: TFileStream):Longint;
+const MaxHeader = 4;
+var Buffer       : array[0..8191] of Byte;
+    BytesRead    : Integer;
+    FirstFramePos: Longint;
+    TempPos      : Longint;
+    i, Count     : Integer;
+    Ok           : Boolean;
+    Frame        : TMPEGFrameInfo;
+begin
+  Result := -1;
+  FirstFramePos := 0;
+  repeat
+    FillChar(Buffer, SizeOf(Buffer), 0);
+    TempPos := FileIn.Position;
+    BytesRead := FileIn.Read(Buffer, SizeOf(Buffer));
+    {Frame in Buffer suchen}
+    i := 0;
+    repeat
+      Frame.Header[0] := Buffer[i];
+      Frame.Header[1] := Buffer[i + 1];
+      Frame.Header[2] := Buffer[i + 2];
+      Frame.Header[3] := Buffer[i + 3];
+      Ok := DecodeMPEGHeader(Frame);
+      Inc(i);
+    until Ok or (i = SizeOf(Buffer) - 3);
+    if Ok then
+    begin
+      FirstFramePos := TempPos + i - 1;
+      Count := 1;
+      {Einen Header haben wir, daß heißt aber noch nichts. Daher prüfen, ob
+       weitere Header im richtigen Abstand folgen.}
+      FileIn.Seek(FirstFramePos, soFromBeginning);
+      FileIn.Seek(Frame.FrameSize, soFromCurrent);
+      repeat
+        {BytesRead := }FileIn.Read(Frame.Header, 4);
+        Ok := DecodeMPEGHeader(Frame);
+        if Ok then
+        begin
+          Inc(Count);
+          FileIn.Seek(Frame.FrameSize - 4, soFromCurrent);
+        end else
+        begin
+          FileIn.Seek(FirstFramePos + 1, soFromBeginning);
+          Count := 0;
+        end;
+      until (Count = MaxHeader) or not Ok;
+    end else
+    begin
+      {in Buffer war kein Frame}
+      FileIn.Seek(-4, soFromCurrent);
+    end;
+  until Ok or (BytesRead < SizeOf(Buffer));
+  if Ok then
+  begin
+    Result := FirstFramePos;
+  end;
+end;
+
+(*
 function TMPEGFile.FindFirstMPEGHeader(FileIn: TFileStream): Longint;
 const MaxHeader = 4;
 var Frame        : TMPEGFrameInfo;
@@ -457,6 +517,7 @@ begin
      Result := FirstFramePos;
    end;
 end;
+*)
 
 { GetMPEGAudioLength -----------------------------------------------------------
 

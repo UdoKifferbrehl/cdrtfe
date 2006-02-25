@@ -1,10 +1,10 @@
 { cl_tree.pas: Implementierung einer einfachen Baum-Struktur
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
   Version          1.0
   erstellt         11.02.2004
-  letzte Änderung  25.07.2004
+  letzte Änderung  17.01.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -437,6 +437,7 @@ begin
   List := TStringList.Create;
   FNodes.Clear;
   try
+    List.Capacity := 1;
     List.LoadFromStream(Stream);
     Node := self;
     s := List[0];

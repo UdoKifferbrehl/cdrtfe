@@ -2,10 +2,10 @@
 
   cl_settings.pas: Einstellungen von cdrtfe
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.10.2005
+  letzte Änderung  20.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -83,6 +83,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        IniFile       : string;
        TempFolder    : string;
        AskForTempDir : Boolean;
+       CDTextUseTags : Boolean;
+       CDTextTP      : Boolean;    // <title> - <performer>.mp3
      end;
 
      TWinPos = record
@@ -133,6 +135,9 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        ProDVD     : Boolean;
        MP3Ok      : Boolean;
        OggOk      : Boolean;
+       FLACOk     : Boolean;
+       RrencOk    : Boolean;
+       RrdecOk    : Boolean;
      end;
 
      TEnvironment = record
@@ -275,6 +280,12 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Device      : string;
        Speed       : string;
        Overburn    : Boolean;
+       {Einstellungen: rrenc}
+       XCDRrencInputFile : string;
+       XCDRrencRRTFile   : string;
+       XCDRrencRRDFile   : string;
+       UseErrorProtection: Boolean;
+       SecCount          : Integer;
      end;
 
      { Auswahl: CDRW }
@@ -368,13 +379,6 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        ShCmdName : string;
      end;
 
-     { Laufwerkslisten }   (*
-     TSettingsDevices = record
-       CDWriter : TStringList;
-       CDReader : TStringList;
-       CDDevices: TStringList;
-     end;                    *)
-
      { Hilfsvariablen }
 
      { Objekt mit den Einstellungen }
@@ -417,7 +421,6 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Readcd      : TSettingsReadcd;
        VideoCD     : TSettingsVideoCD;
        DVDVideo    : TSettingsDVDVideo;
-//       Devices     : TSettingsDevices;
        constructor Create;
        destructor Destroy; override;
        function GetMaxFileNameLength: Byte;
@@ -530,6 +533,8 @@ begin
     IniFile := '';
     TempFolder := '';
     AskForTempDir := False;
+    CDTextUseTags := True;
+    CDTextTP := False;
   end;
 
   with WinPos do
@@ -583,6 +588,9 @@ begin
     ProDVD      := False;
     MP3Ok       := True;
     OggOk       := True;
+    FLACOk      := True;
+    RrencOk     := True;
+    RrdecOk     := True;
   end;
 
   with Environment do
@@ -725,6 +733,12 @@ begin
     Device         := '';
     Speed          := '';
     Overburn       := False;
+    {Einstellungen rrenc}
+    XCDRrencInputFile  := '';
+    XCDRrencRRTFile    := '';
+    XCDRrencRRDFile    := '';
+    UseErrorProtection := False;
+    SecCount           := 3600;
   end;
 
   {CDRW}
@@ -1279,6 +1293,8 @@ var PF: TIniFile; // ProjectFile
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
       WriteString(Section, 'TempFolder', TempFolder);
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
+      WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
+      WriteBool(Section, 'CDTextTP', CDTextTP);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1444,6 +1460,9 @@ var PF: TIniFile; // ProjectFile
       WriteString(Section, 'Device', Device);
       WriteString(Section, 'Speed', Speed);
       WriteBool(Section, 'Overburn', Overburn);
+      {Einstellung: rrenc}
+      WriteBool(Section, 'UseErrorProtection', UseErrorProtection);
+      WriteInteger(Section, 'SecCount', SecCount);
     end;
 
     {CDRW}
@@ -1629,6 +1648,8 @@ var PF: TIniFile; // ProjectFile
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
       TempFolder := ReadString(Section, 'TempFolder', '');
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
+      CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
+      CDTextTP := ReadBool(Section, 'CDTextTP', False);
     end;
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;
@@ -1810,6 +1831,9 @@ var PF: TIniFile; // ProjectFile
       Device := ReadString(Section, 'Device', '');
       Speed := ReadString(Section, 'Speed', '');
       Overburn := ReadBool(Section, 'OverBurn', False);
+      {Einstellungen: rrenc}
+      UseErrorProtection := ReadBool(Section, 'UseErrorProtection', False);
+      SecCount := ReadInteger(Section, 'SecCount', 3600);
     end;
     Shared.ProgressBarPosition := 6;
     ProgressBarUpdate;
@@ -2002,6 +2026,9 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
       WriteString(Section, 'TempFolder', TempFolder);
+      WriteBool(Section, 'AskForTempDir', AskForTempDir);
+      WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
+      WriteBool(Section, 'CDTextTP', CDTextTP);
     end;
 
     Section := 'WinPos';
@@ -2154,6 +2181,9 @@ var PF: TRegIniFile; // ProjectFile
       WriteString(Section, 'Speed', Speed);
       WriteBool(Section, 'Dummy', Dummy);
       WriteBool(Section, 'Overburn', Overburn);
+      {Einstellung: rrenc}
+      WriteBool(Section, 'UseErrorProtection', UseErrorProtection);
+      WriteInteger(Section, 'SecCount', SecCount);      
     end;
 
     {CDRW}
@@ -2303,6 +2333,9 @@ var PF: TRegIniFile; // ProjectFile
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
       TempFolder := ReadString(Section, 'TempFolder', '');
+      AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
+      CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
+      CDTextTP := ReadBool(Section, 'CDTextTP', False);
     end;
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;
@@ -2470,6 +2503,9 @@ var PF: TRegIniFile; // ProjectFile
       Speed := ReadString(Section, 'Speed', '');
       Dummy := ReadBool(Section, 'Dummy', False);
       Overburn := ReadBool(Section, 'OverBurn', False);
+      {Einstellungen: rrenc}
+      UseErrorProtection := ReadBool(Section, 'UseErrorProtection', False);
+      SecCount := ReadInteger(Section, 'SecCount', 3600);
     end;
     Shared.ProgressBarPosition := 6;
     ProgressBarUpdate;

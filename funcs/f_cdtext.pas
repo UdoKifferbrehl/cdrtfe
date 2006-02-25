@@ -2,9 +2,9 @@
 
   f_cdtext.pas: CD-Text-Funktionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  25.05.2005
+  letzte Änderung  11.02.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -159,6 +159,14 @@ type TCDTextTrackData = record
        TextMessage: string;
      end;
 
+     TAutoCDText = record
+       Title    : string;
+       Performer: string;
+       FileName : string;
+       IsWave   : Boolean;
+     end;
+
+function AutoCDText(const Args: TAutoCDText): string;
 function TextTrackDataToString(const TextTrackData: TCDTextTrackData): string;
 procedure CreateCDTextFile(const Name: string; TextData: TStringList);
 procedure StringToTextTrackData(const S: string; var TextTrackData: TCDTextTrackData);
@@ -166,6 +174,7 @@ procedure StringToTextTrackData(const S: string; var TextTrackData: TCDTextTrack
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+     cl_cdrtfedata,
      f_strings, f_crc;
 
 const {Pack Type Indicator}
@@ -653,6 +662,54 @@ begin
     SplitString(Temp, '|', Songwriter, Temp);
     SplitString(Temp, '|', Composer, Temp);
     SplitString(Temp, '|', Arranger, TextMessage);
+  end;
+end;
+
+{ AutoCDText -------------------------------------------------------------------
+
+  bestimmt Title und Performer, wenn ein Track hinzugefügt wurde. Akzeptierter
+  Trenner zwischen Title und Performer ist ' - '.                              }
+
+function AutoCDText(const Args: TAutoCDText): string;
+var Name, Title, Performer: string;
+    UseTags               : Boolean;
+    p                     : Integer;
+begin
+  if Args.IsWave then
+    UseTags := False else
+    UseTags := TCdrtfeData.Instance.Settings.General.CDTextUseTags;
+  if UseTags then
+  begin
+    {Tags sollen benutzt werden.}
+    Result := Args.Title + '|' + Args.Performer + '||||';
+  end else
+  begin
+    {Infos aus Dateinamen erzeugen.}
+    Name := ExtractFileName(Args.FileName);
+    p := LastDelimiter('.', Name);
+    Delete(Name, p, Length(Name) - p + 1);
+    Name := ReplaceString(Name, ' - ', '|');
+    {Tracknummer entfernen, falls vorhanden}
+    if StrToIntDef(StringLeft(Name, '|'), -1) > 0 then
+    begin
+      Delete(Name, 1, Pos('|', Name));
+    end else
+    if StrToIntDef(StringLeft(Name, ' '), -1) > 0 then
+    begin
+      Delete(Name, 1, Pos(' ', Name));
+    end;
+    {Namen in Title und Performer teilen}
+    Title := StringRight(Name, '|');
+    Performer := StringLeft(Name, '|');
+    if TCdrtfeData.Instance.Settings.General.CDTextTP then
+    begin
+      Result := Performer + '|' + Title + '||||';
+    end else
+    begin
+      Result := Title + '|' + Performer + '||||';
+    end;
+    {Korrektur, falls Dateiname kein ' - ' enthielt.}
+    if Pos('|', Name) = 0 then Result := Name + '|||||';
   end;
 end;
 

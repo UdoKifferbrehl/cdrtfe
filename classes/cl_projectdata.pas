@@ -2,10 +2,10 @@
 
   cl_projectdata.pas:
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.10.2005
+  letzte Änderung  16.01.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,7 +20,9 @@
 
     Properties   AcceptMP3
                  AcceptOgg
+                 AccpetFLAC
                  AddAsForm2
+                 CompressedAudioFilesPresent
                  LastError
                  LastFolderAdded
                  OnMessageToShow
@@ -114,13 +116,16 @@ const PD_NoError = 0;          {Fehlercodes}
       PD_InvalidMpegFile = 9;
       PD_InvalidMP3File = 10;
       PD_InvalidOggFile = 11;
-      PD_NoMP3Support = 12;
-      PD_NoOggSupport = 13;
+      PD_InvalidFLACFile = 12;
+      PD_NoMP3Support = 13;
+      PD_NoOggSupport = 14;
+      PD_NoFLACSupport = 15;
 
 type TProjectData = class(TObject)
      private
        FAcceptMP3: Boolean;
        FAcceptOgg: Boolean;
+       FAcceptFLAC: Boolean;
        FLang: TLang;
        FDataCD: TCD;
        FAudioCD: TAudioCD;
@@ -136,10 +141,12 @@ type TProjectData = class(TObject)
        FOnProgressBarReset: TNotifyEvent;
        FOnProgressBarUpdate: TNotifyEvent;
        FOnUpdatePanels: TNotifyEvent;
+       function GetCompressedAudioFilesPresent: Boolean;
        function GetLastError: Byte;
        function GetLastFolderAdded: string;
        procedure SetAcceptMP3(Mode: Boolean);
        procedure SetAcceptOgg(Mode: Boolean);
+       procedure SetAcceptFLAC(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
        {Events}
        procedure MessageToShow;
@@ -169,8 +176,6 @@ type TProjectData = class(TObject)
        function GetProjectMaxLevel(const Choice: Byte): Integer;
        function GetSmallForm2FileCount: Integer;
        function GetTrackPause(const Index: Integer): string;
-       function MP3FilesPresent: Boolean;
-       function OggFilesPresent: Boolean;
        function TrackPausePresent: Boolean;
        procedure AddToPathlist(const AddName, DestPath: string; const Choice: Byte);
        procedure CheckDataCDFS(const Path: string; const MaxLength: Byte; const CheckFolder: Boolean);
@@ -209,6 +214,8 @@ type TProjectData = class(TObject)
        property XCD: TXCD read FXCD write FXCD; *)
        property AcceptMP3: Boolean read FAcceptMP3 write SetAcceptMP3;
        property AcceptOgg: Boolean read FAcceptOgg write SetAcceptOgg;
+       property AcceptFLAC: Boolean read FAcceptFLAC write SetAcceptFLAC;
+       property CompressedAudioFilesPresent: Boolean read GetCompressedAudioFilesPresent;
        property Lang: TLang write FLang;
        property LastError: Byte read GetLastError;
        property LastFolderAdded: string read GetLastFolderAdded;
@@ -336,6 +343,25 @@ begin
   FAudioCD.AcceptOgg := Mode;
 end;
 
+{ SetAcceptFLAC ----------------------------------------------------------------
+
+  Wenn flac.exe existiert, können FLAC-Dateien verwendet werden.               }
+
+procedure TProjectData.SetAcceptFLAC(Mode: Boolean);
+begin
+  FAcceptFLAC := Mode;
+  FAudioCD.AcceptFLAC := Mode;
+end;
+
+{ CompressedAudioFilesPresent --------------------------------------------------
+
+  liefert True, wenn in der Auswahl komprimierte Audio-Dateien vorhanden sind. }
+
+function TProjectData.GetCompressedAudioFilesPresent: Boolean;
+begin
+  Result := FAudioCD.CompresedFilesPresent;
+end;
+
 { TProjectData - public }
 
 constructor TProjectData.Create;
@@ -354,6 +380,9 @@ begin
   ErrorListIgnore := TStringList.Create;
   InvalidSrcFiles := TStringList.Create;
   IgnoreNameLengthErrors := False;
+  FAcceptMP3 := True;
+  FAcceptOgg := True;
+  FAcceptFLAC := True;
 end;
 
 destructor TProjectData.Destroy;
@@ -416,8 +445,10 @@ begin
     CD_InvalidMpegFile: FError := PD_InvalidMpegFile;
     CD_InvalidMP3File: FError := PD_InvalidMP3File;
     CD_InvalidOggFile: FError := PD_InvalidOggFile;
+    CD_InvalidFLACFile: FError := PD_InvalidFLACFile;
     CD_NoMP3Support: FError := PD_NoMP3Support;
     CD_NoOggSupport: FError := PD_NoOggSupport;
+    CD_NoFLACSupport: FError := PD_NoFLACSupport;
   end;
 end;
 
@@ -1065,6 +1096,7 @@ var CDName: string;
 
   procedure LoadCDStrukture;
   begin
+    List.Clear;
     {Tree-Struktur in Liste suchen}
     if GetSection(ProjectList, List, '<' + CDName + '>',
                                      '</' + CDName + '>') then
@@ -1119,6 +1151,7 @@ var CDName: string;
       Choice := 0;
     end;
     {Pfadliste in Liste suchen}
+    List.Clear;
     if GetSection(ProjectList, List, '<' + CDName + '-Files>',
                                      '</' + CDName + '-Files>') then
     begin
@@ -1205,6 +1238,7 @@ var CDName: string;
       Choice := 0;
     end;
     {TreeView-Struktur in Liste suchen}
+    List.Clear;
     if GetSection(ProjectList, List, '<' + CDName + '>',
                                      '</' + CDName + '>') then
     begin
@@ -1252,6 +1286,7 @@ var CDName: string;
       TextTrackData: TCDTextTrackData;
   begin
     {TreeView-Struktur in Liste suchen}
+    List.Clear;
     if GetSection(ProjectList, List, '<' + CDName + '>',
                                      '</' + CDName + '>') then
     begin
@@ -1459,24 +1494,6 @@ end;
 procedure TProjectData.SetTrackPause(const Index: Integer; const Pause: string);
 begin
   FAudioCD.SetTrackPause(Index, Pause);
-end;
-
-{ MP3FilesPresent --------------------------------------------------------------
-
-  liefert True, wenn in der Auswahl MP3-Dateien vorhanden sind.                }
-
-function TProjectData.MP3FilesPresent: Boolean;
-begin
-  Result := FAudioCD.MP3FilesPresent;
-end;
-
-{ OggFilesPresent --------------------------------------------------------------
-
-  liefert True, wenn in der Auswahl Ogg-Dateien vorhanden sind.                }
-
-function TProjectData.OggFilesPresent: Boolean;
-begin
-  Result := FAudioCD.OggFilesPresent;
 end;
 
 { SetDVDSourcePath -------------------------------------------------------------
