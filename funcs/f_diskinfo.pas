@@ -4,7 +4,7 @@
 
   Copyright (c) 2006 Oliver Valencia
 
-  letzte Änderung  15.01.2006
+  letzte Änderung  06.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -37,11 +37,15 @@ const cDiskTypeBlocks: array[0..4, 0..1] of string =
          ('DVD+R/DL (+R9) [7,96 GiByte]', '4173824'));
 
 type TDiskType = (DT_CD, DT_DVD_ROM, DT_DVD_R, DT_DVD_RW, DT_DVD_RDL,
-                  DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL, DT_Manual,
-                  DT_Unknown, DT_None);
+                  DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL,
+                  DT_Unknown,      // unbekannte Disk
+                  DT_None,         // keine Disk eingelegt
+                  DT_Manual,       // manuell Auswahl durch User
+                  DT_ManualNone);  // Abbruch durch User bei Auswahl
 
      TDiskInfo = record
        Sectors : Integer;
+       SecFree : Integer;
        Size    : Double;
        SizeUsed: Double;
        SizeFree: Double;
@@ -165,7 +169,7 @@ end;
 
 procedure TFormSelectDVD.ButtonCancelClick(Sender: TObject);
 begin
-  FDiskType := DT_None;
+  FDiskType := DT_ManualNone;
 end;
 
 { TFormSetDVD - public }
@@ -180,6 +184,7 @@ end;
 procedure InitDiskInfo(var Disk: TDiskInfo);
 begin
   Disk.Sectors  := 0;
+  Disk.SecFree  := 0;
   Disk.Size     := 0;
   Disk.SizeUsed := 0;
   Disk.SizeFree := 0;
@@ -190,21 +195,49 @@ begin
   Disk.DiskType := DT_CD;
 end;
 
+{ DebugShowDiskInfo ------------------------------------------------------------
+
+  zeigt die Daten von TDiskInfo an.                                            }
+
+{$IFDEF DebugReadCDInfo}
+procedure DebugShowDiskInfo(Disk: TDiskInfo);
+begin
+  Deb(CRLF + 'Disk.Sectors : ' + IntToStr(Disk.Sectors), 1);
+  Deb('Disk.SecFree : ' + IntToStr(Disk.SecFree), 1);
+  Deb('Disk.Size    : ' + FloatToStr(Disk.Size), 1);
+  Deb('Disk.SizeUsed: ' + FloatToStr(Disk.SizeUsed), 1);
+  Deb('Disk.SizeFree: ' + FloatToStr(Disk.SizeFree), 1);
+  Deb('Disk.Time    : ' + FloatToStr(Disk.Time), 1);
+  Deb('Disk.TimeFree: ' + FloatToStr(Disk.TimeFree), 1);
+  Deb('Disk.MsInfo  : ' + Disk.MsInfo, 1);
+  if Disk.IsDVD then Deb('Disk.IsDVD   : True' , 1) else
+    Deb('Disk.IsDVD   : False' , 1)
+end;
+{$ENDIF}
+
 { GetAtipInfo ------------------------------------------------------------------
 
   GetAtipInfo liefert als Ergebins die Ausgabe von cdrecord -atip. Da vielleicht
   auch die Angaben zu den DVD-Profilen benötigt werden, wird zusätzlich die
-  Option -v verwendet.                                                         }
+  Option -v verwendet.
+  Für Laufwerke, die bei -v keine vernünftigen Infos zurückgeben, z.B. NEC
+  ND-3550a, ND-4550, kann -vv verwendet werden. Damit werden die benötigten
+  Infos ausgegeben.                                                            }
 
-function GetAtipInfo(const Device: string): string;
+function GetAtipInfo(const Device: string; const vv: Boolean): string;
 var CmdCdrecord: string;
+    VLevel     : string;
 begin
   {ATIP auslesen}
   CmdCdrecord := StartUpDir + cCdrecordBin;
   {$IFDEF QuoteCommandlinePath}
   CmdCdrecord := QuotePath(CmdCdrecord);
   {$ENDIF}
-  CmdCdrecord := CmdCdrecord + ' dev=' + Device + ' -atip -silent -v';
+  case vv of
+    True : VLevel := 'vv';
+    False: VLevel := 'v';
+  end;
+  CmdCdrecord := CmdCdrecord + ' dev=' + Device + ' -atip -silent -' + VLevel;
   Result := GetDosOutput(PChar(CmdCdrecord), True);
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
@@ -305,8 +338,9 @@ begin
     {Größe der CD berechnen}
     Disk.Size := ATIPSec / 512;
     {belegter, freier Speicher}
+    Disk.SecFree := ATIPSec - LastSec;
     Disk.SizeUsed := LastSec / 512;
-    Disk.SizeFree := (ATIPSec - LastSec) / 512;
+    Disk.SizeFree := Disk.SecFree / 512;
     Disk.Time := ATIPSec / 75;
   end else
   begin
@@ -329,7 +363,7 @@ var CmdCdrecord : string;
     p           : Integer;
 begin
   {$IFDEF DebugReadCDInfo}
-  FormDebug.Memo1.Lines.Add('Entering GetAudioCDTimeFree');
+  Deb('Entering GetAudioCDTimeFree', 1);
   {$ENDIF}
   ATIPSec := Disk.Sectors;
   CmdCdrecord := StartUpDir + cCdrecordBin;
@@ -351,6 +385,18 @@ begin
   end;
 end;
 
+{ DiskInserted -----------------------------------------------------------------
+
+  True, wenn ein Medium eingelegt ist, False sonst.                            }
+
+function DiskInserted(const AtipInfo: string): Boolean;
+begin
+  Result := Pos('No disk', AtipInfo) = 0;
+  {$IFDEF DebugReadCDInfo}
+  if not Result then Deb('No disc inserted.' + CRLF, 1);
+  {$ENDIF}
+end;
+
 { MediumIsDVD ------------------------------------------------------------------
 
   MediumIsDVD liefert True, wenn die Disk eine DVD ist, False sonst.           }
@@ -363,6 +409,19 @@ begin
     Result := True;
   end else
     Result := False;
+end;
+
+{ DVDSizeInfoFound -------------------------------------------------------------
+
+  True, wenn 'free blocks' oder 'phys. size' gefunden; False sonst.            }
+
+function DVDSizeInfoFound(const AtipInfo: string): Boolean;
+begin
+  Result := (Pos('free blocks:', AtipInfo) > 0) or
+            (Pos('phys size:...', AtipInfo) > 0);
+  {$IFDEF DebugReadCDInfo}
+  if not Result then Deb('No size information found.', 1);
+  {$ENDIF}
 end;
 
 { GetDVDType -------------------------------------------------------------------
@@ -382,12 +441,12 @@ begin
   Temp := AtipInfo;
   {$IFDEF UseCurrentProfile}
   {$IFDEF DebugReadCDInfo}
-  FormDebug.Memo1.Lines.Add('Using Current Profile.');
+  Deb('Using Current Profile.', 1);
   {$ENDIF}
   p := Pos(CurrentProfileStr, Temp);
   {$ELSE}
   {$IFDEF DebugReadCDInfo}
-  FormDebug.Memo1.Lines.Add('Using Book Type.');
+  Deb('Using Book Type.', 1);
   {$ENDIF}
   p := Pos(BookTypeStr, Temp);
   {$ENDIF}
@@ -409,6 +468,7 @@ begin
     if Temp = 'DVD-ROM'  then Result := DT_DVD_ROM     else
     if Temp = 'DVD-R'    then Result := DT_DVD_R       else
     if Temp = 'DVD-RW'   then Result := DT_DVD_RW      else
+    if Temp = 'DVD-R/DL' then Result := DT_DVD_RDL     else
     if Temp = 'DVD+R'    then Result := DT_DVD_PlusR   else
     if Temp = 'DVD+RW'   then Result := DT_DVD_PlusRW  else
     if Temp = 'DVD+R/DL' then Result := DT_DVD_PlusRDL else
@@ -422,6 +482,26 @@ begin
     {$ENDIF}
   end else
     Result := DT_Unknown;
+  {An dieser Stelle wurde cdrecord -atip mit -v oder -vv aufgerufen. Wenn auch
+   jetzt keine Größeninformationen vorhanden sind, muß der User selbst den Disk-
+   Type auswählen, es sei denn, es ist eine DVD.ROM.}
+  if (Result <> DT_DVD_ROM) and not DVDSizeInfoFound(AtipInfo) then
+  begin
+    Result := DT_Unknown;
+    {$IFDEF DebugReadCDInfo}
+    Deb('No size information found. Disk type set to DT_Unknown.', 1);
+    {$ENDIF}
+  end;
+  {Hack für Laufwerke, die überhaupt keine vernünftigen Infos zurückgeben. Damit
+   der Rohline überhaupt beschrieben werden kann, wird ein unbekannter Typ vor-
+   getäuscht.}
+  if TCdrtfeData.Instance.Settings.Hacks.DisableDVDCheck then
+  begin
+    Result := DT_Unknown;
+    {$IFDEF DebugReadCDInfo}
+    Deb('DT_Unknown forced by DisableDVDCheck=1.', 1);
+    {$ENDIF}
+  end;
 end;
 
 { GetDVDInfo -------------------------------------------------------------------
@@ -442,34 +522,34 @@ begin
   begin
     Disk.MsInfo := '-1';
     {$IFDEF DebugReadCDInfo}
-    FormDebug.Memo1.Lines.Add('DVD-ROM found.' + CRLF);
+    Deb('DVD-ROM found.' + CRLF, 1);
     {$ENDIF}
   end else
   begin
-    if Disk.DiskType in [DT_DVD_R, DT_DVD_RW] then
+    if Disk.DiskType in [DT_DVD_R, DT_DVD_RW, DT_DVD_RDL] then
     begin
       Delete(Temp, 1, Pos('free blocks:', Temp) + 11);
       Temp := Trim(Copy(Temp, 1, Pos(LF, Temp)));
       {$IFDEF DebugReadCDInfo}
-      FormDebug.Memo1.Lines.Add('DVD-R or -RW found.');
-      FormDebug.Memo1.Lines.Add('Using ''free blocks''.');
+      Deb('DVD-R or -RW found.', 1);
+      Deb('Using ''free blocks''.', 1);
       {$ENDIF}
     end else
-    if Disk.DiskType in [DT_DVD_PlusR, DT_DVD_PlusRW] then
+    if Disk.DiskType in [DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL] then
     begin
       Delete(Temp, 1, Pos('phys size:...', Temp) + 12);
       Temp := Trim(Copy(Temp, 1, Pos(LF, Temp)));
       {$IFDEF DebugReadCDInfo}
-      FormDebug.Memo1.Lines.Add('DVD+R or +RW found.');
-      FormDebug.Memo1.Lines.Add('Using ''phys. size''.');
+      Deb('DVD+R or +RW found.', 1);
+      Deb('Using ''phys. size''.', 1);
       {$ENDIF}
     end else
     if Disk.DiskType = DT_Unknown then
     begin
       {$IFDEF DebugReadCDInfo}
-      FormDebug.Memo1.Lines.Add('Unknown DVD-Medium found. Could be DVD+R/DL.');
-      FormDebug.Memo1.Lines.Add('Ask user to select a medium or work with unknown size.');
-      FormDebug.Memo1.Lines.Add('No size check, if no medium not specified.');
+      Deb('Unknown DVD-Medium found. Could be DVD+R/DL.', 1);
+      Deb('Ask user to select a medium or work with unknown size.', 1);
+      Deb('No size check, if no medium specified.', 1);
       {$ENDIF}
       {Den User nur fragen, wenn kein Projekt automatisch ausgeführt wird.}
       if not TCdrtfeData.Instance.Settings.CmdLineFlags.ExecuteProject then
@@ -487,26 +567,28 @@ begin
       end else
       begin
         {$IFDEF DebugReadCDInfo}
-        FormDebug.Memo1.Lines.Add('Auto-executing project. Choosing ''unknown medium type''.');
+        Deb('Auto-executing project. Choosing ''unknown medium type''.', 1);
         {$ENDIF}
         Temp := '2048'; // <- Dummy
       end;
       {$IFDEF DebugReadCDInfo}
       if Disk.DiskType = DT_Unknown then
-      FormDebug.Memo1.Lines.Add('Continuing with unknown medium type.');
+        Deb('Continuing with unknown medium type.', 1);
       if Disk.DiskType = DT_Manual then
-      FormDebug.Memo1.Lines.Add('Continuing with user specified medium type.');
+        Deb('Continuing with user specified medium type.', 1);
       {$ENDIF}
 
     end;
     ATIPSec := StrToIntDef(Temp, 0);
+    Disk.Sectors := ATIPSec;
     Disk.Size := ATIPSec / 512;
     Disk.SizeFree := Disk.Size;
+    Disk.SecFree := Disk.Sectors;
     if Disk.Size = 0 then Disk.MsInfo := '-1';
     {$IFDEF DebugReadCDInfo}
-    FormDebug.Memo1.Lines.Add(Temp + ' blocks');
-    FormDebug.Memo1.Lines.Add(FormatFloat('####.##', Disk.Size) + ' MiByte');
-    FormDebug.Memo1.Lines.Add('');
+    Deb(Temp + ' blocks', 1);
+    Deb(FormatFloat('####.##', Disk.Size) + ' MiByte', 1);
+    Deb('', 1);
     {$ENDIF}
   end;
 end;
@@ -531,20 +613,27 @@ begin
   InitDiskInfo(Disk);
 
   {ATIP auslesen}
-  AtipInfo := GetAtipInfo(Device);
+  AtipInfo := GetAtipInfo(Device, False);
 
-  {Handelt es sich um eine DVD?}
-  Disk.IsDVD := MediumIsDVD(AtipInfo);
-
-  {Auswerten der Infos}
-  if not Disk.IsDVD then
+  {Auswerten der Infos, wenn Medium eingelegt ist.}
+  if DiskInserted(AtipInfo) then
   begin
-    {Es ist eine CD}
-    GetCDInfo(Disk, AtipInfo, Device);
+    {Handelt es sich um eine DVD?}
+    Disk.IsDVD := MediumIsDVD(AtipInfo);
+    if not Disk.IsDVD then
+    begin
+      {Es ist eine CD}
+      GetCDInfo(Disk, AtipInfo, Device);
+    end else
+    begin
+      {Es ist eine DVD.}                               
+      if not DVDSizeInfoFound(AtipInfo) then
+        AtipInfo := GetAtipInfo(Device, True);
+      GetDVDInfo(Disk, AtipInfo);
+    end;
   end else
   begin
-    {Es ist eine DVD.}
-    GetDVDInfo(Disk, AtipInfo);
+    Disk.DiskType := DT_None;
   end;
 
   {Restkapazität berechnen, wenn es sich um eine noch nicht fixierte Audio-CD
@@ -553,6 +642,10 @@ begin
   begin
     GetAudioCDTimeFree(Disk, Device);
   end;
+
+  {$IFDEF DebugReadCDInfo}
+  DebugShowDiskInfo(Disk);
+  {$ENDIF}
 end;
 
 

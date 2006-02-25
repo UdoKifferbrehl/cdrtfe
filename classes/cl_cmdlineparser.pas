@@ -259,6 +259,13 @@ begin
     begin
       FHide := True;
     end;
+    if Par = '/portable' then
+    begin
+      {Ausnahme: Dieser Schalter muß sich sofort auswirken, da die entsprechende
+       Einstellung schon benötigt wird, bevor ExecuteCommandLine ausgeführt
+       wird.}
+      FSettings.General.PortableMode := True;
+    end;
   end;
 
   if ListToAdd = 'data' then

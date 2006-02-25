@@ -3,7 +3,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.01.2006
+  letzte Änderung  23.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,8 +20,6 @@
 
   exportierte Funktionen/Prozeduren:
 
-    AddLog(const Value: string; const Show: Byte)
-    AddLogAddStringList(List: TStringList)
     AddCRStringToList(s: string; List: TStringList)
     ExportControls
     ExportFontList
@@ -63,8 +61,6 @@ function GetSection(Source, Target: TSTringList; const StartTag, EndTag: string)
 function GetCompProp(Comp: TComponent; Name: string): string;
 function PropertyExists(Comp: TComponent; Name: string): Boolean;
 function WaveIsValid(const Name: string): Boolean;
-procedure AddLog(const Value: string; const Show: Byte);
-procedure AddLogAddStringList(List: TStringList);
 procedure AddCRStringToList(s: string; List: TStrings);
 procedure ExportControls;
 procedure ExportFontList;
@@ -94,9 +90,6 @@ implementation
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_filesystem, f_wininfo, f_strings, w32waves, constant;
 
-{ 'statische' Variablen }
-var AddLogFirstRun: Boolean;          // Flag für AddLog
-    
 { GetPathFromNode --------------------------------------------------------------
 
   GetPathFromNode bestimmt den Pfad des angegebenen Knotens ausgehend von der
@@ -176,81 +169,6 @@ begin
   begin
     ListView.Items[i].Selected := True;
   end;
-end;
-
-{ AddLog -----------------------------------------------------------------------
-
-  AddLog fügt eine Zeile an das Log-File an. Falls die Datei log.txt noch nicht
-  existiert, wird sie angelegt. Wenn Show=0 ist, wird der Log-Eintrag nicht als
-  Message-Box angezeigt.                                                       }
-
-procedure AddLog(const Value: string; const Show: Byte);
-var LogName: string;
-    Log: TextFile;
-begin
-  LogName := StartUpDir + '\log.txt';
-  if AddLogFirstRun then
-  begin
-    if not FileExists(LogName) then
-    begin
-      AssignFile(Log, LogName);
-      Rewrite(Log);
-    end else
-    begin
-      AssignFile(log, LogName);
-      Append(Log);
-    end;
-    WriteLn(Log, '------------------------------------------------------------');
-    WriteLn(Log, 'cdrtfe Log-File');
-    WriteLn(Log, '');
-    Close(Log);
-    AddLogFirstRun := False;
-  end;
-  AssignFile(Log, LogName);
-  Append(Log);
-  WriteLn(Log, Value);
-  Close(Log);
-  if Show <> 0 then
-  begin
-    Application.MessageBox(Pchar(Value), 'Debug-Info',
-                           MB_OK or MB_ICONEXCLAMATION);
-  end;
-end;
-
-{ AddLogAddStringList ----------------------------------------------------------
-
-  AddLogAddStringList schreibt den Inhalt der String-Liste ins Log-File.       }
-
-procedure AddLogAddStringList(List: TStringList);
-var i: Integer;
-    LogName: string;
-    Log: TextFile;
-begin
-  if AddLogFirstRun then
-  begin
-    LogName := StartUpDir + '\log.txt';
-    if not FileExists(LogName) then
-    begin
-      AssignFile(Log, LogName);
-      Rewrite(Log);
-    end else
-    begin
-      AssignFile(log, LogName);
-      Append(Log);
-    end;
-    WriteLn(Log, '------------------------------------------------------------');
-    WriteLn(Log, 'cdrtfe Log-File');
-    WriteLn(Log, '');
-    Close(Log);
-    AddLogFirstRun := False;
-  end;
-  AssignFile(Log, LogName);
-  Append(Log);
-  for i := 0 to List.Count - 1 do
-  begin
-    WriteLn(Log, List[i]);
-  end;
-  Close(Log);
 end;
 
 { AddCRStringToList ------------------------------------------------------------
@@ -592,9 +510,5 @@ begin
   FStart := 0;
   FStop := 0;
 end;
-
-
-initialization
-  AddLogFirstRun := True;
 
 end.

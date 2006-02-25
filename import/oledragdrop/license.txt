@@ -1,0 +1,10 @@
+Drag and Drop Component Suite
+Licence, Copyright and Disclaimer
+
+The Drag and Drop Component Suite is Copyright © 1997-99 Angus Johnson & Anders Melander. All rights reserved.
+The software is copyrighted as noted above. It may be freely copied, modified, and redistributed, provided that the copyright notice(s) is preserved on all copies.
+The Drag and Drop Component Suite is freeware and we would like it to remain so. This means that it may not be bundled with commercial libraries or sold as shareware. You are welcome to use it in commercial and shareware applications providing you do not charge for the functionality provided by the Drag and Drop Component Suite.
+
+There is no warranty or other guarantee of fitness for this software, it is provided solely "as is". Bug reports or fixes may be sent to the authors, who may or may not act on them.
+You are welcome to use the source to make your own modified components, and such modified components may be distributed by you or others if you include credits to the original components, and do not charge anything for your modified components. If you modify the source and redistribute it, please include a notice in the revision history (eg in the history.txt file) giving the date and the name of the person performing the modification and a brief description of the modification.
+

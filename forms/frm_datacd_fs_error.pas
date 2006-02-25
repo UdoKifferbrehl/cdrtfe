@@ -2,10 +2,10 @@
 
   frm_datacd_fs_error.pas: Dialog zum Korrigieren von zu langen Dateinamen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.10.2005
+  letzte Änderung  13.05.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,7 +26,7 @@ uses
   cl_projectdata, cl_lang, cl_imagelists, cl_settings;
 
 type
-  TFSEMode = (mFiles, mFolders, mInvalidFiles);
+  TFSEMode = (mFiles, mFolders, mInvalidFiles, mNoAccess);
 
   TFormDataCDFSError = class(TForm)
     ListView: TListView;
@@ -68,9 +68,11 @@ type
     procedure SetForFilenames;
     procedure SetForFolders;
     procedure SetForInvalidFiles;
+    procedure SetForNoAccess;
     procedure ShowErrorList;
     procedure ShowErrorListDir;
     procedure ShowInvalidList;
+    procedure ShowNoAccessList;
   public
     { Public declarations }
     property Data: TProjectData write FData;
@@ -103,6 +105,7 @@ begin
     mFiles       : SetForFilenames;
     mFolders     : SetForFolders;
     mInvalidFiles: SetForInvalidFiles;
+    mNoAccess    : SetForNoAccess;
   end;
 end;
 
@@ -227,6 +230,30 @@ begin
   ListView.TabStop := False;
 end;
 
+{ SetForNoAccess ---------------------------------------------------------------
+
+  Wenn der Dialog für Quelldateien ohne Zugriff genutzt werden soll.           }
+
+procedure TFormDataCDFSError.SetForNoAccess;
+begin
+  FDirCheck := True;
+  {Dialog anpassen}
+  Rename.Visible := False;
+  Caption := FLang.GMS('c504');
+  ListView.Columns[0].Width := 600;
+  ListView.Columns[1].Width := 0;
+  ListView.Columns[2].Width := 0;
+  StaticText1.Visible := False;
+  StaticText2.Visible := False;
+  ButtonIgnore.Visible := False;
+
+  {worum es geht}
+  Label1.Caption := FLang.GMS('m513') + ':';
+  Label2.Caption := '';
+
+  ListView.TabStop := False;
+end;
+
 { AddErrorItemToListView -------------------------------------------------------
 
   Die in der ErrorList gespeicherten Dateien im ListView angezeigen.           }
@@ -298,7 +325,7 @@ begin
                   SHGFI_SYSIconIndex or SHGFI_TYPENAME);
     NewItem.ImageIndex:=Info.IIcon;
   end else
-  if FMode = mInvalidFiles then
+  if FMode in [mInvalidFiles, mNoAccess] then
   begin
     NewItem := ListView.Items.Add;
     NewItem.Caption := Item;
@@ -348,6 +375,19 @@ begin
   end;
 end;
 
+{ ShowNoAccessList -------------------------------------------------------------
+
+  Die Liste mit den unzulässigen Dateien zeigen.                               }
+
+procedure TFormDataCDFSError.ShowNoAccessList;
+var i: Integer;
+begin
+  for i := 0 to FData.NoAccessFiles.Count - 1 do
+  begin
+    AddErrorItemToListView(FData.NoAccessFiles[i], ListView);
+  end;
+end;
+
 
 
 { Form-Events ---------------------------------------------------------------- }
@@ -380,6 +420,7 @@ begin
                    end;
     mFolders     : ShowErrorListDir;
     mInvalidFiles: ShowInvalidList;
+    mNoAccess    : ShowNoAccessList;
   end;
 end;
 

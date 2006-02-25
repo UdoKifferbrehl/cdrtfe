@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_about.pas: About-Dialog
 
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.01.2006
+  letzte Änderung 23.03.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -36,10 +36,12 @@ type
     StaticText5: TStaticText;
     RichEdit1: TRichEdit;
     StaticText6: TStaticText;
+    ButtonSwitch: TButton;
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure Label2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure ButtonSwitchClick(Sender: TObject);
   private
     { Private declarations }
     FLang: TLang;
@@ -55,10 +57,11 @@ implementation
 {$R *.DFM}
 
 {$R ../resource/license.res}
+{$R ../resource/credits.res}
 
 uses constant, f_misc;
 
-const Cdrtfe_Version     = 'cdrtfe 1.2pre1'
+const Cdrtfe_Version     = 'cdrtfe 1.2pre2'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2006  O. Valencia';
@@ -127,6 +130,22 @@ end;
 procedure TFormAbout.FormShow(Sender: TObject);
 begin
   FLang.SetFormLang(self);
+end;
+
+procedure TFormAbout.ButtonSwitchClick(Sender: TObject);
+const {$J+} ShowCredits: Boolean = True; {$J-}
+var TempStream : TResourceStream;
+    Section    : string;
+begin
+  if ShowCredits then Section := 'Credits' else Section := 'License';
+  TempStream := TResourceStream.Create(hInstance, Section, RT_RCDATA);
+  try
+    TempStream.Position := 0;
+    RichEdit1.Lines.LoadFromStream(TempStream);
+  finally
+    TempStream.Free;
+  end;
+  ShowCredits := not ShowCredits;
 end;
 
 initialization

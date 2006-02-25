@@ -2,9 +2,9 @@
 
   f_helper.pas: Hilfsfunktionen
 
-  Copyright (c) 2005 Oliver Valencia
+  Copyright (c) 2005-2006 Oliver Valencia
 
-  letzte Änderung  28.09.2005
+  letzte Änderung  26.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -14,6 +14,7 @@
     * Reload bei einem Laufwerk durchführen
     * Laufwerk öffenen/schließen
     * Eingabe-Liste für rrenc erzeugen
+    * DVD-Video-Quellordner prüfen
 
 
   exportierte Funktionen/Prozeduren:
@@ -21,6 +22,7 @@
     EjectDisk(const Dev: string);
     LoadDisk(const Dev: string);
     ReloadDisk(const Dev: string): Boolean;
+    IsValidDVDSource(const Path: string): Boolean;
 
 }
 
@@ -30,8 +32,9 @@ unit f_helper;
 
 interface
 
-uses Classes;
+uses Classes, FileCtrl;
 
+function IsValidDVDSource(const Path: string): Boolean;
 function ReloadDisk(const Dev: string): Boolean;
 procedure EjectDisk(const Dev: string);
 procedure LoadDisk(const Dev: string);
@@ -128,6 +131,22 @@ begin
   Dest.Add('-d _rec_');
   Dest.Add('-@');
   Dest.Add('-r');
+end;
+
+{ IsValidDVDSoure --------------------------------------------------------------
+
+  True:  Path ist eine gültige DVD-Quelle (enthält Video_TS)
+  False: sonst
+
+  Dies ist nur eine temporäre Lösung.                                          }
+
+function IsValidDVDSource(const Path: string): Boolean;
+var VideoTS: string;
+begin
+  VideoTS := Path;
+  if Path[Length(Path)] <> '\' then VideoTS := VideoTS + '\';
+  VideoTS := VideoTS + 'Video_TS';
+  Result := DirectoryExists(VideoTS);
 end;
 
 end.

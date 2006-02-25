@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.02.2006
+  letzte Änderung  02.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -42,6 +42,7 @@
                         VideoCD
                         DVDVideo
                         Devices
+                        Hacks
 
     Methoden     Create
                  DeleteFromRegistry
@@ -72,10 +73,12 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        TabSheetDrive : array [1..TabSheetCount] of Byte;
        TabSheetSpeed : array [1..TabSheetCount] of Integer;
        CharSets      : TStringList;
+       Mp3Qualities  : TStringList;
        XCDAddMovie   : Boolean;
        TempBoot      : Boolean;
        NoConfirm     : Boolean;
        TabFrmSettings: Byte;
+       TabFrmDAE     : Byte;
        NoWriter      : Boolean;
        NoReader      : Boolean;
        NoDevices     : Boolean;
@@ -85,6 +88,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        AskForTempDir : Boolean;
        CDTextUseTags : Boolean;
        CDTextTP      : Boolean;    // <title> - <performer>.mp3
+       PortableMode  : Boolean;
      end;
 
      TWinPos = record
@@ -133,9 +137,11 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        VCDImOk    : Boolean;
        ShlExtDllOk: Boolean;
        ProDVD     : Boolean;
-       MP3Ok      : Boolean;
-       OggOk      : Boolean;
+       MadplayOk  : Boolean;
+       OggdecOk   : Boolean;
+       OggencOk   : Boolean;
        FLACOk     : Boolean;
+       LameOk     : Boolean;
        RrencOk    : Boolean;
        RrdecOk    : Boolean;
      end;
@@ -311,15 +317,27 @@ type { GUI-Settings, Flags und Hilfsvariablen }
 
      { Einstellungen: DAE }
      TSettingsDAE = record
-       Action    : Byte;
-       Device    : string;
-       Speed     : string;
-       Bulk      : Boolean;
-       Paranoia  : Boolean;
-       NoInfoFile: Boolean;
-       Path      : string;
-       Prefix    : string;
-       Tracks    : string;
+       Action     : Byte;
+       Device     : string;
+       Speed      : string;
+       Bulk       : Boolean;
+       Paranoia   : Boolean;
+       NoInfoFile : Boolean;
+       Path       : string;
+       PrefixNames: Boolean;
+       Prefix     : string;
+       NamePattern: string;
+       Tracks     : string;
+       UseCDDB    : Boolean;
+       CDDBServer : string;
+       CDDBPort   : string;
+       MP3        : Boolean;
+       Ogg        : Boolean;
+       FLAC       : Boolean;
+       AddTags    : Boolean;
+       FlacQuality: string;
+       OggQuality : string;
+       LamePreset : string;
      end;
 
      { Einstellungen: Image schreiben }
@@ -379,6 +397,11 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        ShCmdName : string;
      end;
 
+     { Einstellungen: Hacks }
+     TSettingsHacks = record
+       DisableDVDCheck: Boolean;
+     end;
+
      { Hilfsvariablen }
 
      { Objekt mit den Einstellungen }
@@ -421,6 +444,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Readcd      : TSettingsReadcd;
        VideoCD     : TSettingsVideoCD;
        DVDVideo    : TSettingsDVDVideo;
+       Hacks       : TSettingsHacks;
        constructor Create;
        destructor Destroy; override;
        function GetMaxFileNameLength: Byte;
@@ -514,6 +538,8 @@ begin
                           'iso8859-2,iso8859-3,iso8859-4,iso8859-5,'   +
                           'iso8859-6,iso8859-7,iso8859-8,iso8859-9,'   +
                           'iso8859-14,iso8859-15,koi8-u,koi8-r';
+    Mp3Qualities.CommaText := 'medium,standard,extreme,insane,' +
+                              '320,256,224,192,160,128,112,96,80';
     General.Choice := 0;
     XCDAddMovie := False;
     TempBoot := False;
@@ -526,6 +552,7 @@ begin
     ImageRead := True;
     NoConfirm := False;
     TabFrmSettings := cCdrtfe;
+    TabFrmDAE      := cTabDAE;
     NoWriter := False;
     NoReader := False;
     NoDevices := False;
@@ -535,6 +562,7 @@ begin
     AskForTempDir := False;
     CDTextUseTags := True;
     CDTextTP := False;
+    PortableMode := False;
   end;
 
   with WinPos do
@@ -586,8 +614,10 @@ begin
     VCDImOk     := True;
     ShlExtDllOk := True;
     ProDVD      := False;
-    MP3Ok       := True;
-    OggOk       := True;
+    MadplayOK   := True;
+    LameOk      := True;
+    OggdecOk    := True;
+    OggencOk    := True;
     FLACOk      := True;
     RrencOk     := True;
     RrdecOk     := True;
@@ -767,15 +797,27 @@ begin
   {DAE}
   with DAE do
   begin
-    Action     := 0;
-    Device     := '';
-    Speed      := '';
-    Bulk       := True;
-    Paranoia   := False;
-    NoInfoFile := True;
-    Path       := '';
-    Prefix     := 'track';
-    Tracks     := '';
+    Action      := 0;
+    Device      := '';
+    Speed       := '';
+    Bulk        := True;
+    Paranoia    := False;
+    NoInfoFile  := True;
+    Path        := '';
+    PrefixNames := True;
+    Prefix      := 'track';
+    NamePattern := '%N %P - %T';
+    Tracks      := '';
+    UseCDDB     := False;
+    CDDBServer  := '';
+    CDDBPort    := '';
+    MP3         := False;
+    Ogg         := False;
+    FLAC        := False;
+    AddTags     := True;
+    FlacQuality := '5';
+    OggQuality  := '6';
+    LamePreset  := 'standard';
   end;
 
   {Image schreiben}
@@ -838,6 +880,12 @@ begin
     KeepImage  := False;
     Verify     := False;
     ShCmdName  := '';
+  end;
+
+  {Hacks}
+  with Hacks do
+  begin
+    DisableDVDCheck := False;
   end;
 end;
 
@@ -975,6 +1023,7 @@ constructor TSettings.Create;
 begin
   inherited Create;
   General.Charsets := TStringList.Create;
+  General.Mp3Qualities := TStringList.Create;
   Cdrecord.CdrecordCustOpts := TStringList.Create;
   Cdrecord.MkisofsCustOpts  := TStringList.Create;
 (*  Devices.CDWriter  := TStringList.Create;
@@ -986,6 +1035,7 @@ end;
 destructor TSettings.Destroy;
 begin
   General.CharSets.Free;
+  General.Mp3Qualities.Free;
   Cdrecord.CdrecordCustOpts.Free;
   Cdrecord.MkisofsCustOpts.Free;
 //  Devices.CDWriter.Free;
@@ -1291,6 +1341,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'ImageRead', ImageRead);
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
+      WriteInteger(Section, 'TabFrmDAE', TabFrmDAE);
       WriteString(Section, 'TempFolder', TempFolder);
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
@@ -1501,8 +1552,20 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'Paranoia', Paranoia);
       WriteBool(Section, 'NoInfoFile', NoInfoFile);
       WriteString(Section, 'Path', Path);
+      WriteBool(Section, 'PrefixNames', PrefixNames);
       WriteString(Section, 'Prefix', Prefix);
+      WriteString(Section, 'NamePattern', NamePattern);
       WriteString(Section, 'Tracks', Tracks);
+      WriteBool(Section, 'UseCDDB', UseCDDB);
+      WriteString(Section, 'CDDBServer', CDDBServer);
+      WriteString(Section, 'CDDBPort', CDDBPort);
+      WriteBool(Section, 'MP3', MP3);
+      WriteBool(Section, 'Ogg', Ogg);
+      WriteBool(Section, 'FLAC', FLAC);
+      WriteBool(Section, 'AddTags', AddTags);
+      WriteString(Section, 'FlacQuality', FlacQuality);
+      WriteString(Section, 'OggQuality', OggQuality);
+      WriteString(Section, 'LamePreset', LamePreset);
     end;
 
     {Image schreiben}
@@ -1646,6 +1709,7 @@ var PF: TIniFile; // ProjectFile
       ImageRead := ReadBool(Section, 'ImageRead', True);
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
+      TabFrmDAE := ReadInteger(Section, 'TabFrmDAE', cTabDAE);
       TempFolder := ReadString(Section, 'TempFolder', '');
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
@@ -1654,10 +1718,18 @@ var PF: TIniFile; // ProjectFile
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;
 
-    {Die Fensterpositionen sind nicht in 'normalen' Projekt-Dateien.}
+    {Einstellung, die nur in der cdrtfe.ini vorkommen.}
     {$IFDEF IniSettings}
     if Name = cIniFile then
     begin
+      Section := 'General';
+      with PF, General do
+      begin
+        {read-only}
+        if not PortableMode then
+          PortableMode := ReadBool(Section, 'PortableMode', False);      
+      end;
+      {Fensterpositionen}
       Section := 'WinPos';
       with PF, WinPos do
       begin
@@ -1673,7 +1745,7 @@ var PF: TIniFile; // ProjectFile
         OutMaximized := ReadBool(Section, 'OutMaximized', False);
         OutScrolled := ReadBool(Section, 'OutScrolled', True);
       end;
-      {ProDVD-Schlüssel aus cdrtfe.ini lesen}
+      {ProDVD-Schlüssel aus cdrtfe.ini lesen, read-only}
        Environment.ProDVDKey := PF.ReadString('ProDVD', cCDRSEC, '');
       {Drive-Settings}
       Section := 'Drives';
@@ -1685,6 +1757,12 @@ var PF: TIniFile; // ProjectFile
         if UseRSCSI then RSCSIString := 'REMOTE:' + Host + ':' else
           RSCSIString := '';
         LocalDrives := ReadString(Section, 'LocalDrives', '');
+      end;
+      {Hacks}
+      Section := 'Hacks';
+      with PF, Hacks do
+      begin
+        DisableDVDCheck := ReadBool(Section, 'DisableDVDCheck', False);
       end;
     end;
     {$ENDIF}
@@ -1878,8 +1956,23 @@ var PF: TIniFile; // ProjectFile
       Paranoia := ReadBool(Section, 'Paranoia', False);
       NoInfoFile := ReadBool(Section, 'NoInfoFile', True);
       Path := ReadString(Section, 'Path', '');
+      PrefixNames := ReadBool(Section, 'PrefixNames', True);
       Prefix := ReadString(Section, 'Prefix', 'track');
+      NamePattern := ReadString(Section, 'NamePattern', '');
       Tracks := ReadString(Section, 'Tracks', '');
+      UseCDDB := ReadBool(Section, 'UseCDDB', False);
+      CDDBServer := ReadString(Section, 'CDDBServer', '');
+      CDDBPort := ReadString(Section, 'CDDBPort', '');
+      MP3 := ReadBool(Section, 'MP3', False) and FileFlags.LameOk and
+             (FileFlags.ShOk or not FileFlags.ShNeeded);
+      Ogg := ReadBool(Section, 'Ogg', False) and FileFlags.OggencOk and
+             (FileFlags.ShOk or not FileFlags.ShNeeded);
+      FLAC := ReadBool(Section, 'FLAC', False) and FileFlags.FlacOk and
+              (FileFlags.ShOk or not FileFlags.ShNeeded);
+      AddTags := ReadBool(Section, 'AddTags', True);
+      FlacQuality := ReadString(Section, 'FlacQuality', '5');
+      OggQuality := ReadString(Section, 'OggQuality', '6');
+      LamePreset := ReadString(Section, 'LamePreset', 'standard');
     end;
     Shared.ProgressBarPosition := 9;
     ProgressBarUpdate;
@@ -2025,6 +2118,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'ImageRead', ImageRead);
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
+      WriteInteger(Section, 'TabFrmDAE', TabFrmDAE);
       WriteString(Section, 'TempFolder', TempFolder);
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
@@ -2222,8 +2316,20 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'Paranoia', Paranoia);
       WriteBool(Section, 'NoInfoFile', NoInfoFile);
       WriteString(Section, 'Path', Path);
+      WriteBool(Section, 'PrefixNames', PrefixNames);
       WriteString(Section, 'Prefix', Prefix);
+      WriteString(Section, 'NamePattern', NamePattern);
       WriteString(Section, 'Tracks', Tracks);
+      WriteBool(Section, 'UseCDDB', UseCDDB);
+      WriteString(Section, 'CDDBServer', CDDBServer);
+      WriteString(Section, 'CDDBPort', CDDBPort);
+      WriteBool(Section, 'MP3', MP3);
+      WriteBool(Section, 'Ogg', Ogg);
+      WriteBool(Section, 'FLAC', FLAC);
+      WriteBool(Section, 'AddTags', AddTags);
+      WriteString(Section, 'FlacQuality', FlacQuality);
+      WriteString(Section, 'OggQuality', OggQuality);
+      WriteString(Section, 'LamePreset', LamePreset);
     end;
 
     {Image schreiben}
@@ -2332,6 +2438,7 @@ var PF: TRegIniFile; // ProjectFile
       ImageRead := ReadBool(Section, 'ImageRead', True);
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
+      TabFrmDAE := ReadIntegr(Section, 'TabFrmDAE', cTabDAE);
       TempFolder := ReadString(Section, 'TempFolder', '');
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
@@ -2550,8 +2657,23 @@ var PF: TRegIniFile; // ProjectFile
       Paranoia := ReadBool(Section, 'Paranoia', False);
       NoInfoFile := ReadBool(Section, 'NoInfoFile', True);
       Path := ReadString(Section, 'Path', '');
+      PrefixNames := ReadBool(Section, 'PrefixNames', True);
       Prefix := ReadString(Section, 'Prefix', 'track');
+      NamePattern := ReadString(Section, 'NamePattern', '');
       Tracks := ReadString(Section, 'Tracks', '');
+      UseCDDB := ReadBool(Section, 'UseCDDB', False);
+      CDDBServer := ReadString(Section, 'CDDBServer', '');
+      CDDBPort := ReadString(Section, 'CDDBPort', '');
+      MP3 := ReadBool(Section, 'MP3', False) and FileFlags.LameOk and
+             (FileFlags.ShOk or not FileFlags.ShNeeded);
+      Ogg := ReadBool(Section, 'Ogg', False) and FileFlags.OggencOk and
+             (FileFlags.ShOk or not FileFlags.ShNeeded);
+      FLAC := ReadBool(Section, 'FLAC', False) and FileFlags.FlacOk and
+             (FileFlags.ShOk or not FileFlags.ShNeeded);
+      AddTags := ReadBool(Section, 'AddTags', True);
+      FlacQuality := ReadString(Section, 'FlacQuality', '5');
+      OggQuality := ReadString(Section, 'OggQuality', '6');
+      LamePreset := ReadString(Section, 'LamePreset', 'standard');
     end;
     Shared.ProgressBarPosition := 9;
     ProgressBarUpdate;

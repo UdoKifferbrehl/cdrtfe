@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2006
+  letzte Änderung  23.06.2006
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -31,6 +31,8 @@
 
 program cdrtfe;
 
+{$I directives.inc}
+
 uses
   Forms,
   frm_main in 'forms\frm_main.pas' {Form1},
@@ -45,6 +47,7 @@ uses
   frm_xcd_options in 'forms\frm_xcd_options.pas' {FormXCDOptions},
   frm_audiocd_tracks in 'forms\frm_audiocd_tracks.pas' {FormAudioCDTracks},
   frm_videocd_options in 'forms\frm_videocd_options.pas' {FormVideoCDOptions},
+  frm_dae_options in 'forms\frm_dae_options.pas' {FormDAEOptions},
   cl_lang in 'classes\cl_lang.pas',
   cl_settings in 'classes\cl_settings.pas',
   cl_cd in 'classes\cl_cd.pas',
@@ -54,6 +57,7 @@ uses
   cl_action in 'classes\cl_action.pas',
   cl_actionthread in 'classes\cl_actionthread.pas',
   cl_devices in 'classes\cl_devices.pas',
+  cl_cdrtfedata in 'classes\cl_cdrtfedata.pas',
   f_cdtext in 'funcs\f_cdtext.pas',
   f_checkproject in 'funcs\f_checkproject.pas',
   f_init in 'funcs\f_init.pas',
@@ -61,7 +65,7 @@ uses
   f_helper in 'funcs\f_helper.pas',
   cl_tree in 'support\cl_tree.pas',
   cl_mpeginfo in 'support\cl_mpeginfo.pas',
-  cl_flacinfo in 'support\cl_flacinfo.pas',  
+  cl_flacinfo in 'support\cl_flacinfo.pas',
   f_misc in 'support\f_misc.pas',
   f_cygwin in 'support\f_cygwin.pas',
   f_strings in 'support\f_strings.pas',
@@ -69,8 +73,8 @@ uses
   f_crc_tab in 'support\f_crc_tab.pas',
   constant in 'support\constant.pas',
   user_messages in 'support\user_messages.pas',
-  W32Waves in 'import\w32waves.pas',
-  atl_oggvorbis in 'import\atl_oggvorbis.pas',
+  cl_logwindow in 'support\cl_logwindow.pas',
+  f_logfile in 'support\f_logfile.pas',
   cl_filetypeinfo in 'system\cl_filetypeinfo.pas',
   cl_imagelists in 'system\cl_imagelists.pas',
   cl_peheader in 'system\cl_peheader.pas',
@@ -80,18 +84,28 @@ uses
   f_process in 'system\f_process.pas',
   f_filesystem in 'system\f_filesystem.pas',
   f_diskinfo in 'funcs\f_diskinfo.pas',
-  cl_cdrtfedata in 'classes\cl_cdrtfedata.pas';
+  {$IFDEF UseOLEDragDrop}
+  DropTarget in 'import\oledragdrop\DropTarget.pas',
+  DropSource in 'import\oledragdrop\DropSource.pas',
+  {$ENDIF}
+  W32Waves in 'import\w32waves.pas',
+  atl_oggvorbis in 'import\atl_oggvorbis.pas';
 
 { verwendete externe Komponenten/Units:
   -------------------------------------
   W32Waves:          by Ulli Conrad
   atl_oggvorbis.pas: Copyright (c) 2001 by Jurgen Faul.
+  DropTarget.pas,
+  DropSource.pas:    © 1997-2005 Angus Johnson & Anders Melander
 }
 
 {$R *.RES}
 
 begin
+  {$IFDEF WriteLogfile} AddLog('Application.Initialize', 0); {$ENDIF}
   Application.Initialize;
+  {$IFDEF WriteLogfile} AddLog('Application.CreateForm1' + CRLF, 0); {$ENDIF}
   Application.CreateForm(TForm1, Form1);
+  {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}  
   Application.Run;
 end.

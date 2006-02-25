@@ -41,8 +41,6 @@ interface
 uses SysUtils,
      cl_lang, cl_settings, cl_projectdata;
 
-type TDummy = Integer;
-
 type TCdrtfeData = class(TObject)
      private
        FLang    : TLang;

@@ -3,11 +3,11 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.01.2006
+  letzte Änderung  29.05.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
   f_filesystem.pas stellt Funktionen zum Dateisystem zur Verfügung:
     * Dateinamen/CD-Label überprüfen
@@ -18,6 +18,7 @@
     * Auswahldialog für Ordner
     * Funktionen, um bestimmte Ordner zu finden
     * Infos über Laufwerke (Name, Dateisystem, Seriennummer, ...)
+    * Zugriff auf Datei prüfen
 
 
   exportierte Funktionen/Prozeduren:
@@ -26,6 +27,7 @@
     ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)
+    FileAccess(const Name: string; const OpenMode, ShareMode: Word): Boolean;
     FilenameIsValid(const Name: string):Boolean
     FileSystemIsFAT(const Path: string): Boolean
     FindInSearchPath(const Name: string): string
@@ -35,8 +37,9 @@
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
     GetVolumeInfo(var VolInfo: TVolumeInfo)
-    OverrideProgDataDir
+    OverrideProgDataDir(const OverrideWithStartUpDir: Boolean)
     ProgDataDir: string
+    ProgDataDirCreate
     StartUpDir: string
     TempDir: string
 
@@ -68,6 +71,7 @@ function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
+function FileAccess(const Name: string; const OpenMode, ShareMode: Word): Boolean;
 function FilenameIsValid(const Name: string): Boolean;
 function FileSystemIsFAT(const Path: string): Boolean;
 function FindInSearchPath(const Name: string): string;
@@ -81,7 +85,8 @@ function StartUpDir: string;
 function TempDir: string;
 procedure DummyDir(Mode: Boolean);
 procedure GetVolumeInfo(var VolInfo: TVolumeInfo);
-procedure OverrideProgDataDir;
+procedure OverrideProgDataDir(const OverrideWithStartUpDir: Boolean);
+procedure ProgDataDirCreate;
 
 implementation
 
@@ -137,6 +142,20 @@ begin
   if ProgDataDirOverride <> '' then Result := ProgDataDirOverride;
 end;
 
+{ ProgDataDirCreate ------------------------------------------------------------
+
+  erzeugt das Datenverzeichnis unter NT-Systemen, sofern cdrtfe nicht im
+  Portable-Mode läuft.                                                         }
+
+procedure ProgDataDirCreate;
+begin
+  {Überprüfen, ob das Daten-Verzeichnis da ist. Wenn nicht, anlegen.}
+  if PlatformWinNT then
+  begin
+    if not DirectoryExists(ProgDataDir) then MkDir(ProgDataDir);
+  end;
+end;
+
 { TempDir ----------------------------------------------------------------------
 
   TempDir liefert das %Temp%- bzw. %TMP%-Verzeichnis.                          }
@@ -152,14 +171,20 @@ end;
   OverrideProgDataDir ermöglicht es, ein anderes Verzeichnis für die temporären
   Dateien anzugeben, damit cdrtfe auch von CD läuft.}
 
-procedure OverrideProgDataDir;
+procedure OverrideProgDataDir(const OverrideWithStartUpDir: Boolean);
 var Dir: string;
 begin
-  Dir := '';
-  while Dir = '' do
+  if OverrideWithStartUpDir then
   begin
-    Dir := ChooseDir('', Application.Handle);
-    if DirectoryExists(Dir) then ProgDataDirOverride := Dir;
+    ProgDataDirOverride := StartUpDir;
+  end else
+  begin
+    Dir := '';
+    while Dir = '' do
+    begin
+      Dir := ChooseDir('', Application.Handle);
+      if DirectoryExists(Dir) then ProgDataDirOverride := Dir;
+    end;
   end;
 end;
 
@@ -475,6 +500,33 @@ begin
   VolInfo.Drive := Path;
   GetVolumeInfo(VolInfo);
   Result := (VolInfo.FileSystem = 'FAT') or (VolInfo.FileSystem = 'FAT32');
+end;
+
+{ FileAccess -------------------------------------------------------------------
+
+  FileAccess prüft, ob bei die Datei Name im angegebenen Modus geöffnet werden
+  kann.
+  OpenMode : fmCreate, fmOpenRead, fmOpenWrite, fmOpenReadWrite
+  ShareMode: fmShareCompat, fmShareExclusive, fmShareDenyRead, fmShareDenyWrite,
+             fmShareDenyNone
+  Resul    : True, wenn Zugriff möglich
+             False, sonst                                                      }
+
+function FileAccess(const Name: string;
+                    const OpenMode, ShareMode: Word): Boolean;
+var FS: TFileStream;
+begin
+  FS := nil;
+  try
+    try
+      FS := TFileStream.Create(Name, OpenMode or ShareMode);
+      Result := True;
+    except
+      Result := False;
+    end;
+  finally
+    FS.Free;
+  end;
 end;
 
 initialization

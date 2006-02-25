@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.01.2006
+  letzte Änderung  13.05.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -165,6 +165,7 @@ type TProjectData = class(TObject)
        ErrorListDir: TStringList;
        ErrorListIgnore: TStringList;
        InvalidSrcFiles: TStringList;
+       NoAccessFiles: TStringList;
        IgnoreNameLengthErrors: Boolean;
        constructor Create;
        destructor Destroy; override;
@@ -178,7 +179,7 @@ type TProjectData = class(TObject)
        function GetTrackPause(const Index: Integer): string;
        function TrackPausePresent: Boolean;
        procedure AddToPathlist(const AddName, DestPath: string; const Choice: Byte);
-       procedure CheckDataCDFS(const Path: string; const MaxLength: Byte; const CheckFolder: Boolean);
+       procedure CheckDataCDFS(const Path: string; const MaxLength: Byte; const CheckFolder, CheckAccess: Boolean);
        procedure ChangeForm2Status(const Name, Path: string);
        procedure CreateBurnList(List: TStringList; const Choice: Byte);
        procedure CreateCDTextFile(const Name: string);
@@ -379,6 +380,7 @@ begin
   ErrorListDir := TStringList.Create;
   ErrorListIgnore := TStringList.Create;
   InvalidSrcFiles := TStringList.Create;
+  NoAccessFiles := TStringList.Create;
   IgnoreNameLengthErrors := False;
   FAcceptMP3 := True;
   FAcceptOgg := True;
@@ -397,6 +399,7 @@ begin
   ErrorListDir.Free;
   ErrorListIgnore.Free;
   InvalidSrcFiles.Free;
+  NoAccessFiles.Free;
   inherited Destroy;
 end;
 
@@ -888,21 +891,24 @@ end;
   und zu tief liegende Ordner.                                                 }
 
 procedure TProjectData.CheckDataCDFS(const Path: string; const MaxLength: Byte;
-                                     const CheckFolder: Boolean);
+                                     const CheckFolder, CheckAccess: Boolean);
 var CheckFSArgs: TCheckFSArgs;
 begin
   ErrorListFiles.Clear;
   ErrorListDir.Clear;
   InvalidSrcFiles.Clear;
+  NoAccessFiles.Clear;
   {Argumente zusammenstellen}
   CheckFSArgs.Path := Path;
   CheckFSArgs.MaxLength := MaxLength;
   CheckFSArgs.CheckFolder := CheckFolder;
+  CheckFSArgs.CheckAccess := CheckAccess;
   CheckFSArgs.IgnoreFiles := IgnoreNameLengthErrors;
   CheckFSArgs.ErrorListFiles := ErrorListFiles;
   CheckFSArgs.ErrorListDir := ErrorListDir;
   CheckFSArgs.ErrorListIgnore := ErrorListIgnore;
   CheckFSArgs.InvalidSrcFiles := InvalidSrcFiles;
+  CheckFSArgs.NoAccessFiles := NoAccessFiles;
   {Dateinamen prüfen}
   FDataCD.CheckFS(CheckFSArgs);
 end;

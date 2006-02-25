@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_main.pas: Hauptfenster
 
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.02.2006
+  letzte Änderung  02.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,9 +22,12 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
      {externe Komponenten}
+     {$IFDEF UseOLEDragDrop}
+     DropTarget, DropSource,
+     {$ENDIF}
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
-     cl_action, cl_cmdlineparser, cl_devices,
+     cl_action, cl_cmdlineparser, cl_devices, cl_logwindow,
      user_messages, constant;
 
 type
@@ -158,14 +161,9 @@ type
     PanelDAE: TPanel;
     ButtonDAEOptions: TButton;
     ButtonDAEReadToc: TButton;
-    CheckBoxDAEBulk: TCheckBox;
-    CheckBoxDAELibParanoia: TCheckBox;
-    CheckBoxDAENoInfofiles: TCheckBox;
     Label1: TLabel;
     EditDAEPath: TEdit;
     ButtonDAESelectPath: TButton;
-    Label2: TLabel;
-    EditDAEPrefix: TEdit;
     PanelImage: TPanel;
     GroupBoxReadCD: TGroupBox;
     CheckBoxReadCDNoerror: TCheckBox;
@@ -237,6 +235,16 @@ type
     EditDVDVideoVolID: TEdit;
     ButtonDVDVideoOptions: TButton;
     CheckBoxDVDVideoVerify: TCheckBox;
+    MiscPopupSaveOutput: TMenuItem;
+    TimerNodeExpand: TTimer;
+    PanelDAEOptions: TPanel;
+    LabelDAEBulk: TLabel;
+    LabelDAEParanoia: TLabel;
+    LabelDAEInfoFiles: TLabel;
+    LabelDAECDDB: TLabel;
+    LabelDAEMp3: TLabel;
+    LabelDAEOgg: TLabel;
+    LabelDAEFlac: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -345,6 +353,9 @@ type
     procedure EditChange(Sender: TObject);
     procedure ButtonDVDVideoOptionsClick(Sender: TObject);
     procedure EditDblClick(Sender: TObject);
+    procedure MiscPopupSaveOutputClick(Sender: TObject);
+    procedure TimerNodeExpandTimer(Sender: TObject);
+    procedure ButtonDAEOptionsClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -359,17 +370,22 @@ type
     {$IFDEF ShowCmdError}
     FExitCode: Integer;
     {$ENDIF}
+    {$IFDEF UseOLEDragDrop}
+    DropFileTargetCDETreeView: TDropFileTarget;
+    DropFileTargetXCDETreeView: TDropFileTarget;
+    {$ENDIF}
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
     procedure AddToPathList(const Filename: string);
     procedure AddToPathListSort(const FolderAdded: Boolean);
     procedure AddItemToListView(const Item: string; ListView: TListView);
-    procedure CheckDataCDFS;
+    procedure CheckDataCDFS(const CheckAccess: Boolean);
     procedure CheckControls;
     {$IFDEF ShowCmdError}
     procedure CheckExitCode;
     {$ENDIF}
+    procedure ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
     procedure GetSettings;
     procedure InitMainform;
     procedure InitTreeView(Tree: TTreeView; const Choice: Byte);
@@ -429,6 +445,13 @@ type
     procedure ProgressBarReset(Sender: Tobject);
     procedure ProgressBarUpdate(Sender: TObject);
     procedure UpdatePanels(Sender: TObject);
+    {Ole-Drop-Target-Funktionen}
+    {$IFDEF UseOLEDragDrop}
+    procedure InitDropTargets;
+    procedure FreeDropTargets;
+    procedure DropFileTargetTreeViewDragOver(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
+    procedure DropFileTargetTreeViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
+    {$ENDIF}
   public
     { Public declarations }
   end;
@@ -444,9 +467,10 @@ implementation
 uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
      frm_xcd_options, frm_settings, frm_about, frm_output,
-     frm_videocd_options,
+     frm_videocd_options, frm_dae_options,
      cl_cdrtfedata,
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
      f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init, f_helper,
@@ -631,6 +655,10 @@ end;
 procedure TForm1.WMVTerminated(var Msg: TMessage);
 var LogFile: string;
 begin
+  {$IFDEF ShowExecutionTime}
+  TC2.StopTimeCount;
+  TLogWin.Inst.Add('Time: ' + TC2.TimeAsString);
+  {$ENDIF}
   {Die XCD-Info-Datei darf erst nach dem Vergleich entsorgt werden.}
   FAction.CleanUp(3);
   with FSettings.CmdLineFlags do
@@ -651,7 +679,7 @@ begin
       begin
         LogFile := FSettings.General.LastProject + '.log';
       end;
-      Memo1.Lines.SaveToFile(LogFile);
+      TLogWin.Inst.SaveLog(LogFile);
     end;
     {automatisches Beenden}
     if ExitAfterExecution then
@@ -736,7 +764,7 @@ end;
 
 procedure TForm1.WMCheckDataFS(var Msg: TMessage);
 begin
-  CheckDataCDFS;
+  CheckDataCDFS(False);
 end;
 
 { WMMinimize -------------------------------------------------------------------
@@ -747,6 +775,125 @@ procedure TForm1.WMMinimize(var Msg: TMessage);
 begin
   FSettings.CmdLineFlags.Minimize := True;
 end;
+
+
+{$IFDEF UseOLEDragDrop}
+{ Drop-Target-Funktionen ----------------------------------------------------- }
+
+{ InitDropTargets --------------------------------------------------------------
+
+  InitDropTargets initialisiert die DropFileTarget-Komponenten.                }
+
+procedure TForm1.InitDropTargets;
+begin
+  {CDETreeView}
+  DropFileTargetCDETreeView := TDropFileTarget.Create(Form1);
+  DropFileTargetCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
+  DropFileTargetCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
+  DropFileTargetCDETreeView.Dragtypes := [dtCopy];
+  DropFileTargetCDETreeView.Register(CDETreeView);
+  {XCDETreeView}
+  DropFileTargetXCDETreeView := TDropFileTarget.Create(Form1);
+  DropFileTargetXCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
+  DropFileTargetXCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
+  DropFileTargetXCDETreeView.Dragtypes := [dtCopy];
+  DropFileTargetXCDETreeView.Register(XCDETreeView);
+end;
+
+{ FreeDropTargets --------------------------------------------------------------
+
+  FreeDropTargets gibt die DropFileTarget-Komponenten wieder frei.             }
+
+procedure TForm1.FreeDropTargets;
+begin
+  DropFileTargetCDETreeView.UnregisterAll;
+  DropFileTargetXCDETreeView.UnregisterAll;  
+end;
+
+{ DropFileTargetTreeView-Events ---------------------------------------------- }
+
+{ DropFileTargetTreeViewDragOver -----------------------------------------------
+
+  regelt das Verhalten bei OLE-DragOver-Ereignissen.                           }
+
+procedure TForm1.DropFileTargetTreeViewDragOver(Sender: TObject;
+                                                ShiftState: TShiftState;
+                                                Point: TPoint;
+                                                var Effect: Integer);
+var Tree: TTreeView;
+    Node: TTreeNode;
+    DoRepaint: Boolean;
+begin
+  DoRepaint := False;
+  Tree := ((Sender as TDropFileTarget).Target as TTreeView);
+  if (Point.Y > Tree.Height - 20) and (Point.Y < Tree.Height) then
+  begin
+    Tree.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    DoRepaint := True;
+  end;
+  if (Point.Y < 20) {and (Tree.TopItem <> Tree.Items[0]) }then
+  begin
+    Tree.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    DoRepaint := True;
+  end;
+  {Zielknoten markieren}
+  Node := Tree.GetNodeAt(Point.X, Point.Y);
+  if Tree.DropTarget <> Node then
+  begin
+    (Sender as TDropfileTarget).ShowImage := False;
+    Tree.DropTarget := Node;
+    (Sender as TDropfileTarget).ShowImage := True;
+  end;
+  {automatisches Expandieren}
+  if Node <> nil then
+    if Node.HasChildren and not Node.Expanded then
+    begin
+      ExpandNodeDelayed(Node, False);
+    end;
+  if DoRepaint then
+  begin
+    (Sender as TDropfileTarget).ShowImage := False;
+    Tree.Repaint;
+    (Sender as TDropfileTarget).ShowImage := True;
+  end;
+end;
+
+{ DropFileTargetTreeViewDrop ---------------------------------------------------
+
+  regelt das Verhalten bei OLE-Drop-Ereignissen.                               }
+
+procedure TForm1.DropFileTargetTreeViewDrop(Sender: TObject;
+                                            ShiftState: TShiftState;
+                                            Point: TPoint; var Effect: Integer);
+var FolderAdded: Boolean;
+    i          : Integer;
+    FileName   : string;
+    Tree       : TTreeView;
+    // OldNode    : TTreeNode;
+begin
+  FolderAdded := False;
+  Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
+  {aktuellen Knoten bestimmen}
+  Tree := ((Sender as TDropFileTarget).Target as TTreeView);;
+  SelectRootIfNoneSelected(Tree);
+  // OldNode := Tree.Selected;
+  if Tree.DropTarget <> nil then Tree.Selected := Tree.DropTarget;
+  {Dateienn hinzufügen}
+  for i := 0 to (Sender as TDropFileTarget).Files.Count - 1 do
+  begin
+    FileName := (Sender as TDropFileTarget).Files[i];
+    AddToPathList(FileName);
+    {Flag setzen, wenn Order hinzugefügt wurde}
+    if not FolderAdded then
+    begin
+      if DirectoryExists(FileName) then FolderAdded := True;
+    end;
+  end;
+  // Tree.Selected := OldNode;
+  {Ordner sortieren}
+  AddToPathlistSort(FolderAdded);
+end;
+{$ENDIF}
 
 
 { Lesen/Speichern der Einstellungen ------------------------------------------ }
@@ -793,11 +940,7 @@ begin
   {DAE}
   with FSettings.DAE do
   begin
-    CheckBoxDAEBulk.Checked        := Bulk;
-    CheckBoxDAELibParanoia.Checked := Paranoia;
-    CheckBoxDAENoInfofiles.Checked := NoInfoFile;
     EditDAEPath.Text               := Path;
-    EditDAEPrefix.Text             := Prefix;
   end;
   {Image}
   RadioButtonImageRead.Checked := FSettings.General.ImageRead;
@@ -940,11 +1083,7 @@ begin
   {DAE}
   with FSettings.DAE do
   begin
-    Bulk       := CheckBoxDAEBulk.Checked;
-    Paranoia   := CheckBoxDAELibParanoia.Checked;
-    NoInfoFile := CheckBoxDAENoInfofiles.Checked;
     Path       := EditDAEPath.Text;
-    Prefix     := EditDAEPrefix.Text;
     Device     := GetDevice(cDAE);
     Speed      := GetSpeed(cDAE);
     {ausgwählte Tracks merken}
@@ -1116,12 +1255,15 @@ end;
   CheckDataCDFS überprüft das Dateisystem der Daten-CD auf zu lange Dateinamen
   und zu tief liegende Ordner.                                                 }
 
-procedure TForm1.CheckDataCDFS;
-var OldStatusText: string;
-    Path: string;
-    CheckFolder: Boolean;
+procedure TForm1.CheckDataCDFS(const CheckAccess: Boolean);
+var OldStatusText    : string;
+    Path             : string;
+    CheckFolder      : Boolean;
     FormDataCDFSError: TFormDataCDFSError;
 begin
+  {$IFDEF ShowTimeCheckFS}
+  TC.StartTimeCount;
+  {$ENDIF}
   OldStatusText := Form1.StatusBar.Panels[0].Text;
   Form1.StatusBar.Panels[0].Text := FLang.GMS('m118');
   {zu überprüfenden Ordner ermitteln}
@@ -1132,10 +1274,12 @@ begin
     {Anmerkung: Erlaubt UDF wirklich beliebig tief liegende Ordner?}
     CheckFolder := not (ISODeepDir or (ISOLevel and (ISOLevelNr = 4)) or UDF);
   end;
-  FData.CheckDataCDFS(Path, FSettings.GetMaxFileNameLength, CheckFolder);
+  FData.CheckDataCDFS(Path, FSettings.GetMaxFileNameLength, CheckFolder,
+                      CheckAccess);
   {$IFDEF DebugErrorLists}
   FormDebug.Memo2.Lines.Assign(FData.ErrorListFiles);
   FormDebug.Memo1.Lines.Assign(FData.ErrorListDir);
+  FormDebug.Memo3.Lines.Assign(FData.NoAccessFiles);
   {$ENDIF}
   {Wenn Fehler gefunden, dann Dialog aufrufen}
   if FData.ErrorListFiles.Count > 0 then
@@ -1186,7 +1330,26 @@ begin
       FormDataCDFSError.Release;
     end;
   end;
+  {Quelldateien, auf die nicht zugegriffen werden kann}
+  if FData.NoAccessFiles.Count > 0 then
+  begin
+    FormDataCDFSError := TFormDataCDFSError.Create(nil);
+    try
+      FormDataCDFSError.Data := FData;
+      FormDataCDFSError.ImageLists := FImageLists;
+      FormDataCDFSError.Lang := FLang;
+      FormDataCDFSError.Settings := FSettings;
+      FormDataCDFSError.Mode := mNoAccess;
+      FormDataCDFSError.ShowModal;
+    finally
+      FormDataCDFSError.Release;
+    end;
+  end;
   Form1.StatusBar.Panels[0].Text := OldStatusText;
+  {$IFDEF ShowTimeCheckFS}
+  TC.StopTimeCount;
+  TLogWin.Inst.Add('check FS  : ' + TC.TimeAsString);
+  {$ENDIF}
 end;
 
 { AddToPathlist ----------------------------------------------------------------
@@ -1212,7 +1375,8 @@ begin
                end;
     cAudioCD : Path := '';
     cVideoCD : Path := '';
-    cDVDVideo: if DirectoryExists(FileName) then
+    cDVDVideo: if DirectoryExists(FileName) and IsValidDVDSource(FileName) then
+                                            // temporary Hack
                  EditDVDVideoSourcePath.Text := FileName;
   end;
   {$IFDEF DebugAddFilesDragDrop}
@@ -1225,7 +1389,7 @@ begin
   FData.AddToPathlist(FileName, Path, FSettings.General.Choice);
   {Fehler auswerten}
   ErrorCode := FData.LastError;
-  with Form1.Memo1.Lines do
+  with TLogWin.Inst do
   begin
     case ErrorCode of
       PD_FolderNotUnique: Add(Format(FLang.GMS('e111'), [FileName]));
@@ -1257,7 +1421,7 @@ begin
                Path := GetPathFromNode(CDETreeView.Selected);
                FData.SortFileList(Path, cDataCD);
                {Dateisystem prüfen}
-               CheckDataCDFS;
+               CheckDataCDFS(False);
              end;
     cXCD   : begin
                Path := GetPathFromNode(XCDETreeView.Selected);
@@ -1339,7 +1503,7 @@ begin
     FData.SortFileList(Path, Fsettings.General.Choice);
     if FSettings.General.Choice = cDataCD then
     begin
-      CheckDataCDFS;
+      CheckDataCDFS(False);
     end;
     UpdateGauges;
   end;
@@ -1384,7 +1548,7 @@ begin
     ErrorCode := FData.LastError;
     {$IFDEF ShowTimeAddFolder}
     TC.StopTimeCount;
-    Form1.Memo1.Lines.Add('add folder: ' + TC.TimeAsString);
+    TLogWin.Inst.Add('add folder: ' + TC.TimeAsString);
     {$ENDIF}
     if ErrorCode = PD_FolderNotUnique then
     begin
@@ -1394,7 +1558,7 @@ begin
     end else
     begin
       {Änderungen im GUI nachvollziehen}
-      CheckDataCDFS;
+      CheckDataCDFS(False);
       UserAddFolderUpdateTree(Tree);
       UpdateGauges;
     end;
@@ -1437,8 +1601,16 @@ begin
   if View.SelCount > 0 then
   begin
     Meldung := FLang.GMS('m115');
-    i := Application.MessageBox(PChar(Meldung), PChar(FLang.GMS('m110')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    {$IFDEF Confirm}
+    if not FSettings.General.NoConfirm then
+    begin
+      i := Application.MessageBox(PChar(Meldung), PChar(FLang.GMS('m110')),
+             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    end else
+    {$ENDIF}
+    begin
+      i := 1;
+    end;
     if i = 1 then
     begin
       if FSettings.General.Choice in [cDataCD, cXCD] then
@@ -1510,8 +1682,16 @@ begin
   if Path <> '' then
   begin
     Meldung := Format(FLang.GMS('m108'), [Tree.Selected.Text]);
-    i := Application.MessageBox(PChar(Meldung), PChar(FLang.GMS('m110')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    {$IFDEF Confirm}
+    if not FSettings.General.NoConfirm then
+    begin
+      i := Application.MessageBox(PChar(Meldung), PChar(FLang.GMS('m110')),
+             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    end else
+    {$ENDIF}
+    begin
+      i := 1;
+    end;
     if i = 1 then
     begin
       {Ordner aus Datenstruktur löschen}
@@ -1530,9 +1710,17 @@ end;
 procedure TForm1.UserDeleteAll(Tree: TTreeView);
 var i: Integer;
 begin
-  i := Application.MessageBox(
-         PChar(FLang.GMS('m114')), PChar(FLang.GMS('m110')),
-         MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+  {$IFDEF Confirm}
+  if not FSettings.General.NoConfirm then
+  begin
+    i := Application.MessageBox(
+           PChar(FLang.GMS('m114')), PChar(FLang.GMS('m110')),
+           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+  end else
+  {$ENDIF}
+  begin
+    i := 1;
+  end;
   if i = 1 then
   begin
     Tree.Selected := Tree.Items[0];
@@ -1808,21 +1996,21 @@ begin
         end;
         ErrorCode := FData.LastError;
         case ErrorCode of
-          PD_InvalidWaveFile: Form1.Memo1.Lines.Add(Format(
+          PD_InvalidWaveFile: TLogWin.Inst.Add(Format(
                                 FLang.GMS('eprocs01'), [OpenDialog1.Files[i]]));
-          PD_InvalidMP3File : Form1.Memo1.Lines.Add(Format(
+          PD_InvalidMP3File : TLogWin.Inst.Add(Format(
                                 FLang.GMS('eprocs03'), [OpenDialog1.Files[i]]));
-          PD_InvalidMpegFile: Form1.Memo1.Lines.Add(Format(
+          PD_InvalidMpegFile: TLogWin.Inst.Add(Format(
                                 FLang.GMS('eprocs02'), [OpenDialog1.Files[i]]));
-          PD_InvalidOggFile : Form1.Memo1.Lines.Add(Format(
+          PD_InvalidOggFile : TLogWin.Inst.Add(Format(
                                 FLang.GMS('eprocs04'), [OpenDialog1.Files[i]]));
-          PD_InvalidFLACFile: Form1.Memo1.Lines.Add(Format(
+          PD_InvalidFLACFile: TLogWin.Inst.Add(Format(
                                 FLang.GMS('eprocs05'), [OpenDialog1.Files[i]]));
-          PD_NoMP3Support   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
+          PD_NoMP3Support   : TLogWin.Inst.Add(OpenDialog1.Files[i] +
                                 ': ' + FLang.GMS('minit09'));
-          PD_NoOggSupport   : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
+          PD_NoOggSupport   : TLogWin.Inst.Add(OpenDialog1.Files[i] +
                                 ': ' + FLang.GMS('minit10'));
-          PD_NoFLACSupport  : Form1.Memo1.Lines.Add(OpenDialog1.Files[i] +
+          PD_NoFLACSupport  : TLogWin.Inst.Add(OpenDialog1.Files[i] +
                                 ': ' + FLang.GMS('minit11'));
         end;
       end;
@@ -2073,10 +2261,13 @@ end;
   ShowTrackDAE aktualisiert die Anzeige der auf der CD vorhandenen Tracks.     }
 
 procedure TForm1.ShowTracksDAE;
-var i: Integer;
+var i        : Integer;
     TrackList: TStringList;
-    NewItem: TListItem;
-    Temp: string;
+    NewItem  : TListItem;
+    Temp, Time,
+    Name, Size,
+    Title,
+    Performer: string;
 begin
   TrackList := FData.GetFileList('', cDAE);
   {Debugging: interne Pfadliste anzeigen}
@@ -2094,11 +2285,16 @@ begin
   for i := 0 to TrackList.Count - 1 do
   begin
     NewItem := DAEListView.Items.Add;
-    NewItem.Caption := StringLeft(TrackList[i], ':');
     NewItem.ImageIndex := FImageLists.IconCDA;
-    SplitString(TrackList[i], ':', Temp, Temp);
-    NewItem.SubItems.Add(StringLeft(Temp, '*'));
-    NewItem.SubItems.Add(StringRight(Temp, '*'));
+    SplitString(TrackList[i], ':', Name, Temp);
+    SplitString(Temp, '*', Time, Temp);
+    SplitString(Temp, '|', Size, Temp);
+    SplitString(Temp, '|', Title, Performer);
+    if (Performer <> '') and (Title <> '') then
+      Name := Name + '  ' + Performer + ' - ' + Title;
+    NewItem.Caption := Name;
+    NewItem.SubItems.Add(Time);
+    NewItem.SubItems.Add(Size);
   end;
   DAEListView.Items.EndUpdate;
 end;
@@ -2371,6 +2567,19 @@ begin
       LabelXCDCreateInfoFile.Visible := not (IsoLevel1 or IsoLevel2);
     end;
   end;
+  if FSettings.General.Choice = cDAE then
+  begin
+    with FSettings.DAE do
+    begin
+      SetLabel(LabelDAEBulk, Bulk);
+      SetLabel(LabelDAEParanoia, Paranoia);
+      SetLabel(LabelDAEInfoFiles, not NoInfoFile);
+      SetLabel(LabelDAECDDB, UseCDDB);
+      SetLabel(LabelDAEMp3, Mp3);
+      SetLabel(LabelDAEOgg, Ogg);
+      SetLabel(LabelDAEFlac, Flac);
+    end;
+  end;
   if Fsettings.General.Choice = cVideoCD then
   begin
     with FSettings.VideoCD do
@@ -2534,6 +2743,56 @@ begin
       begin
         IsoLevel1 := False;
         IsoLevel2 := False;
+      end;
+    end;
+  end;
+  {DAE}
+  with FSettings.DAE do
+  begin
+    if L = LabelDAEBulk then
+    begin
+      Bulk := not Bulk;
+    end;
+    if L = LabelDAEParanoia then
+    begin
+      Paranoia := not Paranoia;
+    end;
+    if L = LabelDAEInfoFiles then
+    begin
+      NoInfoFile := not NoInfoFile;
+    end;
+    if L = LabelDAECDDB then
+    begin
+      UseCDDB := not UseCDDB;
+    end;
+    if L = LabelDAEMp3 then
+    begin
+      Mp3 := not Mp3 and FSettings.FileFlags.LameOk and
+             (FSettings.FileFlags.ShOk or not FSettings.FileFlags.ShNeeded);
+      if Mp3 then
+      begin
+        Ogg := False;
+        Flac := False;
+      end;
+    end;
+    if L = LabelDAEOgg then
+    begin
+      Ogg := not Ogg and FSettings.FileFlags.OggencOk and
+             (FSettings.FileFlags.ShOk or not FSettings.FileFlags.ShNeeded);
+      if Ogg then
+      begin
+        Mp3 := False;
+        Flac := False;
+      end;
+    end;
+    if L = LabelDAEFlac then
+    begin
+      Flac := not Flac and FSettings.FileFlags.FlacOk and
+              (FSettings.FileFlags.ShOk or not FSettings.FileFlags.ShNeeded);
+      if Flac then
+      begin
+        Mp3 := False;
+        Ogg := False;
       end;
     end;
   end;
@@ -2794,6 +3053,9 @@ end;
   externen Programme ausführt.                                                 }
 
 procedure TForm1.Setbuttons(const Status: TOnOff);
+{$J+}
+const Title: string = '';
+{$J-}
 begin
   if Status = oOff then
   begin
@@ -2802,6 +3064,12 @@ begin
     ButtonSettings.Enabled := False;
     ButtonAbort.Visible := True;
     SpeedButtonFixCD.Enabled := False;
+    if Title = '' then Title := Application.Title;
+    {$IFDEF TitleFirst}
+    Application.Title := Title + ' ' + FLang.GMS('g009');
+    {$ELSE}
+    Application.Title := FLang.GMS('g009') + ' ' + Title;
+    {$ENDIF}
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
@@ -2809,7 +3077,8 @@ begin
     ButtonCancel.Enabled := True;
     ButtonSettings.Enabled := True;
     ButtonAbort.Visible := False;
-    SpeedButtonFixCD.Enabled := True;    
+    SpeedButtonFixCD.Enabled := True;
+    Application.Title := Title;
   end;
 end;
 
@@ -2859,7 +3128,8 @@ procedure TForm1.InitMainform;
         if (Panel = PanelDataCDOptions) or
            (Panel = PanelAudioCDOptions) or
            (Panel = PanelXCDOptions) or
-           (Panel = PanelVideoCDOptions) then
+           (Panel = PanelVideoCDOptions) or
+           (Panel = PanelDAEOptions) then
         begin
          {$IFDEF MouseOverLabelHighlight}
           Panel.OnMouseMove := PanelMouseMove;
@@ -2884,6 +3154,7 @@ procedure TForm1.InitMainform;
   {$ENDIF}
 
 begin
+  Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
   DragAcceptFiles(Form1.Handle, true);
   {Sonderbehandlung, falls große Schriftarten verwendet werden}
@@ -2993,13 +3264,13 @@ end;
 
 procedure TForm1.MessageShow(Sender: TObject);
 begin
-  Memo1.Lines.Add(FSettings.Shared.MessageToShow);
+  TLogWin.Inst.Add(FSettings.Shared.MessageToShow);
   FSettings.Shared.MessageToShow := '';
 end;
 
 { UpdatePanels -----------------------------------------------------------------
 
-  UpdatePanels zeigt in den beidne Panels des Stauts-Bars die Strings
+  UpdatePanels zeigt in den beiden Panels des Status-Bars die Strings
   FSettings.Shared.Panel1 und .Panel2 an. Wenn der String den Inhalt '<>' haben
   sollte, wird der Panel-Text nicht geändert.                                  }
 
@@ -3060,6 +3331,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice: Byte;
 begin
+  {$IFDEF WriteLogfile} AddLog('TForm1.FormCreate' + CRLF, 0); {$ENDIF}
   SetFont(Self);  
   FInstanceTermination := False;
   {Ein paar Objekte brauchen wir, egal ob es sich um die erste oder zweite
@@ -3092,7 +3364,9 @@ begin
   FData.OnProgressBarUpdate := ProgressBarUpdate;
   FData.OnMessageToShow := MessageShow;
   {Diese wichtigen drei Objekte global verfügbar machen.}
-  TCdrtfeData.Instance.SetObjects(FLang, FSettings, FData);  
+  TCdrtfeData.Instance.SetObjects(FLang, FSettings, FData);
+  {Ausgabefenster global verfügbar machen.}
+  TLogWin.Inst.SetMemo(Memo1);  
   {Kommandzeile auswerten}
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
@@ -3108,15 +3382,19 @@ begin
     InitMainForm;
     {Tree-Views initialisieren}
     InitTreeViews;
+    {$IFDEF UseOLEDragDrop}
+    {OLE-Drop-Target initialisieren}
+    InitDropTargets;
+    {$ENDIF}
     {FileTypeInfo: Cache für Dateiinfos}
     FFileTypeInfo := TFileTypeInfo.Create;
     {prüfen, ob alle Dateien da sind}
-    if CheckFiles(FSettings, Memo1, FLang) then
+    if CheckFiles(FSettings, FLang) then
     begin
       {Wenn die entrpechenden Programme vorhanden sind, können MP3-, Ogg- und
        FLAC-DAteien verwendet werden.}
-      FData.AcceptMP3 := FSettings.FileFlags.MP3Ok;
-      FData.AcceptOgg := FSettings.FileFlags.OggOk;
+      FData.AcceptMP3 := FSettings.FileFlags.MadplayOk;
+      FData.AcceptOgg := FSettings.FileFlags.OggdecOk;
       FData.AcceptFLAC := FSettings.FileFlags.FLACOk;
       {$IFDEF RegistrySettings}
       {Einstellungen laden: Registry}
@@ -3125,7 +3403,10 @@ begin
       {$IFDEF IniSettings}
       {Einstellungen laden: Ini}
       FSettings.LoadFromFile(cIniFile);
-      {$ENDIF}      
+      {$ENDIF}
+      {Datenverzeichnis anlegen (WinNT/2k/XP)}
+      if FSettings.General.PortableMode then OverrideProgDataDir(True);
+      ProgDataDirCreate;      
       {Device-Scan}
       with FDevices do
       begin
@@ -3136,8 +3417,7 @@ begin
         DetectDrives;
         if (CDWriter.Count = 1) and (CDWriter[0] = '') then
         begin
-          Memo1.Lines.Text := Memo1.Lines.Text + FLang.GMS('g003') + CR +
-                              FLang.GMS('minit05') + CR;
+          TLogWin.Inst.Add(FLang.GMS('g003') + CRLF + FLang.GMS('minit05'));
         end;
       end;
       {Falls vorhanden, d2fgui.exe und dat2file.exe hinzufügen}
@@ -3166,11 +3446,11 @@ begin
       FAction.Devices := FDevices;
       FAction.Settings := FSettings;
       FAction.Lang := FLang;
-      FAction.Memo := Form1.Memo1;
       FAction.ProgressBar := Form1.ProgressBar;
       FAction.StatusBar := Form1.StatusBar;
       FAction.FormHandle := Self.Handle;
       FAction.OnMessageToShow := MessageShow;
+      FAction.OnUpdatePanels := UpdatePanels;
     end;
     {falls der Aufruf mit /hide erfolgte, Hauptfenster verstecken}
     if FSettings.CmdLineFlags.Hide then
@@ -3204,6 +3484,10 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  {$IFDEF WriteLogfile} AddLog('TForm1.FormDestroy' + CRLF, 0); {$ENDIF}
+  {$IFDEF UseOLEDragDrop}
+  if not FInstanceTermination then FreeDropTargets;
+  {$ENDIF}
   FLang.Free;
   FImageLists.Free;
   FSettings.Free;
@@ -3241,6 +3525,7 @@ procedure TForm1.FormShow(Sender: TObject);
 var i: Byte;
     OldChoice: Byte;
 begin
+  {$IFDEF WriteLogfile} AddLog('TForm1.FormShow' + CRLF, 0); {$ENDIF}
   {einmal jedes Tab aktivieren, sonst funktioniert FormResize nicht richtig.
    Außerdem wird damit gewährleistet, daß FSettings.General.Choice initialisiert
    ist.}
@@ -3258,8 +3543,8 @@ begin
   begin
     if FCmdLineParser.LastError = CP_ProjectFileNotFound then
     begin
-      Form1.Memo1.Lines.Add(Format(FLang.GMS('epref01'),
-                            [FSettings.General.LastProject]));
+      TLogWin.Inst.Add(Format(FLang.GMS('epref01'),
+                              [FSettings.General.LastProject]));
     end else
     begin
       GetSettings;
@@ -3287,6 +3572,7 @@ end;
 
 procedure TForm1.FormActivate(Sender: TObject);
 begin
+  {$IFDEF WriteLogfile} AddLog('TForm1.FormActivate' + CRLF, 0); {$ENDIF}
   if FSettings.CmdLineFlags.ExecuteProject then
   begin
     SetSettings;
@@ -3311,7 +3597,7 @@ begin
   end;
   {temporäres Verzeichnis erfragen, damit cdrtfe auch von einem read-only-Medium
    gestartet werden kann.}
-  if FSettings.General.AskForTempDir then OverrideProgDataDir;
+  if FSettings.General.AskForTempDir then OverrideProgDataDir(False);
 end;
 
 { FormResize -------------------------------------------------------------------
@@ -3565,6 +3851,7 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  {$IFDEF WriteLogfile} AddLog('TForm1.FormClose' + CRLF, 0); {$ENDIF}
   {Einstellungen speichern}
   SaveWinPos;
 end;
@@ -3682,9 +3969,14 @@ end;
 
 procedure TForm1.ButtonStartClick(Sender: TObject);
 begin
+  {$IFDEF ShowExecutionTime}
+  TC2.StartTimeCount;
+  {$ENDIF}
   SetSettings;
   if InputOk then
   begin
+    {Bei Daten-CD nochmals einen Dateisystemchek.}
+    if FSettings.General.Choice = cDataCD then CheckDataCDFS(True);
     FAction.Reset;
     {Aktion ausführen}
     FAction.Action := FSettings.General.Choice;
@@ -3801,6 +4093,22 @@ begin
   ShowTracksDAE;
 end;
 
+{ DAE: Options }
+
+procedure TForm1.ButtonDAEOptionsClick(Sender: TObject);
+var FormDAEOptions: TFormDAEOptions;
+begin
+  FormDAEOptions := TFormDAEOptions.Create(nil);
+  try
+    FormDAEOptions.Settings := FSettings;
+    FormDAEOptions.Lang := FLang;
+    FormDAEOptions.ShowModal;
+  finally
+    FormDAEOptions.Release;
+  end;
+  UpdateOptionPanel;
+end;
+
 { Image: Select path }
 
 procedure TForm1.ButtonReadCDSelectPathClick(Sender: TObject);
@@ -3846,7 +4154,8 @@ begin
   dir := ChooseDir(Flang.GMS('g002'), Self.Handle);
   if dir <> '' then
   begin
-    EditDVDVideoSourcePath.Text := dir;
+    if IsValidDVDSource(dir) then                  // temporary Hack
+      EditDVDVideoSourcePath.Text := dir;
   end;
 end;
 
@@ -3910,9 +4219,10 @@ begin
   try
     FormOutput.Lang := FLang;
     FormOutput.Settings := FSettings;
-    FormOutput.Memo1.Lines.Assign(Memo1.Lines);
+    TLogWin.Inst.SetMemo2(FormOutput.Memo1);
     FormOutput.ShowModal;
   finally
+    TLogWin.Inst.UnsetMemo2;
     FormOutput.Release;
   end;
 end;
@@ -4109,21 +4419,38 @@ end;
 
 procedure TForm1.TreeViewDragOver(Sender, Source: TObject; X, Y: Integer;
                                   State: TDragState; var Accept: Boolean);
-var Tree: TTreeView;
+var Tree     : TTreeView;
+    Node     : TTreeNode;
+    DoRepaint: Boolean;
 begin
+  DoRepaint := False;
   Tree := (Sender as TTreeView);
   if (Source is TTreeView) or (Source is TListView) then
   begin
     Accept := True;
     {da THETreeView nicht mehr benutzt wird, muß hier gescrollt werden}
     if (Y > Tree.Height - 20) and (Y < Tree.Height) then
+    begin
       PostMessage(Tree.Handle, WM_VSCROLL, MakeLong(SB_LINEDOWN, 0), 0);
-    if (Y < 20) then
+      DoRepaint := True;
+    end;
+    if (Y < 20) and (Tree.TopItem <> Tree.Items[0]) then
+    begin
       PostMessage(Tree.Handle, WM_VSCROLL, MakeLong(SB_LINEUP, 0), 0);
+      DoRepaint := True;
+    end;
+    {automatisches Expandieren}
+    Node := Tree.GetNodeAt(X, Y);
+    if Node <> nil then
+      if Node.HasChildren and not Node.Expanded and (State = dsDragMove) then
+      begin
+        ExpandNodeDelayed(Node, False);
+      end;
   end else
   begin
     Accept := False;
   end;
+  if DoRepaint then Tree.Repaint;
 end;
 
 { TreeView: OnDragDrop ---------------------------------------------------------
@@ -4557,7 +4884,7 @@ begin
   Path := GetPathFromNode(CDETreeView.Selected);
   CDETreeView.Selected := CDETreeView.Items[0];
   {gesamtes Dateisystem prüfen}
-  CheckDataCDFS;
+  CheckDataCDFS(True);
   {alten Knoten wieder selektieren}
   Node := GetNodeFromPath(CDETreeView.Items[0], Path);
   if Node <> nil then
@@ -5049,6 +5376,7 @@ begin
   begin
     MiscPopupVerify.Visible := True;
     MiscPopupClearOutput.Visible := False;
+    MiscPopupSaveOutput.Visible := False;
     MiscPopupEject.Visible := False;
     MiscPopupLoad.Visible := False;
   end else
@@ -5056,6 +5384,7 @@ begin
   begin
     MiscPopupVerify.Visible := False;
     MiscPopupClearOutput.Visible := True;
+    MiscPopupSaveOutput.Visible := True;
     MiscPopupEject.Visible := False;
     MiscPopupLoad.Visible := False;
   end else
@@ -5063,6 +5392,7 @@ begin
   begin
     MiscPopupVerify.Visible := False;
     MiscPopupClearOutput.Visible := False;
+    MiscPopupSaveOutput.Visible := False;    
     MiscPopupEject.Visible := True;
     MiscPopupLoad.Visible := True;
   end;
@@ -5074,6 +5404,9 @@ procedure TForm1.MiscPopupVerifyClick(Sender: TObject);
 var OTF: Boolean;
     XCDPath: string;
 begin
+  {$IFDEF ShowExecutionTime}
+  TC2.StartTimeCount;
+  {$ENDIF}
   {Um sicherzustellen, daß nicht über einen fehlenden Namen für das Image ge-
    meckert wird, täuschen wir einfach otf vor bzw. setzten einfach einen Image-
    Namen ein (XCD).}
@@ -5112,7 +5445,22 @@ end;
 
 procedure TForm1.MiscPopupClearOutputClick(Sender: TObject);
 begin
-  Memo1.Lines.Clear;
+  TLogWin.Inst.Clear;
+end;
+
+{ Save log }
+
+procedure TForm1.MiscPopupSaveOutputClick(Sender: TObject);
+begin
+  SaveDialog1 := TSaveDialog.Create(Form1);
+  SaveDialog1.DefaultExt := 'txt';
+  SaveDialog1.Filter := '(*.txt)|*.txt'; 
+  SaveDialog1.Options := [ofOverwritePrompt,ofHideReadOnly];
+  if SaveDialog1.Execute then
+  begin
+    TLogWin.Inst.SaveLog(SaveDialog1.FileName);
+  end;
+  SaveDialog1.Free;
 end;
 
 { Load/Eject Disk }
@@ -5159,10 +5507,6 @@ begin
   begin
     Key := NoKey;
     if C = EditDAEPath then
-    begin
-      EditDAEPrefix.SetFocus;
-    end else
-    if C = EditDAEPrefix then
     begin
       PageControl1.SetFocus;
     end else
@@ -5318,12 +5662,75 @@ begin
 end;
 {$ENDIF}
 
+
+{ Timer-Events --------------------------------------------------------------- }
+
+{ OnTimer ----------------------------------------------------------------------
+
+  Wird ausgeführt, wenn die 1.5 Sekunden Verzögerung für ein TreeNode-Expand
+  vertrichen ist.                                                              }
+
+procedure TForm1.TimerNodeExpandTimer(Sender: TObject);
+begin
+  ExpandNodeDelayed(nil, True);
+end;
+
+
+{ Hilfsfunktionen ------------------------------------------------------------ }
+
+{ ExpandNodeDelayed ------------------------------------------------------------
+
+  sorgt für das verzögerte Öffnen der TreeNodes.                               }
+
+procedure TForm1.ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
+const {$J+} NodeToExpand: TTreeNode = nil; {$J-}
+var MousePos: TPoint;
+    Control : TWinControl;
+begin
+  if TimerEvent then
+  begin
+    {Die Wartezeit ist vorbei.}
+    TimerNodeExpand.Enabled := False;
+    GetCursorPos(MousePos);
+    Control := FindVCLWindow(MousePos);
+    if (Control <> nil) and (Control is TTreeView) then
+    begin
+      MousePos := (Control as TTreeView).ScreenToClient(MousePos);
+      Node := (Control as TTreeView).GetNodeAt(MousePos.x, MousePos.y);
+//      Memo1.Lines.Add('NodeToExpand: ' + NodeToExpand.Text);
+//      if Node <> nil then Memo1.Lines.Add('Node        : ' + Node.Text);
+      if Node = NodeToExpand then
+      begin
+        NodeToExpand.Expand(False);
+        {$IFDEF UseOLEDragDrop}
+        DropFileTargetCDETreeView.ShowImage := False;
+        DropFileTargetXCDETreeView.ShowImage := False;
+        {$ENDIF}
+        NodeToExpand.TreeView.Repaint;
+        {$IFDEF UseOLEDragDrop}
+        DropFileTargetCDETreeView.ShowImage := True;
+        DropFileTargetXCDETreeView.ShowImage := True;
+        {$ENDIF}
+      end;
+    end;
+    NodeToExpand := nil;
+  end else
+  begin
+    {Beginn der Wartezeit.}
+    NodeToExpand := Node;
+    TimerNodeExpand.Enabled := True;
+  end;
+end;
+
 initialization
   {$IFDEF ShowDebugWindow}
   FormDebug := TFormDebug.Create(nil);
   FormDebug.Top := 0;
   FormDebug.Left := 0;
   FormDebug.Show;
+  {$ENDIF}
+  {$IFDEF WriteLogfile}
+  AddLog('frm_main.pas initialization', 0);
   {$ENDIF}
   {$IFDEF ShowTime}
   TC  := TTimeCount.Create;
@@ -5333,6 +5740,9 @@ initialization
 finalization
   {$IFDEF ShowDebugWindow}
   FormDebug.Free;
+  {$ENDIF}
+  {$IFDEF WriteLogfile}
+  AddLog('frm_main.pas finalization', 0);
   {$ENDIF}
   {$IFDEF ShowTime}
   TC.Free;

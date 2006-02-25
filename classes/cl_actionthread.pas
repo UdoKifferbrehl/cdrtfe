@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_actionthread.pas: Kommandozeilenprogramme in einem eigenen Thread starten
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.10.2005
+  letzte Änderung  14.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -13,6 +13,8 @@
 
   cl_actionthread.pas implementiert das Thread-Objekt, das die Kommandozeilen-
   programme ausführt und die Ausgaben in ein Memo umleitet.
+  Da die Zugriffe auf das Memo über das TLogWin-Singleton erfolgen, ist die Unit
+  cl_logwindow.pas zwingend notwendig.
 
 
   TActionThread
@@ -21,11 +23,11 @@
                  MessageAborted
                  MessageOk
 
-    Methoden     Create(const CmdLine: string; var Memo: TMemo; const Suspended: Boolean)
+    Methoden     Create(const CmdLine: string; const Suspended: Boolean)
 
   exportierte Funktionen
 
-    DisplayDOSOutput(const lpCommandLine: string; var Memo: TMemo; Thread: TActionThread)
+    DisplayDOSOutput(const lpCommandLine: string; Thread: TActionThread)
     TerminateExecution(Thread: TActionThread);
 
 }
@@ -36,7 +38,7 @@ unit cl_actionthread;
 
 interface
 
-uses Classes, Forms, StdCtrls, Windows, SysUtils,
+uses Classes, Forms, Windows, SysUtils,
      cl_lang;
 
 type TActionThread = class(TThread)
@@ -47,7 +49,6 @@ type TActionThread = class(TThread)
        {$ENDIF}
        FLine: string;
        FBSCount: Integer;
-       FMemo: TMemo;
        FMessageOk: string;
        FMessageAborted: string;
        FHandle: THandle;    // Handle des Fensters, das das Ende-Signal erhält
@@ -66,14 +67,13 @@ type TActionThread = class(TThread)
        procedure DClearLine;
        procedure SendTerminationMessage;
      public
-       constructor Create(const CmdLine: string; var Memo: TMemo;
-                          const Suspended: Boolean);
+       constructor Create(const CmdLine: string; const Suspended: Boolean);
        property MessageOk: string write FMessageOk;
        property MessageAborted: string write FMessageAborted;
        property EnvironmentBlock: Pointer write FEnvironmentBlock;
        // property TerminateThread: Boolean write FTerminate;
      end;
-
+(*
      {Typ-Deklarationen für die Callback-Funktion}
      PProcessWindow = ^TProcessWindow;
 
@@ -81,13 +81,13 @@ type TActionThread = class(TThread)
                         TargetProcessID: Cardinal;
                         FoundWindow: HWnd;
                       end;
-
-procedure DisplayDOSOutput(const CommandLine: string; var Memo: TMemo; var Thread: TActionThread; Lang: TLang; const EnvironmentBlock: Pointer);
+*)
+procedure DisplayDOSOutput(const CommandLine: string; var Thread: TActionThread; Lang: TLang; const EnvironmentBlock: Pointer);
 procedure TerminateExecution(Thread: TActionThread);
 
 implementation
 
-uses user_messages, constant, f_misc;
+uses cl_logwindow, user_messages, constant, f_misc, f_process;
 
 { TActionThread -------------------------------------------------------------- }
 
@@ -100,26 +100,28 @@ uses user_messages, constant, f_misc;
 
 procedure TActionThread.DAddLine;
 begin
-  FMemo.Lines.Add(FLine);
+  TLogWin.Inst.Add(FLine);
+  {$IFDEF ShowProgressTaskBar}
+  TLogWin.Inst.ShowProgressTaskBar;
+  {$ENDIF}
 end;
 
 procedure TActionThread.DAddToLine;
 begin
-  FMemo.Lines[FMemo.Lines.Count - 1] := FMemo.Lines[FMemo.Lines.Count - 1] +
-                                        FLine;
+  TLogWin.Inst.AddToLine(FLine);
+  {$IFDEF ShowProgressTaskBar}
+  TLogWin.Inst.ShowProgressTaskBar;
+  {$ENDIF}  
 end;
 
 procedure TActionThread.DDeleteFromLine;
-var Temp: string;
 begin
-  Temp := Copy(FMemo.Lines[FMemo.Lines.Count - 1], 1,
-               Length(FMemo.Lines[FMemo.Lines.Count - 1]) - FBSCount);
-  FMemo.Lines[FMemo.Lines.Count - 1] := Temp;
+  TLogWin.Inst.DeleteFromLine(FBSCount);
 end;
 
 procedure TActionThread.DClearLine;
 begin
-  FMemo.Lines[FMemo.Lines.Count - 1] := '';
+  TLogWin.Inst.ClearLine;
 end;
 
 procedure TActionThread.SendTerminationMessage;
@@ -151,7 +153,7 @@ begin
   if BeginNewLine then
   begin
     FLine := '';
-    Synchronize(DAddLine);  //Memo.Lines.Add('');
+    Synchronize(DAddLine);
     BeginNewLine := False;
   end;
 
@@ -349,8 +351,8 @@ begin
         if FExitCode = 0 then FExitCode := ExitCode;
         {$ENDIF}
         // CloseHandle(hReadPipe);
-        CloseHandle(NewStdIn);
-        CloseHandle(NewStdOut);
+        // CloseHandle(NewStdIn);
+        // CloseHandle(NewStdOut);
         CloseHandle(ReadStdOut);
         CloseHandle(WriteStdIn);
         CloseHandle(lpProcessInformation.hThread);
@@ -387,15 +389,13 @@ end;
 
 { TActionThread - public }
 
-constructor TActionThread.Create(const CmdLine: string; var Memo: TMemo;
+constructor TActionThread.Create(const CmdLine: string;
                                  const Suspended: Boolean);
 begin
   inherited Create(Suspended);
   FMessageOk := '';
   FMessageAborted := '';
-  // FTerminate := False;
-  FMemo := Memo;
-  FHandle := (Memo.Owner as TForm).Handle;
+  FHandle := TLogWin.Inst.OutWindowHandle;
   FCommandLine := CmdLine;
   FEnvironmentBlock := nil;
   {$IFDEF ShowCmdError}
@@ -408,15 +408,15 @@ end;
 
 { DisplayDOSOutput -------------------------------------------------------------
 
-  leitet die Ausgaben einer Konsolenanwendung in ein Memo um, das als zweiter
-  Parameter übergeben wird. Es können beliebig viele Kommandozeilen-Aufrufe
-  durch CR getrennt angegeben werden.                                          }
+  leitet die Ausgaben einer Konsolenanwendung in ein Memo um, das über das
+  TlogWin-Singleton angesprochen wird. Es können beliebig viele Kommandozeilen-
+  Aufrufe durch CR getrennt angegeben werden.                                  }
 
-procedure DisplayDOSOutput(const CommandLine: string; var Memo: TMemo;
+procedure DisplayDOSOutput(const CommandLine: string;
                            var Thread: TActionThread; Lang: TLang;
                            const EnvironmentBlock: Pointer);
 begin
-  Thread := TActionThread.Create(CommandLine, Memo, True);
+  Thread := TActionThread.Create(CommandLine, True);
   Thread.MessageOk := Lang.GMS('moutput01');
   Thread.MessageAborted := Lang.GMS('moutput02');
   Thread.FreeOnTerminate := True;
@@ -424,7 +424,7 @@ begin
     Thread.EnvironmentBlock := EnvironmentBlock;
   Thread.Resume;
 end;
-
+          (*
 { EnumWindowsProc --------------------------------------------------------------
 
   Callback-Funktion für EnumWindows.                                           }
@@ -455,7 +455,7 @@ begin
   ProcWndInfo.FoundWindow := 0;
   EnumWindows(@EnumWindowsProc, integer(@ProcWndInfo));
   Result := ProcWndInfo.FoundWindow;
-end;
+end;                            *)
 
 { TerminateExecution -----------------------------------------------------------
 

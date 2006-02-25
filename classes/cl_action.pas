@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
-
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+ 
   cl_action.pas: die im GUI gewählte Aktion ausführen
 
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.02.2006
+  letzte Änderung  06.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -23,6 +23,7 @@
                  FormHandle
                  Lang
                  OnMessageToShow
+                 OnUpdatePanels
                  ProgressBar
                  Reload
                  Settings
@@ -64,6 +65,9 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        {Daten-CD}
        ForcedContinue: Boolean;
        CDSize        : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       SectorsNeededS: string;
+       SectorsNeededI: Integer;
+       TaoEndSecCount: Integer;
        {Audio-CD}
        CDTime        : Extended;
      end;
@@ -85,8 +89,8 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        FEjectDevice: string;
        {Variablen zur Ausgabe}
        FFormHandle: THandle;
-       FMemo: TMemo;
        FOnMessageToShow: TNotifyEvent;
+       FOnUpdatePanels: TNotifyEvent;
        FSettings: TSettings;
        FStatusBar: TStatusBar;
        FProgressBar: TProgressBar;
@@ -109,11 +113,13 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        procedure FindDuplicateFiles(List: TStringList);
        procedure GetCDInfos;
        procedure ReadImage;
+       procedure SetPanels(const s1, s2: string);
        procedure StartVerification(const Action: Byte);
        procedure WriteImage;
        procedure WriteTOC;
        {Events}
        procedure MessageToShow;
+       procedure UpdatePanels;
      public
        constructor Create;
        destructor Destroy; override;
@@ -127,7 +133,6 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        property Devices: TDevices write FDevices;
        property FormHandle: THandle write FFormHandle;
        property Lang: TLang write FLang;
-       property Memo: TMemo read FMemo write FMemo;
        property StatusBar: TStatusBar read FStatusBar write FStatusBar;
        property ProgressBar: TProgressBar read FProgressBar write FProgressBar;
        property Reload: Boolean read FReload write FReload;
@@ -135,6 +140,7 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        property DuplicateFileSize: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF} read FDupSize write FDupSize;
        {Events}
        property OnMessageToShow: TNotifyEvent read FOnMessageToShow write FOnMessageToShow;
+       property OnUpdatePanels: TNotifyEvent read FOnUpdatePanels write FOnUpdatePanels;
      end;
 
 implementation
@@ -155,6 +161,27 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 procedure TCDAction.MessageToShow;
 begin
   if Assigned(FOnMessageToShow) then FOnMessageToShow(Self);
+end;
+
+{ UpdatePanels -----------------------------------------------------------------
+
+  Löst das Event OnUpdatePanels aus, das das Hauptfenster veranlaßt, die Panel-
+  Texte der Statusleiste zu aktualisieren.                                     }
+
+procedure TCDAction.UpdatePanels;
+begin
+  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(Self);
+end;
+
+{ SetPanels --------------------------------------------------------------------
+
+  SetPanels zeigt s1 und s2 in der Statusleiste an.                            }
+
+procedure TCDAction.SetPanels(const s1, s2: string);
+begin
+  FSettings.Shared.Panel1 := s1;
+  FSettings.Shared.Panel2 := s2;  
+  UpdatePanels;
 end;
 
 { GetAction --------------------------------------------------------------------
@@ -178,7 +205,7 @@ begin
   FProgressBar.Max := 100;
   FProgressBar.Position := 0;
   {Pfadlisten in FVList laden}
-  FVerificationThread := TVerificationThread.Create(List, FMemo,
+  FVerificationThread := TVerificationThread.Create(List,
                                                     FSettings.DataCD.Device,
                                                     FLang, True);
   FVerificationThread.FreeOnTerminate := True;
@@ -200,7 +227,7 @@ begin
   FProgressBar.Max := 100;
   FProgressBar.Position := 0;
   {Pfadlisten in FVList laden}
-  FVerificationThread := TVerificationThread.Create(List, FMemo,
+  FVerificationThread := TVerificationThread.Create(List,
                                                     FSettings.DataCD.Device,
                                                     FLang, True);
   FVerificationThread.FreeOnTerminate := True;
@@ -291,15 +318,16 @@ end;
 
   liefert True, wenn die Überprüfung des eingelegten Mediums erfolgreich war.  }
 
-function TCDAction.CheckMedium(Disk: TDiskInfo; var Args: TCheckMediumArgs): Boolean;
-var i      : Integer;
-    Temp   : string;
-    Meldung: PChar;
+function TCDAction.CheckMedium(Disk: TDiskInfo;
+                               var Args: TCheckMediumArgs): Boolean;
+var i             : Integer;
+    Temp          : string;
+    Meldung       : PChar;
 begin
   Result := True;
   {allgemeine Fehler, unabhängig vom Projekt}
   {Fehler: keine CD eingelegt}
-  if (Disk.Size = 0) and (Disk.MsInfo = '') then
+  if Disk.DiskType = DT_None then
   begin
     Application.MessageBox(PChar(FLang.GMS('eburn01')),
                            PChar(FLang.GMS('g001')),
@@ -323,23 +351,33 @@ begin
     Result := False;
   end;
 
+  {Fehler, die bei mehreren Projekten auftreten können.}
+  if (Args.Choice = cDataCD) or (Args.Choice = cDVDVideo) then
+  begin
+    {Fehler: mkisofs fehlgeschlagen}
+    if Args.SectorsNeededI = -1 then
+    begin
+      Result := False;
+    end;
+    {Fehler: unbekanntes DVD-Medium, unbekannte Kapazität. Abbruch.}
+    if (Disk.DiskType = DT_ManualNone) then
+    begin
+      Result := False;
+    end;    
+  end;
+
   {Fehler: Daten-CD}
   if Args.Choice = cDataCD then
   begin
     {Sessions vorhanden, aber nicht importieren}
     if Result and not FSettings.DataCD.ContinueCD and (Disk.MsInfo <> '') then
     begin
-      if FSettings.General.NoConfirm then
+      if not FSettings.General.NoConfirm then
       begin
         i := Application.MessageBox(PChar(FLang.GMS('eburn03')),
                                     PChar(FLang.GMS('g004')),
                                     MB_OKCancel or MB_ICONEXCLAMATION);
         Result := i = 1;
-      end else
-      begin
-        Application.MessageBox(PChar(FLang.GMS('eburn03')),
-                               PChar(FLang.GMS('g004')),
-                               MB_OK or MB_ICONEXCLAMATION);
       end;
     end;
     {wenn eine CD fortgesetzt werden soll}
@@ -366,28 +404,31 @@ begin
         if Result then
         begin
           Args.ForcedContinue := True;
-          FSettings.DataCD.ContinueCD := False;
         end;
       end;
-      FSettings.DataCD.MsInfo := Disk.MsInfo;
-    end;
-    {Fehler: unbekanntes DVD-Medium, unbekannte Kapazität. Abbruch.}
-    if Result and (Disk.DiskType = DT_None) then
-    begin    {
-      i := Application.MessageBox(PChar(FLang.GMS('eburn12')),
-                                  PChar(FLang.GMS('g004')),
-                                  MB_OKCANCEL or MB_ICONEXCLAMATION);
-      Result := i = 1; }
-      Result := False;
     end;
     {Fehler: zu viele Daten}
     if Result and
        not FSettings.DataCD.Overburn and not (Disk.DiskType = DT_Unknown) and
-       ((Args.CDSize / (1024 * 1024)) > Disk.SizeFree) then
+       (((Args.CDSize / (1024 * 1024)) > Disk.SizeFree) or
+        ((Args.SectorsNeededI + Args.TaoEndSecCount) > Disk.SecFree)) then
     begin
       Temp := FLang.GMS('eburn06') +
               Format(FLang.GMS('eburn07'),
-                     [FormatFloat('###.##', Disk.SizeFree)]);
+                     [FormatFloat('###.###', Disk.SizeFree)]);
+      if ((Args.SectorsNeededI + Args.TaoEndSecCount) > Disk.SecFree) and
+         ((Args.CDSize / (1024 * 1024)) < Disk.SizeFree) then
+        Temp := Temp +
+                Format(FLang.GMS('eburn15'),
+                       [FormatFloat('##0.###',
+                                    (Args.SectorsNeededI +
+                                     Args.TaoEndSecCount) / 512)]) +
+                Format(FLang.GMS('eburn14'),
+                       [FormatFloat('##0.###',
+                                    ((Args.SectorsNeededI + Args.TaoEndSecCount
+                                      - Disk.SecFree) / 512)),
+                        Args.SectorsNeededI + Args.TaoEndSecCount -
+                          Disk.SecFree]);
       Meldung := PChar(Temp);
       Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
                              MB_OK or MB_ICONEXCLAMATION);
@@ -445,6 +486,29 @@ begin
     end;
   end;
 
+  {DVD-Video-Fehler}
+  if Args.Choice = cDVDVideo then
+  begin
+    {Fehler: zu viele Daten}
+    if Result and not (Disk.DiskType = DT_Unknown) and
+       (Args.SectorsNeededI > Disk.SecFree) then
+    begin
+      Temp := FLang.GMS('eburn06') +
+              Format(FLang.GMS('eburn07'),
+                     [FormatFloat('###.###', Disk.SizeFree)]) +
+              Format(FLang.GMS('eburn15'),
+                     [FormatFloat('##0.###', (Args.SectorsNeededI / 512))]) +
+              Format(FLang.GMS('eburn14'),
+                     [FormatFloat('##0.###',
+                                  ((Args.SectorsNeededI - Disk.SecFree) / 512)),
+                      Args.SectorsNeededI - Disk.SecFree]);
+      Meldung := PChar(Temp);
+      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+      Result := False;
+    end;  
+  end;
+
   {DVD-Fehler}
   {Fehler: DVD und TAO/RAW}
   if Result and Disk.IsDVD then
@@ -468,6 +532,7 @@ var CmdGetSize: string;
     Sectors   : string;
     p         : Integer;
 begin
+  SetPanels('<>', FLang.GMS('mburn12'));
   Result := '';
   CmdGetsize := StartUpDir + cMkisofsBin;
   {$IFDEF QuoteCommandlinePath}
@@ -477,7 +542,14 @@ begin
   Sectors := Trim(GetDosOutput(PChar(CmdGetsize), True));
   p := LastDelimiter(LF, Sectors);
   if p > 0 then Delete(Sectors, 1, p);
-  if StrToIntDef(Sectors, -1) >= 0 then Result := Sectors;
+  if StrToIntDef(Sectors, -1) >= 0 then Result := Sectors else
+  begin
+    FSEttings.Shared.MessageToShow := 'mkisofs -print-size failed.' + CRLF +
+      '  Commandline was: ' + CmdGetsize + CRLF +
+      '  Errormessage   : ' + Sectors + CRLF;
+    MessageToShow;
+  end;
+  SetPanels ('<>', '');
 end;
 
 { CreateDataDisk ---------------------------------------------------------------
@@ -492,14 +564,13 @@ var i              : Integer;
     CmdOnTheFly    : string;
     FHPathList,
     FHShCmd        : TextFile;
-    Disk             : TDiskInfo;
+    Disk           : TDiskInfo;
     CMArgs         : TCheckMediumArgs;
     DummyE         : Extended;
     DummyI         : Integer;
     Ok             : Boolean;
     SimulDev       : string;
- // CDSize         : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
- // ForcedContinue : Boolean;
+    Count          : Integer;
 
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
@@ -511,12 +582,12 @@ begin
   CMArgs.ForcedContinue := False;
   CMArgs.Choice := cDataCD;
   {Größe der Daten ermitteln}
-  FData.GetProjectInfo(DummyI, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
+  FData.GetProjectInfo(Count, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
   {Dateiduplikate aufspüren}
   {$IFDEF ShowBurnList}
   FormDebug.Memo1.Lines.Assign(FVList);
   {$ENDIF}
-  if FSettings.DataCD.FindDups then
+  if FSettings.DataCD.FindDups and (Count > 0) then
   begin
     if FVList.Count = 0 then
     begin
@@ -543,16 +614,9 @@ begin
   {Infos über eingelegte CD einlesen}
   if not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly then
   begin
+    SetPanels('<>', FLang.GMS('mburn13'));
     GetDiskInfo(Disk, FSettings.DataCD.Device, False);
-    {Bei DVD als Simulationstreiber dvd_simul verwenden.}
-    if not Disk.IsDVD then
-    begin
-      Ok := CheckMedium(Disk, CMArgs);
-    end else
-    begin
-      SimulDev := 'dvd';
-      {if FSettings.FileFlags.ProDVD then} Ok := CheckMedium(Disk, CMArgs);
-    end;
+    SetPanels('<>', '');
   end;
   {Pfadliste bearbeiten}
   if FSettings.DataCD.Boot then
@@ -589,7 +653,7 @@ begin
   {Kommandozeilen zusammenstellen, die unabhängig von on-the-fly sind, hier
    ersteinmal nur die Argumente; die Programmnamen und -pfade kommen später,
    da sie wegen sh.exe gesondert behandelt werden müssen.}
-  {mkisofs}
+  {mkisofs-Kommandozeile zusammenstellen}
   CmdM := ' -graft-points';
   with FSettings.DataCD, FSettings.General, FSettings.Cdrecord do
   begin
@@ -631,24 +695,44 @@ begin
         if Joliet then CmdM := CmdM + ' -hide-joliet boot.catalog';
       end;
     end;
-    if Multi then
-    begin
-      if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + MsInfo
-                                       + ' -prev-session ' + Device;
-                                    // + ' -dev ' + Device;  ab mkisofs 2.01a22
-                                    // + ' -C ' + MsInfo + ' -M ' + Device;
-      if not ContinueCD and (Disk.MsInfo <> '') then begin
-                          MsInfo := Disk.MsInfo;
-                          CmdM := CmdM + ' -cdrecord-params '  + MsInfo; end;
-                                      // ' -C '
-    end;
     if VolId <> '' then CmdM := CmdM + ' -volid "' + VolId + '"';   // ' -V "'
     if MkisofsUseCustOpts then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
     CmdM := CmdM + ' -path-list '
                  + QuotePath(MakePathConform(PathListName));
     if FSplitOutput then CmdM := CmdM + ' -split-output';
-    {cdrecord}
+    {Anzahl der benötigten Sektoren ermitteln}
+    if not (Disk.DiskType in [DT_None, DT_ManualNone]) then
+    begin
+      CMArgs.SectorsNeededS := GetSectorNumber(CmdM);
+      CMArgs.SectorsNeededI := StrToIntDef(CMArgs.SectorsNeededS, -1);
+      {Wenn TAO, kommen am Ende noch 2 Sektoren dazu.}
+      CMArgs.TaoEndSecCount := Integer(FSettings.DataCD.TAO) * 2;
+    end;
+    {Zusammenstellung prüfen}
+    if not ImageOnly or OnTheFly then
+    begin
+      {Bei DVD als Simulationstreiber dvd_simul verwenden.}
+      if not Disk.IsDVD then
+      begin
+        Ok := CheckMedium(Disk, CMArgs);
+      end else
+      begin
+        SimulDev := 'dvd';
+        {if FSettings.FileFlags.ProDVD then} Ok := CheckMedium(Disk, CMArgs);
+      end;
+    end;
+    {Bei ContinueCD = True ohne vorige Sessions, also bei ForcedContinue = True,
+     dürfen diese Parameter nicht verwendet werden.}    
+    if Multi and not CMArgs.ForcedContinue then
+    begin
+      if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + Disk.MsInfo
+                                       + ' -prev-session ' + Device;
+      if not ContinueCD and (Disk.MsInfo <> '') then
+                          CmdM := CmdM + ' -cdrecord-params '  + Disk.MsInfo;
+
+    end;
+    {cdrecord-Kommandozeile zusammenstellen}
     CmdC := ' gracetime=5 dev=' + Device;
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -670,13 +754,12 @@ begin
     {on-the-fly}
     if OnTheFly then
     begin
-      {Falls OnTheFly und DAO ode RAW, muß die Sektoranzahl ermittelt werden,
-       die dann cdrecord übergeben wird.
-       Dies gilt auch, wenn mit cdrecord-ProDVD TAO geschrieben werden soll.
-       Möglicherweise in Zukunft immer Größe ermitteln.}
+      {Falls OnTheFly und DAO ode RAW, muß die Sektoranzahl an cdrecord über-
+       geben werden.
+       Dies gilt auch, wenn mit cdrecord-ProDVD TAO geschrieben werden soll.}
       if (DAO or RAW or (TAO and FSettings.FileFlags.ProDVD)) and Ok then
       begin
-        CmdC := CmdC + ' -tsize=' + GetSectorNumber(CmdM) + 's';
+        CmdC := CmdC + ' -tsize=' + CMArgs.SectorsNeededS + 's';
       end;
       {ab Win2k ist die Ausführung mit sh.exe nicht mehr nötig.}
       if FSettings.FileFlags.UseSh then
@@ -738,10 +821,6 @@ begin
     end;
   end;
   BurnList.Free;
-  if CMArgs.ForcedContinue then
-  begin
-    FSettings.DataCD.ContinueCD := True;
-  end;
   {Kommandos ausführen}
   if not Ok then
   begin
@@ -753,8 +832,15 @@ begin
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
-      i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                  PChar(FLang.GMS('mburn02')),
+      Temp := FLang.GMS('mburn01');
+      if (Disk.DiskType <> DT_Unknown) and
+         (not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly) then
+        Temp := Format(FLang.GMS('mburn14'),
+                [FormatFloat('##0.###', CMArgs.SectorsNeededI / 512),
+                  FormatFloat('##0.###', (Disk.SecFree -
+                      (CMArgs.SectorsNeededI + CMArgs.TaoEndSecCount)) / 512)])
+                + Temp;
+      i := Application.MessageBox(PChar(Temp), PChar(FLang.GMS('mburn02')),
              MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
     end else
     {$ENDIF}
@@ -780,22 +866,22 @@ begin
         CmdOnTheFly := QuotePath(CmdOnTheFly);
         {$ENDIF}
         CmdOnTheFly := CmdOnTheFly + ' ' + Temp;
-        DisplayDOSOutput(CmdOnTheFly, FMemo, FActionThread, FLang,
+        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
-        DisplayDOSOutput(CmdOnTheFly, FMemo, FActionThread, FLang,
+        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end;
     end else
     begin
       if not FSettings.DataCD.ImageOnly then
       begin
-        DisplayDOSOutput(CmdM + CR + CmdC, FMemo, FActionThread, FLang,
+        DisplayDOSOutput(CmdM + CR + CmdC, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
-        DisplayDOSOutput(CmdM, FMemo, FActionThread, FLang, nil);
+        DisplayDOSOutput(CmdM, FActionThread, FLang, nil);
       end
     end;
   end else
@@ -880,7 +966,9 @@ begin
   {Spielzeit ermitteln}
   FData.GetProjectInfo(DummyI, DummyI, DummyL, CMArgs.CDTime, DummyI, cAudioCD);
   {Infos über eingelegte CD einlesen}
+  SetPanels('<>', FLang.GMS('mburn13'));
   GetDiskInfo(CD, FSettings.AudioCD.Device, True);
+  SetPanels('<>', '');
   Ok := CheckMedium(CD, CMArgs);
   {falls komprimierte Audio-Dateien vorhanden sind, Konvertierung vorbereiten}
   if FData.CompressedAudioFilesPresent then PrepareCompressedToWavConversion;
@@ -978,7 +1066,7 @@ begin
   if i = 1 then
   begin
     if CmdMP <> '' then Cmd := CmdMP + Cmd;
-    DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang, nil);
+    DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
   end else
   begin
     SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
@@ -1169,11 +1257,10 @@ begin
     MessageToShow;
     if not (FSettings.XCD.ImageOnly or (CmdC = '')) then
     begin
-      DisplayDOSOutput(CmdMode2CDMaker + CR + CmdC,
-                       FMemo, FActionThread, FLang, nil);
+      DisplayDOSOutput(CmdMode2CDMaker + CR + CmdC, FActionThread, FLang, nil);
     end else
     begin
-      DisplayDOSOutput(CmdMode2CDMaker, FMemo, FActionThread, FLang, nil);
+      DisplayDOSOutput(CmdMode2CDMaker, FActionThread, FLang, nil);
     end;
   end else
   begin
@@ -1234,7 +1321,7 @@ begin
   if i = 1 then
   begin
     CheckEnvironment(FSettings);
-    DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang,
+    DisplayDOSOutput(Cmd, FActionThread, FLang,
                      FSettings.Environment.EnvironmentBlock);
   end else
   begin
@@ -1278,14 +1365,16 @@ begin
     if FSettings.Cdrecord.Verbose then Cmd := Cmd + ' -v';
     {Kommando ausführen}
     CheckEnvironment(FSettings);
-    DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang,
+    DisplayDOSOutput(Cmd, FActionThread, FLang,
                      FSettings.Environment.EnvironmentBlock);
   end else
   begin
     Ok := True;
     {Kapazitäten des Rohlings ausgeben:
      Infos über eingelegte CD einlesen}
+    SetPanels('<>', FLang.GMS('mburn13'));
     GetDiskInfo(CD, FSettings.CDInfo.Device, True);
+    SetPanels('<>', '');
     {keine CD}
     if (CD.Size = 0) and (CD.MsInfo = '') then
     begin
@@ -1334,16 +1423,98 @@ procedure TCDAction.DAEReadTOC;
 var Output: TStringList;
     TrackList: TStringList;
     CommandLine: string;
-    Temp: string;
-    i: Integer;
-    p: Integer;
-    Name: string;
-    Seconds: Double;
-    Sectors: Integer;
-    Size: Double;
-    SizeString: string;
-    TimeString: string;
     CDPresent: Boolean;
+
+  { UnescapeString -------------------------------------------------------------
+
+    UnescapeString entfernt Anführungszeichen am Anfang und Ende sowie '\' als
+    Esacpe-Zeichen.                                                            }
+
+  function UnescapeString(s: string): string;
+  begin
+    if Pos('''', s) = 1 then Delete(s, 1, 1);
+    if s[Length(s)] = '''' then Delete(s, Length(s), 1);
+    while Pos('\', s) > 0 do
+    begin
+      Delete(s, Pos('\', s), 1);
+    end;
+    Result := s;
+  end;
+
+  { ExtractTrackInfo -----------------------------------------------------------
+
+    ExtractTrackInfo baut die einzelnen Zeilen der cdda2wav-Ausgabe um.        }
+
+  procedure ExtractTrackInfo(List: TStringList);
+  var i         : Integer;
+      Temp      : string;
+      p         : Integer;
+      Seconds   : Double;
+      Sectors   : Integer;
+      Size      : Double;
+      APerformer: string;
+      Performer : string;
+      Title     : string;
+      NameString: string;
+      SizeString: string;
+      TimeString: string;
+  begin
+    {Album-Performer}
+    Temp := List.Text;
+    Delete(Temp, 1, Pos('Album title:', Temp));
+    Temp := Trim(Copy(Temp, 1, Pos(CR, Temp)));
+    Delete(Temp, 1, Pos('from', Temp) + 4);
+    APerformer := UnescapeString(Temp);
+    {$IFDEF DebugReadAudioTOC}
+    FormDebug.Memo1.Lines.Add(APerformer);
+    FormDebug.Memo1.Lines.Add('');
+    {$ENDIF}
+    {Alles Löschen, was keine Trackinfos sind.}
+    for i := List.Count - 1 downto 0 do
+    begin
+      if not ((Pos('T', List[i]) = 1) and (Pos(':', List[i]) = 4)) or
+         (Pos('audio', List[i]) = 0) then
+      begin
+        List.Delete(i);
+      end
+    end;
+    {$IFDEF DebugReadAudioTOC}
+    AddCRStringToList(Output.Text, FormDebug.Memo1.Lines);
+    FormDebug.Memo1.Lines.Add('');
+    {$ENDIF}
+    {Für jeden Track die Infos zusammenstellen.}
+    for i := 0 to List.Count - 1 do
+    begin
+      {Laufzeit}
+      TimeString := Trim(Copy(List[i], 13, 9));
+      Temp := TimeString;
+      p := Pos(':', Temp);
+      Seconds := StrToIntDef(Copy(Temp, 1, p - 1), 0) * 60;
+      Delete(Temp, 1, p);
+      p := Pos('.', Temp);
+      Seconds := Seconds + StrToIntDef(Copy(Temp, 1, p - 1), 0);
+      {Größe}
+      Delete(Temp, 1, p);
+      Sectors := StrToIntDef(Temp, 0);
+      Size := (((Seconds * 75) + Sectors) * 2352) / 1024;
+      SizeString := FormatFloat('#,###,##0 KiByte', Size);
+      {Titel und Interpret}
+      Temp := List[i];
+      p := Pos('title', Temp);
+      Delete(Temp, 1, p + 5);
+      p := Pos('from', Temp);
+      Title := UnescapeString(Copy(Temp, 1, p - 2));
+      Delete(Temp, 1, p + 4);
+      Performer := UnescapeString(Trim(Temp));
+      if (Performer = '') and (Title <> '') then Performer := APerformer;
+      {Trackname}
+      NameString := Format('Track %.2d', [i + 1]);
+      {Neuen Eintrag zusammenstellen.}
+      List[i] :=  NameString + ':' + TimeString + '*' + SizeString +
+                  '|' + Title + '|' + Performer;
+    end;
+  end;
+
 begin
   {$IFDEF DebugReadAudioTOC}
   FormDebug.Memo1.Lines.Add('Reading TOC ...');
@@ -1369,55 +1540,24 @@ begin
   {$ENDIF}
   CommandLine := CommandLine + ' dev=' + FSettings.DAE.Device +
                  ' verbose-level=toc -gui -info-only -no-infofile';
+  if FSettings.DAE.UseCDDB then
+  begin
+    CommandLine := CommandLine + ' cddb=1';
+    if FSettings.DAE.CDDBServer <> '' then
+      CommandLine := CommandLine + ' -cddbp-server=' + FSettings.DAE.CDDBServer;
+    if FSettings.DAE.CDDBPort <> '' then
+      CommandLine := CommandLine + ' -cddbp-port=' + FSettings.DAE.CDDBPort;
+  end;
   if CDPresent then
   begin
     Output.Text := GetDOSOutput(PChar(CommandLine), True);
   end;
-  {nur die Angaben zu den Tracks sind wichtig}
-  for i := Output.Count - 1 downto 0 do
-  begin
-    if not ((Pos('T', Output[i]) = 1) and (Pos(':', Output[i]) = 4))
-       or (Pos('audio', Output[i]) = 0) then
-    begin
-      Output.Delete(i);
-    end else
-    begin
-      Temp := Output[i];
-      Delete(Temp, 1, 1);
-      Insert('Track ', Temp, 1);
-      Delete(Temp, Pos(':', Temp) + 1, 8);
-      Delete(Temp, Pos('audio', Temp), Length(Temp));
-      Output[i] := Temp;
-    end;
-  end;
   {$IFDEF DebugReadAudioTOC}
-  FormDebug.Memo3.Lines.Assign(Output);
+  AddCRStringToList(Output.Text, FormDebug.Memo1.Lines);
+  FormDebug.Memo1.Lines.Add('');
   {$ENDIF}
-  {jetzt den Output zur Trackliste umbauen}
-  for i := 0 to Output.Count - 1 do
-  begin
-    Temp := Output[i];
-    {Track-Name}
-    p := Pos(':', Temp);
-    Name := Copy(Temp, 1, p - 1);
-    Delete(Temp, 1, p);
-    Temp := Trim(Temp);
-    {Laufzeit}
-    TimeString := Temp;
-    p := Pos(':', Temp);
-    Seconds := StrToIntDef(Copy(Temp, 1, p - 1), 0) * 60;
-    Delete(Temp, 1, p);
-    p := Pos('.', Temp);
-    Seconds := Seconds + StrToIntDef(Copy(Temp, 1, p - 1), 0);
-    {Größe}
-    Delete(Temp, 1, p);
-    Sectors := StrToIntDef(Temp, 0);
-    Size := (((Seconds * 75) + Sectors) * 2352) / 1024;
-    SizeString := FormatFloat('#,###,##0 KiByte', Size);
-    {neuen Eintrag zusammenstellen}
-    Temp := Name + ':' + TimeString + '*' + SizeString;
-    Output[i] := Temp;
-  end;
+  {Aus der cdda2wav-Ausgabe die Infos herausholen.}
+  ExtractTrackInfo(Output);
   {TrackListe zuweisen}
   TrackList := FData.GetFileList('', cDAE);
   TrackList.Assign(Output);
@@ -1432,101 +1572,322 @@ end;
   DAEGrabTracks liest die ausgewählte Titel aus.                               }
 
 procedure TCDAction.DAEGrabTracks;
-var TrackList, TempList: TStringList;
-    i, a, b: Byte;
-    Temp: string;
-    CommandLine: string;
-    Cmd: string;
-    OutPath: string;
-    Suffix: string;
-begin
-  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  TempList := TStringList.Create;
-  TrackList := TStringList.Create;
-  {zuerst die Trackliste verarbeiten}
-  TrackList.CommaText := FSettings.DAE.Tracks;
-  TempList.CommaText := FSettings.DAE.Tracks;
-  {aufeinanderfolgende Tracknummern markieren}
-  for i := TempList.Count - 1 downto 1 do
+var Compressed: Boolean;
+
+  { GetCustomName --------------------------------------------------------------
+
+    erzeugt aus dem Pattern und den CD-Infos den Dateinamen.                   }
+
+  function GetCustomName(const Info: string; Index: Integer;
+                         var Title, Performer, Name: string): string;
+  var NameTemp,
+      TitleTemp,
+      PerformerTemp,
+      Temp      : string;
   begin
-    a := StrToInt(TempList[i]);
-    b := StrToInt(TempList[i - 1]);
-    if a = b + 1 then
-    begin
-      TrackList[i - 1] := TrackList[i - 1] + '+';
-    end;
+    {Infos ermitteln.}
+    NameTemp := StringLeft(Info, ':');
+    SplitString(Info, '|', TitleTemp, TitleTemp);
+    PerformerTemp := TitleTemp;
+    TitleTemp := StringLeft(TitleTemp, '|');
+    PerformerTemp := StringRight(PerformerTemp, '|');
+    {Aus dem Pattern den Dateinamen machen.}
+    Temp := FSettings.DAE.NamePattern;
+    Temp := ReplaceString(Temp, '%T', TitleTemp);
+    Temp := ReplaceString(Temp, '%P', PerformerTemp);
+    Temp := ReplaceString(Temp, '%N', Format('%.2d', [Index + 1]));
+    if (TitleTemp = '') and (PerformerTemp = '') then Temp := NameTemp;
+    Title := TitleTemp;
+    Performer := PerformerTemp;
+    Name := NameTemp;
+    Result := Temp;
   end;
-  {aufeinanderfolgende Tracknummern zusammenführen}
-  for i := TrackList.Count -1 downto 1 do
+
+  { Cdda2wavStdCmdLine ---------------------------------------------------------
+
+    erzeugt die unveränderlichen Bestandteile der Kommandozeile.               }
+
+  function Cdda2wavStdCmdLine: string;
+  var CommandLine: string;
   begin
-    if Pos('+', TrackList[i - 1]) > 0 then
+    {unveränderlichen Teil der Kommandozeile zusammenstellen}
+    with FSettings.DAE do
     begin
-      TrackList[i - 1] := TrackList[i - 1] + TrackList[i];
-      TrackList.Delete(i);
+      CommandLine := ' dev=' + Device;
+      if Speed <> '' then CommandLine := CommandLine + ' speed=' + Speed;
+      CommandLine := CommandLine + ' verbose-level=summary';
+      CommandLine := CommandLine + ' -gui';
+      if Bulk       then CommandLine := CommandLine + ' -bulk';
+      if NoInfoFile then CommandLine := CommandLine + ' -no-infofile';
+      if Paranoia   then CommandLine := CommandLine + ' -paranoia';
     end;
+    Result := CommandLine;
   end;
-  {Einträge für die Kommandozeile vorbereiten}
-  for i := 0 to TrackList.Count - 1 do
+
+  { GetCommandLineCompress -----------------------------------------------------
+
+    erzeugt den Aufruf für das Komprimierungstool.                             }
+
+  function GetCommandLineCompress(const Info: string; Index: Integer): string;
+  var Cmd      : string;
+      OutName  : string;
+      Name,
+      Title,
+      Performer: string;
   begin
-    if Pos('+', TrackList[i]) = 0 then
+    Cmd := '';
+    if FSettings.DAE.PrefixNames then
+      OutName := FSettings.DAE.Prefix + Format('_%.2d', [Index + 1])
+    else
+      OutName := GetCustomName(Info, Index, Title, Performer, Name);
+    if FSettings.DAE.MP3  then Cmd := StartUpDir + cLameBin;
+    if FSettings.DAE.Ogg  then Cmd := StartUpDir + cOggencBin;
+    if FSettings.DAE.FLAC then Cmd := StartUpDir + cFLACBin;
+    if FSettings.FileFlags.UseSh then Cmd := MakePathConform(Cmd);
+    {$IFDEF QuoteCommandlinePath}
+    Cmd := QuotePath(Cmd);
+    {$ENDIF}
+    {Jetzt die Optionen anhängen.}
+    if FSettings.DAE.MP3 then
     begin
-      TrackList[i] := TrackList[i] + '+' + TrackList[i];
-    end else
-    begin
-      a := 1;
-      Temp := TrackList[i];
-      while Pos('+', Temp) > 0 do
+      Cmd := Cmd + ' --nohist --preset ' + FSettings.DAE.LamePreset;
+      if FSettings.DAE.AddTags then
       begin
-        a := Pos('+', Temp);
-        Delete(Temp, a, 1);
-        Insert('*', Temp, a);
+        Cmd := Cmd + ' --add-id3v2';
+        if Title <> '' then Cmd := Cmd + ' --tt "' + Title +'"';
+        if Performer <> '' then Cmd := Cmd + ' --ta "' + Performer + '"';
       end;
-      Insert('+', Temp, a+1);
-      a := Pos('*', Temp);
-      b := Pos('+', Temp);
-      Delete(Temp, a, b - a);
-      TrackList[i] := Temp;
+      Cmd := Cmd + ' - ' + QuotePath(FSettings.DAE.Path + OutName + cExtMp3);
     end;
+    if FSettings.DAE.Ogg then
+    begin
+      Cmd := Cmd + ' -q ' + FSettings.DAE.OggQuality;
+      if FSettings.DAE.AddTags then
+      begin
+        if Title <> '' then Cmd := Cmd + ' -t "' + Title +'"';
+        if Performer <> '' then Cmd := Cmd + ' -a "' + Performer + '"';
+      end;
+      Cmd := Cmd + ' -o ' + QuotePath(FSettings.DAE.Path + OutName + cExtOgg)
+                 + ' -';
+    end;
+    if FSettings.DAE.FLAC then
+    begin
+      Cmd := Cmd + ' -f -s -' + FSettings.DAE.FlacQuality;
+      if FSettings.DAE.AddTags then
+      begin
+        if Title <> '' then Cmd := Cmd + ' -T "TITLE=' + Title +'"';
+        if Performer <> '' then Cmd := Cmd + ' -T "ARTIST=' + Performer + '"';
+      end;
+      Cmd := Cmd + ' -o ' + QuotePath(FSettings.DAE.Path + OutName + cExtFLAC)
+                 + ' -';
+    end;
+    Result := Cmd;
   end;
-  {unveränderlichen Teil der Kommandozeile zusammenstellen}
+
+  { DAEGrabTracksSimple --------------------------------------------------------
+
+    Dies ist die alte Routine (bis 1.2pre1). Die Dateinamen werden durch das
+    Präfix und die Tracknummer bestimmt. Keine Kompression.                    }
+
+  procedure DAEGrabTracksSimple;
+  var TrackList, TempList: TStringList;
+      i, a, b            : Byte;
+      Temp               : string;
+      CommandLine        : string;
+      Cmd                : string;
+      OutPath            : string;
+      Suffix             : string;
+  begin
+    SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+    TempList := TStringList.Create;
+    TrackList := TStringList.Create;
+    {zuerst die Trackliste verarbeiten}
+    TrackList.CommaText := FSettings.DAE.Tracks;
+    TempList.CommaText := FSettings.DAE.Tracks;
+    {aufeinanderfolgende Tracknummern markieren}
+    for i := TempList.Count - 1 downto 1 do
+    begin
+      a := StrToInt(TempList[i]);
+      b := StrToInt(TempList[i - 1]);
+      if a = b + 1 then
+      begin
+        TrackList[i - 1] := TrackList[i - 1] + '+';
+      end;
+    end;
+    {aufeinanderfolgende Tracknummern zusammenführen}
+    for i := TrackList.Count -1 downto 1 do
+    begin
+      if Pos('+', TrackList[i - 1]) > 0 then
+      begin
+        TrackList[i - 1] := TrackList[i - 1] + TrackList[i];
+        TrackList.Delete(i);
+      end;
+    end;
+    {Einträge für die Kommandozeile vorbereiten}
+    for i := 0 to TrackList.Count - 1 do
+    begin
+      if Pos('+', TrackList[i]) = 0 then
+      begin
+        TrackList[i] := TrackList[i] + '+' + TrackList[i];
+      end else
+      begin
+        a := 1;
+        Temp := TrackList[i];
+        while Pos('+', Temp) > 0 do
+        begin
+          a := Pos('+', Temp);
+          Delete(Temp, a, 1);
+          Insert('*', Temp, a);
+        end;
+        Insert('+', Temp, a+1);
+        a := Pos('*', Temp);
+        b := Pos('+', Temp);
+        Delete(Temp, a, b - a);
+        TrackList[i] := Temp;
+      end;
+    end;
+    {unveränderlichen Teil der Kommandozeile zusammenstellen}
+    with FSettings.DAE do
+    begin
+      CommandLine := StartUpDir + cCdda2wavBin;
+      {$IFDEF QuoteCommandlinePath}
+      CommandLine := QuotePath(CommandLine);
+      {$ENDIF}
+      CommandLine := CommandLine + Cdda2wavStdCmdLine;
+      if Path[Length(Path)] <> '\' then Path := Path + '\';
+      OutPath := MakePathConform(Path + Prefix);
+    end;
+    for i := 0 to TrackList.Count - 1 do
+    begin
+      {Sonderbehandlung für einzelne Tracks, sonst fehlt die Tracknummer}
+      Suffix := '';
+      a := Pos('+', TrackList[i]);
+      if Copy(TrackList[i], 1, a - 1) =
+         Copy(TrackList[i], a + 1, Length(TrackList[i])) then
+      begin
+        Temp := Copy(TrackList[i], 1, a - 1);
+        if Length(Temp) = 1 then
+        begin
+          Insert('0', Temp, 1);
+        end;
+        Suffix := '_' + Temp;
+      end;
+      {Kommandozeile zusammenstellen}
+      Cmd := Cmd + CommandLine + ' track=' + TrackList[i] + ' ' +
+             QuotePath(OutPath + Suffix) + CR;
+    end;
+    DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
+    TrackList.Free;
+    TempList.Free;
+  end;
+
+  { DAEGrabTracksEx ------------------------------------------------------------
+
+    Dies ist die erweiterte Variante, die automatische Benennung der Dateien
+    sowie das direkte Komprimieren ermöglicht.                                 }
+
+  procedure DAEGrabTracksEx;
+  var TrackList, InfoList: TStringList;
+      i, Index           : Integer;
+      OutPath            : string;
+      Cmd, ShCmd         : string;
+      PipedCmd           : string;
+      ShCmdFile          : string;
+      CmdDAE, CmdComp    : string;
+      Temp, Dummy        : string;
+      FHShCmd            : TextFile;
+  begin
+    SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+    {Trackliste erstellen}
+    InfoList := FData.GetFileList('', cDAE);
+    TrackList := TStringList.Create;
+    TrackList.CommaText := FSettings.DAE.Tracks;
+    CmdDAE := StartUpDir + cCdda2wavBin;
+    {$IFDEF QuoteCommandlinePath}
+    CmdDAE := QuotePath(CmdDAE);
+    {$ENDIF}
+    if Compressed then
+    begin
+      FSettings.Shared.MessageToShow := FLang.GMS('mburn03');
+      MessageToShow;
+    end;
+    with FSettings.DAE do
+    begin
+      if Path[Length(Path)] <> '\' then Path := Path + '\';
+      OutPath := MakePathConform(Path);
+      Cmd := '';
+      {Kommandozeile für jeden Track zusammenstellen}
+      for i := 0 to TrackList.Count - 1 do
+      begin
+        {Nummer des aktuellen Tracks - 1}
+        Index := StrToIntDef(TrackList[i], 0) - 1;
+        {Dateinamen bestimmen.}
+        if not PrefixNames then
+        begin
+          Temp := GetCustomName(InfoList[Index], Index, Dummy, Dummy, Dummy);
+        end else
+        begin
+          {PrefixNames muß berücksichtigt werden für den Fall, daß komprimierte
+           Dateien solche Namen erhalten sollen.}
+          Temp := Prefix + Format('_%.2d', [Index + 1]);
+        end;
+        {Kommandozeile anhängen.}
+        if not Compressed then
+        begin
+          Cmd := Cmd + CmdDAE + Cdda2wavStdCmdLine + ' track=' + TrackList[i] +
+                 '+' + TrackList[i] + ' ' + QuotePath(OutPath + Temp) + CR;
+        end else
+        begin
+          Temp := Cdda2wavStdCmdLine + ' track=' + TrackList[i] + '+' +
+                    TrackList[i] + ' - ';
+          {Kommandozeile für das Komprimierungstool zusammenstellen}
+          CmdComp := GetCommandLineCompress(InfoList[Index], Index);
+          {Kommandozeilen pipen}
+          if FSettings.FileFlags.UseSh then
+          begin
+            PipedCmd := MakePathConform(CmdDAE) + Temp + '|' + CmdComp;
+            {diese Kommandozeile als Datei speichern}
+            ShCmdFile := ProgDataDir +
+                         cShCmdFile + '_' + Format('%.2d', [Index + 1]);
+            AssignFile(FHShCmd, ShCmdFile);
+            Rewrite(FHShCmd);
+            WriteLn(FHShCmd, PipedCmd);
+            CloseFile(FHShCmd);
+            {Shell-Aufruf}
+            ShCmd := StartUpDir + cShBin;
+            {$IFDEF QuoteCommandlinePath}
+            ShCmd := QuotePath(ShCmd);
+            {$ENDIF}
+            Cmd := Cmd + ShCmd + ' ' +
+                   QuotePath(MakePathConform(ShCmdFile)) + CR;
+            FSettings.Shared.MessageToShow := PipedCmd;
+            MessageToShow;
+          end else
+          begin
+            PipedCmd := CmdDAE + Temp + '|' + CmdComp;
+            Cmd := Cmd + GetEnvVarValue(cComSpec) +
+                   ' /c ' + '"' + PipedCmd + '"' + CR;
+          end;
+        end;
+      end;
+    end;
+    DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
+    TrackList.Free;
+  end;
+
+begin
   with FSettings.DAE do
   begin
-    CommandLine := StartUpDir + cCdda2wavBin;
-    {$IFDEF QuoteCommandlinePath}
-    CommandLine := QuotePath(CommandLine);
-    {$ENDIF}
-    CommandLine := CommandLine + ' dev=' + Device;
-    if Speed <> '' then CommandLine := CommandLine + ' speed=' + Speed;
-    CommandLine := CommandLine + ' verbose-level=summary';
-    CommandLine := CommandLine + ' -gui';
-    if Bulk       then CommandLine := CommandLine + ' -bulk';
-    if NoInfoFile then CommandLine := CommandLine + ' -no-infofile';
-    if Paranoia   then CommandLine := CommandLine + ' -paranoia';
-    if Path[Length(Path)] <> '\' then Path := Path + '\';
-    OutPath := MakePathConform(Path + Prefix);
-  end;
-  for i := 0 to TrackList.Count - 1 do
-  begin
-    {Sonderbehandlung für einzelne Tracks, sonst fehlt die Tracknummer}
-    Suffix := '';
-    a := Pos('+', TrackList[i]);
-    if Copy(TrackList[i], 1, a - 1) =
-       Copy(TrackList[i], a + 1, Length(TrackList[i])) then
+    Compressed := Mp3 or Ogg or Flac;
+    if PrefixNames and not Compressed then
     begin
-      Temp := Copy(TrackList[i], 1, a - 1);
-      if Length(Temp) = 1 then
-      begin
-        Insert('0', Temp, 1);
-      end;
-      Suffix := '_' + Temp;
+      DAEGrabTracksSimple;
     end;
-    {Kommandozeile zusammenstellen}
-    Cmd := Cmd + CommandLine + ' track=' + TrackList[i] + ' ' +
-           QuotePath(OutPath + Suffix) + CR;
+    if not PrefixNames or Compressed then
+    begin
+      DAEGrabTracksEx;
+    end;
   end;
-  DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang, nil);
-  TrackList.Free;
-  TempList.Free;
 end;
 
 { ReadImage --------------------------------------------------------------------
@@ -1556,7 +1917,7 @@ begin
     {$ENDIF}
     Cmd := Cmd + ' f=' + IsoPath;
   end;
-  DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang, nil);
+  DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
 end;
 
 { WriteImage -------------------------------------------------------------------
@@ -1676,7 +2037,7 @@ begin
   if i = 1 then
   begin
     CheckEnvironment(FSettings);
-    DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang,
+    DisplayDOSOutput(Cmd, FActionThread, FLang,
                      FSettings.Environment.EnvironmentBlock);
   end else
   begin
@@ -1724,7 +2085,7 @@ begin
   if i = 1 then
   begin
     CheckEnvironment(FSettings);
-    DisplayDOSOutput(Cmd, FMemo, FActionThread, FLang, nil);
+    DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
   end else
   begin
     SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
@@ -1765,9 +2126,10 @@ begin
   end;
   Drive := FDevices.GetDriveLetter(Device);
   {Thread starten}
-  FVerificationThread := TVerificationThread.Create(FVList, FMemo, Device,
+  FVerificationThread := TVerificationThread.Create(FVList, Device,
                                                     FLang, True);
   FVerificationThread.FreeOnTerminate := True;
+  FVerificationThread.Action := Action;
   {jetzt weitere (optionale) Properties setzen}
   if Action = cVerifyXCD then
   begin
@@ -1928,11 +2290,10 @@ begin
   begin
     if not (FSettings.VideoCD.ImageOnly or (CmdC = '')) then
     begin
-      DisplayDOSOutput(CmdVCDIm + CR + CmdC,
-                       FMemo, FActionThread, FLang, nil);
+      DisplayDOSOutput(CmdVCDIm + CR + CmdC, FActionThread, FLang, nil);
     end else
     begin
-      DisplayDOSOutput(CmdVCDIm, FMemo, FActionThread, FLang, nil);
+      DisplayDOSOutput(CmdVCDIm, FActionThread, FLang, nil);
     end;
   end else
   begin
@@ -1946,18 +2307,30 @@ end;
   keine Imageerstellung.                                                       }
 
 procedure TCDACtion.CreateVideoDVD;
-var Ok: Boolean;
-    i: Integer;
-    CmdC, CmdM, CmdOnTheFly: string;
-    Temp: string;
-    SimulDev: string;
-    FHShCmd: TextFile;
+var Ok          : Boolean;
+    i           : Integer;
+    CmdC, CmdM,
+    CmdOnTheFly : string;
+    SourceArg   : string;
+    Disk        : TDiskInfo;
+    CMArgs      : TCheckMediumArgs;
+    Temp        : string;
+    SimulDev    : string;
+    FHShCmd     : TextFile;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   Ok := True;
-  if FSettings.FileFlags.ProDVD then SimulDev := 'dvd' else SimulDev := 'cdr';
-  {Hier sollte noch beispielsweise das Medium überprüft werden ...}
-  {Falls ein Vergleich sattfinden soll, benötigen wir die Dateinamen.}
+  CMArgs.ForcedContinue := False;
+  CMArgs.Choice := cDVDVideo;
+  SimulDev := 'cdr';
+  {Infos über eingelegte Disk einlesen}
+  if not FSettings.DVDVideo.ImageOnly or FSettings.DVDVideo.OnTheFly then
+  begin
+    SetPanels('<>', FLang.GMS('mburn13'));
+    GetDiskInfo(Disk, FSettings.DVDVideo.Device, False);
+    SetPanels('<>', '');
+  end;
+  {Falls ein Vergleich stattfinden soll, benötigen wir die Dateinamen.}
   FData.SetDVDSourcePath(FSettings.DVDVideo.SourcePath);
   CmdM := ' -dvd-video';
   with FSettings.DVDVideo, FSettings.General, FSettings.Cdrecord do
@@ -1965,8 +2338,24 @@ begin
     {mkisofs}
     if MkisofsUseCustOpts then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
-    if VolID <> '' then CmdM := CmdM + ' -volid "' + VolID + '"';  
-    // CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
+    if VolID <> '' then CmdM := CmdM + ' -volid "' + VolID + '"';
+    SourceArg := ' ' + QuotePath(MakePathConform(SourcePath));
+    {Anzahl der benötigten Sektoren ermitteln}
+    if not (Disk.DiskType in [DT_None, DT_ManualNone]) then
+    begin
+      CMArgs.SectorsNeededS := GetSectorNumber(CmdM + SourceArg);
+      CMArgs.SectorsNeededI := StrToIntDef(CMArgs.SectorsNeededS, -1);
+    end;
+    {Zusammenstellung prüfen}
+    if not ImageOnly or OnTheFly then
+    begin
+      Ok := CheckMedium(Disk, CMArgs);
+      {Bei DVD als Simulationstreiber dvd_simul verwenden.}
+      if Disk.IsDVD then
+      begin
+        SimulDev := 'dvd';
+      end;
+    end;
     {cdrecord}
     CmdC := ' gracetime=5 dev=' + Device;
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
@@ -1980,13 +2369,12 @@ begin
     if DMASpeedCheck and ForceSpeed then
                         CmdC := CmdC + ' -force';
     CmdC := CmdC + ' -dao';
-
     {on-the-fly}
     if FSettings.DVDVideo.OnTheFly then
     begin
-      CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
+      CmdM := CmdM + SourceArg;
       {DVDs werden immer in DAO geschrieben, also Sektoranzahl ermitteln}
-      CmdC := CmdC + ' -tsize=' + GetSectorNumber(CmdM) + 's';
+      CmdC := CmdC + ' -tsize=' + CMArgs.SectorsNeededS + 's';
       {ab Win2k ist die Ausführung mit sh.exe nicht mehr nötig.}
       if FSettings.FileFlags.UseSh then
       begin
@@ -2075,22 +2463,22 @@ begin
         CmdOnTheFly := QuotePath(CmdOnTheFly);
         {$ENDIF}
         CmdOnTheFly := CmdOnTheFly + ' ' + Temp;
-        DisplayDOSOutput(CmdOnTheFly, FMemo, FActionThread, FLang,
+        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
-        DisplayDOSOutput(CmdOnTheFly, FMemo, FActionThread, FLang,
+        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end;
     end else
     begin
       if not FSettings.DVDVideo.ImageOnly then
       begin
-        DisplayDOSOutput(CmdM + CR + CmdC, FMemo, FActionThread, FLang,
+        DisplayDOSOutput(CmdM + CR + CmdC, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
-        DisplayDOSOutput(CmdM, FMemo, FActionThread, FLang, nil);
+        DisplayDOSOutput(CmdM, FActionThread, FLang, nil);
       end
     end;
   end else
@@ -2179,7 +2567,8 @@ end;
   CleanUp löscht temporäre Dateien.                                            }
 
 procedure TCDAction.CleanUp(const Phase: Byte);
-var i: Integer;
+var i   : Integer;
+    Temp: string;
 begin
   {Phase 1: TForm1.WMITerminated}
   if Phase = 1 then
@@ -2237,6 +2626,15 @@ begin
         DeleteFile(FSettings.XCD.IsoPath + cExtToc);
         DeleteFile(FSettings.XCD.IsoPath + cExtCue);
         DeleteFile(FSettings.XCD.IsoPath + cExtUm2);
+      end;
+    end;
+
+    if FLastAction = cDAE then
+    begin
+      for i := 0 to 98 do
+      begin
+        Temp := ProgDataDir + cShCmdFile + '_' + Format('%.2d', [i + 1]);
+        if FileExists(Temp) then DeleteFile(Temp);
       end;
     end;
 

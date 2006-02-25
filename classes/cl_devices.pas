@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005 Oliver Valencia
+  Copyright (c) 2005-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.04.2005
+  letzte Änderung  23.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -62,6 +62,9 @@ type TDevices = class(TObject)
        {$IFDEF DebugDeviceList}
        procedure ShowDeviceLists;
        {$ENDIF}
+       {$IFDEF WriteLogfile}
+       procedure WriteLog;
+       {$ENDIF}
      public
        constructor Create;
        destructor Destroy; override;
@@ -79,6 +82,7 @@ type TDevices = class(TObject)
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      constant, f_filesystem, f_strings, f_process;
 
 { TDevices ------------------------------------------------------------------- }
@@ -99,7 +103,7 @@ begin
   for i := 0 to FLocalCDWriter.Count - 1 do Deb(FLocalCDWriter[i], 1);
   Deb(CRLF + 'FLocalCDReader:', 1);
   for i := 0 to FLocalCDReader.Count - 1 do Deb(FLocalCDReader[i], 1);
-  Deb(CRLF + 'FRemoteCDDriveLetter:', 1);
+  Deb(CRLF + 'FLocalCDDriveLetter:', 1);
   for i := 0 to FLocalCDDriveLetter.Count - 1 do Deb(FLocalCDDriveLetter[i], 1);
 
   Deb(CRLF + CRLF + 'FRemoteCDDevices:', 1);
@@ -110,6 +114,36 @@ begin
   for i := 0 to FRemoteCDReader.Count - 1 do Deb(FRemoteCDReader[i], 1);
   Deb(CRLF + 'FRemoteCDDriveLetter:', 1);
   for i := 0 to FRemoteCDDriveLetter.Count - 1 do Deb(FRemoteCDDriveLetter[i], 1);
+end;
+{$ENDIF}
+
+{ WriteLog ---------------------------------------------------------------------
+
+  schreibt die Device-Listen in das Logfile.                                   }
+
+{$IFDEF WriteLogfile}
+procedure TDevices.WriteLog;
+var i: Integer;
+begin
+  AddLog('Device-Lists:' + CRLF, 0);
+  AddLog('FLocalCDDevices:', 0);
+  for i := 0 to FLocalCDDevices.Count - 1 do AddLog('  ' + FLocalCDDevices[i], 0);
+  AddLog(CRLF + 'FLocalCDWriter:', 0);
+  for i := 0 to FLocalCDWriter.Count - 1 do AddLog('  ' + FLocalCDWriter[i], 0);
+  AddLog(CRLF + 'FLocalCDReader:', 0);
+  for i := 0 to FLocalCDReader.Count - 1 do AddLog('  ' + FLocalCDReader[i], 0);
+  AddLog(CRLF + 'FLocalCDDriveLetter:', 0);
+  for i := 0 to FLocalCDDriveLetter.Count - 1 do AddLog('  ' + FLocalCDDriveLetter[i], 0);
+
+  AddLog(CRLF + CRLF + 'FRemoteCDDevices:', 0);
+  for i := 0 to FRemoteCDDevices.Count - 1 do AddLog('  ' + FRemoteCDDevices[i], 0);
+  AddLog(CRLF + 'FRemoteCDWriter:', 0);
+  for i := 0 to FRemoteCDWriter.Count - 1 do AddLog('  ' + FRemoteCDWriter[i], 0);
+  AddLog(CRLF + 'FRemoteCDReader:', 0);
+  for i := 0 to FRemoteCDReader.Count - 1 do AddLog('  ' + FRemoteCDReader[i], 0);
+  AddLog(CRLF + 'FRemoteCDDriveLetter:', 0);
+  for i := 0 to FRemoteCDDriveLetter.Count - 1 do AddLog('  ' + FRemoteCDDriveLetter[i], 0);
+  AddLog(CRLF + CRLF, 0);
 end;
 {$ENDIF}
 
@@ -337,6 +371,9 @@ begin
   end;
   {$IFDEF DebugDeviceList}
   ShowDeviceLists;
+  {$ENDIF}
+  {$IFDEF WriteLogfile}
+  WriteLog;
   {$ENDIF}
 end;
 

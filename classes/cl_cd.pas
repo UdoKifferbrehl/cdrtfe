@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.02.2006
+  letzte Änderung  13.05.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -153,10 +153,12 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        MaxLength      : Byte;
        CheckFolder    : Boolean;
        IgnoreFiles    : Boolean;
+       CheckAccess    : Boolean;
        ErrorListFiles,
        ErrorListDir,
        ErrorListIgnore,
-       InvalidSrcFiles: TStringList;
+       InvalidSrcFiles,
+       NoAccessFiles  : TStringList;
      end;
 
      TCD = class(TObject)
@@ -1406,9 +1408,11 @@ var Folder: TNode;
     end;
   end;
 
-  {CheckFileNames prüft die Länge der Ziel-Dateinamen. Prüft, ob die Namen der
-   Quelldateien gültig sind. In seltenen Fällen können Dateien ungültige Zeichen
-   enthalten (z.B. ?). Diese Dateien müssen aussortiert werden.                }
+  { CheckFileNames -------------------------------------------------------------
+
+    * Überprüfung der Ziel-Dateinamen auf maximal zulässige Länge
+    * Überprüfung der Quelldateinamen auf ungültige Sonderzeichen (z.B. '?').
+    * Überprüfung, ob auf die Quelldateien zugegriffen werden kann.            }
 
   procedure CheckFileNames(Root: TNode);
   var Path           : string;
@@ -1439,6 +1443,15 @@ var Folder: TNode;
       {Dateinamen extrahieren}
       SplitString(Temp, ':', CDName, SrcName);
       SrcName := StringLeft(SrcName, '*');
+      {Kann auf die Quelldatei zugegriffen werden?}
+      if Args.CheckAccess then
+      begin
+        if not FileAccess(SrcName, fmOpenRead, fmShareDenyNone) then
+        begin
+          Args.NoAccessFiles.Add(SrcName);
+          IndexList.Add(IntToStr(i));
+        end;
+      end else
       {Namen der Quelldatei überprüfen}
       if not SourceFileIsValid(SrcName) then
       begin

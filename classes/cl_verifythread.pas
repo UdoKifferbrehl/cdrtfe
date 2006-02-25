@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_verifyhread.pas: Quell- und Zieldateien vergleichen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.08.2005
+  letzte Änderung  16.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -17,6 +17,8 @@
   Außerdem kann in der Pfadliste nach mehrfach vorkommenden, identischen
   Dateien gesucht werden, um diese durch Links zur Ursprungsdatei ersetzen.
   Zudem kann für Mode2/Form2-Dateien eine Info-Datei erzeugt werden.
+  Da die Zugriffe auf das Memo über das TLogWin-Singleton erfolgen, ist die Unit
+  cl_logwindow.pas zwingend notwendig.
 
 
   TVerificationThread
@@ -30,11 +32,11 @@
                  XCDExt
                  XCDKeepExt
 
-    Methoden     Create(List: TStringList; Memo: TMemo; Device: string; Lang: TLang; Suspended: Boolean)
+    Methoden     Create(List: TStringList; Device: string; Lang: TLang; Suspended: Boolean)
 
   exportierte Funktionen (ungenutzt, aus cdrtfe 0.9.x)
 
-    StartVerifyDataCD(List: TStringList; var Thread: TVerificationThread; Memo: TMemo; Device: string; Lang: TLang)
+    StartVerifyDataCD(List: TStringList; var Thread: TVerificationThread; Device: string; Lang: TLang)
     TerminateVerification(Thread: TVerificationThread)
 
 }
@@ -45,7 +47,7 @@ unit cl_verifythread;
 
 interface
 
-uses Windows, SysUtils, Classes, StdCtrls, ComCtrls, Forms, FileCtrl,
+uses Windows, SysUtils, Classes, ComCtrls, Forms, FileCtrl,
      cl_lang;
 
 type TVerificationThread = class(TThread)
@@ -53,7 +55,6 @@ type TVerificationThread = class(TThread)
        FAction      : Byte;
        {Variablen für Ausgabe}
        FHandle      : THandle;           // Window-Handle des Formulars mit Memo
-       FMemo        : TMemo;             // Memo für Ausgabe
        FStatusBar   : TStatusBar;        // für Anzeige von Status-Infos
        FProgressBar : TProgressBar;      // Fortschrittsanzeige
        FLine        : string;            // Zeile, die ausgegeben werden soll
@@ -97,7 +98,7 @@ type TVerificationThread = class(TThread)
        procedure DReloadError;
        procedure SendTerminationMessage;
      public
-       constructor Create(List: TStringList; var Memo: TMemo; Device: string; Lang: TLang; Suspended: Boolean);
+       constructor Create(List: TStringList; Device: string; Lang: TLang; Suspended: Boolean);
        property Action: Byte write FAction;
        {Properties für Ausgabe}
        property StatusBar: TStatusBar write FStatusBar;
@@ -112,12 +113,13 @@ type TVerificationThread = class(TThread)
        {Properties für das Aufspüren von Duplikaten}
      end;
 
-procedure StartVerifyDataCD(List: TStringList; var Thread: TVerificationThread; Memo: TMemo; Device: string; Lang: TLang);
+procedure StartVerifyDataCD(List: TStringList; var Thread: TVerificationThread; Device: string; Lang: TLang);
 procedure TerminateVerification(Thread: TVerificationThread);
 
 implementation
 
 uses {$IFDEF ShowVerifyTime} f_misc, {$ENDIF}
+     cl_logwindow,
      f_filesystem, f_strings, f_largeint, f_crc, f_helper, user_messages,
      constant;
 
@@ -150,12 +152,28 @@ type TM2F2FileHeader = packed record  // RIFF-Header der Mode2/Form2-Dateien
 
 procedure TVerificationThread.DAddLine;
 begin
-  FMemo.Lines.Add(FLine);
+  TLogWin.Inst.Add(FLine);
 end;
 
 procedure TVerificationThread.DStatusBarPanel0;
+{$IFDEF ShowProgressTaskBar}
+var p : Integer;
+    ID: string;
+{$ENDIF}
 begin
   FStatusBar.Panels[0].Text := FLine;
+  {$IFDEF ShowProgressTaskBar}
+  case FAction of
+    cVerify,
+    cVerifyXCD,
+    cVerifyDVDVideo: ID := 'V';
+    cFindDuplicates: ID := 'D';
+    cCreateInfoFile: ID := 'X';
+  end;
+  p := Pos('   ', FLine);
+  TLogWin.Inst.ShowProgressTaskBarString(ID + ': ' + Copy(FLine, p + 3,
+                                                        Length(FLine) - p + 2));
+  {$ENDIF}
 end;
 
 procedure TVerificationThread.DStatusBarPanel1;
@@ -391,8 +409,8 @@ begin
   GetMem(p2, BSize);
   try
     try
-      File1 := TFileStream.Create(FileName1, fmOpenRead);
-      File2 := TFileStream.Create(FileName2, fmOpenRead);
+      File1 := TFileStream.Create(FileName1, fmOpenRead or fmShareDenyNone);
+      File2 := TFileStream.Create(FileName2, fmOpenRead or fmShareDenyNone);
       {$IFDEF LargeFiles}
       FSize1 := GetFileSize(FileName1);
       FSize2 := GetFileSize(FileName2);
@@ -463,8 +481,8 @@ begin
   GetMem(p1, BSize1);
   try
     try
-      File1 := TFileStream.Create(FileName1, fmOpenRead); // Form1-Datei
-      File2 := TFileStream.Create(FileName2, fmOpenRead); // Form2-Datei
+      File1 := TFileStream.Create(FileName1, fmOpenRead or fmShareDenyNone);    // Form1-Datei
+      File2 := TFileStream.Create(FileName2, fmOpenRead or fmShareDenyNone);    // Form2-Datei
       FSize1 := File1.Size;
       FSize2 := FSize1;
       if (FSize1 > 0) and (FSize2 > 0) then
@@ -532,7 +550,7 @@ begin
   GetMem(p, BSize);
   try
     try
-      FileIn := TFileStream.Create(FileName, fmOpenRead);
+      FileIn := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
       FSize := FileIn.Size;
       FSizeBak := FSize;
       if FSize > 0 then
@@ -642,8 +660,8 @@ begin
   BSize2 := SizeOf(SBuffer); // 2352 Bytes
   try
     try
-      File1 := TFileStream.Create(FileName1, fmOpenRead); // Form1-Datei
-      File2 := TFileStream.Create(FileName2, fmOpenRead); // Form2-Datei
+      File1 := TFileStream.Create(FileName1, fmOpenRead or fmShareDenyNone);    // Form1-Datei
+      File2 := TFileStream.Create(FileName2, fmOpenRead or fmShareDenyNone);    // Form2-Datei
       FSize1 := File1.Size;
       FSize2 := FSize1;
       if (FSize1 > 0) and (FSize2 > 0) then
@@ -1081,17 +1099,16 @@ begin
   end;
 end;
 
-constructor TVerificationThread.Create(List: TStringList; var Memo: TMemo;
+constructor TVerificationThread.Create(List: TStringList;
                                        Device: string; Lang: TLang;
                                        Suspended: Boolean);
 begin
   FAction := cNoAction;    // spielt beim Verify keine Rolle
   FVerifyList := List;
   FLang := Lang;
-  FMemo := Memo;
   FDevice := Device;
   FDrive := '';
-  FHandle := (Memo.Owner as TForm).Handle;
+  FHandle := TLogWin.Inst.OutWindowHandle;
   FAutoExec := False;
   FXCD := False;
   FXCDExt := '';
@@ -1112,10 +1129,10 @@ end;
   verwendet.                                                                   }
 
 procedure StartVerifyDataCD(List: TStringList; var Thread: TVerificationThread;
-                            Memo: TMemo; Device: string; Lang: TLang);
+                            Device: string; Lang: TLang);
 
 begin
-  Thread := TVerificationThread.Create(List, Memo, Device, Lang, True);
+  Thread := TVerificationThread.Create(List, Device, Lang, True);
   Thread.FreeOnTerminate := True;
   Thread.Resume;
 end;

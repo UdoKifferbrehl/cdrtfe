@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.02.2006
+  letzte Änderung  25.05.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,7 +21,7 @@
   exportierte Funktionen/Prozeduren:
 
     CheckEnvironment(Settings: TSettings)
-    CheckFiles(Settings: TSettings; Memo: TMemo; Lang: TLang): Boolean
+    CheckFiles(Settings: TSettings; Lang: TLang): Boolean
     CheckVersion(Settings: TSettings);
 
 }
@@ -32,17 +32,18 @@ unit f_init;
 
 interface
 
-uses Windows, Classes, Forms, StdCtrls, SysUtils, Dialogs, FileCtrl, IniFiles,
+uses Windows, Classes, Forms, SysUtils, Dialogs, FileCtrl, IniFiles,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_settings, cl_peheader;
 
-function CheckFiles(Settings: TSettings; Memo: TMemo; Lang: TLang): Boolean;
+function CheckFiles(Settings: TSettings; Lang: TLang): Boolean;
 procedure CheckEnvironment(Settings: TSettings);
 procedure CheckVersion(Settings: TSettings);
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+     cl_logwindow,
      f_filesystem, f_process, f_wininfo, f_environment, f_strings, constant;
 
 { GetToolNames -----------------------------------------------------------------
@@ -69,7 +70,9 @@ begin
       cVCDImagerBin    := ReadString(T, 'VCDImagerBin', cVCDImagerBin);
       cCdrdaoBin       := ReadString(T, 'CdrdaoBin', cCdrdaoBin);
       cMadplayBin      := ReadString(T, 'MadplayBin', cMadplayBin);
+      CLameBin         := ReadString(T, 'LameBin', cLameBin);
       cOggdecBin       := ReadString(T, 'OggdecBin', cOggdecBin);
+      cOggencBin       := ReadString(T, 'OggencBin', cOggencBin);
       cFLACBin         := ReadString(T, 'FLACBin', cFLACBin);
       cRrencBin        := ReadString(T, 'RrencBin', cRrencBin);
       cRrdecBin        := ReadString(T, 'RrdecBin', cRrdecBin);
@@ -92,7 +95,7 @@ end;
   befindet. Sind alle Dateien vorhanden, ist FilesOk True.
   Die Versionsprüfung findet seit cdrtfe 1.0.2.0 nun auch hier statt.          }
 
-function CheckFiles(Settings: TSettings; Memo: TMemo; Lang:TLang): Boolean;
+function CheckFiles(Settings: TSettings; Lang:TLang): Boolean;
 var Ok: Boolean;
 begin
   GetToolNames;
@@ -110,7 +113,7 @@ begin
     {Weitermachen, wenn cdrtools + cygwin oder Mingw32-cdrtools vorhanden sind.}
     Ok := CdrtoolsOk and (CygwinOk or Mingw);
     Result := Ok;
-    {ohne cdrtools oder cygwin1.dll können wir uns den Rest sparen}
+    {Ohne cdrtools oder cygwin1.dll können wir uns den Rest sparen.}
     if not Ok then
     begin
       if not CdrtoolsOk then
@@ -123,96 +126,84 @@ begin
       Application.Terminate;
     end else
     begin
-      {Ist cdda2wav da? Wenn nicht, dann kein DAE}
+      {Ist cdda2wav da? Wenn nicht, dann kein DAE.}
       Cdda2wavOk := FileExists(StartUpDir + cCdda2wavBin + cExtExe);
       if not Cdda2wavOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit01') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit01'));
       end;
-      {Ist readcd da? Wenn nicht, dann kein DAE}
+      {Ist readcd da? Wenn nicht, dann kein Image lesen.}
       ReadcdOk := FileExists(StartUpDir + cReadcdBin + cExtExe);
       if not ReadcdOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit06') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit06'));
       end;
       {Ist sh.exe da? Wenn nicht, dann kein DAO, es sei denn sh.exe wird nicht
-       benötig (Win2k/WinXP}
+       benötig (Win2k/WinXP).}
       ShNeeded := not PlatformWin2kXP;
-      {wenn Mingw, dann darf ShOk nicht True sein} 
+      {wenn Mingw, dann darf ShOk nicht True sein.}
       ShOk := FileExists(StartUpDir + cShBin + cExtExe) and not Mingw;
       if not ShOk and ShNeeded then
       begin
         if not Mingw then
-          Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                             Lang.GMS('minit02') + CR                  else
-          Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                             Lang.GMS('minit07') + CR;
+          TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit02')) else
+          TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit07'));
       end;
       {sh.exe wird benutzt, wenn vorhanden (und nötig) ist, aber keinesfallse,
        wenn eine Mingw-Version verwendet wird.}
       UseSh := (ShNeeded or ShOk) and not Mingw;
-      {Ist der Mode2CDmaker da? Falls nicht, Menüpunkt XCD deaktivieren}
+      {Ist der Mode2CDmaker da? Falls nicht, Menüpunkt XCD deaktivieren.}
       M2CDMOk := FileExists(StartUpDir + cMode2CDMakerBin + cExtExe);
       if not M2CDMOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit03') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit03'));
       end;
-      {ind rrenc/rrdec da? Falls nicht, keine Fehlerkorrektur bei XCDs}
+      {Ist rrenc/rrdec da? Falls nicht, keine Fehlerkorrektur bei XCDs.}
       RrencOk := FileExists(StartUpDir + cRrencBin + cExtExe);
       RrdecOk := FileExists(StartUpDir + cRrdecBin + cExtExe);
-      {Ist der VCDImager da? Falls nicht, Menüpunkt VideoCD deaktivieren}
+      {Ist der VCDImager da? Falls nicht, Menüpunkt VideoCD deaktivieren.}
       VCDImOk := FileExists(StartUpDir + cVCDImagerBin + cExtExe);
       if not VCDImOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit08') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit08'));
       end;
-      {Ist Madplay da? Falls nicht, MP3-Dateien ignorieren}
-      MP3Ok := FileExists(StartUpDir + cMadplayBin + cExtExe);
-      if not MP3Ok then
+      {Ist Madplay da? Falls nicht, MP3-Dateien ignorieren.}
+      MadplayOk := FileExists(StartUpDir + cMadplayBin + cExtExe);
+      if not MadplayOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit09') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit09'));
       end;
-      {Ist Oggdec da? Falls nicht, Ogg-Dateien ignorieren}
-      OggOk := FileExists(StartUpDir + cOggdecBin + cExtExe);
-      if not OggOk then
+      {Ist Lame da? Falls nicht, kann nicht nach mp3 encodiert werden.}
+      LameOk := FileExists(StartUpDir + cLameBin + cExtExe);
+      {Ist Oggdec da? Falls nicht, Ogg-Dateien ignorieren.}
+      OggdecOk := FileExists(StartUpDir + cOggdecBin + cExtExe);
+      if not OggdecOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit10') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit10'));
       end;
-      {Ist FLAC da? Falls nicht, FLAC-Dateien ignorieren}
+      {Ist Oggenc da? Falls nicht, kann nicht nach ogg encodiert werden.}
+      OggencOk := FileExists(StartUpDir + cOggencBin + cExtExe);
+      {Ist FLAC da? Falls nicht, FLAC-Dateien ignorieren. Kein Encodieren.}
       FLACOk := FileExists(StartUpDir + cFLACBin + cExtExe);
       if not FLACOk then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit11') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit11'));
       end;
-      {Version von cdrecord/mkisofs prüfen}
+      {Version von cdrecord/mkisofs prüfen.}
       CheckVersion(Settings);
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei
-       denn, cdrecord ab Version 2.01a24 ist vorhanden}
+       denn, cdrecord ab Version 2.01a24 ist vorhanden.}
       CdrdaoOk := FileExists(StartUpDir + cCdrdaoBin + cExtExe);
       if not (CdrdaoOk or Settings.Cdrecord.CanWriteCueImage) then
       begin
-        Memo.Lines.Text := Memo.Lines.Text + Lang.GMS('g003') + CR +
-                           Lang.GMS('minit04') + CR;
+        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit04'));
       end;
-      {wenn nur cdrdao CUE-Images schreiben kann, Option erzwingen}
+      {wenn nur cdrdao CUE-Images schreiben kann, Option erzwingen.}
       Settings.Cdrdao.WriteCueImages := CdrdaoOk and
                                         not Settings.Cdrecord.CanWriteCueImage;
-      {Ist cdrtfeShlEx.dll da? Falls nicht, entsrpechende Optione deaktivieren}
+      {Ist cdrtfeShlEx.dll da? Falls nicht, entsrpechende Optione deaktivieren.}
       ShlExtDllOk := FileExists(StartUpDir + cCdrtfeShlExDll);
     end;
-  end;
-  {für NT-Systme: Überprüfen, ob das Daten-Verzeichnis da ist, wenn nicht,
-   anlegen}
-  if PlatformWinNT then
-  begin
-    if not DirectoryExists(ProgDataDir) then MkDir(ProgDataDir);
   end;
 end;
 

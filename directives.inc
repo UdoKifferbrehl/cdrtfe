@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  09.01.2006
+  letzte Änderung  20.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -23,11 +23,20 @@
          // kennzeichnet cdrtfe als Testversion
          //    - betrifft: frm_about.pas
 
-(* --------------------------------------------------------------- Experiment *)
 
-{$DEFINE xExperiment}
-         // Experimentelle Funktionen aktivieren
-         //    - betrifft: frm_main.pas
+(* -------------------------------------------- Fortschritt in Taskbar zeigen *)
+
+{$DEFINE ShowProgressTaskBar}
+         // Fortschritt der Aktionen im Taskbar-Eintrag zeigen
+         //    - betrifft: cl_actionthread.pas, cl_logwindow.pas
+
+
+(* ------------------------------------- Einstellungen in Registry spreichern *)
+
+{$DEFINE xTitleFirst}
+         // Taskbar-Eintrag: cdrtfe [aktiv] statt [aktiv] cdrtfe
+         //    - betrifft: frm_amin.pas, cl_logwindow.pas
+
 
 (* ------------------------------------- Einstellungen in Registry spreichern *)
 
@@ -74,6 +83,14 @@
          // Falls beim Ausführen der Kommandozeile ein Fehler auftritt (d.h.
          // ProcessExitCode <> 0), wird eine Warnung ausgegeben.
          //    - betrifft: frm_main.pas, cl_actionthread.pas, cl_lang.pas
+
+
+(* -------------------------------------------------------- OLE-Drag-and-Drop *)
+
+{$DEFINE UseOLEDragDrop}
+         // OLE-Funktionen für das Drag-and-Drop aus dem Explorer in den Tree-
+         // View von cdrtfe verwenden.
+         //    - betrifft: frm_main.pas
 
 
 (* --------------------------------------------------------- Optionen togglen *)
@@ -211,6 +228,15 @@
 {$ENDIF}
 
 
+(* ------------------------------------------------------------- GetDOSOutput *)
+
+{$DEFINE ThreadedGetDOSOutput}
+         // Die internen Aufrufe der Kommandozeilenprogramme erfolgen in einem
+         // eigenen Thread. Damit wird es möglich, auf Aufforderungen (z.B.
+         // 'Reload disk, press ENTER' zu reagieren.
+         //   - betrifft: f_process.pas
+
+         
 (* -------------------------------------------------------------- Zeitmessung *)
 
 {$DEFINE xShowTime}
@@ -222,13 +248,30 @@
 
 {$DEFINE xShowVerifyTime}
          // Dauer des Vergleichs anzeigen
-         //    - betrifft: cl_verifythread.pas
+         //   - betrifft: cl_verifythread.pas
 
 {$DEFINE xShowTimeAddFolder}
          // zeigt die Dauer des Hinzufügens eines Ordners an
-         //    - betrifft: frm_main.pas
+         //   - betrifft: frm_main.pas
+
+{$DEFINE xShowTimeCheckFS}
+         // zeigt die Dauer der Dateisystemüberprüfung an
+         //   - betrifft: frm_main.pas
+
+{$DEFINE xShowExecutionTime}
+         // Gesamtdauer der Ausführung
+         //   - betrifft: frm_main.pas
 
 {$ENDIF}
+
+
+(* ------------------------------------------------------------------ Logfile *)
+
+{$DEFINE xWriteLogfile}
+         // schreibt ein Logfile
+         //   - betrifft: f_process.pas, cl_devices.pas, cl_logwindow.pas,
+         //     frm_main.pas
+
 
 (* ---------------------------------------------------------------- Debugging *)
 
@@ -261,106 +304,106 @@
 {$DEFINE xDebugAddFiles}
          // Anzeige der Prozeduraufrufe, wenn Dateien oder Ordner
          // hinzugefügt werden
-         //    - betrifft: cl_cd.pas
+         //   - betrifft: cl_cd.pas
 
 {$DEFINE xDebugAddFilesDragDrop}
          // Anzeige der Prozedureaufrufe, wenn Dateien oder Ordner
          // per Drag-and-Drop hinzugefügt werden
-         //    - betrifft frm_main.pas
+         //   - betrifft frm_main.pas
 
 {$DEFINE xDebugDeleteAll}
          // Anzeige der Funktionsaufrufe, wenn alles gelöscht werden soll
-         //    - betrifft: cl_cd.pas
+         //   - betrifft: cl_cd.pas
 
 {$DEFINE xDebugFileTypeInfoList}
          // Anzeige der FileTypeInfoList
-         //    - Anzeige der gesamten Liste
-         //    - Anzeige der Treffer/Fehler
-         //    - betrifft: cl_filetypeinfo.pas
+         //   - Anzeige der gesamten Liste
+         //   - Anzeige der Treffer/Fehler
+         //   - betrifft: cl_filetypeinfo.pas
 
 {$DEFINE xDebugSort}
          // Anzeige der sortierten Ordner
-         //    - betrifft frm_main.pas
+         //   - betrifft frm_main.pas
 
 {$DEFINE xDebugGetFolderSize}
          // Anzeige der Funktionsaufrufe und Zwischenergebnisse
-         //    - betrifft: cd_cd.pas
+         //   - betrifft: cd_cd.pas
 
 {$DEFINE xDebugUpdateGauges}
          // Anzeige aller Projektinfos
-         //    - Anzeige, wann Properties aktualisiert werden
-         //    - betrifft: frm_main.pas, cl_cd.pas
+         //   - Anzeige, wann Properties aktualisiert werden
+         //   - betrifft: frm_main.pas, cl_cd.pas
 
 {$DEFINE xDebugSettings}
          // Anzeige der internen Einstellungen
-         //    - betrifft: frm_main.pas, cl_settings.pas
+         //   - betrifft: frm_main.pas, cl_settings.pas
 
 {$DEFINE xDebugMaxFileNameLength}
          // Anzeige der maximalen Dateinamenlänge
-         //    - betrifft: frm_main.pas
+         //   - betrifft: frm_main.pas
 
 {$DEFINE xDebugErrorLists}
          // Anzeige der Listen mit zu langen Dateinamen und zu tiefen Ordnern
-         //    - betrifft: frm_main.pas, cl_cd.pas
+         //   - betrifft: frm_main.pas, cl_cd.pas
 
 {$DEFINE xDebugReadAudioTOC}
          // zeigt die Zwischenergebnisse beim Auslesen der TOC einer Audio-CD an
-         //    - betrifft: cl_action.pas
+         //   - betrifft: cl_action.pas
 
 {$DEFINE xDebugCreateFileLists}
          // Statusinfos
-         //    - betrifft: cl_cd.pas
+         //   - betrifft: cl_cd.pas
 
 {$DEFINE xDebugAddFileLoad}
          // zeigt Pfadnamen beim Laden von Dateien an
-         //    - betrifft: cl_projectdata.pas
+         //   - betrifft: cl_projectdata.pas
 
 {$DEFINE xDebugReadCDInfo}
          // zeigt Zwischenergebnisse in TAction.ReadCDInfo an
-         //    - betrifft: cl_action.pas, f_diskinfo.pas
+         //   - betrifft: cl_action.pas, f_diskinfo.pas
 
 {$DEFINE xShowCDTextInfo}
          // zeigt die CD-Text-Informationen an (Doppelklick auf Hintergrund)
-         //    - betrifft: frm_main.pas
+         //   - betrifft: frm_main.pas
 
 {$DEFINE xDebugCreateCDText}
          // zeigt Zwischenergebnisse beim Erstellen von cdtext.dat an
-         //    - wird durch Doppelklick auf den Hintergrund von Form1
-         //      ausgelöst
-         //    - betrifft: frm_main.pas, f_cdtext.pas
+         //   - wird durch Doppelklick auf den Hintergrund von Form1
+         //     ausgelöst
+         //   - betrifft: frm_main.pas, f_cdtext.pas
 
 {$DEFINE xShowBurnList}
          // zeigt die Pfadliste an, bevor sie für mkisosfs bearbeitet wird
-         //    - sowohl BurnList als auch FVList werden angezeigt
-         //    - betrifft: cl_action.pas
+         //   - sowohl BurnList als auch FVList werden angezeigt
+         //   - betrifft: cl_action.pas
 
 {$DEFINE xDebugFindDups}
          // hält die Programmausführung nach dem Suchvorgang an
-         //    - betrifft: frm_main.pas
+         //   - betrifft: frm_main.pas
 
 {$DEFINE xDebugLang}
          // Anzeige der Sprach-Liste
-         //    - betrifft: cl_lang.pas
+         //   - betrifft: cl_lang.pas
 
 {$DEFINE xDebugCheckEnv}
          // zeigt Infos zum Environment-Block
-         //    - betrifft: f_init.pas
+         //   - betrifft: f_init.pas
 
 {$DEFINE xDebugCreateInfoFile}
          // hält die Programmausführung nach der Dateierstellung an
-         //    - frm_main.pas
-
-{$DEFINE xDebugExp}
-         // zeigt Infos auf TExperiment
-         //    - betrifft: f_experiment.pas
+         //   - frm_main.pas
 
 {$DEFINE xDebugDeviceList}
          // zeigt den Inhalt aller Laufwerkslisten
-         //    - betrifft: cl_devices.pas
+         //   - betrifft: cl_devices.pas
 
 {$DEFINE xDebugDriveDetection}
          // Anzeige der cdrecord-Aufrufe zur Laufwerkserkennung
-         //    - betrifft: cl_devices.pas
+         //   - betrifft: cl_devices.pas
+
+{$DEFINE xDebugGetDOSOutputThread}
+         // Anzeige der Kommandozeilenaufrufe in GetDOSOutputThreaded
+         //   - betrifft: f_process.pas
 
 {$ENDIF}
 
@@ -371,7 +414,7 @@
          // Gibt einen List-View im FormDestroy frei, bevor dies automatisch
          // durch das Programm geschieht. Das verhindert einen unbekannten
          // Win32 Fehler in TWinControl.DestroyWindowHandle
-         //    - betrifft frm_main.pas, frm_datacd_fs_error.pas
+         //   - betrifft frm_main.pas, frm_datacd_fs_error.pas
 
 
 (* -------------------------------------- RegOpenKeyEx: Handle must be closed *)
@@ -383,5 +426,5 @@
          // Andernfalls wird eine alternative Methode verwendet, da KeyExists
          // unter Umständen Fehler erzeugt. Nähere Erklärungen in
          // f_shellext.pas (Funktion ShellExtensionsRegistered).
-         //    - betrifft f_shellext.pas
+         //   - betrifft f_shellext.pas
 

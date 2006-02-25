@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 20.02.2006
+  letzte Änderung 20.05.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -69,6 +69,10 @@ const {die GUID für cdrtfe}
       cCdrdao    = 4;
       cCDAudio   = 5;
 
+      {für TSEttings.General.TabFrmDAE}
+      cTabDAE    = 1;
+      cTabCDDB   = 2;                     
+
       {Standard-Puffergröße}
       cBufSize = $800;
 
@@ -83,7 +87,9 @@ const {die GUID für cdrtfe}
       cVCDImagerBin    : string = '\vcdimager';
       cCdrdaoBin       : string = '\cdrdao';
       cMadplayBin      : string = '\madplay';
+      cLameBin         : string = '\lame';
       cOggdecBin       : string = '\oggdec';
+      cOggencBin       : string = '\oggenc';
       cFLACBin         : string = '\flac';
       cRrencBin        : string = '\rrenc';
       cRrdecBin        : string = '\rrdec';

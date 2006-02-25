@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2006
+  letzte Änderung  20.06.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -111,6 +111,7 @@ begin
     Add('g006=KiByte');
     Add('g007=MiByte');
     Add('g008=GiByte');
+    Add('g009=[aktiv]');
     {$IFDEF ShowCmdError}
     Add('e001=Es ist ein Fehler aufgetreten!');
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');
@@ -180,6 +181,7 @@ begin
     Add('c501=Dateisystemüberprüfung: Dateinamen');
     Add('c502=Dateisystemüberprüfung: Ordner');
     Add('c503=Dateisystemüberprüfung: Ungültige Quelldateien');
+    Add('c504=Dateisystemüberprüfung: Kein Zugriff auf Quelldateien');
     Add('e501=Dateiname zu lang.');
     Add('m501=%d Dateien/Ordner mit zu langen Namen');
     Add('m502=Maximal zulässige Anzahl von Zeichen: %d');
@@ -249,6 +251,8 @@ begin
     Add('eburn11=Sorry, noch keine Unterstützung für Multisession-/Multiborder-DVDs.');
     Add('eburn12=Unbekanntes DVD-Medium, unbekannte Kapazität. Trotzdem fortfahren?');
     Add('eburn13=Sie können auch die Art des Mediums angeben.');
+    Add('eburn14=\n%s MiByte (%d Sektoren) zuviel.');
+    Add('eburn15=\n%s MiByte werden benötigt.');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
@@ -260,6 +264,9 @@ begin
     Add('mburn09=Diese CD ist bereits fixiert.');
     Add('mburn10=Mode2CDMaker wird mit folgenden Optionen gestartet:');
     Add('mburn11=CD fixieren?');
+    Add('mburn12=Image-Größe ermitteln ...');
+    Add('mburn13=Überprüfe Disk ...');
+    Add('mburn14=%s MiByte zu schreiben; %s MiByte verbleibend.\n\n');
     {Messages - Verify}
     Add('mverify01=Vergleiche Dateien ...');
     Add('mverify02=%d Fehler gefunden.');
@@ -435,10 +442,11 @@ end;
   StringList MessageString über die zugehörige ID.                             }
 
 function TLang.GMS(const id: string): string;
-const CR = #13;
+const //CR = #13;
+      CRLF = #13#10;
 begin
   Result := FMessageStrings.Values[id];
-  Result := ReplaceString(Result, '\n', CR);
+  Result := ReplaceString(Result, '\n', CRLF);
 end;
 
 { SetFormLang ------------------------------------------------------------------
