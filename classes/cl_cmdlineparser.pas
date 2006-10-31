@@ -2,10 +2,10 @@
 
   cl_cmdlineparser.pas: Kommandozeilenparser
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.02.2005
+  letzte Änderung  13.08.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -334,7 +334,7 @@ begin
       begin
         {Projekt laden}
         FSettings.LoadFromFile(FProjectFileToLoad);
-        FData.LoadFromFile(FProjectFileToLoad + '.files', FSettings.Shared);
+        FData.LoadFromFile(FProjectFileToLoad + '.files');
       end;
     end;
     {gestrichen ShellExtensions registrieren/löschen?

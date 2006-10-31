@@ -15,6 +15,8 @@
 
 unit frm_xcd_options;
 
+{$I directives.inc}
+
 interface
 
 uses

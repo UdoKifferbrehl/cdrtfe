@@ -4,7 +4,7 @@
 
   Copyright (c) 2006 Oliver Valencia
 
-  letzte Änderung  06.07.2006
+  letzte Änderung  17.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -36,7 +36,8 @@ const cDiskTypeBlocks: array[0..4, 0..1] of string =
          ('DVD-R/DL (-R9) [7,96 GiByte]', '4171712'),
          ('DVD+R/DL (+R9) [7,96 GiByte]', '4173824'));
 
-type TDiskType = (DT_CD, DT_DVD_ROM, DT_DVD_R, DT_DVD_RW, DT_DVD_RDL,
+type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
+                  DT_DVD_R, DT_DVD_RW, DT_DVD_RDL,
                   DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL,
                   DT_Unknown,      // unbekannte Disk
                   DT_None,         // keine Disk eingelegt
@@ -177,6 +178,8 @@ end;
 
 { GetDiskInfo-Funktionen ----------------------------------------------------- }
 
+var UseProfiles: Boolean;
+
 { InitDiskInfo -----------------------------------------------------------------
 
   setzt die Variablen des TDiskInfo-Records zurück.                            }
@@ -210,8 +213,10 @@ begin
   Deb('Disk.Time    : ' + FloatToStr(Disk.Time), 1);
   Deb('Disk.TimeFree: ' + FloatToStr(Disk.TimeFree), 1);
   Deb('Disk.MsInfo  : ' + Disk.MsInfo, 1);
-  if Disk.IsDVD then Deb('Disk.IsDVD   : True' , 1) else
-    Deb('Disk.IsDVD   : False' , 1)
+  if Disk.IsDVD then Deb('Disk.IsDVD   : True', 1) else
+    Deb('Disk.IsDVD   : False', 1);
+  Deb('Disk.DiskType: ' + EnumToStr(TypeInfo(TDiskType), Disk.DiskType)
+      + CRLF, 1); 
 end;
 {$ENDIF}
 
@@ -273,6 +278,67 @@ begin
   end;
 end;
 
+{ GetCDType --------------------------------------------------------------------
+
+  GetCDType ermittelt anhand des aktuellen Profils oder des Disk-Types die Art
+  der CD.                                                                     }
+
+function GetCDType(const AtipInfo: string): TDiskType;
+const CurrentProfileStr: string = 'Current:';
+      DTStr            : string = 'Disk type:    ';
+      ASLOStr          : string = 'start of lead out';
+var Temp: string;
+    p   : Integer;
+begin
+  Temp := AtipInfo;
+  p := Pos(CurrentProfileStr, Temp);
+  if p > 0 then
+  begin
+    UseProfiles := True;
+    {$IFDEF DebugReadCDInfo}
+    Deb('Using Current Profile.', 1);
+    {$ENDIF}
+    {Info extrahieren}
+    Delete(Temp, 1, p + 8);
+    Temp := Trim(Copy(Temp, 1, Pos(LF, Temp)));
+    p := Pos(' ', Temp);
+    if p > 0 then Temp := Copy(Temp, 1, p - 1);
+    {Auswertung}
+    if Temp = 'CD-ROM'  then Result := DT_CD     else
+    if Temp = 'CD-R'    then Result := DT_CD_R   else
+    if Temp = 'CD-RW'   then Result := DT_CD_RW  else
+    Result := DT_Unknown;
+    {$IFDEF ForceUnknownMedium}
+    Result := DT_Unknown;
+    {$ENDIF}
+    {$IFDEF DebugReadCDInfo}
+    FormDebug.Memo1.Lines.Add(Temp + ' -> ' +
+                              EnumToStr(TypeInfo(TDiskType), Result));
+    {$ENDIF}
+  end else
+  begin
+    {kein Profile-String, älteres Laufwerk}
+    UseProfiles := False;
+    {$IFDEF DebugReadCDInfo}
+    Deb('Using Disk type.', 1);
+    {$ENDIF}
+    if ((Pos(DTStr, AtipInfo) = 0) and (Pos(ASLOStr, AtipInfo) = 0)) or
+       (Pos(DTStr + 'unknown dye', AtipInfo) > 0) then Result := DT_CD    else
+    if Pos(DTStr + 'Phase change', AtipInfo) > 0  then Result := DT_CD_RW else
+    Result := DT_CD_R;
+    {$IFDEF DebugReadCDInfo}
+    FormDebug.Memo1.Lines.Add('Disk type: ' +
+                              EnumToStr(TypeInfo(TDiskType), Result));
+    {$ENDIF}
+    {Achtung: Damit Auto-Erase auch mit fixierten CD-RW-Rohlingen funktioniert,
+     müssen bei MS-Info = 0,-1 CD-Rs auch als CD-RWs behandelt werden. Somit
+     wird auch bei CD-Rs ein Auto-Erase angeboten. Leider können fixierte CD-Rs
+     nicht von fixierten CD-RWs unterschieden werden. Dies gilt nur, wenn das
+     Laufwerk keine Profile kennt.
+     Der Hack erfolgt in GetCDInfo.}
+  end;
+end;
+
 { GetCDInfo --------------------------------------------------------------------
 
   GetCDInfo ermittelt aus den ATIP- und MSInfo-Daten die benötigten Daten zu den
@@ -285,6 +351,7 @@ var Temp   : string;
     LastSec: Integer;
 begin
   Temp := AtipInfo;
+  Disk.DiskType := GetCDType(AtipInfo);
   {Es ist eine CD, ATIP-Infos auswerten:
    die für die Berechnungen nötigen Sektorzahlen extrahieren: max. Sektorzahl}
   p := Pos('ATIP start of lead out:', Temp);
@@ -328,6 +395,17 @@ begin
   begin
     LastSec := 0;
   end;
+  {Hack fur Auto-Erase mit CD-RWs und alten Laufwerken}
+  if not UseProfiles and TCdrtfeData.Instance.Settings.Cdrecord.AutoErase and
+    (Disk.DiskType = DT_CD_R) and (Pos('-1', Disk.MsInfo) > 0) then
+  begin
+    Disk.DiskType := DT_CD_RW;
+    {$IFDEF DebugReadCDInfo}
+    Deb('Auto-Erase: Hack for old drives without Profiles: Setting Disk type ' +
+        'from DT_CD_R to DT_CD_RW.', 1);
+    {$ENDIF}
+  end;
+
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(Disk.MsInfo);
   {$ENDIF}

@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2006 Oliver Valencia
 
-  letzte Änderung  26.06.2006
+  letzte Änderung  26.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,10 +15,13 @@
     * Laufwerk öffenen/schließen
     * Eingabe-Liste für rrenc erzeugen
     * DVD-Video-Quellordner prüfen
+    * prüfen, ob eine DVD eingelegt ist
 
 
   exportierte Funktionen/Prozeduren:
 
+    ConvertXCDParamListToRrencInputList(Source, Dest: TStringList)
+    DiskIsDVD(const Dev: string): Boolean
     EjectDisk(const Dev: string);
     LoadDisk(const Dev: string);
     ReloadDisk(const Dev: string): Boolean;
@@ -34,6 +37,7 @@ interface
 
 uses Classes, FileCtrl;
 
+function DiskIsDVD(const Dev: string): Boolean;
 function IsValidDVDSource(const Path: string): Boolean;
 function ReloadDisk(const Dev: string): Boolean;
 procedure EjectDisk(const Dev: string);
@@ -147,6 +151,28 @@ begin
   if Path[Length(Path)] <> '\' then VideoTS := VideoTS + '\';
   VideoTS := VideoTS + 'Video_TS';
   Result := DirectoryExists(VideoTS);
+end;
+
+{ DiskIsDVD --------------------------------------------------------------------
+
+  True : eingelegte Disk ist eine DVD-ROM/-R/-RW/+R/+RW/DL
+  False: Disk ist eine CD-ROM/-R/-RW oder es ist keine Disk im Laufwerk        }
+
+function DiskIsDVD(const Dev: string): Boolean;
+var Temp: string;
+    p   : Integer;
+begin
+  Temp := StartUpDir + cCdrecordBin;
+  {$IFDEF QuoteCommandlinePath}
+  Temp := QuotePath(Temp);
+  {$ENDIF}
+  Temp := Temp + ' dev=' + Dev + ' -checkdrive';
+  Temp := GetDosOutput(PChar(Temp), True);
+  p := Pos('Driver flags   :', Temp);
+  Delete(Temp, 1, p);
+  p := Pos(LF, Temp);
+  Temp := Copy(Temp, 1, p);
+  Result := Pos('DVD', Temp) > 0;
 end;
 
 end.

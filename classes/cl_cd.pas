@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.05.2006
+  letzte Änderung  14.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -129,7 +129,7 @@ unit cl_cd;
 interface
 
 uses Forms, Classes, StdCtrls, ComCtrls, SysUtils, FileCtrl,
-     cl_tree, f_cdtext, constant;
+     cl_tree, f_cdtext, f_largeint, constant, userevents;
 
 const CD_NoError = 0;          {Fehlercodes}
       CD_FolderNotUnique = 1;
@@ -163,7 +163,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 
      TCD = class(TObject)
      private
-       FCDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       FCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        FCDSizeChanged: Boolean;
        FError: Byte;
        FFileCount: Integer;
@@ -177,15 +177,15 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function CountFiles(Root: TNode): Integer;
        function CountFolders(Root: TNode): Integer;
        function ExtractFileNameFromEntry(const Entry: string): string;
-       function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+       function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
        function FileIsUnique(const Name: string; const Node: TNode): Boolean;
        function FolderIsUnique(const Name: string; const Node: TNode): Boolean;
        function GetPathFromFolder(const Root: TNode): string;
        function GetCDLabel: string;
-       function GetCDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetFileCount: Integer;
        function GetFolderCount: Integer;
-       function GetFolderSize(Root: TNode): {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       function GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetIndexOfFile(Name, Path: string): Integer;
        function GetLastError: Byte;
        function GetLastFolderAdded: string;
@@ -224,7 +224,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure SortFileList(const Path: string);
        procedure SortFolder(const Path: string);
        // property Root: TNode read FRoot;
-       property CDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF} read GetCDSize;
+       property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
        property FileCount: Integer read GetFileCount;
        property FolderCount: Integer read GetFolderCount;
        property CDLabel: string read GetCDLabel;
@@ -271,6 +271,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FAlbumComposer: string;
        FAlbumArranger: string;
        FAlbumTextMessage: string;
+       FOnProjectError: TProjectErrorEvent;
        function ExtractTimeFromEntry(const Entry: string): Extended;
        function GetLastError: Byte;
        function GetCDTextLength: Integer;
@@ -279,7 +280,10 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetCompressedFilesPresent: Boolean;
        function GetTrackCount: Integer;
        function GetTrackPausePresent: Boolean;
+       procedure AddPlaylist(const Name: string);
        procedure ExportText(CDTextData: TStringList);
+       {Events}
+       procedure ProjectError(const ErrorCode: Byte; const Name: string);
      public
        constructor Create;
        destructor Destroy; override;
@@ -305,6 +309,8 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property CompresedFilesPresent: Boolean read GetCompressedFilesPresent;
        property TrackCount: Integer read GetTrackCount;
        property TrackPausePresent: Boolean read GetTrackPausePresent;
+       {Events}
+       property OnProjectError: TProjectErrorEvent read FOnProjectError write FOnProjectError;
      end;
 
      TDAE = class(TObject)
@@ -320,7 +326,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 
      TVideoCD = class(TObject)
      private
-       FCDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       FCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        FCDSizeChanged: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
@@ -328,11 +334,11 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FTrackCount: Integer;
        FTrackCountChanged: Boolean;
        FTrackList: TStringList;
-       function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};       
+       function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};       
        function ExtractTimeFromEntry(const Entry: string): Extended;
        function GetLastError: Byte;
        function GetCDTime: Extended;
-       function GetCDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetTrackCount: Integer;
      public
        constructor Create;
@@ -344,7 +350,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure DeleteTrack(const Index: Integer);
        procedure MoveTrack(const Index: Integer; const Direction: TDirection);
        property CDTime: Extended read GetCDTime;
-       property CDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF} read GetCDSize;
+       property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
        property LastError: Byte read GetLastError;
        property TrackCount: Integer read GetTrackCount;
      end;
@@ -601,7 +607,7 @@ end;
   GetFileSize extrahiert aus dem Filelisten-Eintrag die Dateigröße.            }
 
 function TCD.ExtractFileSizeFromEntry(const Entry: string):
-                              {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+                             {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
 var Temp: string;
 begin
   Temp := Entry;
@@ -611,7 +617,11 @@ begin
     Delete(Temp, Pos('>', Temp), 1);
   end;
   {$IFDEF LargeFiles}
+  {$IFNDEF Delphi4Up}
   Result := StrToFloatDef(Temp, 0);
+  {$ELSE}
+  Result := StrToInt64Def(Temp, 0);
+  {$ENDIF}
   {$ELSE}
   Result := StrToIntDef(Temp, 0);
   {$ENDIF}
@@ -720,7 +730,7 @@ end;
 
   GetCDSize liefert die Größe aller Datein in Bytes.                           }
 
-function TCD.GetCDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+function TCD.GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
 begin
   if FCDSizeChanged then
   begin
@@ -740,11 +750,11 @@ end;
 
   GetFolderSize summiert die Größe aller Dateien ausgehen vom Ordner Root auf. }
 
-function TCD.GetFolderSize(Root: TNode): {$IFDEF LargeProject} Comp
+function TCD.GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64
                                                        {$ELSE} Longint {$ENDIF};
 var Node: TNode;
     i: Integer;
-    s: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+    s: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
 begin
   {$IFDEF DebugGetFolderSize}
   FormDebug.Memo1.Lines.Add('GetFolderSize: ' + Root.Text);
@@ -1451,7 +1461,7 @@ var Folder: TNode;
           Args.NoAccessFiles.Add(SrcName);
           IndexList.Add(IntToStr(i));
         end;
-      end else
+      end;
       {Namen der Quelldatei überprüfen}
       if not SourceFileIsValid(SrcName) then
       begin
@@ -1990,6 +2000,17 @@ end;
 
 { TAudioCD - private }
 
+{ ProjectError -----------------------------------------------------------------
+
+  ProjectError löst ein Event aus, das vom Hauptfenster behandelt werden kann.
+  Dies ist nötig, um Fehlermeldunge beim Einlesen einer Playlist nach außen zu
+  geben.                                                                       }
+
+procedure TAudioCD.ProjectError(const ErrorCode: Byte; const Name: string);
+begin
+  if Assigned(FOnProjectError) then FOnProjectError(ErrorCode, Name);
+end;
+
 { GetLastError -----------------------------------------------------------------
 
   GetLastError gibt den Fehlercode aus FError und setzt FError auf No_Error.   }
@@ -2147,6 +2168,30 @@ begin
   end;
 end;
 
+{ AddPlaylist ------------------------------------------------------------------
+
+  AddPlaylist fügt alle Titel aus der Playlist <Name> zum Projekt hinzu, sofern
+  das Dateiformat unterstützt wird.                                            }
+
+procedure TAudioCD.AddPlaylist(const Name: string);
+var List     : TStringList;
+    i        : Integer;
+    ErrorCode: Byte;
+begin
+  List := TStringList.Create;
+  List.LoadFromFile(Name);
+  for i := 0 to List.Count - 1 do
+  begin
+    if Pos('#', List[i]) <> 1 then
+    begin
+      AddTrack(List[i]);
+      ErrorCode := GetLastError;
+      if ErrorCode <> CD_NoError then ProjectError(ErrorCode, List[i]);
+    end;
+  end;
+  List.Free
+end;
+
 { ExportText -------------------------------------------------------------------
 
   ExportText liefert die CD-Text-Daten in zwei String-Listen zurück.           }
@@ -2211,12 +2256,12 @@ end;
   Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TAudioCD.AddTrack(const Name: string);
-var Size              : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+var Size              : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     TrackLength       : Extended;
     Temp, CDText      : string;
     CDTextArgs        : TAutoCDText;
     Ok, Wave, MP3,
-    Ogg, FLAC         : Boolean;
+    Ogg, FLAC, M3u    : Boolean;
     MPEGFile          : TMPEGFile;
     OggFile           : TOggVorbis;
     FLACFile          : TFLACFile;
@@ -2224,9 +2269,10 @@ begin
   if FileExists(Name) then
   begin
     Wave := LowerCase(ExtractFileExt(Name)) = cExtWav;
-    MP3  := (LowerCase(ExtractFileExt(Name)) = cExtMP3);
-    Ogg  := (LowerCase(ExtractFileExt(Name)) = cExtOgg);
-    FLAC := (LowerCase(ExtractFileExt(Name)) = cExtFlac);
+    MP3  := LowerCase(ExtractFileExt(Name)) = cExtMP3;
+    Ogg  := LowerCase(ExtractFileExt(Name)) = cExtOgg;
+    FLAC := LowerCase(ExtractFileExt(Name)) = cExtFlac;
+    M3u  := LowerCase(ExtractFileExt(Name)) = cExtM3u;
     Ok := False;
     Size := GetFileSize(Name);
     TrackLength := 0;
@@ -2339,6 +2385,7 @@ begin
       FTrackCountChanged := True;
       FCDTimeChanged := True;
     end;
+    if M3u then AddPlaylist(Name);
   end else
   begin
     FError := CD_FileNotFound;
@@ -2582,12 +2629,16 @@ end;
   GetFileSize extrahiert aus dem Filelisten-Eintrag die Dateigröße.            }
 
 function TVideoCD.ExtractFileSizeFromEntry(const Entry: string):
-                              {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+                             {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
 var Temp: string;
 begin
   Temp := StringLeft(StringRight(Entry, '|'), '*');
   {$IFDEF LargeFiles}
+  {$IFNDEF Delphi4Up}
   Result := StrToFloatDef(Temp, 0);
+  {$ELSE}
+  Result := StrToInt64Def(Temp, 0);
+  {$ENDIF}
   {$ELSE}
   Result := StrToIntDef(Temp, 0);
   {$ENDIF}
@@ -2624,7 +2675,8 @@ end;
 
   GetCDSize liefert die Größe aller Datein in Bytes.                           }
 
-function TVideoCD.GetCDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+function TVideoCD.GetCDSize: {$IFDEF LargeProject} Int64
+                             {$ELSE} Longint {$ENDIF};
 var i: Integer;
 begin
   if FCDSizeChanged then
@@ -2702,7 +2754,7 @@ end;
   Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TVideoCD.AddTrack(const Name: string);
-var Size: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     TrackLength: Extended;
     Temp: string;
 begin

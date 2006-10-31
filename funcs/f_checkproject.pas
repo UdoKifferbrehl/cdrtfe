@@ -5,11 +5,11 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2006
+  letzte Änderung  14.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
   f_checkproject.pas stellt Funktionen und Prozeduren zur Verfügung, die von
   cdrtfe benötigt werden, um zu überprüfen, ob für ein bestimmtes Projekt alle
@@ -39,7 +39,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings; FLang: TLang): 
 
 implementation
 
-uses f_misc;
+uses f_misc, f_largeint;
 
 function CheckProject(FData: TProjectData; FSettings: TSettings;
                       FLang: TLang): Boolean;
@@ -47,7 +47,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectDataCD: Boolean;
   var FileCount: Integer;
       DummyI   : Integer;
-      DummyL: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+      DummyL: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
       DummyE   : Extended;
   begin
     with FData, FSettings.DataCD, FLang do
@@ -75,7 +75,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectAudioCD: Boolean;
   var TrackCount: Integer;
       DummyI   : Integer;
-      DummyL   : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+      DummyL   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
       DummyE   : Extended;
   begin
     with FData, FSettings.AudioCD, FLang do
@@ -152,7 +152,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectDAE: Boolean;
   var TrackCount: Integer;
       DummyI   : Integer;
-      DummyL   : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+      DummyL   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
       DummyE   : Extended;
   begin
     with FData, FSettings.DAE, FLang do
@@ -206,7 +206,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectVideoCD: Boolean;
   var TrackCount: Integer;
       DummyI   : Integer;
-      DummyL   : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+      DummyL   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
       DummyE   : Extended;
   begin
     with FData, FSettings.VideoCD, FLang do

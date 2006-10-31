@@ -1,8 +1,8 @@
 { cl_peheader.pas: Funktionen zum Auswerten der PE-Header einer EXE-Datei
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  09.04.2005
+  letzte Änderung  17.08.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -56,6 +56,8 @@
 }
 
 unit cl_peheader;
+
+{$I directives.inc}
 
 interface
 
@@ -291,7 +293,7 @@ end;
 
 function TPEHeader.GetLinearAddress(SH: PImageSectionHeader; Count: DWord;
                                     RVA: DWord): DWord;
-var t: Integer;       // RVA = Relative Virtual Address
+var t: DWord{Integer};       // RVA = Relative Virtual Address
 begin
   t := 0;
   Result := 0;
@@ -458,7 +460,8 @@ end;
 procedure TPEHeader.RetrieveSectionNames(F: TStream; P: PImageSectionHeader;
                                          Count: DWord);
 var s: string;
-    i, k: Integer;
+    i: Integer;
+    k: DWord;
 begin
   k := 0;
   while k < Count do

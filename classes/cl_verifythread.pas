@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.06.2006
+  letzte Änderung  14.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -48,7 +48,7 @@ unit cl_verifythread;
 interface
 
 uses Windows, SysUtils, Classes, ComCtrls, Forms, FileCtrl,
-     cl_lang;
+     cl_lang, f_largeint;
 
 type TVerificationThread = class(TThread)
      private
@@ -69,7 +69,7 @@ type TVerificationThread = class(TThread)
        FXCDExt      : string;
        FXCDKeepExt  : Boolean;
        {Variablen für das Aufspüren von Duplikaten}
-       FDupSize     : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+       FDupSize     : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
        {mehrfach verwendete Variablen}
        FLang        : TLang;       
        FVerifyList  : TStringList;
@@ -120,7 +120,7 @@ implementation
 
 uses {$IFDEF ShowVerifyTime} f_misc, {$ENDIF}
      cl_logwindow,
-     f_filesystem, f_strings, f_largeint, f_crc, f_helper, user_messages,
+     f_filesystem, f_strings, f_crc, f_helper, user_messages,
      constant;
 
 type TM2F2FileHeader = packed record  // RIFF-Header der Mode2/Form2-Dateien
@@ -397,7 +397,7 @@ function TVerificationThread.CompareFiles(const FileName1, FileName2: string):
                                           Boolean;
 var File1, File2: TFileStream;
     p1, p2: Pointer;
-    FSize1, FSize2: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+    FSize1, FSize2: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     BSize: Integer;
     NBytes: Integer; //Number of bytes to read
 begin
@@ -462,8 +462,8 @@ function TVerificationThread.CompareForm2Files(const FileName1, FileName2:
                                                                string): Boolean;
 var File1, File2: TFileStream;
     p1: Pointer;
-    HBuffer: array[0..43] of char;   // Buffer for Header
-    SBuffer: array[0..2351] of char; // Buffer for Sector
+    HBuffer: array[0..43] of Char;   // Buffer for Header
+    SBuffer: array[0..2351] of Char; // Buffer for Sector
     FileHeader: ^TM2F2FileHeader;
     Sector: ^TM2F2Sector;
     SecCount: Integer;               // Sectors to read
@@ -891,7 +891,7 @@ var i              : Integer;
     SourceFileSize,
     HashFileSize,
     DuplicateSize,
-    TotalSize      : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+    TotalSize      : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     Quota          : Single;
     HashValue      : Longint;
     HashValueStr   : string;
@@ -985,7 +985,7 @@ procedure TVerificationThread.CreateInfoFile;
 var i, j     : Integer;
     Folder   : string;
     FileName : string;
-    Size     : {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+    Size     : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     CRC32    : Longint;
     InfoList : TStringList;
     Count    : Integer;

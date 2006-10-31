@@ -19,6 +19,8 @@
 
 unit atl_oggvorbis;
 
+{$I directives.inc}
+
 interface
 
 uses

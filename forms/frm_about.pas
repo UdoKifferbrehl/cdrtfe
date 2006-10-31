@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 23.03.2006
+  letzte Änderung 17.10.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -61,7 +61,7 @@ implementation
 
 uses constant, f_misc;
 
-const Cdrtfe_Version     = 'cdrtfe 1.2pre2'
+const Cdrtfe_Version     = 'cdrtfe 1.2'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2006  O. Valencia';

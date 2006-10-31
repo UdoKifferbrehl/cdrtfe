@@ -1,8 +1,8 @@
 { f_cygwin.pas: cygwin-Funktionen
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  16.09.2004
+  letzte Änderung  21.08.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,7 +39,7 @@ function MakePathMingwMkisofsConform(const Path: string): string;
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_strings, f_misc;
+     f_strings, f_misc, f_filesystem;
 
 { 'statische' Variablen }
 var CygPathPrefix : string;           // Cygwin-Mountpoint
@@ -96,7 +96,8 @@ end;
   korrekt behandelt.                                                           }
 
 function MakePathCygwinConform(Path: string):string;
-var p: Integer;
+var p     : Integer;
+    Target: string;
 begin
   if CygPathPrefix = 'unknown' then CygPathPrefix := GetCygwinPathPrefix;
   {standardkonforme Pfadangaben benutzen / statt \}
@@ -107,17 +108,22 @@ begin
   begin
     Delete(Path, p, 1);
   end;
-  {Pfade für Cygwin anpassen, dabei auf das = für -graft-points achten}
+  {Pfade für Cygwin anpassen, dabei auf das = für -graft-points achten. UNC-
+   Pfade (\\server\...) können bleiben, wie sie sind.}
   p := Pos('=', Path);
   if p <> 0 then
   begin
-    Delete(Path, p, 1);
-    // Insert('=/cygdrive/', Path, p);
-    Insert('=' + CygPathPrefix + '/', Path, p);
+    SplitString(Path, '=', Target, Path);
+    if IsUNCPath(Path) then
+    begin
+      Path := Target + '=' + Path;
+    end else
+    begin
+      Path := Target + '=' + CygPathPrefix + '/' + Path;
+    end;
   end else
   begin
-    // Path := '/cygdrive/' + Path;
-    Path := CygPathPrefix +'/' + Path;
+    if not IsUNCPath(Path) then Path := CygPathPrefix +'/' + Path;
   end;
   Result := Path;
 end;

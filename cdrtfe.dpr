@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.06.2006
+  letzte Änderung  27.07.2006
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -72,12 +72,14 @@ uses
   f_crc in 'support\f_crc.pas',
   f_crc_tab in 'support\f_crc_tab.pas',
   constant in 'support\constant.pas',
+  userevents in 'support\userevents.pas',
   user_messages in 'support\user_messages.pas',
   cl_logwindow in 'support\cl_logwindow.pas',
   f_logfile in 'support\f_logfile.pas',
   cl_filetypeinfo in 'system\cl_filetypeinfo.pas',
   cl_imagelists in 'system\cl_imagelists.pas',
   cl_peheader in 'system\cl_peheader.pas',
+  cl_devicechange in 'system\cl_devicechange.pas',
   f_largeint in 'system\f_largeint.pas',
   f_wininfo in 'system\f_wininfo.pas',
   f_environment in 'system\f_environment.pas',
@@ -106,6 +108,6 @@ begin
   Application.Initialize;
   {$IFDEF WriteLogfile} AddLog('Application.CreateForm1' + CRLF, 0); {$ENDIF}
   Application.CreateForm(TForm1, Form1);
-  {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}  
+  {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}
   Application.Run;
 end.

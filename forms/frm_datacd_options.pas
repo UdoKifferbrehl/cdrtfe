@@ -15,6 +15,8 @@
 
 unit frm_datacd_options;
 
+{$I directives.inc}
+
 interface
 
 uses

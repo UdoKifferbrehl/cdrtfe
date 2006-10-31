@@ -2,7 +2,7 @@
 
   Copyright (c) 2006 Oliver Valencia
 
-  letzte Änderung  12.02.2006
+  letzte Änderung  17.08.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -41,6 +41,8 @@
 }
 
 unit cl_mpeginfo;
+
+{$I directives.inc}
 
 interface
 
@@ -255,7 +257,7 @@ begin
   Result := ((x shr 24) and $FF) or
             ((x shr 8) and $FF00) or
             ((x shl 8) and $FF0000) or
-            ((x shl 24)and $FF000000);
+            ((x shl 24)and Integer($FF000000));
 end;
 
 { TMPEGFile ------------------------------------------------------------------ }

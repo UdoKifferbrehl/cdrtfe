@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.07.2006
+  letzte Änderung  10.10.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -245,6 +245,7 @@ type
     LabelDAEMp3: TLabel;
     LabelDAEOgg: TLabel;
     LabelDAEFlac: TLabel;
+    LabelDAECustom: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -382,6 +383,7 @@ type
     procedure AddItemToListView(const Item: string; ListView: TListView);
     procedure CheckDataCDFS(const CheckAccess: Boolean);
     procedure CheckControls;
+    procedure CheckControlsSpeeds;
     {$IFDEF ShowCmdError}
     procedure CheckExitCode;
     {$ENDIF}
@@ -440,17 +442,21 @@ type
     procedure WMCheckDataFS(var Msg: TMessage); message WM_CheckDataFS;
     procedure WMMinimize(var Msg: TMessage); message WM_Minimize;
     {eigene Event-Handler}
-    procedure MessageShow(Sender: TObject);
-    procedure ProgressBarHide(Sender: TObject);
-    procedure ProgressBarReset(Sender: Tobject);
-    procedure ProgressBarUpdate(Sender: TObject);
-    procedure UpdatePanels(Sender: TObject);
+    procedure DeviceArrival(Drive: string);
+    procedure DeviceRemoval(Drive: string);
+    procedure HandleError(const ErrorCode: Byte; const Name: string);
+    procedure MessageShow(const s: string);
+    procedure ProgressBarHide;
+    procedure ProgressBarShow(const Max: Integer);
+    procedure ProgressBarUpdate(const Position: Integer);
+    procedure UpdatePanels(const s1, s2: string);
     {Ole-Drop-Target-Funktionen}
     {$IFDEF UseOLEDragDrop}
     procedure InitDropTargets;
     procedure FreeDropTargets;
     procedure DropFileTargetTreeViewDragOver(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
+    procedure DropFileTargetTreeViewLeave(Sender: TObject);
     {$ENDIF}
   public
     { Public declarations }
@@ -468,7 +474,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
      frm_xcd_options, frm_settings, frm_about, frm_output,
      frm_videocd_options, frm_dae_options,
-     cl_cdrtfedata,
+     cl_cdrtfedata, cl_devicechange,
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
@@ -476,9 +482,10 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init, f_helper,
      f_checkproject;
 
-{$IFDEF ShowTime}
-var TC, TC2: TTimeCount;
-{$ENDIF}
+var DeviceChangeNotifier: TDeviceChangeNotifier;
+    {$IFDEF ShowTime}
+    TC, TC2: TTimeCount;
+    {$ENDIF}
 
 { Messagehandling ------------------------------------------------------------ }
 
@@ -790,12 +797,14 @@ begin
   DropFileTargetCDETreeView := TDropFileTarget.Create(Form1);
   DropFileTargetCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
   DropFileTargetCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
+  DropFileTargetCDETreeView.OnLeave := DropFileTargetTreeViewLeave;
   DropFileTargetCDETreeView.Dragtypes := [dtCopy];
   DropFileTargetCDETreeView.Register(CDETreeView);
   {XCDETreeView}
   DropFileTargetXCDETreeView := TDropFileTarget.Create(Form1);
   DropFileTargetXCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
   DropFileTargetXCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
+  DropFileTargetXCDETreeView.OnLeave := DropFileTargetTreeViewLeave;
   DropFileTargetXCDETreeView.Dragtypes := [dtCopy];
   DropFileTargetXCDETreeView.Register(XCDETreeView);
 end;
@@ -878,7 +887,7 @@ begin
   SelectRootIfNoneSelected(Tree);
   // OldNode := Tree.Selected;
   if Tree.DropTarget <> nil then Tree.Selected := Tree.DropTarget;
-  {Dateienn hinzufügen}
+  {Dateien hinzufügen}
   for i := 0 to (Sender as TDropFileTarget).Files.Count - 1 do
   begin
     FileName := (Sender as TDropFileTarget).Files[i];
@@ -890,8 +899,15 @@ begin
     end;
   end;
   // Tree.Selected := OldNode;
+  Tree.DropTarget := nil;
   {Ordner sortieren}
   AddToPathlistSort(FolderAdded);
+end;
+
+procedure TForm1.DropFileTargetTreeViewLeave(Sender: TObject);
+begin
+  CDETreeView.DropTarget := nil;
+  XCDETreeView.DropTarget := nil;
 end;
 {$ENDIF}
 
@@ -1095,6 +1111,9 @@ begin
         Tracks := Tracks + IntToStr(i + 1) + ',';
       end;
     end;
+    {Letztes ',' entfernen, da sich TStringlist.Commatext je nach Compiler
+     unterschiedlich verhält}
+    Delete(Tracks, Length(Tracks), 1);
   end;
   {Image}
   FSettings.General.ImageRead := RadioButtonImageRead.Checked;
@@ -1215,13 +1234,15 @@ begin
   end;
   if OpenDialog1.Execute then
   begin
+    CDETreeView.Selected := CDETreeView.Items[0];
+    XCDETreeView.Selected := XCDETreeView.Items[0];
     if not ListsOnly then
     begin
       FSettings.LoadFromFile(OpenDialog1.FileName);
-      FData.LoadFromFile(OpenDialog1.FileName + '.files', FSettings.Shared);
+      FData.LoadFromFile(OpenDialog1.FileName + '.files');
     end else
     begin
-      FData.LoadFromFile(OpenDialog1.FileName, FSettings.Shared);
+      FData.LoadFromFile(OpenDialog1.FileName);
     end;
   end;
   OpenDialog1.Free;
@@ -1249,6 +1270,32 @@ end;
 
 
 { Bearbeitung der Dateilisten ------------------------------------------------ }
+
+{ HandleError ------------------------------------------------------------------
+
+  HandleError wertet den ErroCode aus UserAddTrack und AddToPathlist aus. Außer-
+  dem kann diese Prozedur als Event-Handler für TProjectData und andere Objekte
+  dienen.                                                                      }
+
+procedure TForm1.HandleError(const ErrorCode: Byte; const Name: string);
+begin
+  with TLogWin.Inst do
+  begin
+    case ErrorCode of
+      PD_FolderNotUnique: Add(Format(FLang.GMS('e111'), [Name]));
+      PD_FileNotUnique  : Add(Format(FLang.GMS('e112'), [Name]));
+      PD_FileNotFound   : Add(Format(FLang.GMS('e113'), [Name]));
+      PD_InvalidWaveFile: Add(Format(FLang.GMS('eprocs01'), [Name]));
+      PD_InvalidMpegFile: Add(Format(FLang.GMS('eprocs02'), [Name]));
+      PD_InvalidMP3File : Add(Format(FLang.GMS('eprocs03'), [Name]));
+      PD_InvalidOggFile : Add(Format(FLang.GMS('eprocs04'), [Name]));
+      PD_InvalidFLACFile: Add(Format(FLang.GMS('eprocs05'), [Name]));
+      PD_NoMP3Support   : Add(Name + ': ' + FLang.GMS('minit09'));
+      PD_NoOggSupport   : Add(Name + ': ' + FLang.GMS('minit10'));
+      PD_NoFLACSupport  : Add(Name + ': ' + FLang.GMS('minit11'));
+    end;
+  end;
+end;
 
 { CheckDataCDFS ----------------------------------------------------------------
 
@@ -1360,8 +1407,7 @@ end;
   Message-Box.                                                                 }
 
 procedure TForm1.AddToPathList(const FileName: string);
-var ErrorCode: Byte;
-    Path: string;
+var Path: string;
 begin
   {sicherstellen, daß ein Knoten selektiert ist, und Pfad bestimmen}
   case FSettings.General.Choice of
@@ -1388,23 +1434,7 @@ begin
   {Datei/Ordner hinzufügen}
   FData.AddToPathlist(FileName, Path, FSettings.General.Choice);
   {Fehler auswerten}
-  ErrorCode := FData.LastError;
-  with TLogWin.Inst do
-  begin
-    case ErrorCode of
-      PD_FolderNotUnique: Add(Format(FLang.GMS('e111'), [FileName]));
-      PD_FileNotUnique  : Add(Format(FLang.GMS('e112'), [FileName]));
-      PD_InvalidWaveFile: Add(Format(FLang.GMS('eprocs01'), [FileName]));
-      PD_FileNotFound   : Add(Format(FLang.GMS('e113'), [FileName]));
-      PD_InvalidMpegFile: Add(Format(FLang.GMS('eprocs02'), [FileName]));
-      PD_InvalidMP3File : Add(Format(FLang.GMS('eprocs03'), [FileName]));
-      PD_InvalidOggFile : Add(Format(FLang.GMS('eprocs04'), [FileName]));
-      PD_InvalidFLACFile: Add(Format(FLang.GMS('eprocs05'), [FileName]));
-      PD_NoMP3Support   : Add(FileName + ': ' + FLang.GMS('minit09'));
-      PD_NoOggSupport   : Add(FileName + ': ' + FLang.GMS('minit10'));
-      PD_NoFLACSupport  : Add(FileName + ': ' + FLang.GMS('minit11'));      
-    end;
-  end;
+  HandleError(FData.LastError, FileName);
 end;
 
 { AddToPathlistSort ------------------------------------------------------------
@@ -1966,8 +1996,7 @@ end;
   Ausgelöst über GUI.                                                          }
 
 procedure TForm1.UserAddTrack;
-var i : integer;
-    ErrorCode: Byte;
+var i: Integer;
 begin
   with Form1 do
   begin
@@ -1994,25 +2023,7 @@ begin
           cAudioCD: FData.AddToPathlist(OpenDialog1.Files[i], '', cAudioCD);
           cVideoCD: FData.AddToPathlist(OpenDialog1.Files[i], '', cVideoCD);
         end;
-        ErrorCode := FData.LastError;
-        case ErrorCode of
-          PD_InvalidWaveFile: TLogWin.Inst.Add(Format(
-                                FLang.GMS('eprocs01'), [OpenDialog1.Files[i]]));
-          PD_InvalidMP3File : TLogWin.Inst.Add(Format(
-                                FLang.GMS('eprocs03'), [OpenDialog1.Files[i]]));
-          PD_InvalidMpegFile: TLogWin.Inst.Add(Format(
-                                FLang.GMS('eprocs02'), [OpenDialog1.Files[i]]));
-          PD_InvalidOggFile : TLogWin.Inst.Add(Format(
-                                FLang.GMS('eprocs04'), [OpenDialog1.Files[i]]));
-          PD_InvalidFLACFile: TLogWin.Inst.Add(Format(
-                                FLang.GMS('eprocs05'), [OpenDialog1.Files[i]]));
-          PD_NoMP3Support   : TLogWin.Inst.Add(OpenDialog1.Files[i] +
-                                ': ' + FLang.GMS('minit09'));
-          PD_NoOggSupport   : TLogWin.Inst.Add(OpenDialog1.Files[i] +
-                                ': ' + FLang.GMS('minit10'));
-          PD_NoFLACSupport  : TLogWin.Inst.Add(OpenDialog1.Files[i] +
-                                ': ' + FLang.GMS('minit11'));
-        end;
+        HandleError(FData.LastError, OpenDialog1.Files[i]);
       end;
     end;
     OpenDialog1.Free;
@@ -2095,7 +2106,7 @@ end;
 procedure TForm1.AddItemToListView(const Item: string; ListView: TListView);
 var NewItem  : TListItem;
     IconIndex: Integer;
-    Size     : {$IFDEF LargeFiles} Comp {$ELSE} Integer {$ENDIF};
+    Size     : {$IFDEF LargeFiles} Int64 {$ELSE} Integer {$ENDIF};
     Name     : string;
     Caption  : string;
     Filetype : string;
@@ -2396,7 +2407,7 @@ end;
 
 procedure TForm1.UpdateGauges;
 var FileCount, FolderCount, TrackCount: Integer;
-    CDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+    CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
     CDTime: Extended;
     Temp: string;
 begin
@@ -2578,6 +2589,7 @@ begin
       SetLabel(LabelDAEMp3, Mp3);
       SetLabel(LabelDAEOgg, Ogg);
       SetLabel(LabelDAEFlac, Flac);
+      SetLabel(LabelDAECustom, Custom);
     end;
   end;
   if Fsettings.General.Choice = cVideoCD then
@@ -2773,6 +2785,7 @@ begin
       begin
         Ogg := False;
         Flac := False;
+        Custom := False;
       end;
     end;
     if L = LabelDAEOgg then
@@ -2783,6 +2796,7 @@ begin
       begin
         Mp3 := False;
         Flac := False;
+        Custom := False;
       end;
     end;
     if L = LabelDAEFlac then
@@ -2793,6 +2807,19 @@ begin
       begin
         Mp3 := False;
         Ogg := False;
+        Custom := False;
+      end;
+    end;
+    if L = LabelDAECustom then
+    begin
+      Custom := not Custom and
+                FileExists(CustomCmd) and
+                (FSettings.FileFlags.ShOk or not FSettings.FileFlags.ShNeeded);
+      if Custom then
+      begin
+        Mp3 := False;
+        Ogg := False;
+        Flac := False;
       end;
     end;
   end;
@@ -2817,6 +2844,41 @@ begin
   UpdateOptionPanel;
 end;
 {$ENDIF}
+
+{ CheckControlsSpeed -----------------------------------------------------------
+
+  CheckControlsSpeed sorgt dafür, daß jeweils die richtige Speedliste den
+  Laufwerken zugeordnet wird.                                                  }
+
+procedure TForm1.CheckControlsSpeeds;
+var RWFlag: string;
+begin
+  if FSettings.General.DetectSpeeds then
+  begin
+    {Speedlist in Anhängigkeit des Laufwerks wählen}
+    case FSettings.General.Choice of
+      cDataCD,
+      cAudioCD,
+      cXCD,
+      cVideoCD,
+      cDVDVideo,
+      cCDRW     : RWFlag := '[W]';
+      cDAE,
+      cCDInfos  : RWFlag := '[R]';
+      cCDImage  : if RadioButtonImageRead.Checked then RWFlag := '[R]' else
+                                                       RWFlag := '[W]';
+    end;
+    ComboBoxSpeed.Items.Clear;
+    ComboBoxSpeed.Items.CommaText :=
+      FDevices.CDSpeedList.Values[ComboBoxDrives.Items[ComboBoxDrives.ItemIndex]
+      + RWFlag];
+  end;
+  {falls möglich, die für das Tabsheet gespeicherte Geschwindigkeit setzen}
+  if FSettings.General.TabSheetSpeed[FSettings.General.Choice] <
+     ComboBoxSpeed.Items.Count then
+    ComboBoxSpeed.ItemIndex :=
+      FSettings.General.TabSheetSpeed[FSettings.General.Choice];
+end;
 
 { CheckControls ----------------------------------------------------------------
 
@@ -3043,8 +3105,7 @@ begin
                end;
     cDVDVideo: SetDrives(FDevices.CDWriter);
   end;
-  ComboBoxSpeed.ItemIndex :=
-    FSettings.General.TabSheetSpeed[FSettings.General.Choice];
+  CheckControlsSpeeds;
 end;
 
 { SetButtons -------------------------------------------------------------------
@@ -3112,6 +3173,7 @@ end;
   und Drag-and-Drop wird zugelassen.                                           }
 
 procedure TForm1.InitMainform;
+var GlyphArray    : TGlyphArray;
 
   {lokale Prozedur zum Registrieren der Label-OnClick-Eventhandler}
   {$IFDEF AllowToggle}
@@ -3153,6 +3215,32 @@ procedure TForm1.InitMainform;
   end;
   {$ENDIF}
 
+  {Prozedure zum Initialisieren des Glyph-Arrays.}
+  procedure InitGlyphArray(var Glyphs: TGlyphArray);
+  begin
+    Glyphs[1]  := CDESpeedButton1.Glyph;
+    Glyphs[2]  := CDESpeedButton2.Glyph;
+    Glyphs[3]  := CDESpeedButton3.Glyph;
+    Glyphs[4]  := CDESpeedButton4.Glyph;
+    Glyphs[5]  := CDESpeedButton5.Glyph;
+    Glyphs[6]  := Sheet1SpeedButtonCheckFS.Glyph;
+    Glyphs[7]  := AudioSpeedButton2.Glyph;
+    Glyphs[8]  := AudioSpeedButton3.Glyph;
+    Glyphs[9]  := AudioSpeedButton1.Glyph;
+    Glyphs[10] := AudioSpeedButton4.Glyph;
+    Glyphs[11] := XCDESpeedButton1.Glyph;
+    Glyphs[12] := XCDESpeedButton2.Glyph;
+    Glyphs[13] := XCDESpeedButton3.Glyph;
+    Glyphs[14] := XCDESpeedButton4.Glyph;
+    Glyphs[15] := XCDESpeedButton5.Glyph;
+    Glyphs[16] := XCDESpeedButton6.Glyph;
+    Glyphs[17] := XCDESpeedButton7.Glyph;
+    Glyphs[18] := VideoSpeedButton2.Glyph;
+    Glyphs[19] := VideoSpeedButton3.Glyph;
+    Glyphs[20] := VideoSpeedButton1.Glyph;
+    Glyphs[21] := VideoSpeedButton4.Glyph;
+  end;
+
 begin
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
@@ -3169,29 +3257,9 @@ begin
    durch TImnageLists freigegeben wird, was einen Fehler (bei Memcheck)
    verursacht.}
   FImageLists.IconImages.GetIcon(0, Application.Icon);
-  {Bitmap-Resourcen einlesen}
-  CDESpeedButton1.Glyph.LoadFromResourceName(hInstance, 'B1');
-  CDESpeedButton2.Glyph.LoadFromResourceName(hInstance, 'B2');
-  CDESpeedButton3.Glyph.LoadFromResourceName(hInstance, 'B3');
-  CDESpeedButton4.Glyph.LoadFromResourceName(hInstance, 'B4');
-  CDESpeedButton5.Glyph.LoadFromResourceName(hInstance, 'B5');
-  Sheet1SpeedButtonCheckFS.Glyph.LoadFromResourceName(hInstance, 'B6');
-  AudioSpeedButton2.Glyph.LoadFromResourceName(hInstance, 'B7');
-  AudioSpeedButton3.Glyph.LoadFromResourceName(hInstance, 'B8');
-  {Wiederverwendung spart ein paar Bytes}
-  AudioSpeedButton1.Glyph := CDESpeedButton1.Glyph;
-  AudioSpeedButton4.Glyph := CDESpeedButton3.Glyph;
-  XCDESpeedButton1.Glyph := CDESpeedButton1.Glyph;
-  XCDESpeedButton2.Glyph := CDESpeedButton2.Glyph;
-  XCDESpeedButton3.Glyph := CDESpeedButton3.Glyph;
-  XCDESpeedButton4.Glyph := CDESpeedButton1.Glyph;
-  XCDESpeedButton5.Glyph := CDESpeedButton3.Glyph;
-  XCDESpeedButton6.Glyph := CDESpeedButton4.Glyph;
-  XCDESpeedButton7.Glyph := CDESpeedButton5.Glyph;
-  VideoSpeedButton1.Glyph := AudioSpeedButton1.Glyph;
-  VideoSpeedButton2.Glyph := AudioSpeedButton2.Glyph;
-  VideoSpeedButton3.Glyph := AudioSpeedButton3.Glyph;
-  VideoSpeedButton4.Glyph := AudioSpeedButton4.Glyph;
+  {Bitmaps für die Glyphs laden}
+  InitGlyphArray(GlyphArray);
+  FImageLists.LoadGlyphs(GlyphArray);
   {Den Tree- und ListViews die Image-Listen zuweisen}
   CDEListView.LargeImages := FImageLists.LargeImages;
   CDEListView.SmallImages := FImageLists.SmallImages;
@@ -3254,58 +3322,66 @@ end;
 
 { eigene Events -------------------------------------------------------------- }
 
+{ DeviceArrival/DeviceRemoval ------------------------------------------------ }
+
+procedure TForm1.DeviceArrival(Drive: string);
+begin
+  // TLogWin.Inst.Add('Arrival: ' + Drive);
+  if Form1.FSettings.General.DetectSpeeds then
+  begin
+    Form1.FDevices.UpdateSpeedLists(Drive);
+    Form1.CheckControlsSpeeds;
+  end;
+end;
+
+procedure TForm1.DeviceRemoval(Drive: string);
+begin
+  // TLogWin.Inst.Add('Removal: ' + Drive);
+end;
+
 { MessageShow ------------------------------------------------------------------
 
-  MessageShow zeigt den in FSettings.Shared.MessageToShow abgelegten String an.
+  MessageShow zeigt den übergebenen String an. 
   Dieser Mechanismus wird genutzt, damit andere Forms oder Klassen im Memo des
   Hauptfensters Text anzeigen können, ohne frm_main.pas einzubinden und direkt
   auf die Form1.Controls zuzugreifen.
   Wahscheinlich gibt es eine bessere oder elegantere Methode. ;-)              }
 
-procedure TForm1.MessageShow(Sender: TObject);
+procedure TForm1.MessageShow(const s: string);
 begin
-  TLogWin.Inst.Add(FSettings.Shared.MessageToShow);
-  FSettings.Shared.MessageToShow := '';
+  TLogWin.Inst.Add(s);
 end;
 
 { UpdatePanels -----------------------------------------------------------------
 
-  UpdatePanels zeigt in den beiden Panels des Status-Bars die Strings
-  FSettings.Shared.Panel1 und .Panel2 an. Wenn der String den Inhalt '<>' haben
-  sollte, wird der Panel-Text nicht geändert.                                  }
+  UpdatePanels zeigt in den beiden Panels des Status-Bars die Strings s1 und s2
+  an. Wenn der String den Inhalt '<>' haben sollte, wird der Panel-Text nicht
+  geändert.                                                                    }
 
-procedure TForm1.UpdatePanels(Sender: TObject);
+procedure TForm1.UpdatePanels(const s1, s2: string);
 begin
-  if FSettings.Shared.Panel1 <> '<>' then
-  begin
-    StatusBar.Panels[0].Text := FSettings.Shared.Panel1;
-  end;
-  if FSettings.Shared.Panel2 <> '<>' then
-  begin
-    StatusBar.Panels[1].Text := FSettings.Shared.Panel2;
-  end;
-  FSettings.Shared.Panel1 := '';
-  FSettings.Shared.Panel2 := '';
+  if s1 <> '<>' then StatusBar.Panels[0].Text := s1;
+  if s2 <> '<>' then StatusBar.Panels[1].Text := s2;
 end;
 
 { ProgressBarHide --------------------------------------------------------------
 
   ProgressBarHide macht den Progress-Bar unsichtbar.                           }
 
-procedure TForm1.ProgressBarHide(Sender: TObject);
+procedure TForm1.ProgressBarHide;
 begin
   ProgressBar.Visible := False;
 end;
 
-{ ProgressBarReset -------------------------------------------------------------
+{ ProgressBarShow --------------------------------------------------------------
 
   ProgressBarReset setzt ProgressBar.Position auf Null, ProgressBar.Max auf
-  FSettings.Shared.ProgressBarMax und ProgressBar.Visible auf True.            }
+  Max und ProgressBar.Visible auf True.                                        }
 
-procedure TForm1.ProgressBarReset(Sender: TObject);
+procedure TForm1.ProgressBarShow(const Max: Integer);
 begin
   ProgressBar.Position := 0;
-  ProgressBar.Max := FSettings.Shared.ProgressBarMax;
+  ProgressBar.Max := Max;
   ProgressBar.Visible := True;
 end;
 
@@ -3314,9 +3390,9 @@ end;
   ProgressBarReset setzt StatusBar.Position auf FSettings.Shared.
   ProgressBarPosition.                                                         }
 
-procedure TForm1.ProgressBarUpdate(Sender: TObject);
+procedure TForm1.ProgressBarUpdate(const Position: Integer);
 begin
-  ProgressBar.Position := FSettings.Shared.ProgressBarPosition;
+  ProgressBar.Position := Position;
 end;
 
 
@@ -3329,10 +3405,10 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
-    TempChoice: Byte;
+    TempChoice : Byte;
 begin
   {$IFDEF WriteLogfile} AddLog('TForm1.FormCreate' + CRLF, 0); {$ENDIF}
-  SetFont(Self);  
+  SetFont(Self);
   FInstanceTermination := False;
   {Ein paar Objekte brauchen wir, egal ob es sich um die erste oder zweite
    Instanz handelt.}
@@ -3353,16 +3429,16 @@ begin
   FSettings.Lang := FLang;
   FSettings.OnUpdatePanels := UpdatePanels;
   FSettings.OnProgressBarHide := ProgressBarHide;
-  FSettings.OnProgressBarReset := ProgressBarReset;
+  FSettings.OnProgressBarShow := ProgressBarShow;
   FSettings.OnProgressBarUpdate := ProgressBarUpdate;
   {Datenobjekt}
   FData := TProjectData.Create;
   FData.Lang := FLang;
   FData.OnUpdatePanels := UpdatePanels;
   FData.OnProgressBarHide := ProgressBarHide;
-  FData.OnProgressBarReset := ProgressBarReset;
+  FData.OnProgressBarShow := ProgressBarShow;
   FData.OnProgressBarUpdate := ProgressBarUpdate;
-  FData.OnMessageToShow := MessageShow;
+  FData.OnProjectError := HandleError;
   {Diese wichtigen drei Objekte global verfügbar machen.}
   TCdrtfeData.Instance.SetObjects(FLang, FSettings, FData);
   {Ausgabefenster global verfügbar machen.}
@@ -3449,7 +3525,7 @@ begin
       FAction.ProgressBar := Form1.ProgressBar;
       FAction.StatusBar := Form1.StatusBar;
       FAction.FormHandle := Self.Handle;
-      FAction.OnMessageToShow := MessageShow;
+      FAction.OnMessageShow := MessageShow;
       FAction.OnUpdatePanels := UpdatePanels;
     end;
     {falls der Aufruf mit /hide erfolgte, Hauptfenster verstecken}
@@ -3876,7 +3952,7 @@ var i: Integer;
 {$ENDIF}
 {$IFDEF ShowCDTextInfo}
 var i: Integer;
-    DummyC: Comp;
+    DummyC: Int64;
     DummyI, TrackCount: Integer;
     DummyE: Extended;
     TextTrackData: TCDTextTrackData;
@@ -4202,7 +4278,7 @@ begin
   try
     FormSettings.Settings := FSettings;
     FormSettings.Lang := FLang;
-    FormSettings.OnMessageToShow := Form1.MessageShow;
+    FormSettings.OnMessageShow := Form1.MessageShow;
     FormSettings.ShowModal;
   finally
     FormSettings.Release;
@@ -5601,6 +5677,7 @@ begin
   begin
     FSettings.General.TabSheetDrive[FSettings.General.Choice] :=
       ComboBoxDrives.ItemIndex;
+    CheckControlsSpeeds;
   end else
   if (Sender as TComboBox) = ComboBoxSpeed then
   begin
@@ -5616,8 +5693,8 @@ end;
 
   Beim Klick auf ein Label, das den Zustand einer Option darstellt, soll die
   Option (de-)aktiviert werden. Das Umschalten erfolgt in einer eigenen
-  Prozedur.
-                                                             }
+  Prozedur.                                                                    }
+                                                             
 {$IFDEF AllowToggle}
 procedure TForm1.LabelClick(Sender: TObject);
 begin
@@ -5723,6 +5800,9 @@ begin
 end;
 
 initialization
+  DeviceChangeNotifier := TDeviceChangeNotifier.Create(nil);
+  DeviceChangeNotifier.OnDiskInserted := Form1.DeviceArrival;
+  DeviceChangeNotifier.OnDiskRemoved := Form1.DeviceRemoval;
   {$IFDEF ShowDebugWindow}
   FormDebug := TFormDebug.Create(nil);
   FormDebug.Top := 0;
@@ -5744,6 +5824,7 @@ finalization
   {$IFDEF WriteLogfile}
   AddLog('frm_main.pas finalization', 0);
   {$ENDIF}
+  DeviceChangeNotifier.Free;
   {$IFDEF ShowTime}
   TC.Free;
   TC2.Free;  

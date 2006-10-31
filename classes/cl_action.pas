@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.07.2006
+  letzte Änderung  25.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@
                  Devices
                  FormHandle
                  Lang
-                 OnMessageToShow
+                 OnMessageShow
                  OnUpdatePanels
                  ProgressBar
                  Reload
@@ -53,7 +53,7 @@ interface
 
 uses Classes, Forms, StdCtrls, ComCtrls, Controls, Windows, SysUtils,
      cl_settings, cl_projectdata, cl_lang, cl_actionthread, cl_verifythread,
-     cl_devices, f_diskinfo;
+     cl_devices, f_diskinfo, f_largeint, userevents;
 
 type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        Prozeduren benötigt werden, damit diese leichter an CheckMedium übergeben
@@ -64,7 +64,7 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        Choice        : Byte;
        {Daten-CD}
        ForcedContinue: Boolean;
-       CDSize        : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+       CDSize        : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        SectorsNeededS: string;
        SectorsNeededI: Integer;
        TaoEndSecCount: Integer;
@@ -84,13 +84,13 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        FReload: Boolean;
        FLang: TLang;
        // FTempBurnList: TStringList;
-       FDupSize: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+       FDupSize: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
        FSplitOutput: Boolean;
        FEjectDevice: string;
        {Variablen zur Ausgabe}
        FFormHandle: THandle;
-       FOnMessageToShow: TNotifyEvent;
-       FOnUpdatePanels: TNotifyEvent;
+       FOnMessageShow: TMessageShowEvent;
+       FOnUpdatePanels: TUpdatePanelsEvent;
        FSettings: TSettings;
        FStatusBar: TStatusBar;
        FProgressBar: TProgressBar;
@@ -118,8 +118,8 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        procedure WriteImage;
        procedure WriteTOC;
        {Events}
-       procedure MessageToShow;
-       procedure UpdatePanels;
+       procedure MessageShow(const s: string);
+       procedure UpdatePanels(const s1, s2: string);
      public
        constructor Create;
        destructor Destroy; override;
@@ -137,10 +137,10 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        property ProgressBar: TProgressBar read FProgressBar write FProgressBar;
        property Reload: Boolean read FReload write FReload;
        property Settings: TSettings write FSettings;
-       property DuplicateFileSize: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF} read FDupSize write FDupSize;
+       property DuplicateFileSize: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF} read FDupSize write FDupSize;
        {Events}
-       property OnMessageToShow: TNotifyEvent read FOnMessageToShow write FOnMessageToShow;
-       property OnUpdatePanels: TNotifyEvent read FOnUpdatePanels write FOnUpdatePanels;
+       property OnMessageShow: TMessageShowEvent read FOnMessageShow write FOnMessageShow;
+       property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
      end;
 
 implementation
@@ -153,14 +153,14 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 { TCDAction - private }
 
-{ MessageToShow ----------------------------------------------------------------
+{ MessageShow ------------------------------------------------------------------
 
   Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
   FSettings.General.MessageToShow auszugeben.                                  }
 
-procedure TCDAction.MessageToShow;
+procedure TCDAction.MessageShow(const s: string);
 begin
-  if Assigned(FOnMessageToShow) then FOnMessageToShow(Self);
+  if Assigned(FOnMessageShow) then FOnMessageShow(s);
 end;
 
 { UpdatePanels -----------------------------------------------------------------
@@ -168,9 +168,9 @@ end;
   Löst das Event OnUpdatePanels aus, das das Hauptfenster veranlaßt, die Panel-
   Texte der Statusleiste zu aktualisieren.                                     }
 
-procedure TCDAction.UpdatePanels;
+procedure TCDAction.UpdatePanels(const s1, s2: string);
 begin
-  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(Self);
+  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(s1, s2);
 end;
 
 { SetPanels --------------------------------------------------------------------
@@ -179,9 +179,7 @@ end;
 
 procedure TCDAction.SetPanels(const s1, s2: string);
 begin
-  FSettings.Shared.Panel1 := s1;
-  FSettings.Shared.Panel2 := s2;  
-  UpdatePanels;
+  UpdatePanels(s1, s2);
 end;
 
 { GetAction --------------------------------------------------------------------
@@ -325,6 +323,7 @@ var i             : Integer;
     Meldung       : PChar;
 begin
   Result := True;
+  FSettings.Cdrecord.Erase := False;
   {allgemeine Fehler, unabhängig vom Projekt}
   {Fehler: keine CD eingelegt}
   if Disk.DiskType = DT_None then
@@ -337,18 +336,44 @@ begin
   {Fehler: nächste Schreibadresse kann nicht gelesen werden}
   if Disk.MsInfo = 'no_address' then
   begin
-    Application.MessageBox(PChar(FLang.GMS('eburn09')),
-                           PChar(FLang.GMS('g001')),
-                           MB_OK or MB_ICONEXCLAMATION);
-    Result := False;
+    if (Disk.DiskType in [DT_CD_RW, DT_DVD_RW]) and
+       FSettings.Cdrecord.AutoErase then
+    begin
+      i := Application.MessageBox(PChar(FLang.GMS('eburn09') + CRLF + CRLF +
+                                        FLang.GMS('eburn16')),
+                                  PChar(FLang.GMS('g001')),
+                                  MB_OKCancel or MB_ICONEXCLAMATION);
+      Result := i = 1;
+      FSettings.Cdrecord.Erase := Result;
+      Disk.MsInfo := '';
+    end else
+    begin
+      Application.MessageBox(PChar(FLang.GMS('eburn09')),
+                             PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+      Result := False;
+    end;
   end;
   {Fehler: fixierte CD eingelegt}
   if Pos('-1', Disk.MsInfo) <> 0 then
   begin
-    Application.MessageBox(PChar(FLang.GMS('eburn02')),
-                           PChar(FLang.GMS('g001')),
-                           MB_OK or MB_ICONEXCLAMATION);
-    Result := False;
+    if (Disk.DiskType in [DT_CD_RW, DT_DVD_RW]) and
+       FSettings.Cdrecord.AutoErase then
+    begin
+      i := Application.MessageBox(PChar(FLang.GMS('eburn02') + CRLF + CRLF +
+                                        FLang.GMS('eburn16')),
+                                  PChar(FLang.GMS('g001')),
+                                  MB_OKCancel or MB_ICONEXCLAMATION);
+      Result := i = 1;
+      FSettings.Cdrecord.Erase := Result;
+      Disk.MsInfo := '';
+    end else
+    begin
+      Application.MessageBox(PChar(FLang.GMS('eburn02')),
+                             PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION);
+      Result := False;
+    end;
   end;
 
   {Fehler, die bei mehreren Projekten auftreten können.}
@@ -544,10 +569,9 @@ begin
   if p > 0 then Delete(Sectors, 1, p);
   if StrToIntDef(Sectors, -1) >= 0 then Result := Sectors else
   begin
-    FSEttings.Shared.MessageToShow := 'mkisofs -print-size failed.' + CRLF +
-      '  Commandline was: ' + CmdGetsize + CRLF +
-      '  Errormessage   : ' + Sectors + CRLF;
-    MessageToShow;
+    MessageShow('mkisofs -print-size failed.' + CRLF +
+                '  Commandline was: ' + CmdGetsize + CRLF +
+                '  Errormessage   : ' + Sectors + CRLF);
   end;
   SetPanels ('<>', '');
 end;
@@ -670,7 +694,7 @@ begin
     if ISOLevel and (ISOOutChar > -1)
                     then CmdM := CmdM + ' -output-charset '
                                       + CharSets[ISOOutChar];
-    if ISO37Chars   then CmdM := CmdM + ' -max-iso-filenames';
+    if ISO37Chars   then CmdM := CmdM + ' -max-iso9660-filenames';
     if ISONoDot     then CmdM := CmdM + ' -omit-period';             // ' -d';
     if ISOStartDot  then CmdM := CmdM + ' -allow-leading-dots';      // ' -L';
     if ISOMultiDot  then CmdM := CmdM + ' -allow-multidot';
@@ -734,6 +758,7 @@ begin
     end;
     {cdrecord-Kommandozeile zusammenstellen}
     CmdC := ' gracetime=5 dev=' + Device;
+    if Erase       then CmdC := CmdC + ' blank=fast';       
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then CmdC := CmdC + ' driver=' + SimulDev + '_simul';
@@ -856,10 +881,8 @@ begin
       {ab Win2k ist die Ausführung mit sh.exe nicht mehr nötig.}
       if FSettings.FileFlags.UseSh then
       begin
-        FSettings.Shared.MessageToShow := FLang.GMS('mburn03');
-        MessageToShow;
-        FSettings.Shared.MessageToShow := CmdOnTheFly;
-        MessageToShow;
+        MessageShow(FLang.GMS('mburn03'));
+        MessageShow(CmdOnTheFly);
         Temp := QuotePath(MakePathConform(ProgDataDir + cShCmdFile));
         CmdOnTheFly := StartUpDir + cShBin;
         {$IFDEF QuoteCommandlinePath}
@@ -904,7 +927,7 @@ var i         : Integer;
     CD        : TDiskInfo;
     CMArgs    : TCheckMediumArgs;
     DummyI    : Integer;
-    DummyL    : {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+    DummyL    : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
     Temp      : string;
     Cmd, CmdMP: string;
     BurnList  : TStringList;
@@ -992,6 +1015,7 @@ begin
     Cmd := QuotePath(Cmd);
     {$ENDIF}
     Cmd := Cmd + ' gracetime=5 dev=' + Device;
+    if Erase       then Cmd := Cmd + ' blank=fast';
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
@@ -1251,10 +1275,8 @@ begin
   end;
   if i = 1 then
   begin
-    FSettings.Shared.MessageToShow := FLang.GMS('mburn10');
-    MessageToShow;
-    FSettings.Shared.MessageToShow := M2CDMOptions;
-    MessageToShow;
+    MessageShow(FLang.GMS('mburn10'));
+    MessageShow(M2CDMOptions);
     if not (FSettings.XCD.ImageOnly or (CmdC = '')) then
     begin
       DisplayDOSOutput(CmdMode2CDMaker + CR + CmdC, FActionThread, FLang, nil);
@@ -1378,15 +1400,13 @@ begin
     {keine CD}
     if (CD.Size = 0) and (CD.MsInfo = '') then
     begin
-      FSettings.Shared.MessageToShow := FLang.GMS('eburn01');
-      MessageToShow;
+      MessageShow(FLang.GMS('eburn01'));
       Ok := False;
     end;
     {fixierte CD}
     if Pos('-1', CD.MsInfo) <> 0 then
     begin
-      FSettings.Shared.MessageToShow := FLang.GMS('mburn09');
-      MessageToShow;
+      MessageShow(FLang.GMS('mburn09'));
       Ok := False;
     end;
     {Gesamtkapazität}
@@ -1397,19 +1417,16 @@ begin
                IntToStr(Round(Int(CD.Time)) div 60),
                FormatFloat('0#.##',
                            (CD.Time - (Round(Int(CD.Time)) div 60) * 60))]);
-      FSettings.Shared.MessageToShow := Temp;
-      MessageToShow;
+      MessageShow(Temp);
       {noch frei}
       Temp := Format(FLang.GMS('mburn08'),
               [FormatFloat(' ##0.##', CD.SizeFree),
                IntToStr(Round(Int(CD.TimeFree)) div 60),
                FormatFloat('0#.##',
                        (CD.TimeFree - (Round(Int(CD.TimeFree)) div 60) * 60))]);
-      FSettings.Shared.MessageToShow := Temp;
-      MessageToShow;
+      MessageShow(Temp);
     end;
-    FSettings.Shared.MessageToShow := '';
-    MessageToShow;
+    MessageShow('');
     SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
   end;
 end;
@@ -1631,6 +1648,8 @@ var Compressed: Boolean;
   function GetCommandLineCompress(const Info: string; Index: Integer): string;
   var Cmd      : string;
       OutName  : string;
+      CustExt  : string;
+      CustOpt  : string;
       Name,
       Title,
       Performer: string;
@@ -1640,9 +1659,10 @@ var Compressed: Boolean;
       OutName := FSettings.DAE.Prefix + Format('_%.2d', [Index + 1])
     else
       OutName := GetCustomName(Info, Index, Title, Performer, Name);
-    if FSettings.DAE.MP3  then Cmd := StartUpDir + cLameBin;
-    if FSettings.DAE.Ogg  then Cmd := StartUpDir + cOggencBin;
-    if FSettings.DAE.FLAC then Cmd := StartUpDir + cFLACBin;
+    if FSettings.DAE.MP3    then Cmd := StartUpDir + cLameBin;
+    if FSettings.DAE.Ogg    then Cmd := StartUpDir + cOggencBin;
+    if FSettings.DAE.FLAC   then Cmd := StartUpDir + cFLACBin;
+    if FSettings.DAE.Custom then Cmd := FSettings.DAE.CustomCmd;
     if FSettings.FileFlags.UseSh then Cmd := MakePathConform(Cmd);
     {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
@@ -1680,6 +1700,16 @@ var Compressed: Boolean;
       end;
       Cmd := Cmd + ' -o ' + QuotePath(FSettings.DAE.Path + OutName + cExtFLAC)
                  + ' -';
+    end;
+    if FSettings.DAE.Custom then
+    begin
+      {Platzhalter: %F - Dateiname, %T - Titel, %P - Performer}
+      SplitString(FSettings.DAE.CustomOpt, '|', CustOpt, CustExt);
+      CustOpt := ReplaceString(CustOpt, '%F',
+                   QuotePath(FSettings.DAE.Path + OutName + CustExt));
+      CustOpt := ReplaceString(CustOpt, '%T', Title);
+      CustOpt := ReplaceString(CustOpt, '%P', Performer);
+      Cmd := Cmd + ' ' + CustOpt;
     end;
     Result := Cmd;
   end;
@@ -1808,8 +1838,7 @@ var Compressed: Boolean;
     {$ENDIF}
     if Compressed then
     begin
-      FSettings.Shared.MessageToShow := FLang.GMS('mburn03');
-      MessageToShow;
+      MessageShow(FLang.GMS('mburn03'));
     end;
     with FSettings.DAE do
     begin
@@ -1860,8 +1889,7 @@ var Compressed: Boolean;
             {$ENDIF}
             Cmd := Cmd + ShCmd + ' ' +
                    QuotePath(MakePathConform(ShCmdFile)) + CR;
-            FSettings.Shared.MessageToShow := PipedCmd;
-            MessageToShow;
+            MessageShow(PipedCmd);
           end else
           begin
             PipedCmd := CmdDAE + Temp + '|' + CmdComp;
@@ -1878,7 +1906,7 @@ var Compressed: Boolean;
 begin
   with FSettings.DAE do
   begin
-    Compressed := Mp3 or Ogg or Flac;
+    Compressed := Mp3 or Ogg or Flac or Custom;
     if PrefixNames and not Compressed then
     begin
       DAEGrabTracksSimple;
@@ -2358,6 +2386,7 @@ begin
     end;
     {cdrecord}
     CmdC := ' gracetime=5 dev=' + Device;
+    if Erase       then CmdC := CmdC + ' blank=fast';    
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then CmdC := CmdC + ' driver=' + SimulDev + '_simul';
@@ -2453,10 +2482,8 @@ begin
       {ab Win2k ist die Ausführung mit sh.exe nicht mehr nötig.}
       if FSettings.FileFlags.UseSh then
       begin
-        FSettings.Shared.MessageToShow := FLang.GMS('mburn03');
-        MessageToShow;
-        FSettings.Shared.MessageToShow := CmdOnTheFly;
-        MessageToShow;
+        MessageShow(FLang.GMS('mburn03'));
+        MessageShow(CmdOnTheFly);
         Temp := QuotePath(MakePathConform(ProgDataDir + cShCmdFile));
         CmdOnTheFly := StartUpDir + cShBin;
         {$IFDEF QuoteCommandlinePath}

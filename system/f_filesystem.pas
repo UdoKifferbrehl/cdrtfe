@@ -3,7 +3,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.05.2006
+  letzte Änderung  14.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -32,11 +32,12 @@
     FileSystemIsFAT(const Path: string): Boolean
     FindInSearchPath(const Name: string): string
     GetDirSize(Verzeichnis: string): Longint
-    GetDriveList(const DriveType: Integer; DriveList: TStringList): Byte
+    GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte
     GetFileSize(const Filename: string): Longint
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
     GetVolumeInfo(var VolInfo: TVolumeInfo)
+    IsUNCPath(const Path: string): Boolean
     OverrideProgDataDir(const OverrideWithStartUpDir: Boolean)
     ProgDataDir: string
     ProgDataDirCreate
@@ -51,7 +52,8 @@ unit f_filesystem;
 
 interface
 
-uses Forms, Windows, Classes, SysUtils, ShlObj, FileCtrl, ActiveX, Registry;
+uses Forms, Windows, Classes, SysUtils, ShlObj, FileCtrl, ActiveX, Registry,
+     f_largeint;
 
 const {IDs für spezielle Ordner}
       CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
@@ -76,10 +78,11 @@ function FilenameIsValid(const Name: string): Boolean;
 function FileSystemIsFAT(const Path: string): Boolean;
 function FindInSearchPath(const Name: string): string;
 function GetDirSize(Verzeichnis: string): Longint;
-function GetDriveList(const DriveType: Integer; DriveList: TStringList): Byte;
-function GetFileSize(const FileName: string): {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF};
+function GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte;
+function GetFileSize(const FileName: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
 function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
+function IsUNCPath(const Path: string): Boolean;
 function ProgDataDir: string;
 function StartUpDir: string;
 function TempDir: string;
@@ -90,7 +93,7 @@ procedure ProgDataDirCreate;
 
 implementation
 
-uses f_largeint, f_wininfo, f_environment, constant;
+uses f_wininfo, f_environment, constant;
 
     {'statische' Variablen}
 var ProgDataDirOverride: string;
@@ -215,7 +218,7 @@ end;
 
   GeFileSize liefert die Größe einer Datei in Byte.                            }
 
-function GetFileSize(const Filename: string): {$IFDEF LargeFiles} Comp
+function GetFileSize(const Filename: string): {$IFDEF LargeFiles} Int64
                                               {$ELSE} Longint {$ENDIF};
 var SR: TSearchRec;
     {$IFDEF LargeFiles}
@@ -377,7 +380,7 @@ end;
   zurückgegeben. Laufwerkstypen: DRIVE_REMOVABLE, DRIVE_FIXED, DRIVE_REMOTE,
   DRIVE_CDROM, DRIVE_RAMDISK. Format: <drive>:\                                }
 
-function GetDriveList(const DriveType: Integer; DriveList: TStringList): Byte;
+function GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte;
 var Drives     :  array [0..105] of char;
     TempList   : TStringList;
     DriveString: PChar;
@@ -527,6 +530,15 @@ begin
   finally
     FS.Free;
   end;
+end;
+
+{ IsUNCPath --------------------------------------------------------------------
+
+  True, wenn Path im UNC-Format ist: \\server\path...                          }
+
+function IsUNCPath(const Path: string): Boolean;
+begin
+  Result := (Pos('\\', Path) = 1) or (Pos('//', Path) = 1);
 end;
 
 initialization

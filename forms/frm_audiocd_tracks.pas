@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.01.2006
+  letzte Änderung  14.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, Grids,
      {eigene Klassendefinitionen/Units}
-     cl_projectdata, cl_settings, cl_lang;
+     cl_projectdata, cl_settings, cl_lang, f_largeint;
 
 type
   TFormAudioCDTracks = class(TForm)
@@ -164,7 +164,7 @@ end;
 procedure TFormAudioCDTracks.GetSettings;
 var i: Integer;
     DummyI, TrackCount: Integer;
-    DummyL: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF};
+    DummyL: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
     DummyE: Extended;
     TrackData: TCDTextTrackData;
 begin

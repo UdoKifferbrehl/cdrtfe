@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.06.2006
+  letzte Änderung  11.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,14 +18,13 @@
              diese zu speichern und zu laden.
 
     Properties   OnProgressBarHide
-                 OnProgressBarReset
+                 OnProgressBarShow
                  OnProgressBarUpdate
                  OnUpdatePanels
 
     Variablen    record General
                         WinPos
                         CmdLineFlags
-                        Shared
                         FileFlags
                         Environment
                         Drives
@@ -61,8 +60,9 @@ unit cl_settings;
 
 interface
 
-uses Classes, SysUtils, IniFiles, Registry, FileCtrl,
-     cl_lang;
+uses {$IFDEF Delphi2005Up} Windows, {$ENDIF}
+     Classes, SysUtils, IniFiles, Registry, FileCtrl,
+     cl_lang, userevents;
 
 const TabSheetCount = 9;
 
@@ -89,6 +89,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        CDTextUseTags : Boolean;
        CDTextTP      : Boolean;    // <title> - <performer>.mp3
        PortableMode  : Boolean;
+       DetectSpeeds  : Boolean;
      end;
 
      TWinPos = record
@@ -113,19 +114,10 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        WriteLogFile      : Boolean;
      end;
 
-     { Hilfvaraiblen, um Infos zwischen Klassen und Forms auszutauschen }
-     TShared = record
-       MessageToShow      : string;
-       Panel1             : string;
-       Panel2             : string;
-       ProgressBarPosition: Integer;
-       ProgressBarMax     : Integer;
-     end;
-
      TFileFlags = record
        Mingw      : Boolean;    // Mingw32-Port der cdrtools
        IniFileOk  : Boolean;
-       CygwinOk   : Boolean;    // cygwin1.dll    
+       CygwinOk   : Boolean;    // cygwin1.dll
        CdrtoolsOk : Boolean;    // cdrecord.exe, mkisofs.exe
        CdrdaoOk   : Boolean;
        Cdda2wavOk : Boolean;
@@ -174,6 +166,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        FIFO      : Boolean;
        FIFOSize  : Integer;
        ForceSpeed: Boolean;
+       AutoErase : Boolean;
+       Erase     : Boolean;
        {zusätzliche Kommandotzeilenoptionen}
        CdrecordUseCustOpts  : Boolean;
        MkisofsUseCustOpts   : Boolean;
@@ -334,10 +328,13 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        MP3        : Boolean;
        Ogg        : Boolean;
        FLAC       : Boolean;
+       Custom     : Boolean;
        AddTags    : Boolean;
        FlacQuality: string;
        OggQuality : string;
        LamePreset : string;
+       CustomCmd  : string;
+       CustomOpt  : string;
      end;
 
      { Einstellungen: Image schreiben }
@@ -408,10 +405,10 @@ type { GUI-Settings, Flags und Hilfsvariablen }
      TSettings = class(TObject)
      private
        FLang: TLang;
-       FOnProgressBarHide: TNotifyEvent;
-       FOnProgressBarReset: TNotifyEvent;
-       FOnProgressBarUpdate: TNotifyEvent;
-       FOnUpdatePanels: TNotifyEvent;
+       FOnProgressBarHide: TProgressBarHideEvent;
+       FOnProgressBarShow: TProgressBarShowEvent;
+       FOnProgressBarUpdate: TProgressBarUpdateEvent;
+       FOnUpdatePanels: TUpdatePanelsEvent;
        {$IFDEF RegistrySettings}
        function SettingsAvailable: Boolean;
        {$ENDIF}
@@ -421,14 +418,13 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        procedure InitSettings;
        {Events}
        procedure ProgressBarHide;
-       procedure ProgressBarReset;
-       procedure ProgressBarUpdate;
-       procedure UpdatePanels;
+       procedure ProgressBarShow(const Max: Integer);
+       procedure ProgressBarUpdate(const Position: Integer);
+       procedure UpdatePanels(const s1, s2: string);
      public
        General     : TGeneralSettings;
        WinPos      : TWinPos;
        CmdLineFlags: TCmdLineFlags;
-       Shared      : TShared;
        FileFlags   : TFileFlags;
        Environment : TEnvironment;
        Drives      : TSettingsDrives;
@@ -465,10 +461,10 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        {$ENDIF}
        property Lang: TLang write FLang;
        {Events}
-       property OnProgressBarHide: TNotifyEvent read FOnProgressBarHide write FOnProgressBarHide;
-       property OnProgressBarReset: TNotifyEvent read FOnProgressBarReset write FOnProgressBarReset;
-       property OnProgressBarUpdate: TNotifyEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
-       property OnUpdatePanels: TNotifyEvent read FOnUpdatePanels write FOnUpdatePanels;
+       property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
+       property OnProgressBarShow: TProgressBarShowEvent read FOnProgressBarShow write FOnProgressBarShow;
+       property OnProgressBarUpdate: TProgressBarUpdateEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
+       property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
      end;
 
 implementation
@@ -487,17 +483,17 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 procedure TSettings.ProgressBarHide;
 begin
-  if Assigned(FOnProgressBarHide) then FOnProgressBarHide(Self);
+  if Assigned(FOnProgressBarHide) then FOnProgressBarHide;
 end;
 
-{ ProgressBarReset -------------------------------------------------------------
+{ ProgressBarShow --------------------------------------------------------------
 
   Löst das Event OnProgressBarReset aus, daß den Progress-Bar des Hauptfensters
   sichtbar macht und zurücksetzt.                                              }
 
-procedure TSettings.ProgressBarReset;
+procedure TSettings.ProgressBarShow(const Max: Integer);
 begin
-  if Assigned(FOnProgressBarReset) then FOnProgressBarReset(Self);
+  if Assigned(FOnProgressBarShow) then FOnProgressBarShow(Max);
 end;
 
 { ProgressBarUpdate ------------------------------------------------------------
@@ -505,9 +501,9 @@ end;
   Löst das Event OnProgressBarUpdate aus, daß den Progress-Bar des Hauptfensters
   aktualisiert.                                                                }
 
-procedure TSettings.ProgressBarUpdate;
+procedure TSettings.ProgressBarUpdate(const Position: Integer);
 begin
-  if Assigned(FOnProgressBarUpdate) then FOnProgressBarUpdate(Self);
+  if Assigned(FOnProgressBarUpdate) then FOnProgressBarUpdate(Position);
 end;
 
 { UpdatePanels -----------------------------------------------------------------
@@ -515,9 +511,9 @@ end;
   Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
   FSettings.General.MessageToShow auszugeben.                                  }
 
-procedure TSettings.UpdatePanels;
+procedure TSettings.UpdatePanels(const s1, s2: string);
 begin
-  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(Self);
+  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(s1, s2);
 end;
 
 { InitSettings -----------------------------------------------------------------
@@ -563,6 +559,7 @@ begin
     CDTextUseTags := True;
     CDTextTP := False;
     PortableMode := False;
+    DetectSpeeds := False;
   end;
 
   with WinPos do
@@ -587,15 +584,6 @@ begin
     Hide               := False;
     Minimize           := False;
     WriteLogFile       := False;
-  end;
-
-  with Shared do
-  begin
-    MessageToShow := '';
-    Panel1 := '';
-    Panel2 := '';
-    ProgressBarPosition := 0;
-    ProgressBarMax := 0;
   end;
 
   with FileFlags do
@@ -651,6 +639,8 @@ begin
     FIFO       := False;
     FIFOSize   := 4;
     ForceSpeed := False;
+    AutoErase  := False;
+    Erase      := False;
     CdrecordUseCustOpts   := False;
     MkisofsUseCustOpts    := False;
     CdrecordCustOptsIndex := -1;
@@ -814,10 +804,13 @@ begin
     MP3         := False;
     Ogg         := False;
     FLAC        := False;
+    Custom      := False;
     AddTags     := True;
     FlacQuality := '5';
     OggQuality  := '6';
     LamePreset  := 'standard';
+    CustomCmd   := '';
+    CustomOpt   := '';
   end;
 
   {Image schreiben}
@@ -1346,6 +1339,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
       WriteBool(Section, 'CDTextTP', CDTextTP);
+      WriteBool(Section, 'DetectSpeeds', DetectSpeeds);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1392,6 +1386,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'FIFO', FIFO);
       WriteInteger(Section, 'FIFOSize', FIFOSize);
       WriteBool(Section, 'ForceSpeed', ForceSpeed);
+      WriteBool(Section, 'AutoErase', AutoErase);
       WriteBool(Section, 'CdrecordUseCustOpts', CdrecordUseCustOpts);
       WriteInteger(Section, 'CdrecordCustOptsIndex', CdrecordCustOptsIndex);
       WriteInteger(Section, 'CdrecordCustOptsCount', CdrecordCustOpts.Count);
@@ -1562,10 +1557,13 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'MP3', MP3);
       WriteBool(Section, 'Ogg', Ogg);
       WriteBool(Section, 'FLAC', FLAC);
+      WriteBool(Section, 'Custom', Custom);
       WriteBool(Section, 'AddTags', AddTags);
       WriteString(Section, 'FlacQuality', FlacQuality);
       WriteString(Section, 'OggQuality', OggQuality);
       WriteString(Section, 'LamePreset', LamePreset);
+      WriteString(Section, 'CustomCmd', CustomCmd);
+      WriteString(Section, 'CustomOpt', CustomOpt);
     end;
 
     {Image schreiben}
@@ -1714,9 +1712,9 @@ var PF: TIniFile; // ProjectFile
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
       CDTextTP := ReadBool(Section, 'CDTextTP', False);
+      DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
     end;
-    Shared.ProgressBarPosition := 1;
-    ProgressBarUpdate;
+    ProgressBarUpdate(1);
 
     {Einstellung, die nur in der cdrtfe.ini vorkommen.}
     {$IFDEF IniSettings}
@@ -1779,6 +1777,7 @@ var PF: TIniFile; // ProjectFile
       FIFO := ReadBool(Section, 'FIFO', False);
       FIFOSize := ReadInteger(Section, 'FIFOSize', 4);
       ForceSpeed := ReadBool(Section, 'ForceSpeed', False);
+      AutoErase := ReadBool(Section, 'AutoErase', False);
       CdrecordUseCustOpts := ReadBool(Section, 'CdrecordUseCustOpts', False);
       CdrecordCustOptsIndex := ReadInteger(Section,
                                            'CdrecordCustOptsIndex', -1);
@@ -1798,8 +1797,7 @@ var PF: TIniFile; // ProjectFile
                                        'MkisofsCustOpts' + IntToStr(i), ''));
       end;
     end;
-    Shared.ProgressBarPosition := 2;
-    ProgressBarUpdate;
+    ProgressBarUpdate(2);
 
     {allgemeine Einstellungen: cdrdao}
     Section := 'cdrdao';
@@ -1809,8 +1807,7 @@ var PF: TIniFile; // ProjectFile
       ForceGenericMmcRaw := ReadBool(Section, 'ForceGenericMmcRaw', False);
       WriteCueImages := ReadBool(Section, 'WriteCueImages', False);
     end;
-    Shared.ProgressBarPosition := 3;
-    ProgressBarUpdate;
+    ProgressBarUpdate(3);
 
     {Daten-CD}
     Section := 'Data-CD';
@@ -1860,8 +1857,7 @@ var PF: TIniFile; // ProjectFile
       RAWMode := ReadString(Section, 'RAWMode', 'raw96r');
       Overburn := ReadBool(Section, 'Overburn', False);
     end;
-    Shared.ProgressBarPosition := 4;
-    ProgressBarUpdate;
+    ProgressBarUpdate(4);
 
     {Audio-CD}
     Section := 'Audio-CD';
@@ -1885,8 +1881,7 @@ var PF: TIniFile; // ProjectFile
       PauseLength := ReadString(Section, 'PauseLength', '2');
       PauseSector := ReadBool(Section, 'PauseSector', False);
     end;
-    Shared.ProgressBarPosition := 5;
-    ProgressBarUpdate;
+    ProgressBarUpdate(5);
 
     {XCD}
     Section := 'XCD';
@@ -1913,8 +1908,7 @@ var PF: TIniFile; // ProjectFile
       UseErrorProtection := ReadBool(Section, 'UseErrorProtection', False);
       SecCount := ReadInteger(Section, 'SecCount', 3600);
     end;
-    Shared.ProgressBarPosition := 6;
-    ProgressBarUpdate;
+    ProgressBarUpdate(6);
 
     {CDRW}
     Section := 'CDRW';
@@ -1927,8 +1921,7 @@ var PF: TIniFile; // ProjectFile
       BlankSession :=ReadBool(Section, 'BlankSession', False);
       Force := ReadBool(Section, 'Force', False);
     end;
-    Shared.ProgressBarPosition := 7;
-    ProgressBarUpdate;
+    ProgressBarUpdate(7);
 
     {CDInfo}
     Section := 'CDInfo';
@@ -1942,8 +1935,7 @@ var PF: TIniFile; // ProjectFile
       MSInfo := ReadBool(Section, 'MSInfo', False);
       CapInfo := ReadBool(Section, 'CapInfo', False);
     end;
-    Shared.ProgressBarPosition := 8;
-    ProgressBarUpdate;
+    ProgressBarUpdate(8);
 
     {DAE}
     Section := 'DAE';
@@ -1969,13 +1961,15 @@ var PF: TIniFile; // ProjectFile
              (FileFlags.ShOk or not FileFlags.ShNeeded);
       FLAC := ReadBool(Section, 'FLAC', False) and FileFlags.FlacOk and
               (FileFlags.ShOk or not FileFlags.ShNeeded);
+      Custom := ReadBool(Section, 'Custom', False);
       AddTags := ReadBool(Section, 'AddTags', True);
       FlacQuality := ReadString(Section, 'FlacQuality', '5');
       OggQuality := ReadString(Section, 'OggQuality', '6');
       LamePreset := ReadString(Section, 'LamePreset', 'standard');
+      CustomCmd := ReadString(Section, 'CustomCmd', '');
+      CustomOpt := ReadString(Section, 'CustomOpt', '');
     end;
-    Shared.ProgressBarPosition := 9;
-    ProgressBarUpdate;
+    ProgressBarUpdate(9);
 
     {Image schreiben}
     Section := 'Image';
@@ -1991,8 +1985,7 @@ var PF: TIniFile; // ProjectFile
       RAW := ReadBool(Section, 'RAW', False);
       RAWMode := ReadString(Section, 'RAWMode', 'raw96r');
     end;
-    Shared.ProgressBarPosition := 10;
-    ProgressBarUpdate;
+    ProgressBarUpdate(10);
 
     {Image einlesen}
     Section := 'Readcd';
@@ -2008,8 +2001,7 @@ var PF: TIniFile; // ProjectFile
       StartSec := ReadString(Section, 'Startsec', '');
       EndSec := ReadString(Section, 'Endsec', '');
     end;
-    Shared.ProgressBarPosition := 11;
-    ProgressBarUpdate;
+    ProgressBarUpdate(11);
 
     {VideoCD}
     Section := 'VideoCD';
@@ -2030,8 +2022,7 @@ var PF: TIniFile; // ProjectFile
       Sec2336 := ReadBool(Section, 'Sec2336', False);
       SVCDCompat := ReadBool(Section, 'SVCDCompat', False);
     end;
-    Shared.ProgressBarPosition := 12;
-    ProgressBarUpdate;
+    ProgressBarUpdate(12);
 
     {DVD-Video}
     Section := 'DVDVideo';
@@ -2048,8 +2039,7 @@ var PF: TIniFile; // ProjectFile
       KeepImage := ReadBool(Section, 'KeepImage', False);
       Verify := ReadBool(Section, 'Verify', False);
     end;
-    Shared.ProgressBarPosition := 13;
-    ProgressBarUpdate;
+    ProgressBarUpdate(13);
   end;
 
 begin
@@ -2077,13 +2067,10 @@ begin
     PF := TIniFile.Create(Name);
     {Namen merken für Log-File}
     General.LastProject := Name;
-    Shared.Panel1 := Format(FLang.GMS('mpref07'), [Name]);
-    Shared.Panel2 := FLang.GMS('mpref08');
     {Event zum Aktualisieren der Panels auslösen}
-    UpdatePanels;
+    UpdatePanels(Format(FLang.GMS('mpref07'), [Name]), FLang.GMS('mpref08'));
     {Reset der Progress-Bars}
-    Shared.ProgressBarMax := 13;
-    ProgressBarReset;
+    ProgressBarShow(13);
     {Einstellungen laden}
     LoadSettings;
     ProgressBarHide;
@@ -2123,6 +2110,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
       WriteBool(Section, 'CDTextTP', CDTextTP);
+      WriteBool(Section, 'DetectSpeeds', DetectSpeeds);
     end;
 
     Section := 'WinPos';
@@ -2153,6 +2141,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'FIFO', FIFO);
       WriteInteger(Section, 'FIFOSize', FIFOSize);
       WriteBool(Section, 'ForceSpeed', ForceSpeed);
+      WriteBool(Section, 'AutoErase', AutoErase);
       WriteBool(Section, 'CdrecordUseCustOpts', CdrecordUseCustOpts);
       WriteInteger(Section, 'CdrecordCustOptsIndex', CdrecordCustOptsIndex);
       WriteInteger(Section, 'CdrecordCustOptsCount', CdrecordCustOpts.Count);
@@ -2326,10 +2315,13 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'MP3', MP3);
       WriteBool(Section, 'Ogg', Ogg);
       WriteBool(Section, 'FLAC', FLAC);
+      WriteBool(Section, 'Custom', Custom);
       WriteBool(Section, 'AddTags', AddTags);
       WriteString(Section, 'FlacQuality', FlacQuality);
       WriteString(Section, 'OggQuality', OggQuality);
       WriteString(Section, 'LamePreset', LamePreset);
+      WriteString(Section, 'CustomCmd', CustomCmd);
+      WriteString(Section, 'CustomOpt', CustomOpt);
     end;
 
     {Image schreiben}
@@ -2443,6 +2435,7 @@ var PF: TRegIniFile; // ProjectFile
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
       CDTextTP := ReadBool(Section, 'CDTextTP', False);
+      DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
     end;
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;
@@ -2475,6 +2468,7 @@ var PF: TRegIniFile; // ProjectFile
       FIFO := ReadBool(Section, 'FIFO', False);
       FIFOSize := ReadInteger(Section, 'FIFOSize', 4);
       ForceSpeed := ReadBool(Section, 'ForceSpeed', False);
+      AutoErase := ReadBool(Section, 'AutoErase', False);
       CdrecordUseCustOpts := ReadBool(Section, 'CdrecordUseCustOpts', False);
       CdrecordCustOptsIndex := ReadInteger(Section,
                                            'CdrecordCustOptsIndex', -1);
@@ -2670,10 +2664,13 @@ var PF: TRegIniFile; // ProjectFile
              (FileFlags.ShOk or not FileFlags.ShNeeded);
       FLAC := ReadBool(Section, 'FLAC', False) and FileFlags.FlacOk and
              (FileFlags.ShOk or not FileFlags.ShNeeded);
+      Custom := ReadBool(Section, 'Custom', False);
       AddTags := ReadBool(Section, 'AddTags', True);
       FlacQuality := ReadString(Section, 'FlacQuality', '5');
       OggQuality := ReadString(Section, 'OggQuality', '6');
       LamePreset := ReadString(Section, 'LamePreset', 'standard');
+      CustomCmd := ReadString(Section, 'CustomCmd', '');
+      CustomOpt := ReadString(Section, 'CustemOpt', '');
     end;
     Shared.ProgressBarPosition := 9;
     ProgressBarUpdate;

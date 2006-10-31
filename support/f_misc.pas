@@ -3,7 +3,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.06.2006
+  letzte Änderung  28.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -25,6 +25,7 @@
     ExportFontList
     GetCompProp(Comp: TComponent; Name: string): string
     GetPathFromNode(Root: TTreeNode): string
+    GetNameByValue(List: TStringList; const Value: string): string
     GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode
     GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean
     GetWaveLength(const Name: string): Extended
@@ -55,6 +56,7 @@ uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, SysUtils,
      Windows, TypInfo;
 
 function GetPathFromNode(Root: TTreeNode): string;
+function GetNameByValue(List: TStringList; const Value: string): string;
 function GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode;
 function GetWaveLength(const Name: string): Extended;
 function GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean;
@@ -304,6 +306,31 @@ begin
       Inc(i);
     end;
   end;
+end;
+
+{ GetNameByValue ---------------------------------------------------------------
+
+  liefert für eine Liste mit Einträgen der Form Name=Value zu einem gegebenen
+  Wert den Namen.                                                              }
+
+function GetNameByValue(List: TStringList; const Value: string): string;
+var i         : Integer;
+    Temp, Name: string;
+    Found     : Boolean;
+begin
+  Result := '';
+  Found := False;
+  if List.Count > 0 then
+  begin
+    i := -1;
+    repeat
+      Inc(i);
+      Name := List.Names[i];
+      Temp := List.Values[Name];
+      Found := Temp = Value;
+    until Found or (i = List.Count - 1);
+  end;
+  if Found then Result := Name;
 end;
 
 { SetFont ----------------------------------------------------------------------

@@ -26,6 +26,8 @@
 
 unit f_environment;
 
+{$I directives.inc}
+
 interface
 
 uses Windows, Classes, SysUtils;

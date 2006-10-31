@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  20.06.2006
+  letzte Änderung  25.07.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,6 +16,11 @@
   - um die entsprechende Funktion zu aktivieren, das 'x' vor dem Symbolnamen
     entfernen
 }
+
+(* ------------------------------------------------------------ Delphiversion *)
+
+{$I compiler.inc}
+
 
 (* -------------------------------------------------------------- Testversion *)
 
@@ -399,6 +404,10 @@
 
 {$DEFINE xDebugDriveDetection}
          // Anzeige der cdrecord-Aufrufe zur Laufwerkserkennung
+         //   - betrifft: cl_devices.pas
+
+{$DEFINE xDebugDriveSpeedDetection}
+         // Anzeige der Zwischenergebnisse zur Speed-Erkennung
          //   - betrifft: cl_devices.pas
 
 {$DEFINE xDebugGetDOSOutputThread}

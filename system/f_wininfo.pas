@@ -35,6 +35,8 @@
 
 unit f_wininfo;
 
+{$I directives.inc}
+
 interface
 
 uses Windows, Registry, SysUtils;

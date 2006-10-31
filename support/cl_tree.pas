@@ -4,7 +4,7 @@
 
   Version          1.0
   erstellt         11.02.2004
-  letzte Änderung  17.01.2006
+  letzte Änderung  09.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -61,7 +61,10 @@ unit cl_tree;
 
 interface
 
-uses Classes, SysUtils;
+{$I directives.inc}
+
+uses {$IFDEF Delphi2005Up} Windows, {$ENDIF}
+     Classes, SysUtils;
 
 type TNode = class;
 

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.05.2006
+  letzte Änderung  30.10.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -25,10 +25,10 @@
                  CompressedAudioFilesPresent
                  LastError
                  LastFolderAdded
-                 OnMessageToShow
                  OnProgressBarHide
-                 OnProgressBarReset
+                 OnProgressBarShow
                  OnProgressBarUpdate
+                 OnProjectError                 
                  OnUpdatePanels
                  
     Variablen    DataCDFilesToSort: Boolean           Diese Flags geben an, ob
@@ -98,11 +98,7 @@ unit cl_projectdata;
 interface
 
 uses Forms, Classes, SysUtils, FileCtrl, ComCtrls,
-     cl_cd, cl_lang, cl_settings, f_cdtext, constant;
-
-     {cl_settings wird nur eingebunden, damit der Typ TShared verwendet werden
-      kann. Auf keinen Fall sollte direkt auf Objekte vom Typ TSettings zuge-
-      griffen werden.}
+     cl_cd, cl_lang, f_cdtext, f_largeint, constant, userevents;
 
 const PD_NoError = 0;          {Fehlercodes}
       PD_FolderNotUnique = 1;
@@ -136,11 +132,11 @@ type TProjectData = class(TObject)
        FError: Byte;
        FFolderAdded: string;
        FAddAsForm2: Boolean;
-       FOnMessageToShow: TNotifyEvent;
-       FOnProgressBarHide: TNotifyEvent;
-       FOnProgressBarReset: TNotifyEvent;
-       FOnProgressBarUpdate: TNotifyEvent;
-       FOnUpdatePanels: TNotifyEvent;
+       FOnProgressBarHide: TProgressBarHideEvent;
+       FOnProgressBarShow: TProgressBarShowEvent;
+       FOnProgressBarUpdate: TProgressBarUpdateEvent;
+       FOnProjectError: TProjectErrorEvent;
+       FOnUpdatePanels: TUpdatePanelsEvent;
        function GetCompressedAudioFilesPresent: Boolean;
        function GetLastError: Byte;
        function GetLastFolderAdded: string;
@@ -148,12 +144,13 @@ type TProjectData = class(TObject)
        procedure SetAcceptOgg(Mode: Boolean);
        procedure SetAcceptFLAC(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
+       procedure SetOnProjectError(EventHandler: TProjectErrorEvent);
        {Events}
-       procedure MessageToShow;
        procedure ProgressBarHide;
-       procedure ProgressBarReset;
-       procedure ProgressBarUpdate;
-       procedure UpdatePanels;
+       procedure ProgressBarShow(const Max: Integer);
+       procedure ProgressBarUpdate(const Position: Integer);
+       procedure ProjectError(const ErrorCode: Byte; const Name: string);
+       procedure UpdatePanels(const s1, s2: string);
      public
        DataCDFilesToSort: Boolean;
        DataCDFilesToSortFolder: string;
@@ -189,9 +186,9 @@ type TProjectData = class(TObject)
        procedure DeleteFromPathlistByIndex(const Index: Integer; const Path: string; const Choice: Byte);
        procedure DeleteFromPathlistByName(const Name, Path: string; const Choice: Byte);
        procedure GetCDText(const Index: Integer; var TextData: TCDTextTrackData);
-       procedure GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF}; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte);
+       procedure GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF}; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte);
        procedure ExportStructureToTreeView(const Choice: Byte; Tree: TTreeView);
-       procedure LoadFromFile(const Name: string; var Shared: TShared);
+       procedure LoadFromFile(const Name: string);
        procedure MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string; const Choice: Byte);
        procedure MoveFileByName(const Name, SourcePath, DestPath: string; const Choice: Byte);
        procedure MoveFolder(const SourcePath, DestPath: string; const Choice: Byte);
@@ -222,15 +219,15 @@ type TProjectData = class(TObject)
        property LastFolderAdded: string read GetLastFolderAdded;
        property AddAsForm2: Boolean write SetXCDAddMode;
        {Events}
-       property OnMessageToShow: TNotifyEvent read FOnMessageToShow write FOnMessageToShow;
-       property OnProgressBarHide: TNotifyEvent read FOnProgressBarHide write FOnProgressBarHide;
-       property OnProgressBarReset: TNotifyEvent read FOnProgressBarReset write FOnProgressBarReset;
-       property OnProgressBarUpdate: TNotifyEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
-       property OnUpdatePanels: TNotifyEvent read FOnUpdatePanels write FOnUpdatePanels;
+       property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
+       property OnProgressBarShow: TProgressBarShowEvent read FOnProgressBarShow write FOnProgressBarShow;
+       property OnProgressBarUpdate: TProgressBarUpdateEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
+       property OnProjectError: TProjectErrorEvent read FOnProjectError write SetOnProjectError;
+       property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
      end;
 
-procedure ExtractFileInfoFromEntry(const Entry: string; var Name, Path: string; var Size: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF});
-procedure ExtractTrackInfoFromEntry(const Entry: string; var Name, Path: string; var Size: {$IFDEF LargeFiles} Comp {$ELSE} Longint {$ENDIF}; var TrackLength: Extended);
+procedure ExtractFileInfoFromEntry(const Entry: string; var Name, Path: string; var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF});
+procedure ExtractTrackInfoFromEntry(const Entry: string; var Name, Path: string; var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF}; var TrackLength: Extended);
 
 implementation
 
@@ -241,14 +238,14 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 { TProjectData - private }
 
-{ MessageToShow ----------------------------------------------------------------
+{ ProjectError -----------------------------------------------------------------
 
-  Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
-  FSettings.General.MessageToShow auszugeben.                                  }
+  Löst das ProjectError-Event aus, das das Hauptfenster veranlaßt, die ent-
+  sprechende Meldung auszugeben.                                               }
 
-procedure TProjectData.MessageToShow;
+procedure TProjectData.ProjectError(const ErrorCode: Byte; const Name: string);
 begin
-  if Assigned(FOnMessageToShow) then FOnMessageToShow(Self);
+  if Assigned(FOnProjectError) then FOnProjectError(ErrorCode, Name);
 end;
 
 { ProgressBarHide --------------------------------------------------------------
@@ -258,17 +255,17 @@ end;
 
 procedure TProjectData.ProgressBarHide;
 begin
-  if Assigned(FOnProgressBarHide) then FOnProgressBarHide(Self);
+  if Assigned(FOnProgressBarHide) then FOnProgressBarHide;
 end;
 
-{ ProgressBarReset -------------------------------------------------------------
+{ ProgressBarShow --------------------------------------------------------------
 
-  Löst das Event OnProgressBarReset aus, daß den Progress-Bar des Hauptfensters
+  Löst das Event OnProgressBarShow aus, daß den Progress-Bar des Hauptfensters
   sichtbar macht und zurücksetzt.                                              }
 
-procedure TProjectData.ProgressBarReset;
+procedure TProjectData.ProgressBarShow(const Max: Integer);
 begin
-  if Assigned(FOnProgressBarReset) then FOnProgressBarReset(Self);
+  if Assigned(FOnProgressBarShow) then FOnProgressBarShow(Max);
 end;
 
 { ProgressBarUpdate ------------------------------------------------------------
@@ -276,9 +273,9 @@ end;
   Löst das Event OnProgressBarUpdate aus, daß den Progress-Bar des Hauptfensters
   aktualisiert.                                                                }
 
-procedure TProjectData.ProgressBarUpdate;
+procedure TProjectData.ProgressBarUpdate(const Position: Integer);
 begin
-  if Assigned(FOnProgressBarUpdate) then FOnProgressBarUpdate(Self);
+  if Assigned(FOnProgressBarUpdate) then FOnProgressBarUpdate(Position);
 end;
 
 { UpdatePanels -----------------------------------------------------------------
@@ -286,9 +283,9 @@ end;
   Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
   FSettings.General.MessageToShow auszugeben.                                  }
 
-procedure TProjectData.UpdatePanels;
+procedure TProjectData.UpdatePanels(const s1, s2: string);
 begin
-  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(Self);
+  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(s1, s2);
 end;
 
 { GetLastError -----------------------------------------------------------------
@@ -352,6 +349,17 @@ procedure TProjectData.SetAcceptFLAC(Mode: Boolean);
 begin
   FAcceptFLAC := Mode;
   FAudioCD.AcceptFLAC := Mode;
+end;
+
+{ SetOnProjectError ------------------------------------------------------------
+
+  OnProjectError kann nicht direkt gesetzt werden, da er auch an FAudioCD durch-
+  gereicht werden muß.                                                         }
+
+procedure TProjectData.SetOnProjectError(EventHandler: TProjectErrorEvent);
+begin
+  FOnProjectError := EventHandler;
+  FAudioCD.OnProjectError := EventHandler;
 end;
 
 { CompressedAudioFilesPresent --------------------------------------------------
@@ -797,7 +805,7 @@ end;
   alle Variablen nötig sind, ist unschön, spart aber eine zusätzliche Prozedur.}
 
 procedure TProjectData.GetProjectInfo(var FileCount, FolderCount: Integer;
-                                      var CDSize: {$IFDEF LargeProject} Comp
+                                      var CDSize: {$IFDEF LargeProject} Int64
                                                   {$ELSE} Longint {$ENDIF};
                                       var CDTime: Extended;
                                       var TrackCount: Integer;
@@ -1095,12 +1103,13 @@ end;
 
   LoadFromFile lädt die Dateilisten aus einer Text-Datei.                      }
 
-procedure TProjectData.LoadFromFile(const Name: string; var Shared: TShared);
+procedure TProjectData.LoadFromFile(const Name: string);
 var CDName: string;
     ProjectList: TStringList;
     List: TStringList;
 
   procedure LoadCDStrukture;
+  // var ProgressBarMax: Integer;
   begin
     List.Clear;
     {Tree-Struktur in Liste suchen}
@@ -1112,17 +1121,15 @@ var CDName: string;
       if CDName = 'Data-CD' then
       begin
         FDataCD.ImportStructureFromStringList(List);
-        Shared.ProgressBarMax := FDataCD.FolderCount;
+        // ProgressBarMax := FDataCD.FolderCount;
       end else
       if CDName = 'XCD' then
       begin
         FXCD.ImportStructureFromStringList(List);
-        Shared.ProgressBarMax := FXCD.FolderCount;
+        // ProgressBarMax := FXCD.FolderCount;
       end;
       {Jetzt die Dateilisten erzeugen}
-      Shared.Panel1 := '<>';
-      Shared.Panel2 := FLang.GMS('mpref10');
-      UpdatePanels;
+      UpdatePanels('<>', FLang.GMS('mpref10'));
       if CDName = 'Data-CD' then
       begin
         FDataCD.CreateFileLists;
@@ -1162,12 +1169,10 @@ var CDName: string;
                                      '</' + CDName + '-Files>') then
     begin
       {Dateien einfügen}
-      Shared.ProgressBarMax := List.Count - 1;
-      ProgressBarReset;
+      ProgressBarShow(List.Count - 1);
       for i := 0 to List.Count -1 do
       begin
-        Shared.ProgressBarPosition := i;
-        ProgressBarUpdate;
+        ProgressBarUpdate(i);
         Temp := List[i];
         {den Pfadlisten-Eintrag auseinandernehmen}
         SplitString(Temp, ':', TargetName, SourcePath);
@@ -1198,22 +1203,12 @@ var CDName: string;
         {$ENDIF}
         AddToPathlist(SourcePath, TargetPath, Choice);
         ErrorCode := GetLastError;
-        case ErrorCode of
-          PD_FileNotFound   : begin
-                                Shared.MessageToShow :=
-                                  Format(FLang.GMS('e113'), [SourcePath]);
-                                MessageToShow;
-                              end;
-          PD_FileNotUnique  : begin
-                                Shared.MessageToShow :=
-                                  Format(FLang.GMS('e112'), [SourcePath]);
-                                MessageToShow;
-                              end;
-        end;
+        if ErrorCode <> PD_NoError then ProjectError(ErrorCode, SourcePath);
         FXCD.AddAsForm2 := False;
         {TargetName anders als SourceName? Als maximale Dateilänge nehmen wir
-         erst einmal 255 an, da später sowieso geprüft wird.}
-        if SourceName <> TargetName then
+         erst einmal 255 an, da später sowieso geprüft wird. Umbenennen ist nur
+         erlaubt, wenn die Datei auch tatsächlich vorhanden ist.}
+        if (SourceName <> TargetName) and (ErrorCode = PD_NoError) then
         begin
           RenameFileByName(TargetPath, SourceName, TargetName, 255, Choice);
         end;
@@ -1248,12 +1243,10 @@ var CDName: string;
     if GetSection(ProjectList, List, '<' + CDName + '>',
                                      '</' + CDName + '>') then
     begin
-      Shared.ProgressBarMax := List.Count - 1;
-      ProgressBarReset;
+      ProgressBarShow(List.Count - 1);
       for i := 0 to List.Count -1 do
       begin
-        Shared.ProgressBarPosition := i;
-        ProgressBarUpdate;
+        ProgressBarUpdate(i);
         Temp := List[i];
         {$IFDEF DebugAddFileLoad}
         FormDebug.Memo1.Lines.Add(IntToStr(Choice) + ' - ' + Temp);
@@ -1265,23 +1258,7 @@ var CDName: string;
         end;
         {Fehlerbehandlung}
         ErrorCode := GetLastError;
-        case ErrorCode of
-          PD_InvalidWaveFile: begin
-                                Shared.MessageToShow :=
-                                  Format(FLang.GMS('eprocs01'), [Temp]);
-                                MessageToShow;
-                              end;
-          PD_InvalidMpegFile: begin
-                                Shared.MessageToShow :=
-                                  Format(FLang.GMS('eprocs02'), [Temp]);
-                                MessageToShow;
-                              end;
-          PD_FileNotFound   : begin
-                                Shared.MessageToShow :=
-                                  Format(FLang.GMS('e113'), [Temp]);
-                                MessageToShow;
-                              end;
-        end;
+        if ErrorCode <> PD_NoError then ProjectError(ErrorCode, Temp);
         Application.ProcessMessages;
       end;
     end;
@@ -1296,12 +1273,10 @@ var CDName: string;
     if GetSection(ProjectList, List, '<' + CDName + '>',
                                      '</' + CDName + '>') then
     begin
-      Shared.ProgressBarMax := List.Count - 1;
-      ProgressBarReset;
+      ProgressBarShow(List.Count - 1);
       for i := 0 to List.Count -1 do
       begin
-        Shared.ProgressBarPosition := i;
-        ProgressBarUpdate;
+        ProgressBarUpdate(i);
         if CDName = 'CD-Text' then
         begin
           StringToTextTrackData(List[i], TextTrackData);
@@ -1317,10 +1292,8 @@ var CDName: string;
   end;
 
 begin
-  Shared.Panel1 := Format(FLang.GMS('mpref07'), [Name]);
-  Shared.Panel2 := FLang.GMS('mpref08');
   {Event zum Aktualisieren der Panels auslösen}
-  UpdatePanels;
+  UpdatePanels(Format(FLang.GMS('mpref07'), [Name]), FLang.GMS('mpref08'));
   {Jetzt die Dateien laden}
   if FileExists(Name{ + '.files'}) then
   begin
@@ -1336,21 +1309,15 @@ begin
     ProjectList.LoadFromFile(Name{ + '.files'});
     {Daten-CD: Tree-Struktur laden}
     CDName := 'Data-CD';
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := FLang.GMS('mpref09');
-    UpdatePanels;
+    UpdatePanels('<>', FLang.GMS('mpref09'));
     LoadCDStrukture;
     {Daten-CD: Dateien in den Tree laden}
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := FLang.GMS('mpref11');
-    UpdatePanels;
+    UpdatePanels('<>', FLang.GMS('mpref11'));
     LoadCDData;
 
     {Audiotracks laden}
     CDName := 'Audio-CD';
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := FLang.GMS('mpref12');
-    UpdatePanels;
+    UpdatePanels('<>', FLang.GMS('mpref12'));
     LoadTracks;
     {CD-Text-Informationen}
     CDName := 'CD-Text';
@@ -1361,36 +1328,26 @@ begin
 
     {XCD: Tree-Struktur laden}
     CDName := 'XCD';
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := FLang.GMS('mpref13');
-    UpdatePanels;
+    UpdatePanels('<>', FLang.GMS('mpref13'));
     LoadCDStrukture;
     {XCD: Dateien in den Tree laden}
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := FLang.GMS('mpref14');
-    UpdatePanels;
+    UpdatePanels('<>', FLang.GMS('mpref14'));
     LoadCDData;
 
     {Tracks (DAE) laden}
     CDName := 'DAE';
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := '';
-    UpdatePanels;
+    UpdatePanels('<>', '');
     LoadTracks;
 
     {Videotracks laden}
     CDName := 'Video-CD';
-    Shared.Panel1 := '<>';
-    Shared.Panel2 := FLang.GMS('mpref15');
-    UpdatePanels;
+    UpdatePanels('<>', FLang.GMS('mpref15'));
     LoadTracks;
 
     ProjectList.Free;
     List.Free;
   end;
-  Shared.Panel1 := '';
-  Shared.Panel2 := '';
-  UpdatePanels;
+  UpdatePanels('', '');
   ProgressBarHide;
 end;
 
@@ -1524,7 +1481,7 @@ end;
 
 procedure ExtractFileInfoFromEntry(const Entry: string;
                                    var Name, Path: string;
-                                   var Size: {$IFDEF LargeFiles} Comp
+                                   var Size: {$IFDEF LargeFiles} Int64
                                              {$ELSE} Longint {$ENDIF});
 var Temp: string;
 begin
@@ -1540,7 +1497,11 @@ begin
     Delete(Temp, Length(Temp), 1);
   end;
   {$IFDEF LargeFiles}
-  Size := StrToFloatDef(Temp, 0);  
+  {$IFNDEF Delphi4Up}
+  Size := StrToFloatDef(Temp, 0);
+  {$ELSE}
+  Size := StrToInt64Def(Temp, 0);
+  {$ENDIF}
   {$ELSE}
   Size := StrToIntDef(Temp, 0);
   {$ENDIF}
@@ -1553,7 +1514,7 @@ end;
 
 procedure ExtractTrackInfoFromEntry(const Entry: string;
                                     var Name, Path: string;
-                                    var Size: {$IFDEF LargeFiles} Comp
+                                    var Size: {$IFDEF LargeFiles} Int64
                                               {$ELSE} Longint {$ENDIF};
                                     var TrackLength: Extended);
 begin
@@ -1561,8 +1522,12 @@ begin
   Path := StringLeft(Entry, '|');
   Name := ExtractFileName(Path);
   {Dateigröße extrahieren}
-  {$IFDEf LargeFiles}
+  {$IFDEF LargeFiles}
+  {$IFNDEF Delphi4Up}
   Size := StrToFloatDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
+  {$ELSE}
+  Size := StrToInt64Def(StringLeft(StringRight(Entry, '|'), '*'), 0);
+  {$ENDIF}
   {$ELSE}
   Size := StrToIntDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
   {$ENDIF}

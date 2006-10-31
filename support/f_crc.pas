@@ -1,10 +1,10 @@
 { f_crc.pas: Berechnung der CRC-Prüfsummen, bitweiser Vergleich
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
-  Version          1.3
+  Version          1.4
   erstellt         22.08.2004
-  letzte Änderung  03.02.2005
+  letzte Änderung  17.08.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,6 +43,8 @@
 }
 
 unit f_crc;
+
+{$I directives.inc}
 
 interface
 
@@ -122,7 +124,7 @@ end;
   Reversed: True                                                               }
 
 function UpdateCRC32(Init: Longint; Buffer: Pointer; count: Longint): Longint;
-var crc: Longint;
+var crc: Cardinal{Longint};
 begin
   crc := Init;
   while Count > 0 do
@@ -176,7 +178,7 @@ var PTabCRC32: ^TCRC32Tab;
     vorher festgelegt werden muß.                                              }
 
   function CalcVCRC32(Init: Longint; Buffer: Pointer; count: Longint): Longint;
-  var crc: Longint;
+  var crc: Cardinal{Longint};
   begin
     crc := Init;
     while Count > 0 do

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.06.2006
+  letzte Änderung  11.10.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -56,7 +56,6 @@ type TActionThread = class(TThread)
        FPStdIn: THandle;    // Handle der StdIn-Pipe des Prozesses
        FPID: DWORD;         // Prozess-ID
        FEnvironmentBlock: Pointer; // Zeiger zum neuen Umgebungsblock
-       // FTerminate: Boolean;
        function ProcessOutput(Line: string; var BeginNewLine: Boolean):string;
        procedure StartExecution;
      protected
@@ -71,7 +70,8 @@ type TActionThread = class(TThread)
        property MessageOk: string write FMessageOk;
        property MessageAborted: string write FMessageAborted;
        property EnvironmentBlock: Pointer write FEnvironmentBlock;
-       // property TerminateThread: Boolean write FTerminate;
+       property PID: DWORD read FPID;
+       property StdIn: THandle read FPStdIn;
      end;
 (*
      {Typ-Deklarationen für die Callback-Funktion}
@@ -84,10 +84,11 @@ type TActionThread = class(TThread)
 *)
 procedure DisplayDOSOutput(const CommandLine: string; var Thread: TActionThread; Lang: TLang; const EnvironmentBlock: Pointer);
 procedure TerminateExecution(Thread: TActionThread);
+procedure SendCRToThread(Thread: TActionThread);
 
 implementation
 
-uses cl_logwindow, user_messages, constant, f_misc, f_process;
+uses cl_logwindow, user_messages, constant, f_misc, f_process, f_wininfo;
 
 { TActionThread -------------------------------------------------------------- }
 
@@ -253,7 +254,138 @@ end;
 
   StartExecution führt die Kommandozeile aus und leitet die Ausgaben an
   ProcessOutput weiter.                                                        }
+(*
+procedure TActionThread.StartExecution;
+const SECURITY_DESCRIPTOR_REVISION = 1;
+var lpPipeAttributes        : TSecurityAttributes;
+    ReadStdOut, NewStdOut   : THandle;
+    WriteStdIn, NewStdIn    : THandle;
+    lpStartupInfo           : TStartupInfo;
+    lpProcessInformation    : TProcessInformation;
+    lpSecurityDescriptor    : TSecurityDescriptor;
+    lpNumberOfBytesRead     : DWORD;
+    lpNumberOfBytesAvailable: DWORD;
+    Buffer                  : array[0..10] of Char;
+    Temp                    : string;
+    StartWithNewLine        : Boolean;
+    OnlyBS                  : Boolean;
+    ExitCode                : Integer;
+    Changed                 : Boolean;
+begin
+  FLine := FCommandLine;
+  Synchronize(DAddLine);
+  StartWithNewLine := True;
+  ZeroMemory(@lpPipeAttributes, SizeOf(TSecurityAttributes));
+  lpPipeAttributes.nLength := SizeOf(TSecurityAttributes);
+  lpPipeAttributes.bInheritHandle := True;
 
+  if PlatformWinNT then
+  begin
+    InitializeSecurityDescriptor(@lpSecurityDescriptor,
+                                 SECURITY_DESCRIPTOR_REVISION);
+    SetSecurityDescriptorDacl(@lpSecurityDescriptor, True, nil, False);
+    lpPipeAttributes.lpSecurityDescriptor := @lpSecurityDescriptor;
+  end else
+  begin
+    lpPipeAttributes.lpSecurityDescriptor := nil;
+  end;
+
+  if (CreatePipe(ReadStdOut, NewStdOut, @lpPipeAttributes, 0)) and
+     (CreatePipe(NewStdIn, WriteStdIn, @lpPipeAttributes, 0)) then
+  begin
+    ZeroMemory(@lpStartupInfo, SizeOf(TStartupInfo));
+    ZeroMemory(@lpProcessInformation, SizeOf(TProcessInformation));
+    lpStartupInfo.cb := SizeOf(TStartupInfo);
+    lpStartupInfo.dwFlags := STARTF_USESTDHANDLES or STARTF_USESHOWWINDOW;
+    lpStartupInfo.hStdOutput := NewStdOut;
+    lpStartupInfo.hStdError := NewStdOut;
+    lpStartupInfo.hStdInput := NewStdIn;
+    lpStartupInfo.wShowWindow := SW_HIDE;
+    if CreateProcess(nil, PChar(FCommandLine), nil, nil, True,
+                     CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
+                     FEnvironmentBlock, nil,
+                     lpStartupInfo, lpProcessInformation) then
+      try
+        FPHandle := lpProcessInformation.hProcess;
+        FPStdIn := WriteStdIn;
+        FPID := lpProcessInformation.dwProcessId;
+        Buffer[0] := #0;
+        Temp := '';
+        Changed := True;
+        repeat
+          GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
+          if Changed then
+          begin
+            Temp := Temp + Buffer;
+            {jetzt Zeichen verarbeiten und anzeigen}
+            Temp := ProcessOutput(Temp, StartWithNewLine);
+          end;
+
+          ZeroMemory(@Buffer, SizeOf(Buffer));
+          lpNumberOfBytesRead := 0;
+          // Application.ProcessMessages;
+
+          {ReadSuccess := }
+          PeekNamedPipe(ReadStdout, @Buffer, SizeOf(Buffer),
+                        @lpNumberOfBytesRead,
+                        @lpNumberOfBytesAvailable, nil);
+
+          Changed := lpNumberOfBytesAvailable > 0;
+          if lpNumberOfBytesAvailable <> 0 then
+          begin
+            ZeroMemory(@Buffer, SizeOf(Buffer));
+            {ReadSuccess :=}
+            ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
+                     lpNumberOfBytesRead, nil);
+          end else
+          begin
+            {nach StdIn schreiben}
+          end;
+
+          Sleep(1);
+        until (ExitCode <> STILL_ACTIVE) and (lpNumberOfBytesAvailable = 0);
+
+        {Falls noch Reste in Temp stehen, diese verarbeiten und ausgeben}
+        OnlyBS := False;
+        repeat
+          Temp := ProcessOutput(Temp, StartWithNewLine);
+          if Length(Temp) > 0 then
+          begin
+            if (Temp[1] = BckSp) and (Temp[Length(Temp)] = BckSP) then
+            begin
+              OnlyBS := True;
+            end;
+          end;
+        until (Temp = '') or OnlyBS;
+        if not Terminated then
+        begin
+          // Ausführung beendet.
+          FLine := FMessageOk; // FLine := GMS('moutput01');
+        end else
+        begin
+          // Ausführung durch Anwender abgebrochen.
+          FLine := FMessageAborted; // FLine := GMS('moutput02');
+        end;
+        Synchronize(DAddLine);
+        FLine := '';
+        Synchronize(DAddLine);
+      finally
+        {$IFDEF ShowCmdError}
+        repeat
+          GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
+        until ExitCode <> STILL_ACTIVE;
+        if FExitCode = 0 then FExitCode := ExitCode;
+        {$ENDIF}
+        CloseHandle(NewStdIn);
+        CloseHandle(NewStdOut);
+        CloseHandle(ReadStdOut);
+        CloseHandle(WriteStdIn);
+        CloseHandle(lpProcessInformation.hThread);
+        CloseHandle(lpProcessInformation.hProcess);
+      end;
+  end;
+end;
+*)
 procedure TActionThread.StartExecution;
 var lpPipeAttributes: TSecurityAttributes;
     ReadStdOut, NewStdOut: THandle;
@@ -308,13 +440,13 @@ begin
 
           ZeroMemory(@Buffer, SizeOf(Buffer));
           lpNumberOfBytesRead := 0;
-          Application.ProcessMessages;
+          // Application.ProcessMessages;
 
-          {Abbrechen, wenn gewünscht, radikale Variante}   (*
+          {Abbrechen, wenn gewünscht, radikale Variante}   {
           if ETerminate then
           begin
             TerminateProcess(lpProcessInformation.hProcess, 0);
-          end;                                                 *)
+          end;                                                 }
 
         until not ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
                            lpNumberOfBytesRead, nil);
@@ -350,9 +482,6 @@ begin
         until ExitCode <> STILL_ACTIVE;
         if FExitCode = 0 then FExitCode := ExitCode;
         {$ENDIF}
-        // CloseHandle(hReadPipe);
-        // CloseHandle(NewStdIn);
-        // CloseHandle(NewStdOut);
         CloseHandle(ReadStdOut);
         CloseHandle(WriteStdIn);
         CloseHandle(lpProcessInformation.hThread);
@@ -473,16 +602,32 @@ begin
   begin
     {Dem Thread signalisieren, daß er die noch ausstehenden Kommandozeilen -
      sofern vorhanden - nicht ausführen soll.}
-    Thread.Terminate; //Thread.TerminateThread := True;
+    Thread.Terminate;
     {Dem Kommandozeilenprogramm ein Ctrl-C senden. Es soll schließlich geordnet
      abgebrochen werden. Ein gewaltsamer Abbruch mit TerminateProcess könnte
      negative Auswirkungen (Speicherlecks usw.) haben.}
-    Window := GetProcessWindow(Thread.FPID);
+    Window := GetProcessWindow(Thread.PID);
     SetForeGroundWindow(Window);
     Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), 0, 0);
     Keybd_Event($43, MapVirtualKey($43,0), 0, 0);
     Keybd_Event($43, MapVirtualKey($43,0), KEYEVENTF_KEYUP, 0);
     Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), KEYEVENTF_KEYUP, 0);
+  end;
+end;
+
+{ SendCRToThread ---------------------------------------------------------------
+
+  sendet ein CRLF an den im Thread laufenden Prozess.                          }
+
+procedure SendCRToThread(Thread: TActionThread);
+var Buffer: array[0..1] of Char;
+    BytesWritten: {$IFDEF Delphi3} Integer {$ELSE} Cardinal {$ENDIF};
+begin
+  if Thread <> nil then
+  begin                               
+    Buffer[0] := #13;
+    Buffer[1] := #10;
+    WriteFile(Thread.StdIn, Buffer, SizeOf(Buffer), BytesWritten, nil);
   end;
 end;
 

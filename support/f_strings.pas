@@ -1,8 +1,8 @@
 { f_strings.pas: String-Funktionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2006 Oliver Valencia
 
-  letzte Änderung  04.05.2005
+  letzte Änderung  14.09.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -34,7 +34,8 @@ unit f_strings;
 
 interface
 
-uses SysUtils, TypInfo;
+uses SysUtils, TypInfo,
+     f_largeint;
 
 { 'statische' Variablen }
 var UnitByte  : string = 'Byte';    // für SizeToString, damit eine Übersetzung
@@ -48,7 +49,7 @@ function QuotePath(const S: string): string;
 function ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string;
 function ReplaceCharFirst(s: string; const SearchChar, ReplaceChar: Char): string;
 function ReplaceString(s: string; const SearchString, ReplaceString: string): string;
-function SizeToString(const Size: {$IFDEF LargeProject} Comp {$ELSE} Longint {$ENDIF}): string;
+function SizeToString(const Size: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF}): string;
 function StringLeft(const Source, Delimiter: string): string;
 function StringRight(const Source, Delimiter: string): string;
 function StrToFloatDef(const S: string; Default: Extended): Extended;
@@ -65,7 +66,7 @@ implementation
   MiByte oder GiByte ungerechneten und in einen String umgewandelten Wert inkl.
   Einheit.                                                                     }
 
-function SizeToString(const Size: {$IFDEF LargeProject} Comp
+function SizeToString(const Size: {$IFDEF LargeProject} Int64
                                   {$ELSE} Longint {$ENDIF}): string;
 var SizeKB: Double;
     SizeMB: Double;

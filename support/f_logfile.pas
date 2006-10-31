@@ -22,6 +22,8 @@
 
 unit f_logfile;
 
+{$I directives.inc}
+
 interface
 
 uses Windows, Forms, Classes, SysUtils;

@@ -14,6 +14,8 @@
 
 unit frm_videocd_options;
 
+{$I directives.inc}
+
 interface
 
 uses

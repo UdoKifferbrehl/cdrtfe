@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2006
+  letzte Änderung 02.08.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,9 +20,9 @@ unit frm_settings;
 interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-     StdCtrls, ExtCtrls, FileCtrl,
+     StdCtrls, ExtCtrls, FileCtrl, ComCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_lang, cl_settings, ComCtrls;
+     cl_lang, cl_settings, userevents;
 
 type
   TFormSettings = class(TForm)
@@ -77,6 +77,9 @@ type
     PanelCDText: TPanel;
     RadioButtonCDTextPT: TRadioButton;
     RadioButtonCDTextTP: TRadioButton;
+    GroupBoxAutoErase: TGroupBox;
+    RadioButtonAutoEraseDisabled: TRadioButton;
+    RadioButtonAutoErase: TRadioButton;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -90,7 +93,7 @@ type
     procedure EditTempFolderExit(Sender: TObject);
   private
     { Private declarations }
-    FOnMessageToShow: TNotifyEvent;
+    FOnMessageShow: TMessageShowEvent;
     FSettings: TSettings;
     FLang: TLang;
     FShellExtIsSet: Boolean;  // Die Variablen für die ShellExtensions spielen
@@ -102,13 +105,13 @@ type
     procedure GetSettings;
     procedure SetSettings;
     {Events}
-    procedure MessageToShow;
+    procedure MessageShow(const s: string);
   public
     { Public declarations }
     property Lang: TLang read FLang write FLang;
     property Settings: TSettings read FSettings write FSettings;
     {Events}
-    property OnMessageToShow: TNotifyEvent read FOnMessageToShow write FOnMessageToShow;
+    property OnMessageShow: TMessageShowEvent read FOnMessageShow write FOnMessageShow;
   end;
 
 { var }
@@ -148,9 +151,9 @@ end;
   Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
   FSettings.General.MessageToShow auszugeben.                                  }
 
-procedure TFormSettings.MessageToShow;
+procedure TFormSettings.MessageShow(const s: string);
 begin
-  if Assigned(FOnMessageToShow) then FOnMessageToShow(Self);
+  if Assigned(FOnMessageShow) then FOnMessageShow(s);
 end;
 
 
@@ -207,6 +210,8 @@ begin
   RadioButtonCDTextUseName.Checked := not FSettings.General.CDTextUseTags;
   RadioButtonCDTextPT.Checked := not FSettings.General.CDTextTP;
   RadioButtonCDTextTP.Checked := FSettings.General.CDTextTP;
+  RadioButtonAutoErase.Checked := FSettings.Cdrecord.AutoErase;
+  RadioButtonAutoEraseDisabled.Checked := not FSettings.Cdrecord.AutoErase;
   ActivateTab;
 end;
 
@@ -241,6 +246,7 @@ begin
   FSettings.General.TabFrmSettings := GetActivePage;
   FSettings.General.CDTextUseTags := RadioButtonCDTextUseTags.Checked;
   FSettings.General.CDTextTP := RadioButtonCDTextTP.Checked;
+  FSettings.Cdrecord.AutoErase := RadioButtonAutoErase.Checked;
 end;
 
 { CheckControls ----------------------------------------------------------------
@@ -373,14 +379,13 @@ begin
       case FShellExtToSet of
         True : begin
                  RegisterShellExtensions;
-                 FSettings.Shared.MessageToShow := FLang.GMS('mpref01');
+                 MessageShow(FLang.GMS('mpref01'));
                end;
         False: begin
                  UnregisterSHellExtensions;
-                 FSettings.Shared.MessageToShow := FLang.GMS('mpref02');
+                 MessageShow(FLang.GMS('mpref02'));
                end;
       end;
-      MessageToShow;
     end;
     ModalResult := mrOK;
   end;

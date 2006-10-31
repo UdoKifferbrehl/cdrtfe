@@ -3,7 +3,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.06.2006
+  letzte Änderung  09.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,7 +38,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
-     constant;
+     f_wininfo, constant;
 
      {Typ-Deklarationen für die Callback-Funktion}
 type PProcessWindow = ^TProcessWindow;
@@ -321,6 +321,7 @@ type TDOSThread = class(TThread)
        {$IFDEF DebugGetDOSOutputThread}
        FLine           : string;
        {$ENDIF}
+       function GetUserReloadDisk: Boolean;
        procedure GetDOSOutputThreaded;
        procedure CheckOutput;
      protected
@@ -331,8 +332,10 @@ type TDOSThread = class(TThread)
      public
        constructor Create(const CmdLine: PChar; const GetStdErr, Suspended: Boolean);
        property Output: string read FOutput;
+       property StdIn: THandle read FPStdIn;
+       property PID: DWORD read FPID;
        property Running: Boolean read FRunning;
-       property UserReloadDisk: Boolean read FUserReloadDisk write FUserReloadDisk;
+       property UserReloadDisk: Boolean read GetUserReloadDisk write FUserReloadDisk;
      end;
 
 { TDOSThread - private/protected }
@@ -343,6 +346,16 @@ begin
   Deb(FLine, 2);
 end;
 {$ENDIF}
+
+{ GetUserReloadDisk ------------------------------------------------------------
+
+  liefert den Wert und setzt ihn zurück.                                       }
+
+function TDOSThread.GetUserReloadDisk: Boolean;
+begin
+  Result := FUserReloadDisk;
+  FUserReloadDisk := False;
+end;
 
 { CheckOutput ------------------------------------------------------------------
 
@@ -364,52 +377,89 @@ end;
   Ausgabe in FOutput.                                                          }
 
 procedure TDOSThread.GetDOSOutputThreaded;
-var lpPipeAttributes     : TSecurityAttributes;
-    ReadStdOut, NewStdOut: THandle;
-    WriteStdIn, NewStdIn : THandle;
-    lpStartupInfo        : TStartupInfo;
-    lpProcessInformation : TProcessInformation;
-    lpNumberOfBytesRead  : DWORD;
-    Buffer               : array[0..10] of Char;
-    {$IFDEF ShowCmdError}
-    ExitCode             : Integer;
-    {$ENDIF}
+const SECURITY_DESCRIPTOR_REVISION = 1;
+var lpPipeAttributes        : TSecurityAttributes;
+    ReadStdOut, NewStdOut   : THandle;
+    WriteStdIn, NewStdIn    : THandle;
+    lpStartupInfo           : TStartupInfo;
+    lpProcessInformation    : TProcessInformation;
+    lpSecurityDescriptor    : TSecurityDescriptor;
+    lpNumberOfBytesRead     : DWORD;
+    lpNumberOfBytesAvailable: DWORD;
+    Buffer                  : array[0..10] of Char;
+    Temp                    : string;
+    Changed                 : Boolean;
+    ExitCode                : {$IFDEF Delphi3} Integer {$ELSE}
+                                               Cardinal {$ENDIF};
 begin
   ZeroMemory(@lpPipeAttributes, SizeOf(TSecurityAttributes));
   lpPipeAttributes.nLength := SizeOf(TSecurityAttributes);
   lpPipeAttributes.bInheritHandle := True;
+
+  if PlatformWinNT then
+  begin
+    InitializeSecurityDescriptor(@lpSecurityDescriptor,
+                                 SECURITY_DESCRIPTOR_REVISION);
+    SetSecurityDescriptorDacl(@lpSecurityDescriptor, True, nil, False);
+    lpPipeAttributes.lpSecurityDescriptor := @lpSecurityDescriptor;
+  end else
+  begin
+    lpPipeAttributes.lpSecurityDescriptor := nil;
+  end;
+
   if (CreatePipe(ReadStdOut, NewStdOut, @lpPipeAttributes, 0)) and
      (CreatePipe(NewStdIn, WriteStdIn, @lpPipeAttributes, 0)) then
   begin
     ZeroMemory(@lpStartupInfo, SizeOf(TStartupInfo));
     ZeroMemory(@lpProcessInformation, SizeOf(TProcessInformation));
     lpStartupInfo.cb := SizeOf(TStartupInfo);
-    lpStartupInfo.dwFlags := STARTF_USESTDHANDLES;
+    lpStartupInfo.dwFlags := STARTF_USESTDHANDLES or STARTF_USESHOWWINDOW;
     lpStartupInfo.hStdOutput := NewStdOut;
-    if FGetStdErr then  lpStartupInfo.hStdError := NewStdOut;
-    {StdIn darf nicht umgeleitet werden, sonst kein Abbruch per ctrl-c}
-    // lpStartupInfo.hStdInput := NewStdIn;
-    lpStartupInfo.dwFlags := lpStartupInfo.dwFlags or STARTF_USESHOWWINDOW;
+    if FGetStdErr then lpStartupInfo.hStdError := NewStdOut;
+    lpStartupInfo.hStdInput := NewStdIn;
     lpStartupInfo.wShowWindow := SW_HIDE;
-    if CreateProcess(nil, FCommandLine, nil, nil, True,
+    if CreateProcess(nil, PChar(FCommandLine), nil, nil, True,
                      CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
                      nil, nil,
                      lpStartupInfo, lpProcessInformation) then
       try
-        CloseHandle(NewStdOut);
-        CloseHandle(NewStdIn);
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
         FPID := lpProcessInformation.dwProcessId;
         Buffer[0] := #0;
+        Temp := '';
+        Changed := True;
         repeat
-          FOutput := FOutput + Buffer;
-          CheckOutput;
+          GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
+          if Changed then
+          begin
+            FOutput := FOutput + Buffer;
+            CheckOutput;
+          end;
+
           ZeroMemory(@Buffer, SizeOf(Buffer));
           lpNumberOfBytesRead := 0;
           Application.ProcessMessages;
-        until not ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
-                           lpNumberOfBytesRead, nil);
+
+          {ReadSuccess := }
+          PeekNamedPipe(ReadStdout, @Buffer, SizeOf(Buffer),
+                        @lpNumberOfBytesRead,
+                        @lpNumberOfBytesAvailable, nil);
+
+          Changed := lpNumberOfBytesAvailable > 0;
+          if lpNumberOfBytesAvailable <> 0 then
+          begin
+            ZeroMemory(@Buffer, SizeOf(Buffer));
+            {ReadSuccess :=}
+            ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
+                     lpNumberOfBytesRead, nil);
+          end else
+          begin
+            {nach StdIn schreiben}
+          end;
+          Sleep(1);
+        until (ExitCode <> STILL_ACTIVE) and (lpNumberOfBytesAvailable = 0);
+
       finally
         {$IFDEF ShowCmdError}
         repeat
@@ -417,17 +467,13 @@ begin
         until ExitCode <> STILL_ACTIVE;
         if FExitCode = 0 then FExitCode := ExitCode;
         {$ENDIF}
+        CloseHandle(NewStdIn);
+        CloseHandle(NewStdOut);
         CloseHandle(ReadStdOut);
         CloseHandle(WriteStdIn);
         CloseHandle(lpProcessInformation.hThread);
         CloseHandle(lpProcessInformation.hProcess);
       end;
-      {$IFDEF DebugGetDOSOutputThread}
-      FLine := string(FCommandLine);
-      Synchronize(Debug);
-      FLine := FOutput + CRLF;
-      Synchronize(Debug);
-      {$ENDIF}
   end;
 end;
 
@@ -466,9 +512,11 @@ end;
 function GetDOSOutputEx(const lpCommandLine: PChar;
                         const GetStdErr: Boolean): string;
 var Thread  : TDOSThread;
-    i       : Integer;
-    Msg, Cap: string;
-    Window  : HWnd;
+    i           : Integer;
+    BytesWritten: {$IFDEF Delphi3} Integer {$ELSE} Cardinal {$ENDIF};
+    Msg, Cap    : string;
+    Window      : HWnd;
+    Buffer      : array[0..1] of Char;
 begin
   Thread := TDOSThread.Create(lpCommandLine, GetStdErr, True);
   Thread.FreeOnTerminate := False;
@@ -487,14 +535,15 @@ begin
       if i = 1 then
       begin
         {OK}
-        Window := GetProcessWindow(Thread.FPID);
-        SetForeGroundWindow(Window);
-        Keybd_Event(13, MapVirtualKey(13,0), 0, 0);
-        Keybd_Event(13, MapVirtualKey(13,0), KEYEVENTF_KEYUP, 0);
-        Thread.UserReloadDisk := False;
+        if Thread <> nil then
+        begin
+          Buffer[0] := #13;
+          Buffer[1] := #10;
+          WriteFile(Thread.StdIn, Buffer, SizeOf(Buffer), BytesWritten, nil);
+        end;
       end else
       begin
-        Window := GetProcessWindow(Thread.FPID);
+        Window := GetProcessWindow(Thread.PID);
         SetForeGroundWindow(Window);
         Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), 0, 0);
         Keybd_Event($43, MapVirtualKey($43,0), 0, 0);

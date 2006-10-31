@@ -4,7 +4,7 @@
 
   Copyright (c) 2006 Oliver Valencia
 
-  letzte Änderung  20.05.2006
+  letzte Änderung  11.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -62,11 +62,18 @@ type
     LabelDAEOgg1: TLabel;
     GroupBoxDAEMp3: TGroupBox;
     ComboBoxDAEMp3Quality: TComboBox;
+    RadioButtonDAECustom: TRadioButton;
+    GroupBoxDAECustom: TGroupBox;
+    EditCustomCmd: TEdit;
+    EditCustomOpt: TEdit;
+    LabelCustomCmd: TLabel;
+    LabelCustomOpt: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
     procedure EditKeyPress(Sender: TObject; var Key: Char);
     procedure TrackBarChange(Sender: TObject);
+    procedure EditExit(Sender: TObject);
   private
     { Private declarations }
     FSettings: TSettings;
@@ -137,11 +144,13 @@ begin
     RadioButtonDAEMp3.Enabled := False;
     RadioButtonDAEOgg.Enabled := False;
     RadioButtonDAEFlac.Enabled := False;
+    RadioButtonDAECustom.Enabled := False;
   end else
   begin
     RadioButtonDAEMp3.Enabled := FSettings.FileFlags.LameOk;
     RadioButtonDAEOgg.Enabled := FSettings.FileFlags.OggencOk;
     RadioButtonDAEFlac.Enabled := FSettings.FileFlags.FlacOk;
+    RadioButtonDAECustom.Enabled := FileExists(FSettings.DAE.CustomCmd);
   end;
   with FSettings.DAE do
   begin
@@ -158,12 +167,16 @@ begin
     RadioButtonDAEMp3.Checked            := Mp3;
     RadioButtonDAEOgg.Checked            := Ogg;
     RadioButtonDAEFlac.Checked           := Flac;
-    RadioButtonDAEWav.Checked            := not (MP3 or Ogg or Flac);
+    RadioButtonDAECustom.Checked         := Custom;
+    RadioButtonDAEWav.Checked            := not (MP3 or Ogg or Flac or Custom);
     CheckBoxDAETags.Checked              := AddTags;
     TrackBarFlac.Position                := StrToIntDef(FlacQuality, 5);
     TrackBarOgg.Position                 := StrToIntDef(OggQuality, 6);
+    EditCustomCmd.Text                   := CustomCmd;
+    EditCustomOpt.Text                   := CustomOpt;                                        
     ComboBoxDAEMp3Quality.ItemIndex :=
                                 ComboBoxDAEMp3Quality.Items.IndexOf(LamePreset);
+
   end;
   ActivateTab;
 end;
@@ -188,9 +201,12 @@ begin
     MP3         := RadioButtonDAEMp3.Checked;
     Ogg         := RadioButtonDAEOgg.Checked;
     Flac        := RadioButtonDAEFlac.Checked;
+    Custom      := RadioButtonDAECustom.Checked;
     AddTags     := CheckBoxDAETags.Checked;
     FlacQuality := IntToStr(TrackBarFLAC.Position);
     OggQuality  := IntToStr(TrackBarOgg.Position);
+    CustomCmd   := EditCustomCmd.Text;
+    CustomOpt   := EditCustomOpt.Text;
     LamePreset  := ComboBoxDAEMp3Quality.Items[ComboBoxDAEMp3Quality.ItemIndex];
   end;
   FSettings.General.TabFrmDAE := GetActivePage;
@@ -270,6 +286,22 @@ begin
     if (C = EditDAEPrefix) or (C = EditDAENamePattern) then
     begin
       CheckBoxDAEBulk.SetFocus;
+    end else
+    if C = EditDAECDDBServer then
+    begin
+      EditDAECDDBPort.SetFocus;
+    end else
+    if C = EditDAECDDBPort then
+    begin
+      ButtonOk.SetFocus;
+    end else
+    if C = EditCustomCmd then
+    begin
+      EditCustomOpt.SetFocus;
+    end else
+    if c= EditCustomOpt then
+    begin
+      ButtonOk.SetFocus;
     end;
   end;
 end;
@@ -290,6 +322,26 @@ begin
   if Sender as TTrackBar = TrackBarOgg then
   begin
     LabelDAEOggCurQuality.Caption := IntToStr(TrackBarOgg.Position);
+  end;
+end;
+
+
+{ Edit-Events ---------------------------------------------------------------- }
+
+{ OnExit -----------------------------------------------------------------------
+
+  Eingabe prüfen.                                                              }
+
+procedure TFormDAEOptions.EditExit(Sender: TObject);
+begin
+  if Sender as TEdit = EditCustomCmd then
+  begin
+    if not FileExists((Sender as TEdit).Text) then
+    begin
+      (Sender as TEdit).Text := '';
+      RadioButtonDAECustom.Enabled := False;
+    end else
+      RadioButtonDAECustom.Enabled := True;
   end;
 end;
 

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2005 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.09.2005
+  letzte Änderung  08.09.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -57,7 +57,7 @@ begin
   if Screen.PixelsPerInch > 96 then
   begin
     self.Width := 756;
-    self.Height := 629;
+    self.Height := 634;
   end;
 end;
 
@@ -97,14 +97,14 @@ begin
   if Screen.PixelsPerInch <= 96 then
   begin
     Memo1.Width := self.ClientWidth - 16;
-    Memo1.Height := self.ClientHeight - 44;
+    Memo1.Height := self.ClientHeight - 49; {44}
     ButtonOk.Top := Memo1.Height + 14;
     ButtonOk.Left := Memo1.Width + 8 - 75;
   end else
   if Screen.PixelsPerInch > 96 then
   begin
     Memo1.Width := self.ClientWidth - 16;
-    Memo1.Height := self.ClientHeight - 53;
+    Memo1.Height := self.ClientHeight - 58; {53}
     ButtonOk.Top := ClientHeight - 39;
     ButtonOk.Left := ClientWidth - 8 - ButtonOk.Width;
   end;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.06.2006
+  letzte Änderung  13.10.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -46,8 +46,11 @@ type TLang = class(TObject)
        FComponentStrings: TStringList;
        FLangList: TStringList;
        FLangFileFound: Boolean;
+       FIniFileFound: Boolean;
+       FIniFile: string;
        FCurrentLang: string;
        FDefaultLang: string;
+       function GetIniPath: string;
        procedure GetDefaultLang;
        procedure GetLangList;
        procedure InitMessageStrings;
@@ -68,7 +71,7 @@ procedure ExportStringProperties;
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_filesystem, f_misc, f_strings;
+     f_filesystem, f_misc, f_strings, f_wininfo, constant;
 
 const LangFileName = '\cdrtfe_lang.ini';
 
@@ -120,7 +123,7 @@ begin
     Add('f001=ISO-Image (*.iso)|*.iso;*.iso_00|CUE-Image (*.cue)|*.cue');
     Add('f002=ISO-Image (*.iso)|*.iso;*.iso_00');
     Add('f003=Namen ohne Endung eingeben!|*.*');
-    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg; *.flac)|*.wav;*.mp3;*.ogg;*.flac');
+    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg; *.flac)|*.wav;*.mp3;*.ogg;*.flac|Playlist (*.m3u)|*.m3u');
     Add('f005=Movie-Dateien (*.avi)|*.avi|Alle Dateien|*.*');
     Add('f006=cdrtfe Projekt-Dateien (*.cfp)|*.cfp');
     Add('f007=Image-Dateien (*.bin; *.img; *.ima)|*.bin;*.img;*.ima|Alle Dateien|*.*');
@@ -253,6 +256,7 @@ begin
     Add('eburn13=Sie können auch die Art des Mediums angeben.');
     Add('eburn14=\n%s MiByte (%d Sektoren) zuviel.');
     Add('eburn15=\n%s MiByte werden benötigt.');
+    Add('eburn16=Soll die CD/DVD-RW automatisch gelöscht werden?');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
@@ -304,6 +308,53 @@ begin
   end;
 end;
 
+{ GetIniPath -------------------------------------------------------------------
+
+  GetIniPath bestimmt den Pfad zur cdrtfe.ini. Die identische Funktion aus
+  cl_settings.pas kann nicht verwendet werden, da TSettings später instantiiert
+  wird als TLang.                                                              }
+
+function TLang.GetIniPath: string;
+var Temp: string;
+    Name: string;
+begin
+  Name := cDataDir + cIniFile;
+  if PlatformWinNT then
+  begin
+    Temp := GetShellFolder(CSIDL_LOCAL_APPDATA) + Name;
+    if not FileExists(Temp) then
+    begin
+      Temp := GetShellFolder(CSIDL_APPDATA) + Name;
+      if not FileExists(Temp) then
+      begin
+        Temp := GetShellFolder(CSIDL_COMMON_APPDATA) + Name;
+        if not FileExists(Temp) then
+        begin
+          Temp := StartUpDir + cIniFile;
+          if not FileExists(Temp) then
+          begin
+            Temp := '';
+          end;
+        end;
+      end;
+    end;
+    Result := Temp;
+  end else
+  begin
+    Temp := StartUpDir + cIniFile;
+    if not FileExists(Temp) then
+    begin
+      Temp := '';
+    end;
+    Result := Temp;
+  end;
+  FIniFileFound := not(Result = '');
+  {$IFDEF DebugLang}
+  if FIniFileFound then Deb('cdrtfe.ini found.', 1) else
+                        Deb('cdrtfe.ini not found.', 1);
+  {$ENDIF}
+end;
+
 { GetDefaultLang ---------------------------------------------------------------
 
   ermittelt die eingestelle Default-Sprache, genauer das entsprechende Suffix. }
@@ -311,13 +362,27 @@ end;
 procedure TLang.GetDefaultLang;
 var LangFile: TIniFile;
 begin
-  LangFile := TIniFile.Create(StartUpDir + LangFileName);
-  FDefaultLang := LangFile.ReadString('Languages', 'Default', '');
+  {Zuerst Einstellung in cdrtfe.ini suchen.}
+  if FIniFileFound then
+  begin
+    LangFile := TIniFile.Create(FIniFile);
+    FDefaultLang := LangFile.ReadString('General', 'DefaultLang', '');
+    LangFile.Free;
+    {$IFDEF DebugLang}
+    Deb('cdrtfe.ini     : DefaultLang=' + FDefaultLang, 1);
+    {$ENDIF}
+  end;
+  {Nichts gefunden? Dann in cdrtfe_lang.ini suchen.}
+  if FDefaultLang = '' then
+  begin
+    LangFile := TIniFile.Create(StartUpDir + LangFileName);
+    FDefaultLang := LangFile.ReadString('Languages', 'Default', '');
+    LangFile.Free;
+    {$IFDEF DebugLang}
+    Deb('cdrtfe_lang.ini: DefaultLang=' + FDefaultLang, 1);
+    {$ENDIF}
+  end;
   FCurrentLang := FDefaultLang;
-  LangFile.Free;
-  {$IFDEF DebugLang}
-  Deb('DefaultLang: ' + FDefaultLang, 1);
-  {$ENDIF}
 end;
 
 { SetDefaultLang ---------------------------------------------------------------
@@ -325,21 +390,32 @@ end;
   setzt Suffix für die Default-Sprache.                                        }
 
 procedure TLang.SetDefaultLang;
-var LangFile: TStringList {TIniFile};
+var LangFile: TStringList;
+    IniFile : TIniFile;
     i: Integer;
 begin
-{ Da cdrtfe_lang.ini größer als 64 KiByte ist, können wir nicht mehr die
-  Funktionen für Ini-Dateien verwenden, wenn wir speichern wollen.
-  LangFile := TIniFile.Create(StartUpDir + LangFileName);
-  LangFile.WriteString('Languages', 'Default', FDefaultLang);
-  LangFile.Free;
-}
-  LangFile := TStringList.Create;
-  LangFile.LoadFromFile(StartUpDir + LangFileName);
-  i := LangFile.IndexOf('Default=' + FDefaultLang);
-  LangFile[i] := 'Default=' + FCurrentLang;
-  LangFile.SaveToFile(StartUpDir + LangFileName);
-  LangFile.Free;
+  if FIniFileFound then
+  begin
+    IniFile := TIniFile.Create(FIniFile);
+    IniFile.WriteString('General', 'DefaultLang', FCurrentLang);
+    INiFile.Free;
+    {$IFDEF DebugLang}
+    Deb('cdrtfe.ini     : DefaultLang=' + FCurrentLang + ' saved.', 1);
+    {$ENDIF}
+  end else
+  begin
+    { Da cdrtfe_lang.ini größer als 64 KiByte ist, können wir nicht mehr die
+      Funktionen für Ini-Dateien verwenden, wenn wir speichern wollen. }
+    LangFile := TStringList.Create;
+    LangFile.LoadFromFile(StartUpDir + LangFileName);
+    i := LangFile.IndexOf('Default=' + FDefaultLang);
+    LangFile[i] := 'Default=' + FCurrentLang;
+    LangFile.SaveToFile(StartUpDir + LangFileName);
+    LangFile.Free;
+    {$IFDEF DebugLang}
+    Deb('cdrtfe_lang.ini: DefaultLang=' + FCurrentLang + ' saved.', 1);
+    {$ENDIF}
+  end;
   FDefaultLang := FCurrentLang;
 end;
 
@@ -349,12 +425,14 @@ end;
 
 procedure TLang.GetLangList;
 var LangFile: TIniFile;
+    Temp    : string;
 begin
   LangFile := TIniFile.Create(StartUpDir + LangFileName);
   LangFile.ReadSectionValues('Languages', FLangList);
   LangFile.Free;
   {Defaulteintrag entfernen}
-  FlangList.Delete(FLangList.IndexOf('Default=' + FDefaultLang));
+  Temp := FLangList.Values['Default'];
+  FLangList.Delete(FLangList.IndexOf('Default=' + Temp));
   {$IFDEF DebugLang}
   FormDebug.Memo3.Lines.Assign(FLangList);
   {$ENDIF}
@@ -413,6 +491,8 @@ begin
   InitMessageStrings;
   if FileExists(StartUpDir + LangFileName) then
   begin
+    {cdrtfe.ini suchen}
+    FIniFile := GetIniPath;
     {es wurde eine Sprachdatei gefunden}
     FLangFileFound := True;
     {Defaultwert auslesen}
