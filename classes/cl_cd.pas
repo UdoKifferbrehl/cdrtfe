@@ -2,10 +2,10 @@
 
   cl_cd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.09.2006
+  letzte Änderung  21.01.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -370,7 +370,8 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      atl_oggvorbis,
-     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo;
+     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo,
+     cl_mpegvinfo;
 
 { TCD ------------------------------------------------------------------------ }
 
@@ -2754,9 +2755,10 @@ end;
   Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TVideoCD.AddTrack(const Name: string);
-var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+var Size       : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     TrackLength: Extended;
-    Temp: string;
+    Temp       : string;
+    MPEGFile   : TMPEGVideoFile;
 begin
   if FileExists(Name) then
   begin
@@ -2764,8 +2766,10 @@ begin
     begin
       if True {MpegIsValid(Name)} then
       begin
+        MPEGFile := TMPEGVideoFile.Create(Name);
+        MPEGFile.GetInfo;
         Size := GetFileSize(Name);
-        TrackLength := 0; // GetMpegLength(Name);
+        TrackLength := MPEGFile.Length; //0;
         Temp := Name + '|' +
                 {$IFDEF LargeFiles}FloatToStr(Size)
                 {$ELSE}            IntToStr(Size) {$ENDIF} +
@@ -2774,6 +2778,7 @@ begin
         FTrackCountChanged := True;
         FCDTimeChanged := True;
         FCDSizeChanged := True;
+        MPEGFile.Free;
       end else
       begin
         FError := CD_InvalidMpegFile;

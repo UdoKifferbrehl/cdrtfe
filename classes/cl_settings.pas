@@ -2,10 +2,10 @@
 
   cl_settings.pas: Einstellungen von cdrtfe
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.09.2006
+  letzte Änderung  27.01.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -179,6 +179,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        CanWriteCueImage   : Boolean;  // 2.01a24: Cue-Image-Support ausreichend
        WritingModeRequired: Boolean;  // 2.01a26: -tao|-dao|-raw verpflichtend
        DMASpeedCheck      : Boolean;  // 2.01a33: DMA-Geschwindigkeitsprüfung
+       HaveMediaInfo      : Boolean;  // 2.01.01a21: -minfo
      end;
 
      {Einstellungen: cdrdao allgemein}
@@ -306,6 +307,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Toc     : Boolean;
        Atip    : Boolean;
        MSInfo  : Boolean;
+       MInfo   : Boolean;
        CapInfo : Boolean;
      end;
 
@@ -648,6 +650,7 @@ begin
     CanWriteCueImage    := False;  
     WritingModeRequired := False;
     DMASpeedCheck       := False;
+    HaveMediaInfo       := False;
   end;
 
   {allgemeine Einstellungen: cdrdao}
@@ -780,7 +783,8 @@ begin
     Prcap    := False;
     Toc      := False;
     Atip     := False;
-    MSInfo   := False;   
+    MSInfo   := False;
+    MInfo    := False;
     CapInfo  := False;
   end;
 
@@ -1533,6 +1537,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'Toc', Toc);
       WriteBool(Section, 'Atip', Atip);
       WriteBool(Section, 'MSInfo', MSInfo);
+      WriteBool(Section, 'MInfo', MInfo);
       WriteBool(Section, 'CapInfo', CapInfo);
     end;
 
@@ -1782,6 +1787,7 @@ var PF: TIniFile; // ProjectFile
       CdrecordCustOptsIndex := ReadInteger(Section,
                                            'CdrecordCustOptsIndex', -1);
       c := ReadInteger(Section, 'CdrecordCustOptsCount', 0);
+      CdrecordCustOpts.Clear;
       for i := 0 to c - 1 do
       begin
         CdrecordCustOpts.Add(ReadString(Section,
@@ -1791,6 +1797,7 @@ var PF: TIniFile; // ProjectFile
       MkisofsCustOptsIndex := ReadInteger(Section,
                                           'MkisofsCustOptsIndex', -1);
       c := ReadInteger(Section, 'MkisofsCustOptsCount', 0);
+      MkisofsCustOpts.Clear;
       for i := 0 to c - 1 do
       begin
         MkisofsCustOpts.Add(ReadString(Section,
@@ -1933,6 +1940,7 @@ var PF: TIniFile; // ProjectFile
       Toc := ReadBool(Section, 'Toc', False);
       Atip := ReadBool(Section, 'Atip', False);
       MSInfo := ReadBool(Section, 'MSInfo', False);
+      MInfo := ReadBool(Section, 'MInfo', False);
       CapInfo := ReadBool(Section, 'CapInfo', False);
     end;
     ProgressBarUpdate(8);
@@ -2291,6 +2299,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'Toc', Toc);
       WriteBool(Section, 'Atip', Atip);
       WriteBool(Section, 'MSInfo', MSInfo);
+      WriteBool(Section, 'MInfo', MInfo);
       WriteBool(Section, 'CapInfo', CapInfo);
     end;
 
@@ -2473,6 +2482,7 @@ var PF: TRegIniFile; // ProjectFile
       CdrecordCustOptsIndex := ReadInteger(Section,
                                            'CdrecordCustOptsIndex', -1);
       c := ReadInteger(Section, 'CdrecordCustOptsCount', 0);
+      CdrecordCustOpts.Clear;
       for i := 0 to c - 1 do
       begin
         CdrecordCustOpts.Add(ReadString(Section,
@@ -2482,6 +2492,7 @@ var PF: TRegIniFile; // ProjectFile
       MkisofsCustOptsIndex := ReadInteger(Section,
                                           'MkisofsCustOptsIndex', -1);
       c := ReadInteger(Section, 'MkisofsCustOptsCount', 0);
+      MkisofsCustOpts.Clear;
       for i := 0 to c - 1 do
       begin
         MkisofsCustOpts.Add(ReadString(Section,
@@ -2635,6 +2646,7 @@ var PF: TRegIniFile; // ProjectFile
       Toc := ReadBool(Section, 'Toc', False);
       Atip := ReadBool(Section, 'Atip', False);
       MSInfo := ReadBool(Section, 'MSInfo', False);
+      MInfo := ReadBool(Section, 'MInfo', False);
       CapInfo := ReadBool(Section, 'CapInfo', False);
     end;
     Shared.ProgressBarPosition := 8;

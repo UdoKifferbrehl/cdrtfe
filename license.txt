@@ -1,7 +1,7 @@
 cdrtfe - cdrtools/Mode2CDMaker/VCDImager Frontend
 -------------------------------------------------
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
 
@@ -19,6 +19,27 @@ cdrtfe - cdrtools/Mode2CDMaker/VCDImager Frontend
   Programm erhalten haben. Falls nicht, schreiben Sie an die Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+  cdrtfe statisch oder dynamisch mit anderen Modulen zu linken, erzeugt ein
+  kombiniertes Datenwerk basierend auf cdrtfe. Folglich unterliegt die gesamte
+  Kombination den Bestimmungen und Bedingungen der GNU General Public License.
+
+  Zusätzlich, als eine spezielle Ausnahme, räumen Ihnen die Copyright-Inhaber
+  von cdrtfe die Erlaubnis ein, cdrtfe mit freien Programmen oder Bibliotheken,
+  die unter der GNU Library General Public License (GNU LGPL), Mozilla Public
+  License 1.1 (MPL) oder Common Development and Distribution License (CDDL)
+  veröffentlicht wurden, zu kombinieren. Sie dürfen ein solches System
+  entsprechend den Bestimmungen der GNU GPL für cdrtfe und der Lizenzen des
+  anderen betroffenen Codes kopieren und verbreiten, vorausgesetzt, sie legen
+  den Quelltext dieses anderen Codes bei, sofern die GNU GPL die Weitergabe
+  von Quelltexten verlangt.
+
+  Beachten Sie, daß Personen, die eine modifizierte Version von cdrtfe erstel-
+  len, nicht verpflichtet sind, diese spezielle Ausnahme für ihre modifizierte
+  Version zu gewähren; es ist deren Wahl dies zu tun. Die GNU General Public
+  License erlaubt es, eine modifizierte Version ohne diese Ausnahme zu
+  veröffentlichen. Diese Ausnahme macht es auch  möglich, eine modifizierte
+  Version zu veröffentlichen, die diese Ausnahme weiterträgt.
+
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -32,6 +53,25 @@ cdrtfe - cdrtools/Mode2CDMaker/VCDImager Frontend
   You should have received a copy of the GNU General Public License along with
   this program; if not, write to the Free Software Foundation, Inc., 59 Temple
   Place, Suite 330, Boston, MA 02111-1307, USA.
+
+  Linking cdrtfe statically or dynamically with other modules is making a
+  combined work based on cdrtfe. Thus, the terms and conditions of the GNU
+  General Public License cover the whole combination.
+
+  In addition, as a special exception, the copyright holders of cdrtfe give you
+  permission to combine this program with free software programs or libraries
+  that are released under the GNU Library General Public License (GNU LGPL),  
+  Mozilla Public License 1.1 (MPL) or Common Development and Distribution
+  License (CDDL). You may copy and distribute such a system following the terms
+  of the GNU GPL for cdrtfe and the licenses of the other code concerned,
+  provided that you include the source code of that other code when and as the
+  GNU GPL requires distribution of source code.
+
+  Note that people who make modified versions of cdrtfe are not obligated to
+  grant this special exception for their modified versions; it is their choice
+  whether to do so. The GNU General Public License gives permission to release
+  a modified version without this exception; this exception also makes it
+  possible to release a modified version which carries forward this exception.
 
 
 Kontakt/Contact

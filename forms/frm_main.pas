@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.10.2006
+  letzte Änderung  27.01.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -246,6 +246,7 @@ type
     LabelDAEOgg: TLabel;
     LabelDAEFlac: TLabel;
     LabelDAECustom: TLabel;
+    RadioButtonMInfo: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -951,6 +952,7 @@ begin
     RadioButtonToc.Checked      := Toc;
     RadioButtonAtip.Checked     := Atip;
     RadioButtonMSInfo.Checked   := MSInfo;
+    RadioButtonMInfo.Checked    := MInfo;    
     RadioButtonCapacity.Checked := CapInfo;
   end;
   {DAE}
@@ -1093,6 +1095,7 @@ begin
     Toc     := RadioButtonToc.Checked;
     Atip    := RadioButtonAtip.Checked;
     MSInfo  := RadioButtonMSInfo.Checked;
+    MInfo   := RadioButtonMInfo.Checked;    
     CapInfo := RadioButtonCapacity.Checked;
     Device  := GetDevice(cCDInfos);
   end;
@@ -2948,6 +2951,12 @@ procedure TForm1.CheckControls;
     end;
   end;
 
+  {TabSheet5: CD-Infos}
+  procedure CheckControlsCDInfos;
+  begin
+    RadioButtonMInfo.Enabled := FSettings.Cdrecord.HaveMediaInfo;
+  end;
+
   { TabSheet6: DAE }
   procedure CheckControlsDAE;
   var i: Integer;
@@ -3093,7 +3102,10 @@ begin
                  SetDrives(FDevices.CDWriter);
                end;
     cCDRW    : SetDrives(FDevices.CDWriter);
-    cCDInfos : SetDrives(FDevices.CDDevices);
+    cCDInfos : begin
+                 CheckControlsCDInfos;
+                 SetDrives(FDevices.CDDevices);
+               end;  
     cDAE     : begin
                  CheckControlsDAE;
                  SetDrives(FDevices.CDDevices);

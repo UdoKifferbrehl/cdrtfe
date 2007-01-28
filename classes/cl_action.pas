@@ -2,10 +2,10 @@
  
   cl_action.pas: die im GUI gewählte Aktion ausführen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.09.2006
+  letzte Änderung  27.01.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,9 +53,9 @@ interface
 
 uses Classes, Forms, StdCtrls, ComCtrls, Controls, Windows, SysUtils,
      cl_settings, cl_projectdata, cl_lang, cl_actionthread, cl_verifythread,
-     cl_devices, f_diskinfo, f_largeint, userevents;
+     cl_devices, {f_diskinfo,} cl_diskinfo, f_largeint, userevents;
 
-type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
+type (*{ TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        Prozeduren benötigt werden, damit diese leichter an CheckMedium übergeben
        werden können.}
 
@@ -70,7 +70,7 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        TaoEndSecCount: Integer;
        {Audio-CD}
        CDTime        : Extended;
-     end;
+     end;          *)
 
      TCDAction = class(TObject)
      private
@@ -81,6 +81,9 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        FVList: TStringList;
        FData: TProjectData;
        FDevices: TDevices;
+       FDisk : TDiskInfo;
+       FDiskA: TDiskInfoA;
+       FDiskM: TDiskInfoM;
        FReload: Boolean;
        FLang: TLang;
        // FTempBurnList: TStringList;
@@ -94,7 +97,6 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        FSettings: TSettings;
        FStatusBar: TStatusBar;
        FProgressBar: TProgressBar;
-       function CheckMedium(Disk: TDiskInfo; var Args: TCheckMediumArgs): Boolean;
        function GetAction: Byte;
        function MakePathConform(const Path: string): string;
        function MakePathEntryMkisofsConform(const Path: string): string;
@@ -117,6 +119,7 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        procedure StartVerification(const Action: Byte);
        procedure WriteImage;
        procedure WriteTOC;
+       procedure SetFSettings(Value: TSettings);
        {Events}
        procedure MessageShow(const s: string);
        procedure UpdatePanels(const s1, s2: string);
@@ -136,7 +139,7 @@ type { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
        property StatusBar: TStatusBar read FStatusBar write FStatusBar;
        property ProgressBar: TProgressBar read FProgressBar write FProgressBar;
        property Reload: Boolean read FReload write FReload;
-       property Settings: TSettings write FSettings;
+       property Settings: TSettings write SetFSettings;
        property DuplicateFileSize: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF} read FDupSize write FDupSize;
        {Events}
        property OnMessageShow: TMessageShowEvent read FOnMessageShow write FOnMessageShow;
@@ -152,6 +155,20 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 { TCDAction ------------------------------------------------------------------ }
 
 { TCDAction - private }
+
+{ SetFSettings -----------------------------------------------------------------
+
+  setzt die Eigenschaft Settings und die Feldvariable FDisk in Abhängigkeit der
+  Daten in FSettings.                                                          }
+
+procedure TCDAction.SetFSettings(Value: TSettings);
+begin
+  FSettings := Value;
+  case FSettings.Cdrecord.HaveMediaInfo of
+    True : FDisk := FDiskM;
+    False: FDisk := FDiskA;
+  end;
+end;
 
 { MessageShow ------------------------------------------------------------------
 
@@ -312,242 +329,6 @@ begin
   FEjectDevice := '';
 end;
 
-{ CheckMedium ------------------------------------------------------------------
-
-  liefert True, wenn die Überprüfung des eingelegten Mediums erfolgreich war.  }
-
-function TCDAction.CheckMedium(Disk: TDiskInfo;
-                               var Args: TCheckMediumArgs): Boolean;
-var i             : Integer;
-    Temp          : string;
-    Meldung       : PChar;
-begin
-  Result := True;
-  FSettings.Cdrecord.Erase := False;
-  {allgemeine Fehler, unabhängig vom Projekt}
-  {Fehler: keine CD eingelegt}
-  if Disk.DiskType = DT_None then
-  begin
-    Application.MessageBox(PChar(FLang.GMS('eburn01')),
-                           PChar(FLang.GMS('g001')),
-                           MB_OK or MB_ICONEXCLAMATION);
-    Result := False;
-  end;
-  {Fehler: nächste Schreibadresse kann nicht gelesen werden}
-  if Disk.MsInfo = 'no_address' then
-  begin
-    if (Disk.DiskType in [DT_CD_RW, DT_DVD_RW]) and
-       FSettings.Cdrecord.AutoErase then
-    begin
-      i := Application.MessageBox(PChar(FLang.GMS('eburn09') + CRLF + CRLF +
-                                        FLang.GMS('eburn16')),
-                                  PChar(FLang.GMS('g001')),
-                                  MB_OKCancel or MB_ICONEXCLAMATION);
-      Result := i = 1;
-      FSettings.Cdrecord.Erase := Result;
-      Disk.MsInfo := '';
-    end else
-    begin
-      Application.MessageBox(PChar(FLang.GMS('eburn09')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-  end;
-  {Fehler: fixierte CD eingelegt}
-  if Pos('-1', Disk.MsInfo) <> 0 then
-  begin
-    if (Disk.DiskType in [DT_CD_RW, DT_DVD_RW]) and
-       FSettings.Cdrecord.AutoErase then
-    begin
-      i := Application.MessageBox(PChar(FLang.GMS('eburn02') + CRLF + CRLF +
-                                        FLang.GMS('eburn16')),
-                                  PChar(FLang.GMS('g001')),
-                                  MB_OKCancel or MB_ICONEXCLAMATION);
-      Result := i = 1;
-      FSettings.Cdrecord.Erase := Result;
-      Disk.MsInfo := '';
-    end else
-    begin
-      Application.MessageBox(PChar(FLang.GMS('eburn02')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-  end;
-
-  {Fehler, die bei mehreren Projekten auftreten können.}
-  if (Args.Choice = cDataCD) or (Args.Choice = cDVDVideo) then
-  begin
-    {Fehler: mkisofs fehlgeschlagen}
-    if Args.SectorsNeededI = -1 then
-    begin
-      Result := False;
-    end;
-    {Fehler: unbekanntes DVD-Medium, unbekannte Kapazität. Abbruch.}
-    if (Disk.DiskType = DT_ManualNone) then
-    begin
-      Result := False;
-    end;    
-  end;
-
-  {Fehler: Daten-CD}
-  if Args.Choice = cDataCD then
-  begin
-    {Sessions vorhanden, aber nicht importieren}
-    if Result and not FSettings.DataCD.ContinueCD and (Disk.MsInfo <> '') then
-    begin
-      if not FSettings.General.NoConfirm then
-      begin
-        i := Application.MessageBox(PChar(FLang.GMS('eburn03')),
-                                    PChar(FLang.GMS('g004')),
-                                    MB_OKCancel or MB_ICONEXCLAMATION);
-        Result := i = 1;
-      end;
-    end;
-    {wenn eine CD fortgesetzt werden soll}
-    if Result and (FSettings.DataCD.Multi and FSettings.DataCD.ContinueCD) then
-    begin
-      {Warnung: keine Sessions gefunden}
-      if Disk.MsInfo = '' then
-      begin
-        {weitermachen oder nicht?}
-        {$IFDEF Confirm}
-        if not (FSettings.CmdLineFlags.ExecuteProject or
-                FSettings.General.NoConfirm) then
-        begin
-          i := Application.MessageBox(PChar(FLang.GMS('eburn04')),
-                                      PChar(FLang.GMS('eburn05')),
-                                      MB_OKCANCEL or MB_ICONEXCLAMATION);
-        end else
-        {$ENDIF}
-        begin
-          i := 1;
-        end;
-        Result := i = 1;
-        {Wenn trotzdem geschrieben werden soll, dann aber ohne -C und -M}
-        if Result then
-        begin
-          Args.ForcedContinue := True;
-        end;
-      end;
-    end;
-    {Fehler: zu viele Daten}
-    if Result and
-       not FSettings.DataCD.Overburn and not (Disk.DiskType = DT_Unknown) and
-       (((Args.CDSize / (1024 * 1024)) > Disk.SizeFree) or
-        ((Args.SectorsNeededI + Args.TaoEndSecCount) > Disk.SecFree)) then
-    begin
-      Temp := FLang.GMS('eburn06') +
-              Format(FLang.GMS('eburn07'),
-                     [FormatFloat('###.###', Disk.SizeFree)]);
-      if ((Args.SectorsNeededI + Args.TaoEndSecCount) > Disk.SecFree) and
-         ((Args.CDSize / (1024 * 1024)) < Disk.SizeFree) then
-        Temp := Temp +
-                Format(FLang.GMS('eburn15'),
-                       [FormatFloat('##0.###',
-                                    (Args.SectorsNeededI +
-                                     Args.TaoEndSecCount) / 512)]) +
-                Format(FLang.GMS('eburn14'),
-                       [FormatFloat('##0.###',
-                                    ((Args.SectorsNeededI + Args.TaoEndSecCount
-                                      - Disk.SecFree) / 512)),
-                        Args.SectorsNeededI + Args.TaoEndSecCount -
-                          Disk.SecFree]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-    {Fehler: DVD und Multisession}
-    if Result and Disk.IsDVD and FSettings.DataCD.Multi then
-    begin
-      Result := False;
-      Application.MessageBox(PChar(FLang.GMS('eburn11')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-    end;
-  end;
-
-  {Fehler: Audio-CD}
-  if Args.Choice = cAudioCD then
-  begin
-    {Fehler: Multisession-Daten-CD eingelegt -> man könnte eine Mixed-Mode-CD
-     machen.}
-    if Result and (Disk.MsInfo <> '') then
-    begin
-      Application.MessageBox(PChar(FLang.GMS('eburn08')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-
-      Result := False;
-    end;
-    {Fehler: Restkapazität nicht ausreichend}
-    if Result and (Disk.TimeFree > 0) and (Args.CDTime > Disk.TimeFree) then
-    begin
-      Temp := FLang.GMS('eburn06') +
-              Format(FLang.GMS('mburn04'),
-                     [IntToStr(Round(Disk.TimeFree) div 60) + ':' +
-                      FormatFloat('0#.##',
-                        (Disk.TimeFree - (Round(Disk.TimeFree) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-   {Fehler: Gesamtspielzeit zu lang}
-    if Result and not FSettings.AudioCD.Overburn and
-       (Args.CDTime > Disk.Time) then
-    begin
-      Temp := FLang.GMS('eburn06') +
-              Format(FLang.GMS('mburn04'),
-                     [IntToStr(Round(Disk.Time) div 60) + ':' +
-                      FormatFloat('0#.##',
-                                (Disk.Time - (Round(Disk.Time) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;
-  end;
-
-  {DVD-Video-Fehler}
-  if Args.Choice = cDVDVideo then
-  begin
-    {Fehler: zu viele Daten}
-    if Result and not (Disk.DiskType = DT_Unknown) and
-       (Args.SectorsNeededI > Disk.SecFree) then
-    begin
-      Temp := FLang.GMS('eburn06') +
-              Format(FLang.GMS('eburn07'),
-                     [FormatFloat('###.###', Disk.SizeFree)]) +
-              Format(FLang.GMS('eburn15'),
-                     [FormatFloat('##0.###', (Args.SectorsNeededI / 512))]) +
-              Format(FLang.GMS('eburn14'),
-                     [FormatFloat('##0.###',
-                                  ((Args.SectorsNeededI - Disk.SecFree) / 512)),
-                      Args.SectorsNeededI - Disk.SecFree]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-      Result := False;
-    end;  
-  end;
-
-  {DVD-Fehler}
-  {Fehler: DVD und TAO/RAW}
-  if Result and Disk.IsDVD then
-  begin
-    if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) then
-    begin
-      Result := False;
-      Application.MessageBox(PChar(FLang.GMS('eburn10')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-    end;
-  end;
-end;
-
 { GetSectorNumber --------------------------------------------------------------
 
   bestimmt die Länge des Datentracks in Sektoren. Nötig für DAO/RAW.           }
@@ -588,7 +369,6 @@ var i              : Integer;
     CmdOnTheFly    : string;
     FHPathList,
     FHShCmd        : TextFile;
-    Disk           : TDiskInfo;
     CMArgs         : TCheckMediumArgs;
     DummyE         : Extended;
     DummyI         : Integer;
@@ -639,7 +419,7 @@ begin
   if not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly then
   begin
     SetPanels('<>', FLang.GMS('mburn13'));
-    GetDiskInfo(Disk, FSettings.DataCD.Device, False);
+    FDisk.GetDiskInfo(FSettings.DataCD.Device, False);
     SetPanels('<>', '');
   end;
   {Pfadliste bearbeiten}
@@ -726,7 +506,7 @@ begin
                  + QuotePath(MakePathConform(PathListName));
     if FSplitOutput then CmdM := CmdM + ' -split-output';
     {Anzahl der benötigten Sektoren ermitteln}
-    if not (Disk.DiskType in [DT_None, DT_ManualNone]) then
+    if not (FDisk.DiskType in [DT_None, DT_ManualNone]) then
     begin
       CMArgs.SectorsNeededS := GetSectorNumber(CmdM);
       CMArgs.SectorsNeededI := StrToIntDef(CMArgs.SectorsNeededS, -1);
@@ -737,23 +517,23 @@ begin
     if not ImageOnly or OnTheFly then
     begin
       {Bei DVD als Simulationstreiber dvd_simul verwenden.}
-      if not Disk.IsDVD then
+      if not FDisk.IsDVD then
       begin
-        Ok := CheckMedium(Disk, CMArgs);
+        Ok := FDisk.CheckMedium(CMArgs);
       end else
       begin
         SimulDev := 'dvd';
-        {if FSettings.FileFlags.ProDVD then} Ok := CheckMedium(Disk, CMArgs);
+        {if FSettings.FileFlags.ProDVD then} Ok := FDisk.CheckMedium(CMArgs);
       end;
     end;
     {Bei ContinueCD = True ohne vorige Sessions, also bei ForcedContinue = True,
      dürfen diese Parameter nicht verwendet werden.}    
     if Multi and not CMArgs.ForcedContinue then
     begin
-      if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + Disk.MsInfo
+      if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + FDisk.MsInfo
                                        + ' -prev-session ' + Device;
-      if not ContinueCD and (Disk.MsInfo <> '') then
-                          CmdM := CmdM + ' -cdrecord-params '  + Disk.MsInfo;
+      if not ContinueCD and (FDisk.MsInfo <> '') then
+                          CmdM := CmdM + ' -cdrecord-params '  + FDisk.MsInfo;
 
     end;
     {cdrecord-Kommandozeile zusammenstellen}
@@ -858,11 +638,11 @@ begin
     begin
       {Brennvorgang starten?}
       Temp := FLang.GMS('mburn01');
-      if (Disk.DiskType <> DT_Unknown) and
+      if (FDisk.DiskType <> DT_Unknown) and
          (not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly) then
         Temp := Format(FLang.GMS('mburn14'),
                 [FormatFloat('##0.###', CMArgs.SectorsNeededI / 512),
-                  FormatFloat('##0.###', (Disk.SecFree -
+                  FormatFloat('##0.###', (FDisk.SecFree -
                       (CMArgs.SectorsNeededI + CMArgs.TaoEndSecCount)) / 512)])
                 + Temp;
       i := Application.MessageBox(PChar(Temp), PChar(FLang.GMS('mburn02')),
@@ -924,14 +704,12 @@ end;
 procedure TCDAction.CreateAudioCD;
 var i         : Integer;
     Ok        : Boolean;
-    CD        : TDiskInfo;
     CMArgs    : TCheckMediumArgs;
     DummyI    : Integer;
     DummyL    : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
     Temp      : string;
     Cmd, CmdMP: string;
     BurnList  : TStringList;
- // CDTime    : Extended;
 
   { PrepareCompressedToWavConversion -------------------------------------------
 
@@ -959,7 +737,8 @@ var i         : Integer;
         BurnList[j] := Target;
         if (Ext = cExtMP3) then
         begin
-          CmdTemp := StartUpDir + cMadplayBin + ' -v -b 16 -R 44100 -o wave:' +
+          CmdTemp := StartUpDir + cMadplayBin +
+                     ' -v -S -b 16 -R 44100 -o wave:' +
                      QuotePath(Target) + ' ' + QuotePath(Source) + CR
         end else
         if (Ext = cExtOgg) then
@@ -990,9 +769,9 @@ begin
   FData.GetProjectInfo(DummyI, DummyI, DummyL, CMArgs.CDTime, DummyI, cAudioCD);
   {Infos über eingelegte CD einlesen}
   SetPanels('<>', FLang.GMS('mburn13'));
-  GetDiskInfo(CD, FSettings.AudioCD.Device, True);
+  FDisk.GetDiskInfo(FSettings.AudioCD.Device, True);
   SetPanels('<>', '');
-  Ok := CheckMedium(CD, CMArgs);
+  Ok := FDisk.CheckMedium(CMArgs);
   {falls komprimierte Audio-Dateien vorhanden sind, Konvertierung vorbereiten}
   if FData.CompressedAudioFilesPresent then PrepareCompressedToWavConversion;
   {Pfadliste bearbeiten}
@@ -1359,7 +1138,6 @@ procedure TCDAction.GetCDInfos;
 var Cmd: string;
     Temp: string;
     Ok: Boolean;
-    CD: TDiskInfo;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   if not FSettings.CDInfo.CapInfo then
@@ -1378,10 +1156,11 @@ begin
       end else
       begin
         Cmd := Cmd + ' dev=' + Device;
-        if Prcap  then Cmd := Cmd + ' -prcap' else
-        if Toc    then Cmd := Cmd + ' -toc'   else
-        if Atip   then Cmd := Cmd + ' -atip'  else
-        if MSInfo then Cmd := Cmd + ' -msinfo';
+        if Prcap  then Cmd := Cmd + ' -prcap'  else
+        if Toc    then Cmd := Cmd + ' -toc'    else
+        if Atip   then Cmd := Cmd + ' -atip'   else
+        if MSInfo then Cmd := Cmd + ' -msinfo' else
+        if MInfo  then Cmd := Cmd + ' -minfo';
       end;
     end;
     if FSettings.Cdrecord.Verbose then Cmd := Cmd + ' -v';
@@ -1395,16 +1174,16 @@ begin
     {Kapazitäten des Rohlings ausgeben:
      Infos über eingelegte CD einlesen}
     SetPanels('<>', FLang.GMS('mburn13'));
-    GetDiskInfo(CD, FSettings.CDInfo.Device, True);
+    FDisk.GetDiskInfo(FSettings.CDInfo.Device, True);
     SetPanels('<>', '');
     {keine CD}
-    if (CD.Size = 0) and (CD.MsInfo = '') then
+    if (FDisk.Size = 0) and (FDisk.MsInfo = '') then
     begin
       MessageShow(FLang.GMS('eburn01'));
       Ok := False;
     end;
     {fixierte CD}
-    if Pos('-1', CD.MsInfo) <> 0 then
+    if Pos('-1', FDisk.MsInfo) <> 0 then
     begin
       MessageShow(FLang.GMS('mburn09'));
       Ok := False;
@@ -1413,17 +1192,17 @@ begin
     if Ok then
     begin
       Temp := Format(FLang.GMS('mburn07'),
-              [FormatFloat(' ##0.##', CD.Size),
-               IntToStr(Round(Int(CD.Time)) div 60),
+              [FormatFloat(' ##0.##', FDisk.Size),
+               IntToStr(Round(Int(FDisk.Time)) div 60),
                FormatFloat('0#.##',
-                           (CD.Time - (Round(Int(CD.Time)) div 60) * 60))]);
+                         (FDisk.Time - (Round(Int(FDisk.Time)) div 60) * 60))]);
       MessageShow(Temp);
       {noch frei}
       Temp := Format(FLang.GMS('mburn08'),
-              [FormatFloat(' ##0.##', CD.SizeFree),
-               IntToStr(Round(Int(CD.TimeFree)) div 60),
+              [FormatFloat(' ##0.##', FDisk.SizeFree),
+               IntToStr(Round(Int(FDisk.TimeFree)) div 60),
                FormatFloat('0#.##',
-                       (CD.TimeFree - (Round(Int(CD.TimeFree)) div 60) * 60))]);
+                  (FDisk.TimeFree - (Round(Int(FDisk.TimeFree)) div 60) * 60))]);
       MessageShow(Temp);
     end;
     MessageShow('');
@@ -2340,7 +2119,6 @@ var Ok          : Boolean;
     CmdC, CmdM,
     CmdOnTheFly : string;
     SourceArg   : string;
-    Disk        : TDiskInfo;
     CMArgs      : TCheckMediumArgs;
     Temp        : string;
     SimulDev    : string;
@@ -2355,7 +2133,7 @@ begin
   if not FSettings.DVDVideo.ImageOnly or FSettings.DVDVideo.OnTheFly then
   begin
     SetPanels('<>', FLang.GMS('mburn13'));
-    GetDiskInfo(Disk, FSettings.DVDVideo.Device, False);
+    FDisk.GetDiskInfo(FSettings.DVDVideo.Device, False);
     SetPanels('<>', '');
   end;
   {Falls ein Vergleich stattfinden soll, benötigen wir die Dateinamen.}
@@ -2369,7 +2147,7 @@ begin
     if VolID <> '' then CmdM := CmdM + ' -volid "' + VolID + '"';
     SourceArg := ' ' + QuotePath(MakePathConform(SourcePath));
     {Anzahl der benötigten Sektoren ermitteln}
-    if not (Disk.DiskType in [DT_None, DT_ManualNone]) then
+    if not (FDisk.DiskType in [DT_None, DT_ManualNone]) then
     begin
       CMArgs.SectorsNeededS := GetSectorNumber(CmdM + SourceArg);
       CMArgs.SectorsNeededI := StrToIntDef(CMArgs.SectorsNeededS, -1);
@@ -2377,9 +2155,9 @@ begin
     {Zusammenstellung prüfen}
     if not ImageOnly or OnTheFly then
     begin
-      Ok := CheckMedium(Disk, CMArgs);
+      Ok := FDisk.CheckMedium(CMArgs);
       {Bei DVD als Simulationstreiber dvd_simul verwenden.}
-      if Disk.IsDVD then
+      if FDisk.IsDVD then
       begin
         SimulDev := 'dvd';
       end;
@@ -2529,11 +2307,17 @@ begin
   FDupSize := 0;
   FSplitOutput := False;
   FEjectDevice := '';
+  {DiskInfo-Object}
+  FDiskA := TDiskInfoA.Create;
+  FDiskM := TDiskInfoM.Create;
+  FDisk := FDiskA;
 end;
 
 destructor TCDAction.Destroy;
 begin
   FVList.Free;
+  FDiskA.Free;
+  FDiskM.Free;
   // FTempBurnList.Free;
   inherited Destroy;
 end;

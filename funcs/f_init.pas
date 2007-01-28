@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.05.2006
+  letzte Änderung  27.11.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -341,6 +341,9 @@ begin
   {ab cdrecord 2.01a33 wird die DMA-Geschwindigkeit geprüft}
   Settings.Cdrecord.DMASpeedCheck :=
     VersionValue >= GetVersionValue('2.01a33');
+  {ab cdrecord 2.01.01a21 gibt es die Option -minfo}
+  Settings.Cdrecord.HaveMediaInfo :=
+    VersionValue >= GetVersionValue('2.01.01a21');
   {haben wir es cdrecord-ProDVD zu tun?}
   Settings.FileFlags.ProDVD := Pos('-ProDVD-', Output) > 0;
 (*

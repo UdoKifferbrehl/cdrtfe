@@ -2,10 +2,10 @@
 
   cdrtfe.dpr: Hauptprogramm
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.07.2006
+  letzte Änderung  21.01.2007
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -14,9 +14,10 @@
 
   This program is distributed in the hope that it will be useful, but WITHOUT
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+  FOR A PARTICULAR PURPOSE. See the file license.txt and the GNU General Public
+  License for more details.
 
-  
+
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License, wie von der Free Software Foundation ver-
   öffentlicht, weitergeben und/oder modifizieren, entweder gemäß Version 2 der
@@ -25,7 +26,8 @@
   Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen
   von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite
   Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK.
-  Details finden Sie in der GNU General Public License.
+  Details finden Sie in der Datei license.txt und in der GNU General Public
+  License.
 
 }
 
@@ -65,6 +67,7 @@ uses
   f_helper in 'funcs\f_helper.pas',
   cl_tree in 'support\cl_tree.pas',
   cl_mpeginfo in 'support\cl_mpeginfo.pas',
+  cl_mpegvinfo in 'support\cl_mpegvinfo.pas',
   cl_flacinfo in 'support\cl_flacinfo.pas',
   f_misc in 'support\f_misc.pas',
   f_cygwin in 'support\f_cygwin.pas',
@@ -85,20 +88,25 @@ uses
   f_environment in 'system\f_environment.pas',
   f_process in 'system\f_process.pas',
   f_filesystem in 'system\f_filesystem.pas',
-  f_diskinfo in 'funcs\f_diskinfo.pas',
+  cl_diskinfo in 'funcs\cl_diskinfo.pas',
   {$IFDEF UseOLEDragDrop}
   DropTarget in 'import\oledragdrop\DropTarget.pas',
   DropSource in 'import\oledragdrop\DropSource.pas',
+  {$ENDIF}
+  {$IFDEF ExceptionDlg}
+  cl_exceptionlog in 'import\exceptionlog\cl_exceptionlog.pas',
+  frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',
   {$ENDIF}
   W32Waves in 'import\w32waves.pas',
   atl_oggvorbis in 'import\atl_oggvorbis.pas';
 
 { verwendete externe Komponenten/Units:
   -------------------------------------
-  W32Waves:          by Ulli Conrad
+  W32Waves         : by Ulli Conrad
   atl_oggvorbis.pas: Copyright (c) 2001 by Jurgen Faul.
   DropTarget.pas,
-  DropSource.pas:    © 1997-2005 Angus Johnson & Anders Melander
+  DropSource.pas   : © 1997-2005 Angus Johnson & Anders Melander
+  JCL              : Project JEDI, http://jvcl.sourceforge.net/
 }
 
 {$R *.RES}

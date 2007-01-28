@@ -2,10 +2,10 @@
 
   frm_about.pas: About-Dialog
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 17.10.2006
+  letzte Änderung  20.01.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -56,15 +56,24 @@ implementation
 
 {$R *.DFM}
 
-{$R ../resource/license.res}
-{$R ../resource/credits.res}
+{$IFDEF GPLonly}
+  {$R ../resource/license.res}
+{$ELSE}
+  {$R ../resource/license_ex.res}
+{$ENDIF}
+
+{$IFNDEF ExceptionDlg}
+  {$R ../resource/credits.res}
+{$ELSE}
+  {$R ../resource/credits_ex.res}
+{$ENDIF}
 
 uses constant, f_misc;
 
-const Cdrtfe_Version     = 'cdrtfe 1.2'
+const Cdrtfe_Version     = 'cdrtfe 1.3pre1'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
-      Cdrtfe_Copyright   = 'Copyright © 2004-2006  O. Valencia';
+      Cdrtfe_Copyright   = 'Copyright © 2004-2007  O. Valencia';
       Cdrtfe_Copyright2  = 'Copyright © 2002-2004  O. Valencia, O. Kutsche';
       Cdrtfe_Homepage    = 'http://www.cdrtfe.de.vu';
       // Cdrtfe_Homepage    = 'http://home.arcor.de/kerberos002';

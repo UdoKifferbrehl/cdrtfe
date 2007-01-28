@@ -5,7 +5,7 @@
   Copyright (c) 2004-2006 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.10.2006
+  letzte Änderung  24.12.2006
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -257,6 +257,7 @@ begin
     Add('eburn14=\n%s MiByte (%d Sektoren) zuviel.');
     Add('eburn15=\n%s MiByte werden benötigt.');
     Add('eburn16=Soll die CD/DVD-RW automatisch gelöscht werden?');
+    Add('eburn17=Diese DVD+RW enthält Daten. Soll sie überschrieben werden?');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
