@@ -2,9 +2,9 @@
 
   f_helper.pas: Hilfsfunktionen
 
-  Copyright (c) 2005-2006 Oliver Valencia
+  Copyright (c) 2005-2007 Oliver Valencia
 
-  letzte Änderung  26.07.2006
+  letzte Änderung  06.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -61,7 +61,7 @@ begin
   Temp := QuotePath(Temp);
   {$ENDIF}
   Temp := Temp + ' dev=' + Dev + ' -eject';
-  Temp := GetDosOutput(PChar(Temp), True);
+  Temp := GetDosOutput(PChar(Temp), True, False);
   ReloadError := (Pos('Cannot load media with this drive!', Temp) > 0) or
                  (Pos('Try to load media by hand.', Temp) > 0) or
                  (Pos('Cannot load media.', Temp) > 0);
@@ -72,7 +72,7 @@ begin
     Temp := QuotePath(Temp);
     {$ENDIF}
     Temp := Temp + ' dev=' + Dev + ' -load';
-    Temp := GetDosOutput(PChar(Temp), True);
+    Temp := GetDosOutput(PChar(Temp), True, False);
     ReloadError := (Pos('Cannot load media with this drive!', Temp) > 0) or
                    (Pos('Try to load media by hand.', Temp) > 0) or
                    (Pos('Cannot load media.', Temp) > 0);
@@ -92,7 +92,7 @@ begin
   Temp := QuotePath(Temp);
   {$ENDIF}
   Temp := Temp + ' dev=' + Dev + ' -eject';
-  Temp := GetDosOutput(PChar(Temp), True);
+  Temp := GetDosOutput(PChar(Temp), True, False);
 end;
 
 { LoadDisk ---------------------------------------------------------------------
@@ -107,7 +107,7 @@ begin
   Temp := QuotePath(Temp);
   {$ENDIF}
   Temp := Temp + ' dev=' + Dev + ' -load';
-  Temp := GetDosOutput(PChar(Temp), True);
+  Temp := GetDosOutput(PChar(Temp), True, False);
 end;
 
 { ConvertXCDParamListToRrencInputList ------------------------------------------
@@ -167,7 +167,7 @@ begin
   Temp := QuotePath(Temp);
   {$ENDIF}
   Temp := Temp + ' dev=' + Dev + ' -checkdrive';
-  Temp := GetDosOutput(PChar(Temp), True);
+  Temp := GetDosOutput(PChar(Temp), True, True);
   p := Pos('Driver flags   :', Temp);
   Delete(Temp, 1, p);
   p := Pos(LF, Temp);

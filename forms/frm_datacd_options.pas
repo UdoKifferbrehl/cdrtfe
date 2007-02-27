@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_datacd_options.pas: Daten-CD: Optionen, DVD-Video: Image-Optionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.10.2005
+  letzte Änderung  13.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -49,6 +49,7 @@ type
     CheckBoxImageKeep: TCheckBox;
     SaveDialog1: TSaveDialog;
     CheckBoxOverburn: TCheckBox;
+    CheckBoxLastSession: TCheckBox;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -114,11 +115,12 @@ begin
     end;
     with FSettings.DataCD do
     begin
-      CheckBoxMulti.Checked     := Multi;
-      CheckBoxContinue.Checked  := ContinueCD;
-      CheckBoxImageOnly.Checked := ImageOnly;
-      CheckBoxImageKeep.Checked := KeepImage;
-      EditIsoPath.Text          := IsoPath;
+      CheckBoxMulti.Checked       := Multi;
+      CheckBoxLastSession.Checked := LastSession;
+      CheckBoxContinue.Checked    := ContinueCD;
+      CheckBoxImageOnly.Checked   := ImageOnly;
+      CheckBoxImageKeep.Checked   := KeepImage;
+      EditIsoPath.Text            := IsoPath;
       if OnTheFly then
       begin
         RadioButtonOnTheFly.Checked := True;
@@ -176,15 +178,16 @@ begin
   begin
     with FSettings.DataCD do
     begin
-      Multi      := CheckBoxMulti.Checked;
-      ContinueCD := CheckBoxContinue.Checked;
-      ImageOnly  := CheckBoxImageOnly.Checked;
-      KeepImage  := CheckBoxImageKeep.Checked;
-      IsoPath    := EditIsoPath.Text;
-      OnTheFly   := RadioButtonOnTheFly.Checked;
-      TAO        := RadioButtonTAO.Checked;
-      DAO        := RadioButtonDAO.Checked;
-      RAW        := RadioButtonRAW.Checked;
+      Multi       := CheckBoxMulti.Checked;
+      LastSession := CheckBoxLastSession.Checked;
+      ContinueCD  := CheckBoxContinue.Checked;
+      ImageOnly   := CheckBoxImageOnly.Checked;
+      KeepImage   := CheckBoxImageKeep.Checked;
+      IsoPath     := EditIsoPath.Text;
+      OnTheFly    := RadioButtonOnTheFly.Checked;
+      TAO         := RadioButtonTAO.Checked;
+      DAO         := RadioButtonDAO.Checked;
+      RAW         := RadioButtonRAW.Checked;
       if RadioButtonRaw96r.Checked then
       begin
         RawMode := 'raw96r';
@@ -227,9 +230,11 @@ begin
   if CheckBoxMulti.Checked then
   begin
     CheckBoxContinue.Enabled := True;
+    CheckBoxLastSession.Enabled := True;
   end else
   begin
     CheckBoxContinue.Enabled := False;
+    CheckBoxLastSession.Enabled := False;    
   end;
   {Image oder otf}
   if RadioButtonImage.Checked then

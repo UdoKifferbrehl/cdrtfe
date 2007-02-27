@@ -358,6 +358,7 @@ type
     procedure MiscPopupSaveOutputClick(Sender: TObject);
     procedure TimerNodeExpandTimer(Sender: TObject);
     procedure ButtonDAEOptionsClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -3123,7 +3124,8 @@ end;
 { SetButtons -------------------------------------------------------------------
 
   SetButtons wird benötig, um die Buttons zu deaktivieren, wenn cdrtfe die
-  externen Programme ausführt.                                                 }
+  externen Programme ausführt.
+  Zusätzlich wird hier das Falg für laufende Prozesse gesetzt.                 }
 
 procedure TForm1.Setbuttons(const Status: TOnOff);
 {$J+}
@@ -3132,6 +3134,7 @@ const Title: string = '';
 begin
   if Status = oOff then
   begin
+    FSettings.Environment.ProcessRunning := True;
     ButtonStart.Enabled := False;
     ButtonCancel.Enabled := False;
     ButtonSettings.Enabled := False;
@@ -3146,6 +3149,7 @@ begin
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
+    FSettings.Environment.ProcessRunning := False;
     ButtonStart.Enabled := True;
     ButtonCancel.Enabled := True;
     ButtonSettings.Enabled := True;
@@ -3160,7 +3164,7 @@ end;
   CheckExitCode prüft, ob ein Fehler aufgetreten ist und gibt einen Hinweis
   aus.                                                                         }
 
-{$IFDEF ShowCmdError}  
+{$IFDEF ShowCmdError}
 procedure TForm1.CheckExitCode;
 begin
   if FExitCode = 142 then
@@ -3930,6 +3934,17 @@ begin
     GroupBoxDVDVideo.Top := (TSHeight - GroupBoxDVDVideo.Height) div 2;
     GroupBoxDVDVideo.Left := (TabSheet9.Width - GroupBoxDVDVideo.Width) div 2;
   end;
+end;
+
+{ FormCloseQuery ---------------------------------------------------------------
+
+  prüft, ob noch ein Prozess läuft. Falls ja, wird der User darauf hingewiese. }
+
+procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if FSettings.Environment.ProcessRunning then
+    CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
+                           MB_YESNO or MB_ICONWARNING) = ID_YES; 
 end;
 
 { FormClose --------------------------------------------------------------------

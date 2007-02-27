@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings.pas: Einstellungen von cdrtfe
 
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.01.2007
+  letzte Änderung  13.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -142,6 +142,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        ProDVDKey       : string;
        EnvironmentBlock: Pointer;
        EnvironmentSize : Integer;
+       ProcessRunning  : Boolean;
      end;
 
      { Einstellungen: RSCSI, Laufwerkszuordnungen}
@@ -231,6 +232,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Device      : string;
        Speed       : string;
        Multi       : Boolean;
+       LastSession : Boolean;
        DAO         : Boolean;
        TAO         : Boolean;
        RAW         : Boolean;
@@ -618,6 +620,7 @@ begin
     ProDVDKey        := '';
     EnvironmentBlock := nil;
     EnvironmentSize  := 0;
+    ProcessRunning   := False;
   end;
 
   with Drives do
@@ -704,6 +707,7 @@ begin
     Device       := '';
     Speed        := '';
     Multi        := False;
+    LastSession  := False;
     DAO          := False;
     TAO          := True;
     RAW          := False;

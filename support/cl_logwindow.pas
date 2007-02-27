@@ -1,8 +1,8 @@
 { cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 
-  Copyright (c) 2006 Oliver Valencia
+  Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  27.06.2006
+  letzte Änderung  08.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -314,7 +314,8 @@ begin
     b := StringRight(Temp, 'f');
     a := Trim(a); b := Trim(b);
     ia := StrToIntDef(a, 0); ib := StrToIntDef(b, 1);
-    Progress := Progress + ' ' + FormatFloat('##0%', (ia / ib) *100);
+    if ib > 0 then Progress := Progress + ' ' +
+                               FormatFloat('##0%', (ia / ib) *100);
   end else
   {cdrecord: Fixating ...}
   if s = 'Fixating...' then

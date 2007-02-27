@@ -1,9 +1,9 @@
 { f_process.pas: Prozesse, Fenster, ...
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.09.2006
+  letzte Änderung  06.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -17,7 +17,7 @@
 
   exportierte Funktionen/Prozeduren:
 
-    GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean): string
+    GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string
     IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean
 
 }
@@ -30,7 +30,7 @@ interface
 
 uses Windows, Classes, Forms, SysUtils;
 
-function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean): string;
+function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string;
 function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
 function IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean;
 
@@ -47,6 +47,9 @@ type PProcessWindow = ^TProcessWindow;
                         TargetProcessID: Cardinal;
                         FoundWindow: HWnd;
                       end;
+
+var MutexHandle   : THandle;
+    AlreadyRunning: Boolean;   // True = andere Instanz von cdrtfe läuft bereits
 
 { EnumWindowsProc --------------------------------------------------------------
 
@@ -76,7 +79,7 @@ var ProcWndInfo: TProcessWindow;
 begin
   ProcWndInfo.TargetProcessID := TargetProcessID;
   ProcWndInfo.FoundWindow := 0;
-  EnumWindows(@EnumWindowsProc, integer(@ProcWndInfo));
+  EnumWindows(@EnumWindowsProc, Integer(@ProcWndInfo));
   Result := ProcWndInfo.FoundWindow;
 end;
 
@@ -94,31 +97,18 @@ end;
 
 function IsFirstInstance(var hwndPrevInstance: HWnd;
                          WType, WCaption: string): Boolean;
-var hwndIDE: HWnd;
+var //hwndIDE     : HWnd;
     hwndInstance: HWnd;
 begin
   {find other instance, first own window handle}
   hwndInstance := FindWindow(PChar(WType), PChar(WCaption));
-  {  if hwndInstance <> self.Handle then
-    hwndPrevInstance := hwndInstance
-  else}
   {first other instances window}
-  hwndPrevInstance := FindWindowEx(0, hwndInstance, PChar(WType), PChar(WCaption));
-  {Delphi IDE}
-  hwndIDE := FindWindow('TAppBuilder', nil);
-  if (hwndIDE <> 0) or // hwndIDE is 0 if there's no Delphi IDE running
-     (hwndPrevInstance = 0) or
-     (hwndPrevInstance = 65934) then // there is another instance running
-  begin
-    hwndPrevInstance := hwndInstance;
-  end;
-  if hwndInstance <> hwndPrevInstance then
-  begin
-    Result := False;
-  end else
-  begin
-    Result := True;
-  end;
+  hwndPrevInstance := FindWindowEx(0, hwndInstance,
+                                   PChar(WType), PChar(WCaption));
+  {if no other Window -> previous window = current window}
+  if hwndPrevInstance = 0 then hwndPrevInstance := hwndInstance;
+  {Result depends on mutex creation result on startup}
+  Result := not AlreadyRunning;
 end;
 
 { GetDOSOutputStd --------------------------------------------------------------
@@ -130,7 +120,8 @@ end;
   hWritePipe, was keinen Einfluß auf die Funktion hat.                         }
 
 function GetDOSOutputStd(const lpCommandLine: PChar;
-                         const GetStdErr: Boolean): string;
+                         const GetStdErr: Boolean;
+                         const FastMode: Boolean): string;
 
 var lpPipeAttributes: TSecurityAttributes;
     hReadPipe: THandle;
@@ -311,6 +302,8 @@ type TDOSThread = class(TThread)
        FGetStdErr      : Boolean;
        FRunning        : Boolean;
        FUserReloadDisk : Boolean;    // User soll ENTER drücken
+       FFastMode       : Boolean;
+       FBuffSize       : Integer;
        {$IFDEF ShowCmdError}
        FExitCode       : Integer;
        {$ENDIF}
@@ -336,6 +329,7 @@ type TDOSThread = class(TThread)
        property PID: DWORD read FPID;
        property Running: Boolean read FRunning;
        property UserReloadDisk: Boolean read GetUserReloadDisk write FUserReloadDisk;
+       property FastMode: Boolean write FFastMode;
      end;
 
 { TDOSThread - private/protected }
@@ -373,7 +367,7 @@ end;
 
 { GetDOSOutputThreaded ---------------------------------------------------------
 
-  Wird von Excute aufgerufen: Führt die Kommandozeile aus und specihert die
+  Wird von Excute aufgerufen: Führt die Kommandozeile aus und speichert die
   Ausgabe in FOutput.                                                          }
 
 procedure TDOSThread.GetDOSOutputThreaded;
@@ -386,12 +380,14 @@ var lpPipeAttributes        : TSecurityAttributes;
     lpSecurityDescriptor    : TSecurityDescriptor;
     lpNumberOfBytesRead     : DWORD;
     lpNumberOfBytesAvailable: DWORD;
-    Buffer                  : array[0..10] of Char;
+//  Buffer                  : array[0..10] of Char;
+    Buffer                  : PChar;
     Temp                    : string;
     Changed                 : Boolean;
     ExitCode                : {$IFDEF Delphi3} Integer {$ELSE}
                                                Cardinal {$ENDIF};
 begin
+  Buffer := nil;
   ZeroMemory(@lpPipeAttributes, SizeOf(TSecurityAttributes));
   lpPipeAttributes.nLength := SizeOf(TSecurityAttributes);
   lpPipeAttributes.bInheritHandle := True;
@@ -426,7 +422,9 @@ begin
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
         FPID := lpProcessInformation.dwProcessId;
-        Buffer[0] := #0;
+//      Buffer[0] := #0;
+        GetMem(Buffer, FBuffSize);
+        ZeroMemory(Buffer, FBuffSize);
         Temp := '';
         Changed := True;
         repeat
@@ -437,21 +435,25 @@ begin
             CheckOutput;
           end;
 
-          ZeroMemory(@Buffer, SizeOf(Buffer));
+//        ZeroMemory(@Buffer, SizeOf(Buffer));
+          ZeroMemory(Buffer, FBuffSize);
           lpNumberOfBytesRead := 0;
           Application.ProcessMessages;
 
           {ReadSuccess := }
-          PeekNamedPipe(ReadStdout, @Buffer, SizeOf(Buffer),
+//        PeekNamedPipe(ReadStdout, @Buffer, SizeOf(Buffer),
+          PeekNamedPipe(ReadStdout, Buffer, FBuffSize,
                         @lpNumberOfBytesRead,
                         @lpNumberOfBytesAvailable, nil);
 
           Changed := lpNumberOfBytesAvailable > 0;
           if lpNumberOfBytesAvailable <> 0 then
           begin
-            ZeroMemory(@Buffer, SizeOf(Buffer));
+//          ZeroMemory(@Buffer, SizeOf(Buffer));
+            ZeroMemory(Buffer, FBuffSize);
             {ReadSuccess :=}
-            ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
+//          ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
+            ReadFile(ReadStdOut, Buffer^, FBuffSize - 1,
                      lpNumberOfBytesRead, nil);
           end else
           begin
@@ -473,6 +475,7 @@ begin
         CloseHandle(WriteStdIn);
         CloseHandle(lpProcessInformation.hThread);
         CloseHandle(lpProcessInformation.hProcess);
+        FreeMem(Buffer);
       end;
   end;
 end;
@@ -484,6 +487,10 @@ end;
 
 procedure TDOSThread.Execute;
 begin
+  case FFastMode of
+    True : FBuffSize := 512;
+    False: FBuffSize := 11;
+  end;
   FOutput := '';
   FRunning := True;
   GetDOSOutputThreaded;
@@ -510,16 +517,24 @@ end;
   gaben an das Programm zu senden.                                             }
 
 function GetDOSOutputEx(const lpCommandLine: PChar;
-                        const GetStdErr: Boolean): string;
-var Thread  : TDOSThread;
+                        const GetStdErr: Boolean;
+                        const FastMode: Boolean): string;
+var Thread      : TDOSThread;
     i           : Integer;
     BytesWritten: {$IFDEF Delphi3} Integer {$ELSE} Cardinal {$ENDIF};
     Msg, Cap    : string;
     Window      : HWnd;
     Buffer      : array[0..1] of Char;
 begin
+  {$IFDEF WriteLogfile}
+  case FastMode of
+    True : AddLog('FastMode: True  -> BuffSize = 512' + CRLF, 0);
+    False: AddLog('FastMode: False -> BuffSize = 10' + CRLF, 0);
+  end;
+  {$ENDIF}
   Thread := TDOSThread.Create(lpCommandLine, GetStdErr, True);
   Thread.FreeOnTerminate := False;
+  Thread.FastMode := FastMode;
   Thread.Resume;
 
   while Thread.Running do
@@ -565,20 +580,32 @@ end;
   GetDOSOutput führt die Kommandozeile lpCommandline aus und leitet die Ausgaben
   der Konsolenanwendung in eine Stringvariable um. Diese Funktion stammt aus dem
   Internet und wurde ein wenig verändert. Wenn GetStdErr = False, dann werden
-  Fehlermeldungen ignoriert. Steuerzeichen (z.B. LF) werden nicht entfernt.    }
+  Fehlermeldungen ignoriert. Steuerzeichen (z.B. LF) werden nicht entfernt. Bei
+  FastMode = True wird die Puffergröße hochgesetzt. Dadurch steht die Ausgabe
+  schneller zur Verfügung, allerdings kann es zu Problemen kommen, falls eine
+  Eingabe nötig wird.                                                          }
 
 function GetDOSOutput(const lpCommandLine: PChar;
-                      const GetStdErr: Boolean): string;
+                      const GetStdErr: Boolean;
+                      const FastMode: Boolean): string;
 begin
   {$IFNDEF ThreadedGetDOSOutput}
-  Result := GetDOSOutputStd(lpCommandLine, GetStdErr);
+  Result := GetDOSOutputStd(lpCommandLine, GetStdErr, FastMode);
   {$ELSE}
-  Result := GetDOSOutputEx(lpCommandLine, GetStdErr);
+  Result := GetDOSOutputEx(lpCommandLine, GetStdErr, FastMode);
   {$ENDIF}
   {$IFDEF WriteLogfile}
   AddLog(string(lpCommandLine) + CRLF, 0);
   AddLog(Result + CRLF + CRLF, 0);
   {$ENDIF}
 end;
+
+initialization
+  MutexHandle := CreateMutex(nil, True,
+                             PChar(ExtractFileName(Application.ExeName)));
+  AlreadyRunning := GetLastError = ERROR_ALREADY_EXISTS;
+
+finalization
+  if MutexHandle <> 0 then CloseHandle(MutexHandle);
 
 end.

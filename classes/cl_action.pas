@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.01.2007
+  letzte Änderung  17.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -336,24 +336,38 @@ end;
 function TCDAction.GetSectorNumber(const MkisofsOptions: string): string;
 var CmdGetSize: string;
     Sectors   : string;
-    p         : Integer;
+    Temp      : string;
+    Output    : TStringList;
+    i, p      : Integer;
 begin
   SetPanels('<>', FLang.GMS('mburn12'));
   Result := '';
+  Output := TStringList.Create;
   CmdGetsize := StartUpDir + cMkisofsBin;
   {$IFDEF QuoteCommandlinePath}
   CmdGetSize := QuotePath(CmdGetSize);
   {$ENDIF}
   CmdGetsize := CmdGetSize + ' -print-size -quiet' + MkisofsOptions;
-  Sectors := Trim(GetDosOutput(PChar(CmdGetsize), True));
+  Output.Text := GetDosOutput(PChar(CmdGetsize), True, True);
+  Sectors := Trim(Output.Text);
   p := LastDelimiter(LF, Sectors);
   if p > 0 then Delete(Sectors, 1, p);
   if StrToIntDef(Sectors, -1) >= 0 then Result := Sectors else
   begin
-    MessageShow('mkisofs -print-size failed.' + CRLF +
-                '  Commandline was: ' + CmdGetsize + CRLF +
-                '  Errormessage   : ' + Sectors + CRLF);
+    Temp := ExtractFileName(cMkisofsBin);
+    MessageShow(Temp + ' -print-size failed.');
+    MessageShow('  Commandline was: ' + CmdGetsize);
+    for i := 0 to Output.Count - 1 do
+    begin
+      Sectors := Output[i];
+      if Pos(Temp, Sectors) > 0 then
+      begin
+        Delete(Sectors, 1, Pos(':', Sectors));
+        MessageShow('  Errormessage   : ' + Sectors);
+      end;
+    end;
   end;
+  Output.Free;
   SetPanels ('<>', '');
 end;
 
@@ -375,13 +389,12 @@ var i              : Integer;
     Ok             : Boolean;
     SimulDev       : string;
     Count          : Integer;
-
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   BurnList := TStringList.Create;
   DummyDir(True);
   FData.CreateBurnList(BurnList, cDataCD);
-  Ok := True;
+  // Ok := True;
   SimulDev := 'cdr';
   CMArgs.ForcedContinue := False;
   CMArgs.Choice := cDataCD;
@@ -525,9 +538,12 @@ begin
         SimulDev := 'dvd';
         {if FSettings.FileFlags.ProDVD then} Ok := FDisk.CheckMedium(CMArgs);
       end;
+    end else
+    begin
+      Ok := FDisk.CheckMedium(CMArgs);
     end;
     {Bei ContinueCD = True ohne vorige Sessions, also bei ForcedContinue = True,
-     dürfen diese Parameter nicht verwendet werden.}    
+     dürfen diese Parameter nicht verwendet werden.}
     if Multi and not CMArgs.ForcedContinue then
     begin
       if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + FDisk.MsInfo
@@ -555,7 +571,8 @@ begin
     if RAW         then CmdC := CmdC + ' -' + RAWMode;
     if Overburn and (DAO or RAW) then
                         CmdC := CmdC + ' -overburn';
-    if Multi       then CmdC := CmdC + ' -multi';
+    if Multi and not LastSession
+                   then CmdC := CmdC + ' -multi';
     {on-the-fly}
     if OnTheFly then
     begin
@@ -1079,10 +1096,17 @@ end;
   DeleteCDRW löscht CD-RWs bzw. Teile davon.                                   }
 
 procedure TCDAction.DeleteCDRW;
-var i: Integer;
-    Cmd: string;
+var i     : Integer;
+    Cmd   : string;
+    Ok    : Boolean;
+    CMArgs: TCheckMediumArgs;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  CMArgs.Choice := cCDRW;
+  SetPanels('<>', FLang.GMS('mburn13'));
+  FDisk.GetDiskInfo(FSettings.CDRW.Device, False);
+  SetPanels('<>', '');
+  Ok := FDisk.CheckMedium(CMArgs);
   {Kommandozeile zusammenstellen}
   with FSettings.CDRW do
   begin
@@ -1106,18 +1130,24 @@ begin
     if Dummy       then Cmd := Cmd + ' -dummy';
   end;
   {Kommando ausführen}
-  {$IFDEF Confirm}
-  if not (FSettings.CmdLineFlags.ExecuteProject or
-          FSettings.General.NoConfirm) then
+  if not Ok then
   begin
-    {Brennvorgang starten?}
-    i := Application.MessageBox(PChar(FLang.GMS('mburn05')),
-                                PChar(FLang.GMS('mburn06')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    i := 0;
   end else
-  {$ENDIF}
   begin
-    i := 1;
+    {$IFDEF Confirm}
+    if not (FSettings.CmdLineFlags.ExecuteProject or
+            FSettings.General.NoConfirm) then
+    begin
+      {Brennvorgang starten?}
+      i := Application.MessageBox(PChar(FLang.GMS('mburn05')),
+                                  PChar(FLang.GMS('mburn06')),
+             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    end else
+    {$ENDIF}
+    begin
+      i := 1;
+    end;
   end;
   if i = 1 then
   begin
@@ -1324,7 +1354,7 @@ begin
   CommandLine := QuotePath(CommandLine);
   {$ENDIF}
   CommandLine := CommandLine + ' dev=' + FSettings.DAE.Device + ' -toc';
-  Output.Text := GetDOSOutput(PChar(CommandLine), True);
+  Output.Text := GetDOSOutput(PChar(CommandLine), True, False);
   if Pos('No disk / Wrong disk!', Output.text) = 0 then
   begin
     CDPresent := True;
@@ -1346,7 +1376,7 @@ begin
   end;
   if CDPresent then
   begin
-    Output.Text := GetDOSOutput(PChar(CommandLine), True);
+    Output.Text := GetDOSOutput(PChar(CommandLine), True, False);
   end;
   {$IFDEF DebugReadAudioTOC}
   AddCRStringToList(Output.Text, FormDebug.Memo1.Lines);

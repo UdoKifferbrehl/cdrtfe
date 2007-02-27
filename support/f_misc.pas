@@ -1,9 +1,9 @@
 { f_misc.pas: unterstützende Funktionen (sonstiges)
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.07.2006
+  letzte Änderung  10.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,6 +16,7 @@
     * Funktionen für String-Listen
     * Funktionen zur Zeitmessung
     * Umgang mit Komponenten
+    * Standard-Dialog
 
 
   exportierte Funktionen/Prozeduren:
@@ -34,6 +35,7 @@
     SelectRootIfNoneSelected(Tree: TTreeView)
     SetCompProp(Comp: TComponent; const Name, Value: string)
     SetFont(Form: TForm)
+    ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
     WaveIsValid(const Name: string): Boolean
 
 
@@ -62,6 +64,7 @@ function GetWaveLength(const Name: string): Extended;
 function GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean;
 function GetCompProp(Comp: TComponent; Name: string): string;
 function PropertyExists(Comp: TComponent; Name: string): Boolean;
+function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
 function WaveIsValid(const Name: string): Boolean;
 procedure AddCRStringToList(s: string; List: TStrings);
 procedure ExportControls;
@@ -345,6 +348,25 @@ begin
     if Screen.Fonts.IndexOf('Microsoft Sans Serif') >= 0 then
       Form.Font.Name := 'Microsoft Sans Serif';
   end;
+end;
+
+{ ShowMsgDlg -------------------------------------------------------------------
+
+  zeigt einen Dialog an. Verwendet Application.MessageBox.
+  
+  Flags: MB_ICONSTOP             MB_OK 
+         MB_ICONQUESTION         MB_OKCANCEL
+         MB_ICONWARNING          MB_ABORTRETRYIGNORE
+         MB_ICONINFORMATION      MB_YESNOCANCEL
+                                 MB_YESNO
+                                 MB_RETRYCANCEL
+                                 MB_HELP
+
+  Results: ID_OK, ID_CANCEL, ID_ABORT, ID_RETRY, ID_RIGNORE, ID_YES, ID_NO     }
+
+function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
+begin
+  Result := Application.MessageBox(PChar(Text), PChar(Caption), Flags);
 end;
                          
 { Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }

@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.12.2006
+  letzte Änderung  11.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -258,6 +258,8 @@ begin
     Add('eburn15=\n%s MiByte werden benötigt.');
     Add('eburn16=Soll die CD/DVD-RW automatisch gelöscht werden?');
     Add('eburn17=Diese DVD+RW enthält Daten. Soll sie überschrieben werden?');
+    Add('eburn18=Sie sind dabei, cdrtfe zu beenden, obwohl noch ein Kommando-\nzeilenprogramm läuft. Dies könnte Probleme verursachen (z.B.\nSysteminstabilitäten).\nTrotzdem beenden?');
+    Add('eburn19=Bei DVD+RWs ist keine Simulation möglich.');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
@@ -272,6 +274,7 @@ begin
     Add('mburn12=Image-Größe ermitteln ...');
     Add('mburn13=Überprüfe Disk ...');
     Add('mburn14=%s MiByte zu schreiben; %s MiByte verbleibend.\n\n');
+    Add('mburn15=DVD+RW-Disks können nicht gelöscht werden.\nSie werden einfach überschrieben.');
     {Messages - Verify}
     Add('mverify01=Vergleiche Dateien ...');
     Add('mverify02=%d Fehler gefunden.');

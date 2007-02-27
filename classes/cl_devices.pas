@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005-2006 Oliver Valencia
+  Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.07.2006
+  letzte Änderung  06.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -376,7 +376,7 @@ begin
   {$ENDIF}
   if FUseRSCSI then CommandLine := CommandLine + ' dev=' + FRSCSIHost;
   CommandLine := CommandLine + ' -scanbus';
-  Output.Text := GetDOSOutput(PChar(CommandLine), True);
+  Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
   {$IFDEF DebugDriveDetection}
   Deb(CommandLine, 2);
   {$ENDIF}
@@ -412,7 +412,7 @@ begin
     {$ENDIF}
     CommandLine := CommandLine + ' dev=' + Dev + ' -prcap';
     Output.Clear;
-    Output.Text := GetDOSOutput(PChar(CommandLine), True);
+    Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
     {$IFDEF DebugDriveDetection}
     Deb(CommandLine, 2);
     {$ENDIF}
@@ -579,7 +579,7 @@ var DriveName: string;
     {$ENDIF}
     CommandLine := CommandLine + ' dev=' + Dev + ' -prcap';
     Output.Clear;
-    Output.Text := GetDOSOutput(PChar(CommandLine), True);
+    Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
   end;
 
 begin

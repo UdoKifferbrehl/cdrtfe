@@ -1,10 +1,10 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_diskinfo.pas: Zugriff auf Rohlingsinformationen und Medien-Überprüfung
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  22.01.2007
+  letzte Änderung  11.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -54,7 +54,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
                   DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL,
                   DT_Unknown,      // unbekannte Disk
                   DT_None,         // keine Disk eingelegt
-                  DT_Manual,       // manuell Auswahl durch User
+                  DT_Manual,       // manuelle Auswahl durch User
                   DT_ManualNone);  // Abbruch durch User bei Auswahl
 
      { TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
@@ -546,7 +546,7 @@ begin
   end;
   CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' ' + CmdOption +
                  ' -silent -' + VLevel;
-  Result := GetDosOutput(PChar(CmdCdrecord), True);
+  Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
   AddCRStringToList(Result, FormDebug.Memo1.Lines);
@@ -568,7 +568,7 @@ begin
   CmdCdrecord := QuotePath(CmdCdrecord);
   {$ENDIF}
   CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' -msinfo -silent';
-  Result := GetDosOutput(PChar(CmdCdrecord), True);
+  Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
   FormDebug.Memo1.Lines.Add(Result + CRLF);
@@ -693,7 +693,7 @@ begin
   CmdCdrecord := QuotePath(CmdCdrecord);
   {$ENDIF}
   CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' -toc -silent';
-  Output := GetDosOutput(PChar(CmdCdrecord), True);
+  Output := GetDosOutput(PChar(CmdCdrecord), True, False);
   p := Pos('track:lout lba:', Output);
   if p > 0 then
   begin
@@ -906,9 +906,8 @@ end;
   liefert True, wenn die Überprüfung des eingelegten Mediums erfolgreich war.  }
 
 function TDiskInfoA.CheckMedium(var Args: TCheckMediumArgs): Boolean;
-var i             : Integer;
-    Temp          : string;
-    Meldung       : PChar;
+var i   : Integer;
+    Temp: string;
 begin
   Result := True;
   FSettings.Cdrecord.Erase := False;
@@ -916,9 +915,7 @@ begin
   {Fehler: keine CD eingelegt}
   if FDiskType = DT_None then
   begin
-    Application.MessageBox(PChar(FLang.GMS('eburn01')),
-                           PChar(FLang.GMS('g001')),
-                           MB_OK or MB_ICONEXCLAMATION);
+    ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
     Result := False;
   end;
   {Fehler: nächste Schreibadresse kann nicht gelesen werden}
@@ -927,18 +924,15 @@ begin
     if (FDiskType in [DT_CD_RW, DT_DVD_RW]) and
        FSettings.Cdrecord.AutoErase then
     begin
-      i := Application.MessageBox(PChar(FLang.GMS('eburn09') + CRLF + CRLF +
-                                        FLang.GMS('eburn16')),
-                                  PChar(FLang.GMS('g001')),
-                                  MB_OKCancel or MB_ICONEXCLAMATION);
-      Result := i = 1;
+      i := ShowMsgDlg(FLang.GMS('eburn09') + CRLF + CRLF + FLang.GMS('eburn16'),
+                      FLang.GMS('g001'),
+                      MB_OKCancel or MB_ICONWARNING);
+      Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
     end else
     begin
-      Application.MessageBox(PChar(FLang.GMS('eburn09')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
   end;
@@ -948,11 +942,10 @@ begin
     if (FDiskType in [DT_CD_RW, DT_DVD_RW]) and
        FSettings.Cdrecord.AutoErase then
     begin
-      i := Application.MessageBox(PChar(FLang.GMS('eburn02') + CRLF + CRLF +
-                                        FLang.GMS('eburn16')),
-                                  PChar(FLang.GMS('g001')),
-                                  MB_OKCancel or MB_ICONEXCLAMATION);
-      Result := i = 1;
+      i := ShowMsgDlg(FLang.GMS('eburn02') + CRLF + CRLF + FLang.GMS('eburn16'),
+                      FLang.GMS('g001'),
+                      MB_OKCancel or MB_ICONWARNING);
+      Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
       FSecFree := FSectors;
@@ -960,9 +953,7 @@ begin
       FSizeUsed := 0;
     end else
     begin
-      Application.MessageBox(PChar(FLang.GMS('eburn02')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
   end;
@@ -979,7 +970,7 @@ begin
     if (FDiskType = DT_ManualNone) then
     begin
       Result := False;
-    end;    
+    end;
   end;
 
   {Fehler: Daten-CD}
@@ -990,10 +981,9 @@ begin
     begin
       if not FSettings.General.NoConfirm then
       begin
-        i := Application.MessageBox(PChar(FLang.GMS('eburn03')),
-                                    PChar(FLang.GMS('g004')),
-                                    MB_OKCancel or MB_ICONEXCLAMATION);
-        Result := i = 1;
+        i := ShowMsgDlg(FLang.GMS('eburn03'), FLang.GMS('g004'),
+                        MB_OKCancel or MB_ICONWARNING);
+        Result := i = ID_OK;
       end;
     end;
     {wenn eine CD fortgesetzt werden soll}
@@ -1007,15 +997,14 @@ begin
         if not (FSettings.CmdLineFlags.ExecuteProject or
                 FSettings.General.NoConfirm) then
         begin
-          i := Application.MessageBox(PChar(FLang.GMS('eburn04')),
-                                      PChar(FLang.GMS('eburn05')),
-                                      MB_OKCANCEL or MB_ICONEXCLAMATION);
+          i := ShowMsgDlg(FLang.GMS('eburn04'), FLang.GMS('eburn05'),
+                          MB_OKCancel or MB_ICONWARNING);
         end else
         {$ENDIF}
         begin
-          i := 1;
+          i := ID_OK;
         end;
-        Result := i = 1;
+        Result := i = ID_OK;
         {Wenn trotzdem geschrieben werden soll, dann aber ohne -C und -M}
         if Result then
         begin
@@ -1045,18 +1034,14 @@ begin
                                       - FSecFree) / 512)),
                         Args.SectorsNeededI + Args.TaoEndSecCount -
                           FSecFree]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
     {Fehler: DVD und Multisession}
     if Result and FIsDVD and FSettings.DataCD.Multi then
     begin
       Result := False;
-      Application.MessageBox(PChar(FLang.GMS('eburn11')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
     end;
   end;
 
@@ -1067,9 +1052,7 @@ begin
      machen.}
     if Result and (MsInfo <> '') then
     begin
-      Application.MessageBox(PChar(FLang.GMS('eburn08')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn08'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
 
       Result := False;
     end;
@@ -1081,9 +1064,7 @@ begin
                      [IntToStr(Round(FTimeFree) div 60) + ':' +
                       FormatFloat('0#.##',
                         (FTimeFree - (Round(FTimeFree) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONWARNING);
       Result := False;
     end;
    {Fehler: Gesamtspielzeit zu lang}
@@ -1095,9 +1076,19 @@ begin
                      [IntToStr(Round(FTime) div 60) + ':' +
                       FormatFloat('0#.##',
                                 (FTime - (Round(FTime) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      Result := False;
+    end;
+  end;
+
+  {Fehler: Medium löschen}
+  if Args.Choice = cCDRW then
+  begin
+    {Fehler: DVD+RW kann nicht gelöscht werden. Wird überschrieben.}
+    if FDiskType = DT_DVD_PlusRW then
+    begin
+      ShowMsgDlg(FLang.GMS('mburn15'), FLang.GMS('g004'),
+                 MB_OK or MB_ICONINFORMATION);
       Result := False;
     end;
   end;
@@ -1118,9 +1109,7 @@ begin
                      [FormatFloat('##0.###',
                                   ((Args.SectorsNeededI - FSecFree) / 512)),
                       Args.SectorsNeededI - FSecFree]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
   end;
@@ -1132,10 +1121,13 @@ begin
     if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) then
     begin
       Result := False;
-      Application.MessageBox(PChar(FLang.GMS('eburn10')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
     end;
+    if (FDiskType = DT_DVD_PlusRW) and FSettings.Cdrecord.Dummy then
+    begin
+      Result := False;
+      ShowMsgDlg(FLang.GMS('eburn19'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+    end;    
   end;
 end;
 
@@ -1206,7 +1198,7 @@ begin
   end;
   CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' ' + CmdOption +
                  ' -silent -' + VLevel;
-  Result := GetDosOutput(PChar(CmdCdrecord), True);
+  Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
   AddCRStringToList(Result, FormDebug.Memo1.Lines);
@@ -1494,9 +1486,8 @@ end;
   liefert True, wenn die Überprüfung des eingelegten Mediums erfolgreich war.  }
 
 function TDiskInfoM.CheckMedium(var Args: TCheckMediumArgs): Boolean;
-var i             : Integer;
-    Temp          : string;
-    Meldung       : PChar;
+var i   : Integer;
+    Temp: string;
 begin
   Result := True;
   FSettings.Cdrecord.Erase := False;
@@ -1504,43 +1495,37 @@ begin
   {Fehler: keine CD eingelegt}
   if FDiskType = DT_None then
   begin
-    Application.MessageBox(PChar(FLang.GMS('eburn01')),
-                           PChar(FLang.GMS('g001')),
-                           MB_OK or MB_ICONEXCLAMATION);
+    ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
     Result := False;
-  end;                                                           (*
-  {Fehler: nächste Schreibadresse kann nicht gelesen werden}
+  end;
+  {Fehler: nächste Schreibadresse kann nicht gelesen werden} (*
   if FMsInfo = 'no_address' then
   begin
     if (FDiskType in [DT_CD_RW, DT_DVD_RW]) and
        FSettings.Cdrecord.AutoErase then
     begin
-      i := Application.MessageBox(PChar(FLang.GMS('eburn09') + CRLF + CRLF +
-                                        FLang.GMS('eburn16')),
-                                  PChar(FLang.GMS('g001')),
-                                  MB_OKCancel or MB_ICONEXCLAMATION);
-      Result := i = 1;
+      i := ShowMsgDlg(FLang.GMS('eburn09') + CRLF + CRLF + FLang.GMS('eburn16'),
+                      FLang.GMS('g001'),
+                      MB_OKCancel or MB_ICONWARNING);
+      Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
     end else
     begin
-      Application.MessageBox(PChar(FLang.GMS('eburn09')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
-  end;                                                                  *)
+  end;                                                     *)
   {Fehler: fixierte CD eingelegt}
-  if FDiskComplete then
+  if FDiskComplete and (Args.Choice <> cCDRW)then
   begin
     if (FDiskType in [DT_CD_RW, DT_DVD_RW]) and
        FSettings.Cdrecord.AutoErase then
     begin
-      i := Application.MessageBox(PChar(FLang.GMS('eburn02') + CRLF + CRLF +
-                                        FLang.GMS('eburn16')),
-                                  PChar(FLang.GMS('g001')),
-                                  MB_OKCancel or MB_ICONEXCLAMATION);
-      Result := i = 1;
+      i := ShowMsgDlg(FLang.GMS('eburn02') + CRLF + CRLF + FLang.GMS('eburn16'),
+                      FLang.GMS('g001'),
+                      MB_OKCancel or MB_ICONWARNING);
+      Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
       FSecFree := FSectors;
@@ -1554,24 +1539,21 @@ begin
       if not (FSettings.CmdLineFlags.ExecuteProject or
               FSettings.General.NoConfirm) then
       begin
-        i := Application.MessageBox(PChar(FLang.GMS('eburn17')),
-                                    PChar(FLang.GMS('g001')),
-                                    MB_OKCancel or MB_ICONEXCLAMATION);
+        i := ShowMsgDlg(FLang.GMS('eburn17'), FLang.GMS('g001'),
+                        MB_OKCancel or MB_ICONWARNING);
       end else
       {$ENDIF}
       begin
-        i := 1;
+        i := ID_OK;
       end;
-      Result := i = 1;
+      Result := i = ID_OK;
       FMsInfo := '';
       FSecFree := FSectors;
       FSizeFree := FSize;
       FSizeUsed := 0;
     end else
     begin
-      Application.MessageBox(PChar(FLang.GMS('eburn02')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
   end;
@@ -1599,10 +1581,9 @@ begin
     begin
       if not FSettings.General.NoConfirm then
       begin
-        i := Application.MessageBox(PChar(FLang.GMS('eburn03')),
-                                    PChar(FLang.GMS('g004')),
-                                    MB_OKCancel or MB_ICONEXCLAMATION);
-        Result := i = 1;
+        i := ShowMsgDlg(FLang.GMS('eburn03'), FLang.GMS('g004'),
+                        MB_OKCancel or MB_ICONWARNING);
+        Result := i = ID_OK;
       end;
     end;
     {wenn eine CD fortgesetzt werden soll}
@@ -1616,15 +1597,14 @@ begin
         if not (FSettings.CmdLineFlags.ExecuteProject or
                 FSettings.General.NoConfirm) then
         begin
-          i := Application.MessageBox(PChar(FLang.GMS('eburn04')),
-                                      PChar(FLang.GMS('eburn05')),
-                                      MB_OKCANCEL or MB_ICONEXCLAMATION);
+          i := ShowMsgDlg(FLang.GMS('eburn04'), FLang.GMS('eburn05'),
+                          MB_OKCancel or MB_ICONWARNING);
         end else
         {$ENDIF}
         begin
-          i := 1;
+          i := ID_OK;
         end;
-        Result := i = 1;
+        Result := i = ID_OK;
         {Wenn trotzdem geschrieben werden soll, dann aber ohne -C und -M}
         if Result then
         begin
@@ -1654,18 +1634,14 @@ begin
                                       - FSecFree) / 512)),
                         Args.SectorsNeededI + Args.TaoEndSecCount -
                           FSecFree]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
     {Fehler: DVD und Multisession}
     if Result and FIsDVD and FSettings.DataCD.Multi then
     begin
       Result := False;
-      Application.MessageBox(PChar(FLang.GMS('eburn11')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
     end;
   end;
 
@@ -1676,10 +1652,7 @@ begin
      machen.}
     if Result and (MsInfo <> '') and FSessionEmpty then
     begin
-      Application.MessageBox(PChar(FLang.GMS('eburn08')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
-
+      ShowMsgDlg(FLang.GMS('eburn08'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
     {Fehler: Restkapazität nicht ausreichend}
@@ -1690,9 +1663,7 @@ begin
                      [IntToStr(Round(FTimeFree) div 60) + ':' +
                       FormatFloat('0#.##',
                         (FTimeFree - (Round(FTimeFree) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
    {Fehler: Gesamtspielzeit zu lang}
@@ -1704,9 +1675,19 @@ begin
                      [IntToStr(Round(FTime) div 60) + ':' +
                       FormatFloat('0#.##',
                                 (FTime - (Round(FTime) div 60) * 60))]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      Result := False;
+    end;
+  end;
+
+  {Fehler: Medium löschen}
+  if Args.Choice = cCDRW then
+  begin
+    {Fehler: DVD+RW kann nicht gelöscht werden. Wird überschrieben.}
+    if FDiskType = DT_DVD_PlusRW then
+    begin
+      ShowMsgDlg(FLang.GMS('mburn15'), FLang.GMS('g004'),
+                 MB_OK or MB_ICONINFORMATION);
       Result := False;
     end;
   end;
@@ -1727,9 +1708,7 @@ begin
                      [FormatFloat('##0.###',
                                   ((Args.SectorsNeededI - FSecFree) / 512)),
                       Args.SectorsNeededI - FSecFree]);
-      Meldung := PChar(Temp);
-      Application.MessageBox(Meldung, PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
     end;
   end;
@@ -1741,9 +1720,12 @@ begin
     if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) then
     begin
       Result := False;
-      Application.MessageBox(PChar(FLang.GMS('eburn10')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+    end;
+    if (FDiskType = DT_DVD_PlusRW) and FSettings.Cdrecord.Dummy then
+    begin
+      Result := False;
+      ShowMsgDlg(FLang.GMS('eburn19'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
     end;
   end;
 end;

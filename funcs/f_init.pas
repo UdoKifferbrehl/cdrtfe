@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.11.2006
+  letzte Änderung  06.02.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -329,7 +329,7 @@ begin
   Cmd := QuotePath(Cmd);
   {$ENDIF}
   Cmd := Cmd + ' -version';
-  Output := GetDosOutput(PChar(Cmd), True);
+  Output := GetDosOutput(PChar(Cmd), True, True);
   VersionString := GetVersionString(Output);
   VersionValue := GetVersionValue(VersionString);
   {ab cdrecord 2.01a24 ist die CUE-Image-Unterstützung ausreichend}
