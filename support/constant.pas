@@ -2,10 +2,10 @@
 
   constant.pas: Konstanten-Deklaration
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 06.10.2006
+  letzte Änderung  05.03.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -172,6 +172,9 @@ const {die GUID für cdrtfe}
                             ('btn_v_down',         'B8', '8'),
                             ('btn_v_load_track',   'B1', '1'),
                             ('btn_v_del_track',    'B3', '3'));
+
+      {Win32 Error Sources}
+      cCreateProcess   : string = 'CreateProcess()';
 
 type {Richtungsangaben beim Verschieben von Tracks}
      TDirection = (dUp, dDown);

@@ -1,4 +1,6 @@
-{ f_process.pas: Prozesse, Fenster, ...
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+
+  f_process.pas: Prozesse, Fenster, ...
 
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
@@ -38,7 +40,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
-     f_wininfo, constant;
+     cl_logwindow, f_wininfo, constant;
 
      {Typ-Deklarationen für die Callback-Funktion}
 type PProcessWindow = ^TProcessWindow;
@@ -304,6 +306,8 @@ type TDOSThread = class(TThread)
        FUserReloadDisk : Boolean;    // User soll ENTER drücken
        FFastMode       : Boolean;
        FBuffSize       : Integer;
+       FWinLastError   : Integer;
+       FErrorInfo      : string;
        {$IFDEF ShowCmdError}
        FExitCode       : Integer;
        {$ENDIF}
@@ -319,6 +323,7 @@ type TDOSThread = class(TThread)
        procedure CheckOutput;
      protected
        procedure Execute; override;
+       procedure OutputErrorMessage;
        {$IFDEF DebugGetDOSOutputThread}
        procedure Debug;
        {$ENDIF}
@@ -333,6 +338,15 @@ type TDOSThread = class(TThread)
      end;
 
 { TDOSThread - private/protected }
+
+{ OutputErrorMessage -----------------------------------------------------------
+
+  gibt die Win32-Fehlermeldung aus.                                            }
+
+procedure TDOSThread.OutputErrorMessage;
+begin
+  TLogWin.Inst.AddSysError(FWinLastError, FErrorInfo);
+end;
 
 {$IFDEf DebugGetDOSOutputThread}
 procedure TDOSThread.Debug;
@@ -418,6 +432,7 @@ begin
                      CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
                      nil, nil,
                      lpStartupInfo, lpProcessInformation) then
+    begin
       try
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
@@ -477,6 +492,12 @@ begin
         CloseHandle(lpProcessInformation.hProcess);
         FreeMem(Buffer);
       end;
+    end else
+    begin
+      FWinLastError := GetLastError;
+      FErrorInfo := cCreateProcess + CRLF + string(FCommandLine);
+      Synchronize(OutputErrorMessage);
+    end;
   end;
 end;
 
@@ -503,11 +524,13 @@ constructor TDOSThread.Create(const CmdLine: PChar;
                               const GetStdErr, Suspended: Boolean);
 begin
   inherited Create(Suspended);
-  FCommandLine := CmdLine;
-  FGetStdErr   := GetStdErr;
-  FRunning     := True;
+  FCommandLine  := CmdLine;
+  FGetStdErr    := GetStdErr;
+  FWinLastError := 0;
+  FErrorInfo    := '';
+  FRunning      := True;
   {$IFDEF ShowCmdError}
-  FExitCode := 0;
+  FExitCode     := 0;
   {$ENDIF}
 end;
 

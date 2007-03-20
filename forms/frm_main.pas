@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.01.2007
+  letzte Änderung  18.03.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -247,6 +247,7 @@ type
     LabelDAEFlac: TLabel;
     LabelDAECustom: TLabel;
     RadioButtonMInfo: TRadioButton;
+    MainMenuReset: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -359,6 +360,8 @@ type
     procedure TimerNodeExpandTimer(Sender: TObject);
     procedure ButtonDAEOptionsClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure MainMenuResetClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -377,6 +380,7 @@ type
     DropFileTargetCDETreeView: TDropFileTarget;
     DropFileTargetXCDETreeView: TDropFileTarget;
     {$ENDIF}
+    StayOnTopState: Boolean;
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
@@ -406,6 +410,7 @@ type
     {$IFDEF AllowToggle}
     procedure ToggleOptions(Sender: TObject);
     {$ENDIF}
+    procedure ToggleStayOnTopState;
     procedure UpdateGauges;
     procedure UpdateOptionPanel;
     procedure UserAddFile(Tree: TTreeView);
@@ -3179,6 +3184,15 @@ begin
 end;
 {$ENDIF}
 
+{ ToggleStayOnTopState ---------------------------------------------------------
+
+  StayOnTop-Status umschalten.                                                 }
+
+procedure TForm1.ToggleStayOnTopState;
+begin
+  StayOnTopState := not StayOnTopState;
+  WindowStayOnTop(Self.Handle, StayOnTopState);
+end;
 
 { Initialisierungen -----------------------------------------------------------}
 
@@ -4065,6 +4079,19 @@ begin
   {$ENDIF}
 end;
 
+{ OnKeyDown --------------------------------------------------------------------
+
+  globale Tasten.                                                              }
+
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
+                             Shift: TShiftState);
+begin
+  case Key of
+    VK_F12: ToggleStayOnTopState;
+  end;
+end;
+
+
 
 { Button-Events -------------------------------------------------------------- }
 
@@ -4394,6 +4421,53 @@ begin
   FSettings.General.Choice := Temp;
   CheckControls;
   UpdateOptionPanel;
+end;
+
+{ Projekt/Reset cdrtfe }
+
+procedure TForm1.MainMenuResetClick(Sender: TObject);
+var i   : Integer;
+    Tree: TTreeView;
+    List: TListView;
+begin
+  Tree := nil;
+  List := nil;
+  {Settings zurücksetzen}
+  MainMenuReloadDefaultsClick(Sender);
+  {Projectdaten löschen}
+  for i := cDataCD to cDVDVideo do
+  begin
+    case i of
+      cDataCD,
+      cXCD    : begin
+                  case i of
+                    cDataCD: begin
+                               Tree := CDETreeView;
+                               List := CDEListView;
+                             end;
+                    cXCD   : begin
+                               Tree := XCDETreeView;
+                               List := XCDEListView1;
+                             end;
+                  end;
+                  Tree.Selected := Tree.Items[0];
+                  FData.DeleteAll(i);
+                  InitTreeView(Tree, i);
+                  SelectRootIfNoneSelected(Tree);
+                  ShowFolderContent(Tree, List);
+                end;
+      cAudioCD,
+      cVideoCD: begin
+                  case i of
+                    cAudioCD: List := AudioListView;
+                    cVideoCD: List := VideoListView;
+                  end;
+                  FData.DeleteAll(i);
+                  List.Items.Clear;
+                end;
+    end;
+  end;
+  UpdateGauges;
 end;
 
 { Extras/Sprache ändern }

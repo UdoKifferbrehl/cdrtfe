@@ -2,10 +2,10 @@
 
   cl_actionthread.pas: Kommandozeilenprogramme in einem eigenen Thread starten
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.10.2006
+  letzte Änderung  05.03.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -56,6 +56,8 @@ type TActionThread = class(TThread)
        FPStdIn: THandle;    // Handle der StdIn-Pipe des Prozesses
        FPID: DWORD;         // Prozess-ID
        FEnvironmentBlock: Pointer; // Zeiger zum neuen Umgebungsblock
+       FWinLastError    : Integer;
+       FErrorInfo       : string;
        function ProcessOutput(Line: string; var BeginNewLine: Boolean):string;
        procedure StartExecution;
      protected
@@ -64,6 +66,7 @@ type TActionThread = class(TThread)
        procedure DAddToLine;
        procedure DDeleteFromLine;
        procedure DClearLine;
+       procedure DOutputErrorMessage;
        procedure SendTerminationMessage;
      public
        constructor Create(const CmdLine: string; const Suspended: Boolean);
@@ -98,6 +101,11 @@ uses cl_logwindow, user_messages, constant, f_misc, f_process, f_wininfo;
 
   Zugriffe auf die VCL müssen über Synchronize erfolgen. Methoden, die für die
   Anzeige von Daten zuständig sind beginnen mit 'D'.                           }
+
+procedure TActionThread.DOutputErrorMessage;
+begin
+  TLogWin.Inst.AddSysError(FWinLastError, FErrorInfo);
+end;
 
 procedure TActionThread.DAddLine;
 begin
@@ -424,6 +432,7 @@ begin
                      CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
                      FEnvironmentBlock, nil,
                      lpStartupInfo, lpProcessInformation) then
+    begin
       try
         CloseHandle(NewStdOut);
         CloseHandle(NewStdIn);
@@ -487,6 +496,12 @@ begin
         CloseHandle(lpProcessInformation.hThread);
         CloseHandle(lpProcessInformation.hProcess);
       end;
+    end else
+    begin
+      FWinLastError := GetLastError;
+      FErrorInfo := cCreateProcess + CRLF + FCommandLine;
+      Synchronize(DOutputErrorMessage);
+    end;
   end;
 end;
 
@@ -527,6 +542,8 @@ begin
   FHandle := TLogWin.Inst.OutWindowHandle;
   FCommandLine := CmdLine;
   FEnvironmentBlock := nil;
+  FWinLastError := 0;
+  FErrorInfo := '';
   {$IFDEF ShowCmdError}
   FExitCode := 0;
   {$ENDIF}

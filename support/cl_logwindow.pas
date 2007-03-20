@@ -1,8 +1,10 @@
-{ cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+
+  cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  08.02.2007
+  letzte Änderung  05.03.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -61,6 +63,7 @@ type TLogWin = class(TObject)
        procedure UnsetMemo2;
        procedure Add(s: string);
        procedure AddToLine(s: string);
+       procedure AddSysError(const Error: Integer; const Info: string);
        procedure Clear;
        procedure ClearLine;
        procedure DeleteFromLine(i: Integer);
@@ -75,7 +78,7 @@ type TLogWin = class(TObject)
 implementation
 
 uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
-     f_wininfo, f_strings;
+     f_wininfo, f_strings, constant;
 
 { TLogWindow ----------------------------------------------------------------- }
 
@@ -165,6 +168,30 @@ end;
 procedure TLogWin.UnsetMemo2;
 begin
   FMemo2 := nil;
+end;
+
+{ AddSysError ------------------------------------------------------------------
+
+  AddSysError zeigt die zu einem Win32-Errorcode gehörende Meldung an.         }
+
+procedure TLogWin.AddSysError(const Error: Integer; const Info: string);
+var i    : Integer;
+    Temp : string;
+    List : TStringList;
+begin
+  Temp := '  Info   : ';
+  Add('A Win32 API error has occurred:');
+  Add('  Code   : ' + IntToStr(Error));
+  Add('  Message: ' + SysErrorMessage(Error));
+  List := TStringList.Create;
+  List.Text := Info;
+  for i := 0 to List.Count - 1 do
+  begin
+    Add(Temp + List[i]);
+    Temp := '           ';    
+  end;
+  List.Free;
+  Add('');
 end;
 
 { Add --------------------------------------------------------------------------

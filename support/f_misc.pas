@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.02.2007
+  letzte Änderung  16.03.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -17,6 +17,7 @@
     * Funktionen zur Zeitmessung
     * Umgang mit Komponenten
     * Standard-Dialog
+    * Eigenschaften von Formularen ändern (Stay-on-top)
 
 
   exportierte Funktionen/Prozeduren:
@@ -36,6 +37,7 @@
     SetCompProp(Comp: TComponent; const Name, Value: string)
     SetFont(Form: TForm)
     ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
+    WindowStayOnTop(Handle: THandle; Value: Boolean)
     WaveIsValid(const Name: string): Boolean
 
 
@@ -73,6 +75,7 @@ procedure ListViewSelectAll(ListView: TListView);
 procedure SelectRootIfNoneSelected(Tree: TTreeView);
 procedure SetCompProp(Comp: TComponent; const Name, Value: string);
 procedure SetFont(Form: TForm);
+procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 
 type TTimeCount = class(TObject)
      private
@@ -348,6 +351,18 @@ begin
     if Screen.Fonts.IndexOf('Microsoft Sans Serif') >= 0 then
       Form.Font.Name := 'Microsoft Sans Serif';
   end;
+end;
+
+{ WindowStayOnTop --------------------------------------------------------------
+
+  setzt die Eigenschaft 'Stay-on-top' eines Formulars.                         }
+
+procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
+begin
+  if Value then
+    SetWindowPos(Handle, HWND_TOPMOST, -1, -1, -1, -1, SWP_NOMOVE + SWP_NOSIZE)
+  else
+    SetWindowPos(Handle, HWND_NOTOPMOST, -1, -1, -1, -1, SWP_NOMOVE + SWP_NOSIZE);
 end;
 
 { ShowMsgDlg -------------------------------------------------------------------
