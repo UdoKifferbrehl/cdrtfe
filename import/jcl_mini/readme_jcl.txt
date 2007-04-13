@@ -28,8 +28,8 @@ Some functions of cdrtfe are based on the JCL (Jedi Code Library, Project JEDI).
 Thus, the JCL has to be installed in order to compile the program. You can down-
 load the JCL (source code and installer) from http://jcl.sourceforge.net/.
 
-If you don't want to install the JCL, you can get from the cdrtfe donwload page
-a package which contains the needed parts of the JCL. Extract the files into
+If you don't want to install the JCL, you can get a package which contains the
+needed parts of the JCL from the cdrtfe download page. Extract the files into
 this folder (import\jcl_mini).
 
 In both cases the GPL with the special exception (permission to combine this
