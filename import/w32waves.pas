@@ -11,6 +11,8 @@
 
 unit W32Waves;
 
+{$I directives.inc}
+
 interface
 
 uses SysUtils, Windows, MMSystem, Dialogs;
