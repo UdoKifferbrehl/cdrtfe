@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.02.2007
+  letzte Änderung  22.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -90,6 +90,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        CDTextTP      : Boolean;    // <title> - <performer>.mp3
        PortableMode  : Boolean;
        DetectSpeeds  : Boolean;
+       AutoSaveOnExit: Boolean;
      end;
 
      TWinPos = record
@@ -564,6 +565,7 @@ begin
     CDTextTP := False;
     PortableMode := False;
     DetectSpeeds := False;
+    AutoSaveOnExit := False;
   end;
 
   with WinPos do
@@ -1348,6 +1350,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
       WriteBool(Section, 'CDTextTP', CDTextTP);
       WriteBool(Section, 'DetectSpeeds', DetectSpeeds);
+      WriteBool(Section, 'AutoSaveOnExit', AutoSaveOnExit);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1722,6 +1725,7 @@ var PF: TIniFile; // ProjectFile
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
       CDTextTP := ReadBool(Section, 'CDTextTP', False);
       DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
+      AutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
     end;
     ProgressBarUpdate(1);
 
@@ -1734,7 +1738,7 @@ var PF: TIniFile; // ProjectFile
       begin
         {read-only}
         if not PortableMode then
-          PortableMode := ReadBool(Section, 'PortableMode', False);      
+          PortableMode := ReadBool(Section, 'PortableMode', False);
       end;
       {Fensterpositionen}
       Section := 'WinPos';
@@ -2123,6 +2127,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
       WriteBool(Section, 'CDTextTP', CDTextTP);
       WriteBool(Section, 'DetectSpeeds', DetectSpeeds);
+      WriteBool(Section, 'AutoSaveOnExit', AutoSaveOnExit);
     end;
 
     Section := 'WinPos';
@@ -2449,6 +2454,7 @@ var PF: TRegIniFile; // ProjectFile
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
       CDTextTP := ReadBool(Section, 'CDTextTP', False);
       DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
+      AutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', AutoSaveOnExit);
     end;
     Shared.ProgressBarPosition := 1;
     ProgressBarUpdate;

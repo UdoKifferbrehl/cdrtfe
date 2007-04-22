@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 02.08.2006
+  letzte Änderung 22.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -80,6 +80,7 @@ type
     GroupBoxAutoErase: TGroupBox;
     RadioButtonAutoEraseDisabled: TRadioButton;
     RadioButtonAutoErase: TRadioButton;
+    CheckBoxAutoSaveOnExit: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -180,6 +181,7 @@ begin
     CheckBoxShellExt.Enabled := False;
     StaticText4.Enabled := False;
   end;
+  CheckBoxAutoSaveOnExit.Checked := FSettings.General.AutoSaveOnExit;
   EditTempFolder.Text := FSettings.General.TempFolder;
   CheckBoxShellExt.Checked           := FShellExtIsSet;
   CheckBoxNoConfirm.Checked          := FSettings.General.NoConfirm;
@@ -226,6 +228,7 @@ begin
   FSettings.Cdrdao.ForceGenericMmc    := CheckBoxForceGenericMMC.Checked;
   FSettings.Cdrdao.ForceGenericMmcRaw := CheckBoxForceGenericMMCRaw.Checked;
   FSettings.Cdrdao.WriteCueImages     := CheckBoxCdrdaoCueImage.Checked;
+  FSettings.General.AutoSaveOnExit    := CheckBoxAutoSaveOnExit.Checked;
   FSettings.General.TempFolder        := EditTempFolder.Text;
   with FSettings.Cdrecord do
   begin

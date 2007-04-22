@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.03.2007
+  letzte Änderung  22.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3971,6 +3971,16 @@ begin
   {$IFDEF WriteLogfile} AddLog('TForm1.FormClose' + CRLF, 0); {$ENDIF}
   {Einstellungen speichern}
   SaveWinPos;
+  if FSettings.General.AutoSaveOnExit then
+  begin
+    SetSettings;
+    {$IFDEF RegistrySettings}
+    FSettings.SaveToRegistry;
+    {$ENDIF}
+    {$IFDEF IniSettings}
+    FSettings.SaveToFile(cIniFile);
+    {$ENDIF}
+  end;
 end;
 
 procedure TForm1.FormDblClick(Sender: TObject);
@@ -4118,7 +4128,8 @@ end;
 
 procedure TForm1.ButtonCancelClick(Sender: TObject);
 begin
-  Application.Terminate;
+  Self.Close;
+  //Application.Terminate;
 end;
 
 { Data-CD: Options file system }
