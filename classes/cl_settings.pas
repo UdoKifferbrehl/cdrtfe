@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.04.2007
+  letzte Änderung  24.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -79,6 +79,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        NoConfirm     : Boolean;
        TabFrmSettings: Byte;
        TabFrmDAE     : Byte;
+       TabFrmDCDFS   : Byte;
        NoWriter      : Boolean;
        NoReader      : Boolean;
        NoDevices     : Boolean;
@@ -211,6 +212,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        ISOLevel    : Boolean;
        ISOLevelNr  : Integer;   // 1 - 4; 0 = keine Angabe
        ISOOutChar  : Integer;   // -1 = keine Auswahl, sonst Index
+       ISOInChar   : Integer;
        ISO37Chars  : Boolean;   // -max-iso-filenames
        ISONoDot    : Boolean;   // -d
        ISOStartDot : Boolean;   // -L -> mkisofs 2.01a32: -allow-leading-dots
@@ -538,7 +540,7 @@ begin
                           'cp10029,cp10007,cp10006,cp10000,iso8859-1,' +
                           'iso8859-2,iso8859-3,iso8859-4,iso8859-5,'   +
                           'iso8859-6,iso8859-7,iso8859-8,iso8859-9,'   +
-                          'iso8859-14,iso8859-15,koi8-u,koi8-r';
+                          'iso8859-14,iso8859-15,koi8-u,koi8-r,default';
     Mp3Qualities.CommaText := 'medium,standard,extreme,insane,' +
                               '320,256,224,192,160,128,112,96,80';
     General.Choice := 0;
@@ -554,6 +556,7 @@ begin
     NoConfirm := False;
     TabFrmSettings := cCdrtfe;
     TabFrmDAE      := cTabDAE;
+    TabFrmDCDFS    := cTabFSGen; 
     NoWriter := False;
     NoReader := False;
     NoDevices := False;
@@ -687,6 +690,7 @@ begin
     ISOLevel     := False;
     ISOLevelNr   := 0;
     ISOOutChar   := -1;
+    ISOInChar    := -1;
     ISO37Chars   := False;
     ISONoDot     := False;
     ISOStartDot  := False;
@@ -1345,6 +1349,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
       WriteInteger(Section, 'TabFrmDAE', TabFrmDAE);
+      WriteInteger(Section, 'TabFrmDCDFS', TabFrmDCDFS);
       WriteString(Section, 'TempFolder', TempFolder);
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
@@ -1445,6 +1450,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'ISOLevel', ISOLevel);
       WriteInteger(Section, 'ISOLevelNr', ISOLevelNr);
       WriteInteger(Section, 'ISOOutChar', ISOOutChar);
+      WriteInteger(Section, 'ISOInChar', ISOInChar);
       WriteBool(Section, 'ISO37Chars', ISO37Chars);
       WriteBool(Section, 'ISONoDot', ISONoDot);
       WriteBool(Section, 'ISOStartDot', ISOStartDot);
@@ -1720,6 +1726,7 @@ var PF: TIniFile; // ProjectFile
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
       TabFrmDAE := ReadInteger(Section, 'TabFrmDAE', cTabDAE);
+      TabFrmDCDFS := ReadInteger(Section, 'TabFrmDCDFS', cTabFSGen);
       TempFolder := ReadString(Section, 'TempFolder', '');
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
@@ -1845,6 +1852,7 @@ var PF: TIniFile; // ProjectFile
       ISOLevel := ReadBool(Section, 'ISOLevel', False);
       ISOLevelNr := ReadInteger(Section, 'ISOLevelNr', 0);
       ISOOutChar := ReadInteger(Section, 'ISOOutChar', -1);
+      ISOInChar := ReadInteger(Section, 'ISOInChar', -1);
       ISO37Chars := ReadBool(Section, 'ISO37Chars', False);
       ISONoDot := ReadBool(Section, 'ISONoDot', False);
       ISOStartDot := ReadBool(Section, 'ISOStartDot', False);
@@ -2122,6 +2130,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'NoConfirm', NoConfirm);
       WriteInteger(Section, 'TabFrmSettings', TabFrmSettings);
       WriteInteger(Section, 'TabFrmDAE', TabFrmDAE);
+      WriteInteger(Section, 'TabFrmDCDFS', TabFrmDCDFS);
       WriteString(Section, 'TempFolder', TempFolder);
       WriteBool(Section, 'AskForTempDir', AskForTempDir);
       WriteBool(Section, 'CDTextUseTags', CDTextUseTags);
@@ -2208,6 +2217,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'ISOLevel', ISOLevel);
       WriteInteger(Section, 'ISOLevelNr', ISOLevelNr);
       WriteInteger(Section, 'ISOOutChar', ISOOutChar);
+      WriteInteger(Section, 'ISOInChar', ISOInChar);
       WriteBool(Section, 'ISO37Chars', ISO37Chars);
       WriteBool(Section, 'ISONoDot', ISONoDot);
       WriteBool(Section, 'ISOStartDot', ISOStartDot);
@@ -2449,6 +2459,7 @@ var PF: TRegIniFile; // ProjectFile
       NoConfirm := ReadBool(Section, 'NoConfirm', False);
       TabFrmSettings := ReadInteger(Section, 'TabFrmSettings', cCdrtfe);
       TabFrmDAE := ReadIntegr(Section, 'TabFrmDAE', cTabDAE);
+      TabFrmDCDFS := ReadIntegr(Section, 'TabFrmDCDFS', cTabFSGen);      
       TempFolder := ReadString(Section, 'TempFolder', '');
       AskForTempDir := ReadBool(Section, 'AskForTempDir', False);
       CDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
@@ -2548,6 +2559,7 @@ var PF: TRegIniFile; // ProjectFile
       ISOLevel := ReadBool(Section, 'ISOLevel', False);
       ISOLevelNr := ReadInteger(Section, 'ISOLevelNr', 0);
       ISOOutChar := ReadInteger(Section, 'ISOOutChar', -1);
+      ISOInChar := ReadInteger(Section, 'ISOInChar', -1);
       ISO37Chars := ReadBool(Section, 'ISO37Chars', False);
       ISONoDot := ReadBool(Section, 'ISONoDot', False);
       ISOStartDot := ReadBool(Section, 'ISOStartDot', False);

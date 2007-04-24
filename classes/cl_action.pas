@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.02.2007
+  letzte Änderung  24.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -482,11 +482,14 @@ begin
     if RationalRock then CmdM := CmdM + ' -rational-rock' else       // ' -r';
                          CmdM := CmdM + ' -rock';                    // ' -R';
     if UDF          then CmdM := CmdM + ' -udf';
-    if ISO31Chars   then CmdM := CmdM + ' -full-iso9660-filenames';  // ' -l';
-    if ISOLevel     then CmdM := CmdM + ' -iso-level ' + IntToStr(ISOLevelNr);
-    if ISOLevel and (ISOOutChar > -1)
+    if ISOInChar > -1
+                    then CmdM := CmdM + ' -input-charset '
+                                      + CharSets[ISOInChar];
+    if ISOOutChar > -1
                     then CmdM := CmdM + ' -output-charset '
                                       + CharSets[ISOOutChar];
+    if ISO31Chars   then CmdM := CmdM + ' -full-iso9660-filenames';  // ' -l';
+    if ISOLevel     then CmdM := CmdM + ' -iso-level ' + IntToStr(ISOLevelNr);
     if ISO37Chars   then CmdM := CmdM + ' -max-iso9660-filenames';
     if ISONoDot     then CmdM := CmdM + ' -omit-period';             // ' -d';
     if ISOStartDot  then CmdM := CmdM + ' -allow-leading-dots';      // ' -L';

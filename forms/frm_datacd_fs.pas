@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_datacd_fs.pas: mkisfos-Optionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.09.2005
+  letzte Änderung  24.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,20 +22,37 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_settings, cl_lang;
+     cl_settings, cl_lang, ComCtrls;
 
 type
   TFormDataCDFS = class(TForm)
     ButtonCancel: TButton;
     ButtonOk: TButton;
+    OpenDialog1: TOpenDialog;
+    PageControlFileSystem: TPageControl;
+    TabSheetGeneral: TTabSheet;
+    TabSheetISO: TTabSheet;
+    GroupBoxJoliet: TGroupBox;
+    Label2: TLabel;
+    CheckBoxJolietLong: TCheckBox;
+    CheckBoxJoliet: TCheckBox;
+    GroupBoxDuplicateFiles: TGroupBox;
+    CheckBoxFindDups: TCheckBox;
+    GroupBoxUDF: TGroupBox;
+    CheckBoxUDF: TCheckBox;
+    GroupBoxRockRidge: TGroupBox;
+    CheckBoxRockRidge: TCheckBox;
+    CheckBoxRationalRock: TCheckBox;
     GroupBoxBoot: TGroupBox;
     ButtonBootImageSelect: TButton;
     CheckBoxBoot: TCheckBox;
     CheckBoxBootCatHide: TCheckBox;
     StaticText1: TStaticText;
     EditBootImage: TEdit;
+    CheckBoxBootBinHide: TCheckBox;
+    CheckBoxBootNoEmul: TCheckBox;
     GroupBoxISO: TGroupBox;
-    OpenDialog1: TOpenDialog;
+    Label1: TLabel;
     CheckBoxISO31Chars: TCheckBox;
     CheckBoxISONoDot: TCheckBox;
     CheckBoxISODeepDir: TCheckBox;
@@ -45,25 +62,14 @@ type
     CheckBoxISOLower: TCheckBox;
     CheckBoxISONoTrans: TCheckBox;
     CheckBoxISOMultiDot: TCheckBox;
-    Label1: TLabel;
     CheckBoxISOLevel: TCheckBox;
     ComboBoxISOLevel: TComboBox;
-    CheckBoxBootBinHide: TCheckBox;
-    GroupBoxJoliet: TGroupBox;
-    CheckBoxJolietLong: TCheckBox;
-    Label2: TLabel;
-    ComboBoxISOOutChar: TComboBox;
-    Label3: TLabel;
     CheckBoxISONoVer: TCheckBox;
-    CheckBoxBootNoEmul: TCheckBox;
-    GroupBoxUDF: TGroupBox;
-    CheckBoxUDF: TCheckBox;
-    CheckBoxJoliet: TCheckBox;
-    GroupBoxRockRidge: TGroupBox;
-    CheckBoxRockRidge: TCheckBox;
-    GroupBoxDuplicateFiles: TGroupBox;
-    CheckBoxFindDups: TCheckBox;
-    CheckBoxRationalRock: TCheckBox;
+    GroupBoxCharSet: TGroupBox;
+    ComboBoxISOOutChar: TComboBox;
+    ComboBoxISOInChar: TComboBox;
+    LabelCharsetIn: TLabel;
+    LabelCharsetOut: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -73,7 +79,9 @@ type
     { Private declarations }
     FSettings: TSettings;
     FLang: TLang;
+    function GetActivePage: Byte;
     function InputOk: Boolean;
+    procedure ActivateTab;
     procedure CheckControls;
     procedure GetSettings;
     procedure SetSettings;
@@ -94,6 +102,27 @@ uses constant, f_misc;
 {uses ;}
 
 {var}
+
+{ ActivateTab ------------------------------------------------------------------
+
+  ActivateTab zeigt das TabSheet an, das in FSettings.General.TabFrmSettings
+  angegeben ist.                                                               }
+
+procedure TFormDataCDFS.ActivateTab;
+begin
+   PageControlFileSystem.ActivePage :=
+     PageControlFileSystem.Pages[FSettings.General.TabFrmDCDFS - 1];
+end;
+
+{ GetActivePage ----------------------------------------------------------------
+
+  GetActivePage liefert als Ergebnis die Nummer der aktiven Registerkarte:
+  Allgemein = 1; ISO = 2;                                                      }
+
+function TFormDataCDFS.GetActivePage: Byte;
+begin
+  Result := PageControlFileSystem.ActivePage.PageIndex + 1;
+end;
 
 { InputOk ----------------------------------------------------------------------
 
@@ -121,6 +150,10 @@ begin
   begin
     ComboBoxISOOutChar.ItemIndex := -1;
   end;
+  if ComboBoxISOInChar.ItemIndex = 0 then
+  begin
+    ComboBoxISOInChar.ItemIndex := -1;
+  end;
 end;
 
 
@@ -140,27 +173,29 @@ begin
     CheckBoxISO31Chars.Checked   := ISO31Chars;
     if ISOLevel then
     begin
-      CheckBoxISOLevel.Checked := True;
+      CheckBoxISOLevel.Checked   := True;
     end;
-    ComboBoxISOLevel.ItemIndex := ISOLevelNr - 1;
+    ComboBoxISOLevel.ItemIndex   := ISOLevelNr - 1;
     ComboBoxISOOutChar.ItemIndex := ISOOutChar;
-    CheckBoxISO37Chars.Checked  := ISO37Chars;
-    CheckBoxISONoDot.Checked    := ISONoDot;
-    CheckBoxISOStartDot.Checked := ISOStartDot;
-    CheckBoxISOMultiDot.Checked := ISOMultiDot;
-    CheckBoxISOASCII.Checked    := ISOASCII;
-    CheckBoxISOLower.Checked    := ISOLower;
-    CheckBoxISONoTrans.Checked  := ISONoTrans;
-    CheckBoxISODeepDir.Checked  := ISODeepDir;
-    CheckBoxISONoVer.Checked    := ISONoVer;
-    CheckBoxUDF.Checked         := UDF;
-    CheckBoxBoot.Checked        := Boot;
-    EditBootImage.Text          := BootImage;
-    CheckBoxBootCatHide.Checked := BootCatHide;
-    CheckBoxBootBinHide.Checked := BootBinHide;
-    CheckBoxBootNoEmul.Checked  := BootNoEmul;
-    CheckBoxFindDups.Checked    := FindDups;
+    ComboBoxISOInChar.ItemIndex  := ISOInChar;
+    CheckBoxISO37Chars.Checked   := ISO37Chars;
+    CheckBoxISONoDot.Checked     := ISONoDot;
+    CheckBoxISOStartDot.Checked  := ISOStartDot;
+    CheckBoxISOMultiDot.Checked  := ISOMultiDot;
+    CheckBoxISOASCII.Checked     := ISOASCII;
+    CheckBoxISOLower.Checked     := ISOLower;
+    CheckBoxISONoTrans.Checked   := ISONoTrans;
+    CheckBoxISODeepDir.Checked   := ISODeepDir;
+    CheckBoxISONoVer.Checked     := ISONoVer;
+    CheckBoxUDF.Checked          := UDF;
+    CheckBoxBoot.Checked         := Boot;
+    EditBootImage.Text           := BootImage;
+    CheckBoxBootCatHide.Checked  := BootCatHide;
+    CheckBoxBootBinHide.Checked  := BootBinHide;
+    CheckBoxBootNoEmul.Checked   := BootNoEmul;
+    CheckBoxFindDups.Checked     := FindDups;
   end;
+  ActivateTab;
 end;
 
 { SetSettings ------------------------------------------------------------------
@@ -179,6 +214,7 @@ begin
     ISOLevel      := CheckBoxIsoLevel.Checked;
     ISOLevelNr    := ComboBoxISOLevel.ItemIndex + 1;
     ISOOutChar    := ComboBoxISOOutChar.ItemIndex;
+    ISOInChar     := ComboBoxISOInChar.ItemIndex;
     ISO37Chars    := CheckBoxISO37Chars.Checked;
     ISONoDot      := CheckBoxISONoDot.Checked;
     ISOStartDot   := CheckBoxISOStartDot.Checked;
@@ -201,6 +237,7 @@ begin
       Multi := False;
     end;
   end;
+  FSettings.General.TabFrmDCDFS := GetActivePage;
 end;
 
 { CheckControls ----------------------------------------------------------------
@@ -232,6 +269,7 @@ begin
   if CheckBoxISOLevel.Checked then
   begin
     ComboBoxISOLevel.Enabled := True;
+    (* Zeichensatz-Einstellungen sind _nicht_ beschränkt auf ISO-Level 4
     if ComboBoxISOLevel.ItemIndex = 3 then
     begin
       ComboBoxISOOutChar.Enabled := True;
@@ -240,12 +278,13 @@ begin
     begin
       ComboBoxISOOutChar.Enabled := False;
       Label3.Enabled := False;
-    end;
+    end; *)
   end else
   begin
     ComboBoxISOLevel.Enabled := False;
+    (*
     ComboBoxISOOutChar.Enabled := False;
-    Label3.Enabled := False;
+    Label3.Enabled := False; *)
   end;
   {Boot-Optionen}
   if CheckBoxBoot.Checked then
@@ -308,7 +347,8 @@ procedure TFormDataCDFS.FormShow(Sender: TObject);
 begin
   SetFont(Self);
   FLang.SetFormLang(Self);
-  ComboBoxISOOutChar.Items.Assign(Fsettings.General.Charsets);
+  ComboBoxISOOutChar.Items.Assign(FSettings.General.Charsets);
+  ComboBoxISOInChar.Items.Assign(FSettings.General.Charsets);
   GetSettings;
   CheckControls;
   {Wenn Label 'boot' geklickt wurde}
@@ -345,17 +385,15 @@ begin
     Key := NoKey;
     if C = ComboBoxISOLevel then
     begin
-      if ComboBoxISOLevel.ItemIndex = 3 then
-      begin
-        ComboBoxISOOutChar.SetFocus;
-      end else
-      begin
-        CheckBoxISO37Chars.SetFocus;
-      end;
+      CheckBoxISO37Chars.SetFocus;
+    end else
+    if C = ComboBoxISOInChar then
+    begin
+      ComboBoxISOOutChar.SetFocus;
     end else
     if C = ComboBoxISOOutChar then
     begin
-      CheckBoxISO37Chars.SetFocus;
+      CheckBoxFindDups.SetFocus;
     end else
     if C = EditBootImage then
     begin
