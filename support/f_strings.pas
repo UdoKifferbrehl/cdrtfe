@@ -1,8 +1,8 @@
 { f_strings.pas: String-Funktionen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
 
-  letzte Änderung  14.09.2005
+  letzte Änderung  26.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -183,7 +183,7 @@ end;
 
 function QuotePath(const S: string): string;
 begin
-  if Pos(' ', S) > 0 then
+  if (Pos(' ', S) > 0) or (Pos('''', S) > 0) then
   begin
     Result := '"' + S + '"';
   end else
