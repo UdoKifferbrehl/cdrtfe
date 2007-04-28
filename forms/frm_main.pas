@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.04.2007
+  letzte Änderung  28.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3669,6 +3669,10 @@ begin
     end;
   end;
   SetWinPos;
+  {$IFDEF ShowStartupTime}
+  TC.StopTimeCount;
+  Form1.Memo1.Lines.Add('StartupTime: ' + TC.TimeAsString);
+  {$ENDIF}
 end;
 
 { FormActivate -----------------------------------------------------------------
@@ -5927,6 +5931,9 @@ initialization
   {$IFDEF ShowTime}
   TC  := TTimeCount.Create;
   TC2 := TTimeCount.Create;
+  {$ENDIF}
+  {$IFDEF ShowStartupTime}
+  TC.StartTimeCount;
   {$ENDIF}
 
 finalization

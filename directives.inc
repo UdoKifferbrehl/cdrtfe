@@ -279,6 +279,10 @@
          // Gesamtdauer der Ausführung
          //   - betrifft: frm_main.pas
 
+{$DEFINE xShowStartupTime}
+         // Startzeit anzeigen (frm_main initialization - 
+         //   - betrifft: frm_main.pas
+
 {$ENDIF}
 
 
