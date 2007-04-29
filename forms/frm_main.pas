@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.04.2007
+  letzte Änderung  29.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,6 +21,9 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
+     {$IFDEF Delphi2005Up}
+     HTMLHelpViewer,
+     {$ENDIF}
      {externe Komponenten}
      {$IFDEF UseOLEDragDrop}
      DropTarget, DropSource,
@@ -248,6 +251,7 @@ type
     LabelDAECustom: TLabel;
     RadioButtonMInfo: TRadioButton;
     MainMenuReset: TMenuItem;
+    MainMenuHelp: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -362,6 +366,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure MainMenuResetClick(Sender: TObject);
+    procedure MainMenuHelpClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -4499,6 +4504,11 @@ end;
 
 { ?/Info }
 
+procedure TForm1.MainMenuHelpClick(Sender: TObject);
+begin
+  Application.HelpContext(1000);
+end;
+
 procedure TForm1.MainMenuInfoClick(Sender: TObject);
 var AboutBox: TFormAbout;
 begin
@@ -5919,6 +5929,10 @@ initialization
   DeviceChangeNotifier := TDeviceChangeNotifier.Create(nil);
   DeviceChangeNotifier.OnDiskInserted := Form1.DeviceArrival;
   DeviceChangeNotifier.OnDiskRemoved := Form1.DeviceRemoval;
+  {Helpsystem - chm-support erst ab Delphi 2005?}
+  {$IFDEF Delphi2005Up}
+  Application.HelpFile := StartUpDir + cHelpFile;
+  {$ENDIF}
   {$IFDEF ShowDebugWindow}
   FormDebug := TFormDebug.Create(nil);
   FormDebug.Top := 0;
