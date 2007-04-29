@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.04.2007
+  letzte Änderung  29.04.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -121,6 +121,7 @@ const {die GUID für cdrtfe}
       cRrencRRDFile    : string = '\protect.rrd';
       cIniFile         : string = '\cdrtfe.ini';
       cIniFileTools    : string = '\cdrtfe_tools.ini';
+      cHelpFile        : string = '\cdrtfe.chm';
       cDefaultIsoName  : string = '\image';
 
       {Dateiendungen}
