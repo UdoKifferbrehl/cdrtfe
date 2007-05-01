@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.04.2007
+  letzte Änderung  01.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -252,6 +252,7 @@ type
     RadioButtonMInfo: TRadioButton;
     MainMenuReset: TMenuItem;
     MainMenuHelp: TMenuItem;
+    N4: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -3676,7 +3677,7 @@ begin
   SetWinPos;
   {$IFDEF ShowStartupTime}
   TC.StopTimeCount;
-  Form1.Memo1.Lines.Add('StartupTime: ' + TC.TimeAsString);
+  TLogWin.Inst.Add('StartupTime: ' + TC.TimeAsString);
   {$ENDIF}
 end;
 

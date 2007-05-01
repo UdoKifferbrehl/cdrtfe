@@ -2,10 +2,10 @@
 
   frm_output.pas: Darstellung der Ausgabe der Konsolenprogramme
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.09.2006
+  letzte Änderung  01.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -28,11 +28,13 @@ type
   TFormOutput = class(TForm)
     Memo1: TMemo;
     ButtonOk: TButton;
+    CheckBoxAutoUpdate: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure CheckBoxAutoUpdateClick(Sender: TObject);
   private
     { Private declarations }
     FLang: TLang;
@@ -47,7 +49,7 @@ type
 
 implementation
 
-uses frm_main, f_misc;
+uses frm_main, f_misc, cl_logwindow;
 
 {$R *.DFM}
 
@@ -133,6 +135,17 @@ procedure TFormOutput.Memo1KeyDown(Sender: TObject; var Key: Word;
 begin
   case Key of
     VK_ESCAPE: Close;
+  end;
+end;
+
+procedure TFormOutput.CheckBoxAutoUpdateClick(Sender: TObject);
+begin
+  if (Sender as TCheckBox).Checked then
+  begin
+    TLogWin.Inst.SetMemo2(Memo1);
+  end else
+  begin
+    TLogWin.Inst.UnsetMemo2;
   end;
 end;
 
