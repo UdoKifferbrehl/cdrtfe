@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.04.2007
+  letzte Änderung  01.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,6 +70,11 @@ type
     ComboBoxISOInChar: TComboBox;
     LabelCharsetIn: TLabel;
     LabelCharsetOut: TLabel;
+    CheckBoxBootInfoTable: TCheckBox;
+    EditBootLoadSegAdr: TEdit;
+    EditBootLoadSize: TEdit;
+    LabelBootLoadSegAdr: TLabel;
+    LabelBootLoadSize: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -166,34 +171,37 @@ procedure TFormDataCDFS.GetSettings;
 begin
   with FSettings.DataCD do
   begin
-    CheckBoxJoliet.Checked       := Joliet;
-    CheckBoxJolietLong.Checked   := JolietLong;
-    CheckBoxRockRidge.Checked    := RockRidge;
-    CheckBoxRationalRock.Checked := RationalRock;
-    CheckBoxISO31Chars.Checked   := ISO31Chars;
+    CheckBoxJoliet.Checked        := Joliet;
+    CheckBoxJolietLong.Checked    := JolietLong;
+    CheckBoxRockRidge.Checked     := RockRidge;
+    CheckBoxRationalRock.Checked  := RationalRock;
+    CheckBoxISO31Chars.Checked    := ISO31Chars;
     if ISOLevel then
     begin
-      CheckBoxISOLevel.Checked   := True;
+      CheckBoxISOLevel.Checked    := True;
     end;
-    ComboBoxISOLevel.ItemIndex   := ISOLevelNr - 1;
-    ComboBoxISOOutChar.ItemIndex := ISOOutChar;
-    ComboBoxISOInChar.ItemIndex  := ISOInChar;
-    CheckBoxISO37Chars.Checked   := ISO37Chars;
-    CheckBoxISONoDot.Checked     := ISONoDot;
-    CheckBoxISOStartDot.Checked  := ISOStartDot;
-    CheckBoxISOMultiDot.Checked  := ISOMultiDot;
-    CheckBoxISOASCII.Checked     := ISOASCII;
-    CheckBoxISOLower.Checked     := ISOLower;
-    CheckBoxISONoTrans.Checked   := ISONoTrans;
-    CheckBoxISODeepDir.Checked   := ISODeepDir;
-    CheckBoxISONoVer.Checked     := ISONoVer;
-    CheckBoxUDF.Checked          := UDF;
-    CheckBoxBoot.Checked         := Boot;
-    EditBootImage.Text           := BootImage;
-    CheckBoxBootCatHide.Checked  := BootCatHide;
-    CheckBoxBootBinHide.Checked  := BootBinHide;
-    CheckBoxBootNoEmul.Checked   := BootNoEmul;
-    CheckBoxFindDups.Checked     := FindDups;
+    ComboBoxISOLevel.ItemIndex    := ISOLevelNr - 1;
+    ComboBoxISOOutChar.ItemIndex  := ISOOutChar;
+    ComboBoxISOInChar.ItemIndex   := ISOInChar;
+    CheckBoxISO37Chars.Checked    := ISO37Chars;
+    CheckBoxISONoDot.Checked      := ISONoDot;
+    CheckBoxISOStartDot.Checked   := ISOStartDot;
+    CheckBoxISOMultiDot.Checked   := ISOMultiDot;
+    CheckBoxISOASCII.Checked      := ISOASCII;
+    CheckBoxISOLower.Checked      := ISOLower;
+    CheckBoxISONoTrans.Checked    := ISONoTrans;
+    CheckBoxISODeepDir.Checked    := ISODeepDir;
+    CheckBoxISONoVer.Checked      := ISONoVer;
+    CheckBoxUDF.Checked           := UDF;
+    CheckBoxBoot.Checked          := Boot;
+    EditBootImage.Text            := BootImage;
+    CheckBoxBootCatHide.Checked   := BootCatHide;
+    CheckBoxBootBinHide.Checked   := BootBinHide;
+    CheckBoxBootNoEmul.Checked    := BootNoEmul;
+    CheckBoxBootInfoTable.Checked := BootInfTable;
+    EditBootLoadSegAdr.Text       := BootSegAdr;
+    EditBootLoadSize.Text         := BootLoadSize;
+    CheckBoxFindDups.Checked      := FindDups;
   end;
   ActivateTab;
 end;
@@ -230,6 +238,9 @@ begin
     BootCatHide   := CheckBoxBootCatHide.Checked;
     BootBinHide   := CheckBoxBootBinHide.Checked;
     BootNoEmul    := CheckBoxBootNoEmul.Checked;
+    BootInfTable  := CheckBoxBootInfoTable.Checked;
+    BootSegAdr    := EditBootLoadSegAdr.Text;
+    BootLoadSize  := EditBootLoadSize.Text;
     FindDups      := CheckBoxFindDups.Checked;
     {wenn kein RockRidge, dann auch kein Multisession}
     if not RockRidge then
@@ -246,6 +257,7 @@ end;
   Einstellungen vorkommen.                                                     }
 
 procedure TFormDataCDFS.CheckControls;
+var Temp: Boolean;
 begin
   {Joliet-Optionen}
   if CheckBoxJoliet.Checked then
@@ -292,6 +304,7 @@ begin
     CheckBoxBootCatHide.Enabled := True;
     CheckBoxBootBinHide.Enabled := True;
     CheckBoxBootNoEmul.Enabled := True;
+    CheckBoxBootInfoTable.Enabled := True;
     EditBootImage.Enabled := True;
     ButtonBootImageSelect.Enabled := True;
     StaticText1.Enabled := True;
@@ -300,10 +313,16 @@ begin
     CheckBoxBootCatHide.Enabled := False;
     CheckBoxBootBinHide.Enabled := False;
     CheckBoxBootNoEmul.Enabled := False;
+    CheckBoxBootInfoTable.Enabled := False;
     EditBootImage.Enabled := False;
     ButtonBootImageSelect.Enabled := False;
     StaticText1.Enabled := False;
   end;
+  Temp := CheckBoxBoot.Checked and CheckBoxBootNoEmul.Checked;
+  LabelBootLoadSegAdr.Enabled := Temp;
+  LabelBootLoadSize.Enabled := Temp;
+  EditBootLoadSegAdr.Enabled := Temp;
+  EditBootLoadSize.Enabled := Temp;
 end;
 
 

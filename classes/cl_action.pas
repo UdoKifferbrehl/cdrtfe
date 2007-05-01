@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.04.2007
+  letzte Änderung  01.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -502,14 +502,22 @@ begin
     if Boot         then
     begin
       CmdM := CmdM + ' -eltorito-boot ' + QuotePath(ExtractFileName(BootImage));
-      if BootNoEmul  then CmdM := CmdM + ' -no-emul-boot';
-      if BootBinHide then
+      if BootInfTable then CmdM := CmdM + ' -boot-info-table';
+      if BootNoEmul   then
+      begin
+        CmdM := CmdM + ' -no-emul-boot';
+        if BootSegAdr <> '' then CmdM := CmdM + ' -boot-load-seg '
+                                              + BootSegAdr;
+        if BootLoadSize <> '' then CmdM := CmdM + ' -boot-load-size '
+                                                + BootLoadSize;
+      end;
+      if BootBinHide  then
       begin
         CmdM := CmdM + ' -hide ' + QuotePath(ExtractFileName(BootImage));
         if Joliet then CmdM := CmdM + ' -hide-joliet '
                                     + QuotePath(ExtractFileName(BootImage));
       end;
-      if BootCatHide then
+      if BootCatHide  then
       begin
         CmdM := CmdM + ' -hide boot.catalog';
         if Joliet then CmdM := CmdM + ' -hide-joliet boot.catalog';

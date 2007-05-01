@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.04.2007
+  letzte Änderung  01.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -228,6 +228,9 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        BootCatHide : Boolean;
        BootBinHide : Boolean;
        BootNoEmul  : Boolean;
+       BootInfTable: Boolean;
+       BootSegAdr  : string;
+       BootLoadSize: string;
        VolId       : string;
        MsInfo      : string;
        FindDups    : Boolean;
@@ -706,6 +709,9 @@ begin
     BootCatHide  := False;
     BootBinHide  := False;
     BootNoEmul   := False;
+    BootInfTable := False;
+    BootSegAdr   := '';
+    BootLoadSize := '';
     VolId        := '';
     MsInfo       := '';
     FindDups     := False;
@@ -1466,6 +1472,9 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'BootCatHide', BootCatHide);
       WriteBool(Section, 'BootBinHide', BootBinHide);
       WriteBool(Section, 'BootNoEmul', BootNoEmul);
+      WriteBool(Section, 'BootInfTable', BootInfTable);
+      WriteString(Section, 'BootSegAdr', BootSegAdr);
+      WriteString(Section, 'BootLoadSize', BootLoadSize);
       WriteString(Section, 'VolId', VolId);
       WriteBool(Section, 'FindDups', FindDups);
       {Einstellungen: cdrecord}
@@ -1868,6 +1877,9 @@ var PF: TIniFile; // ProjectFile
       BootCatHide := ReadBool(Section, 'BootCatHide', False);
       BootBinHide := ReadBool(Section, 'BootBinHide', False);
       BootNoEmul := ReadBool(Section, 'BootNoEmul', False);
+      BootInfTable := ReadBool(Section, 'BootInfTable', False);
+      BootSegAdr := ReadString(Section, 'BootSegAdr', '');
+      BootLoadSize := ReadString(Section, 'BootLoadSize', '');
       VolId := ReadString(Section, 'VolId', '');
       FindDups := ReadBool(Section, 'FindDups', False);
       {Einstellungen: cdrecord}
@@ -2233,6 +2245,9 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'BootCatHide', BootCatHide);
       WriteBool(Section, 'BootBinHide', BootBinHide);
       WriteBool(Section, 'BootNoEmul', BootNoEmul);
+      WriteBool(Section, 'BootInfTable', BootInfTable);
+      WriteString(Section, 'BootSegAdr', BootSegAdr);
+      WriteString(Section, 'BootLoadSize', BootLoadSize);
       WriteString(Section, 'VolId', VolId);
       WriteBool(Section, 'FindDups', FindDups);
       {Einstellungen: cdrecord}
@@ -2575,6 +2590,9 @@ var PF: TRegIniFile; // ProjectFile
       BootCatHide := ReadBool(Section, 'BootCatHide', False);
       BootBinHide := ReadBool(Section, 'BootBinHide', False);
       BootNoEmul := ReadBool(Section, 'BootNoEmul', False);
+      BootInfTable := ReadBool(Section, 'BootInfTable', False);
+      BootSegAdr := ReadString(Section, 'BootSegAdr', '');
+      BootLoadSize := ReadString(Section, 'BootLoadSize', '');
       VolId := ReadString(Section, 'VolId', '');
       FindDups := ReadBool(Section, 'FindDups', False);
       {Einstellungen: cdrecord}
