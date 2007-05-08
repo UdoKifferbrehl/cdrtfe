@@ -2,10 +2,10 @@
 
   f_shellext.pas: ShellExtensions registrieren/löschen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.04.2005
+  letzte Änderung  08.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -89,8 +89,12 @@ end;
   Versionen ist eine Aktivierung per Kommandozeile nicht mehr möglich.         }
 
 procedure RegisterShellExtensions;
-var Reg: TRegistry;
+var Reg    : TRegistry;
+    DLLPath: string;
 begin
+  DLLPath := ExtractFilePath(Application.ExeName);
+  if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
+  DLLPath := DLLPath + cCdrtfeShlExDll;
   Reg := TRegistry.Create;
   try
     with Reg do
@@ -100,8 +104,7 @@ begin
       OpenKey('\CLSID\' + CdrtfeClassID, True);
       WriteString('', 'cdrtfe Context Menu Shell Extension');
       OpenKey('\CLSID\' + CdrtfeClassID + '\InProcServer32', True);
-      WriteString('', ExtractFilePath(Application.ExeName) +
-                      cCdrtfeShlExDll );
+      WriteString('', DLLPath);
       WriteString('ThreadingModel', 'Apartment');
       CreateKey('\*\shellex\ContextMenuHandlers\' + CdrtfeClassID);
       CreateKey('\folder\shellex\ContextMenuHandlers\' + CdrtfeClassID);
