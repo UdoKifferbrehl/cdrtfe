@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.05.2005
+  letzte Änderung  09.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,6 +40,8 @@ procedure UnregisterShellExtensions;
 implementation
 
 uses constant;
+
+const CMHPath: string = '\shellex\ContextMenuHandlers\cdrtfeShlEx';
 
 { ShellExtensionsRegistered ----------------------------------------------------
 
@@ -91,6 +93,7 @@ end;
 procedure RegisterShellExtensions;
 var Reg    : TRegistry;
     DLLPath: string;
+    Key    : string;
 begin
   DLLPath := ExtractFilePath(Application.ExeName);
   if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
@@ -106,8 +109,14 @@ begin
       OpenKey('\CLSID\' + CdrtfeClassID + '\InProcServer32', True);
       WriteString('', DLLPath);
       WriteString('ThreadingModel', 'Apartment');
-      CreateKey('\*\shellex\ContextMenuHandlers\' + CdrtfeClassID);
-      CreateKey('\folder\shellex\ContextMenuHandlers\' + CdrtfeClassID);
+      {Kontextmenü für * erweitern}
+      Key := '\*' + CMHPath;
+      OpenKey(Key, True);
+      WriteString('', CdrtfeClassID);
+      {Kontextmenü für Ordner erweitern}
+      Key := '\folder' + CMHPath;
+      OpenKey(Key, True);
+      WriteString('', CdrtfeClassID);
       {cdrtfe-Programmpfad eintragen}
       RootKey := HKEY_LOCAL_MACHINE; //HKEY_CURRENT_USER;
       OpenKey('\Software\cdrtfe\Program', True);
@@ -128,6 +137,7 @@ end;
 
 procedure UnregisterShellExtensions;
 var Reg: TRegistry;
+    Key: string;
 begin
   Reg := TRegistry.Create;
   try
@@ -137,8 +147,12 @@ begin
       RootKey := HKEY_CLASSES_ROOT;
       DeleteKey('\CLSID\' + CdrtfeClassID + '\InProcServer32');
       DeleteKey('\CLSID\' + CdrtfeClassID);
-      DeleteKey('\*\shellex\ContextMenuHandlers\' + CdrtfeClassID);
-      DeleteKey('\folder\shellex\ContextMenuHandlers\' + CdrtfeClassID);
+      {Kontextmenüeintrag für * löschen}
+      Key := '\*' + CMHPath;
+      DeleteKey(Key);
+      {Kontextmenü für Ordner erweitern}
+      Key := '\folder' + CMHPath;
+      DeleteKey(Key);
       {cdrtfe-Programmpfad löschen}
       RootKey := HKEY_LOCAL_MACHINE;
       DeleteKey('\Software\cdrtfe');
