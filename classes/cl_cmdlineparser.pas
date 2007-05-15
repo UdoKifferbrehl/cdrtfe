@@ -2,10 +2,10 @@
 
   cl_cmdlineparser.pas: Kommandozeilenparser
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.08.2006
+  letzte Änderung  15.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,6 +52,7 @@ type TCmdLineParser = class(TObject)
        FListAudio         : TStringList;
        FListXCD           : TStringList;
        FListVCD           : TStringList;
+       FImageFile         : string;
        FProjectFileToLoad : string;
        FLoadProject       : Boolean;
        FExecute           : Boolean;
@@ -120,6 +121,10 @@ begin
   begin
     FListVCD.Add(FileName);
   end;
+  if AddTo = 'img' then                   // /img
+  begin
+    FImageFile := FileName;
+  end;
   if AddTo = 'load' then                  // Projekt-Datei
   begin
     FProjectFileToLoad := FileName;
@@ -136,6 +141,7 @@ begin
   FListAudio          := TStringList.Create;
   FListXCD            := TStringList.Create;
   FListVCD            := TStringList.Create;
+  FImageFile          := '';
   FProjectFileToLoad  := '';
   FLoadProject        := False;
   FExecute            := False;
@@ -224,6 +230,20 @@ begin
         end;
       end;
     end else
+    if Par = '/img' then
+    begin                       // sicherstellen, daß nach /img ein
+      Temp := ParamStr(i + 1);  // Dateiname folgt
+      if Temp <> '' then
+      begin
+        if Temp[1] <> '/' then
+        begin
+          ListPrev := ListToAdd;
+          ListToAdd := 'img';
+          // ListToAdd := Copy(Par, 2, Length(Par) - 1);
+          FLoadProject := True;
+        end;
+      end;
+    end else
     {Die Optionen /register und /unregister wurden gestrichen
     if Par = '/register' then
     begin
@@ -283,6 +303,10 @@ begin
   if ListToAdd = 'vcd' then
   begin
     FTabToActivate := cVideoCD;
+  end;
+  if ListToAdd = 'img' then
+  begin
+    FTabToActivate := cCDImage;
   end;
 
   {/hide _und_ /minimize sind nicht erlaubt}
@@ -442,6 +466,20 @@ begin
                             Longint(Application.Handle), Longint(@aCopyData));
     end;
   end;
+  {Image-Datei mit /img}
+  if FImageFile <> '' then
+  begin
+    SendMessage(Instance, WM_ACTIVATEIMGTAB, 0, 0);
+    pcBuffer := PChar(FImageFile);
+    with aCopyData do
+    begin
+      dwData := 0;
+      cbData := StrLen(pcBuffer) + 1;
+      lpData := pcBuffer;
+    end;
+    SendMessage(Instance, WM_COPYDATA,
+                          Longint(Application.Handle), Longint(@aCopyData));
+  end;
   {update kilobyte/time display}
   SendMessage(Instance, WM_UPDATEGAUGES, 0, 0);
   {aktivate last TabSheet}
@@ -450,6 +488,7 @@ begin
     cAudioCD: SendMessage(Instance, WM_ACTIVATEAUDIOTAB, 0, 0);
     cXCD    : SendMessage(Instance, WM_ACTIVATEXCDTAB, 0, 0);
     cVideoCD: SendMessage(Instance, WM_ACTIVATEVCDTAB, 0, 0);
+    cCDImage: SendMessage(Instance, WM_ACTIVATEIMGTAB, 0, 0);
   end;
   {automatisches Starten}
   if FExecute then
