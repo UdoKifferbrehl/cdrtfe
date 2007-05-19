@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.05.2005
+  letzte Änderung  19.05.2005
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -41,7 +41,7 @@ implementation
 
 uses constant;
 
-const CMHPath: string = '\shellex\ContextMenuHandlers\cdrtfeShlEx';
+const CMHPath: string = '\shellex\ContextMenuHandlers\'; // cdrtfeShlEx';
 
 { ShellExtensionsRegistered ----------------------------------------------------
 
@@ -110,11 +110,11 @@ begin
       WriteString('', DLLPath);
       WriteString('ThreadingModel', 'Apartment');
       {Kontextmenü für * erweitern}
-      Key := '\*' + CMHPath;
+      Key := '\*' + CMHPath + CdrtfeClassID;
       OpenKey(Key, True);
       WriteString('', CdrtfeClassID);
       {Kontextmenü für Ordner erweitern}
-      Key := '\folder' + CMHPath;
+      Key := '\folder' + CMHPath + CdrtfeClassID;
       OpenKey(Key, True);
       WriteString('', CdrtfeClassID);
       {cdrtfe-Programmpfad eintragen}
@@ -148,10 +148,10 @@ begin
       DeleteKey('\CLSID\' + CdrtfeClassID + '\InProcServer32');
       DeleteKey('\CLSID\' + CdrtfeClassID);
       {Kontextmenüeintrag für * löschen}
-      Key := '\*' + CMHPath;
+      Key := '\*' + CMHPath + CdrtfeClassID;
       DeleteKey(Key);
       {Kontextmenü für Ordner erweitern}
-      Key := '\folder' + CMHPath;
+      Key := '\folder' + CMHPath + CdrtfeClassID;
       DeleteKey(Key);
       {cdrtfe-Programmpfad löschen}
       RootKey := HKEY_LOCAL_MACHINE;
