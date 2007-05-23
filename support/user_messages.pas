@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2007
+  letzte Änderung  23.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,6 +40,7 @@ const WM_CDRTFE           = WM_APP;
       WM_ITerminated      = WM_CDRTFE + 14;
       WM_ACTIVATEVCDTAB   = WM_CDRTFE + 15;
       WM_ACTIVATEIMGTAB   = WM_CDRTFE + 16;
+      WM_ACTIVATEDVDTAB   = WM_CDRTFE + 17;
       {$IFDEF Experiment}
       WM_Experiment       = WM_CDRTFE + 20;
       {$ENDIF}

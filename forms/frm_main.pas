@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2007
+  letzte Änderung  23.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -450,6 +450,7 @@ type
     procedure WMActivateXcdTab(var Msg: TMessage); message WM_ACTIVATEXCDTAB;
     procedure WMActivateVcdTab(var Msg: TMessage); message WM_ACTIVATEVCDTAB;
     procedure WMActivateImgTab(var Msg: TMessage); message WM_ACTIVATEIMGTAB;
+    procedure WMActivateDVDTab(var Msg: TMessage); message WM_ACTIVATEDVDTAB;
     procedure WMExecute(var Msg: TMessage); message WM_EXECUTE;
     procedure WMExitAfterExecute(var Msg: TMessage); message WM_ExitAfterExec;
     procedure WMWriteLog(var Msg: TMessage); message WM_WriteLog;
@@ -743,6 +744,11 @@ procedure TForm1.WMActivateImgTab(var Msg: TMessage);
 begin
   ActivateTab(cCDImage);
   RadioButtonImageWrite.Checked := True;
+end;
+
+procedure TForm1.WMActivateDVDTab(var Msg: TMessage);
+begin
+  ActivateTab(cDVDVideo);
 end;
 
 { WMUpdateGauges ---------------------------------------------------------------
