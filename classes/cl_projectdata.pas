@@ -2,10 +2,10 @@
 
   cl_projectdata.pas:
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.10.2006
+  letzte Änderung  28.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,6 +22,7 @@
                  AcceptOgg
                  AccpetFLAC
                  AddAsForm2
+                 CDImportSession
                  CompressedAudioFilesPresent
                  LastError
                  LastFolderAdded
@@ -116,6 +117,7 @@ const PD_NoError = 0;          {Fehlercodes}
       PD_NoMP3Support = 13;
       PD_NoOggSupport = 14;
       PD_NoFLACSupport = 15;
+      PD_PreviousSession = 16;
 
 type TProjectData = class(TObject)
      private
@@ -132,6 +134,7 @@ type TProjectData = class(TObject)
        FError: Byte;
        FFolderAdded: string;
        FAddAsForm2: Boolean;
+       FCDImportSession: Boolean;
        FOnProgressBarHide: TProgressBarHideEvent;
        FOnProgressBarShow: TProgressBarShowEvent;
        FOnProgressBarUpdate: TProgressBarUpdateEvent;
@@ -144,6 +147,7 @@ type TProjectData = class(TObject)
        procedure SetAcceptOgg(Mode: Boolean);
        procedure SetAcceptFLAC(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
+       procedure SetCDImportSession(Mode: Boolean);
        procedure SetOnProjectError(EventHandler: TProjectErrorEvent);
        {Events}
        procedure ProgressBarHide;
@@ -218,6 +222,7 @@ type TProjectData = class(TObject)
        property LastError: Byte read GetLastError;
        property LastFolderAdded: string read GetLastFolderAdded;
        property AddAsForm2: Boolean write SetXCDAddMode;
+       property CDImportSession: Boolean read FCDImportSession write SetCDImportSession;
        {Events}
        property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
        property OnProgressBarShow: TProgressBarShowEvent read FOnProgressBarShow write FOnProgressBarShow;
@@ -320,6 +325,17 @@ begin
   FXCD.AddAsForm2 := Mode;
 end;
 
+{ SetCDImportSession -----------------------------------------------------------
+
+  Wenn eine bereits vorhandene Session eingelesen werden soll, müssen die Daten
+  anders behandelt werden. Daher ist ImportCDSession auf True gesetzt werden.  }
+
+procedure TProjectData.SetCDImportSession(Mode: Boolean);
+begin
+  FCDImportSession := Mode;
+  FDataCD.CDImportSession := Mode;
+end;
+
 { SetAcceptMP3 -----------------------------------------------------------------
 
   Bei Audio-CD können auch MP3s verwendet werden, es sei denn, Madplay.exe ist
@@ -384,6 +400,7 @@ begin
   FVideoCD := TVideoCD.Create;
   FDVDVideo := TDVDVideo.Create;
   AddAsForm2 := False; // als Property angesprochen, um Änderung durchzureichen
+  CDImportSession := False;
   ErrorListFiles := TStringList.Create;
   ErrorListDir := TStringList.Create;
   ErrorListIgnore := TStringList.Create;
@@ -592,6 +609,7 @@ begin
   case ErrorCode of
     CD_NoError : FError := PD_NoError;
     CD_FileNotUnique: FError := PD_FileNotUnique;
+    CD_PreviousSession: FError := PD_PreviousSession;
   end;
 end;
 
@@ -618,6 +636,7 @@ begin
   case ErrorCode of
     CD_NoError : FError := PD_NoError;
     CD_FileNotUnique: FError := PD_FileNotUnique;
+    CD_PreviousSession: FError := PD_PreviousSession;
   end;
 end;
 
@@ -644,6 +663,7 @@ begin
     CD_NoError : FError := PD_NoError;
     CD_FolderNotUnique: FError := PD_FolderNotUnique;
     CD_DestFolderIsSubFolder : FError := PD_DestFolderIsSubFolder;
+    CD_PreviousSession: FError := PD_PreviousSession;
   end;
 end;
 
@@ -716,8 +736,9 @@ begin
   case ErrorCode of
     CD_NoError : FError := PD_NoError;
     CD_FolderNotUnique: FError := PD_FolderNotUnique;
-    CD_NameTooLong : FError := PD_NameTooLong;
-    CD_InvalidName : FError := PD_InvalidName;
+    CD_NameTooLong: FError := PD_NameTooLong;
+    CD_InvalidName: FError := PD_InvalidName;
+    CD_PreviousSession: FError := PD_PreviousSession;
   end;
 end;
 
@@ -741,8 +762,9 @@ begin
   case ErrorCode of
     CD_NoError : FError := PD_NoError;
     CD_FileNotUnique: FError := PD_FileNotUnique;
-    CD_NameTooLong : FError := PD_NameTooLong;
-    CD_InvalidName : FError := PD_InvalidName;
+    CD_NameTooLong: FError := PD_NameTooLong;
+    CD_InvalidName: FError := PD_InvalidName;
+    CD_PreviousSession: FError := PD_PreviousSession;
   end;
 end;
 
@@ -765,8 +787,9 @@ begin
   case ErrorCode of
     CD_NoError : FError := PD_NoError;
     CD_FileNotUnique: FError := PD_FileNotUnique;
-    CD_NameTooLong : FError := PD_NameTooLong;
-    CD_InvalidName : FError := PD_InvalidName;
+    CD_NameTooLong: FError := PD_NameTooLong;
+    CD_InvalidName: FError := PD_InvalidName;
+    CD_PreviousSession: FError := PD_PreviousSession;    
   end;
 end;
 

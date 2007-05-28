@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.05.2007
+  letzte Änderung  28.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -253,6 +253,8 @@ type
     MainMenuReset: TMenuItem;
     MainMenuHelp: TMenuItem;
     N4: TMenuItem;
+    CDETreeViewPopupN4: TMenuItem;
+    CDETreeViewPopupImport: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -368,6 +370,7 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure MainMenuResetClick(Sender: TObject);
     procedure MainMenuHelpClick(Sender: TObject);
+    procedure CDETreeViewPopupImportClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -1807,9 +1810,10 @@ end;
   UerMoveFile verschiebt Dateien aus einem Verzeichnis in ein anderes.         }
 
 procedure TForm1.UserMoveFile(SourceNode, DestNode: TTreeNode; View: TListView);
-var i: Integer;
-    ErrorCode: Byte;
-    SourcePath, DestPath: string;
+var i          : Integer;
+    ErrorCode  : Byte;
+    SourcePath,
+    DestPath   : string;
 begin
    SourcePath := GetPathFromNode(SourceNode);
    DestPath := GetPathFromNode(DestNode);
@@ -1827,6 +1831,12 @@ begin
        begin
          Application.MessageBox(PChar(Format(FLang.GMS('e112'),
                                              [View.Items[i].Caption])),
+                                PChar(FLang.GMS('e108')),
+                                MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+       end else
+       if ErrorCode = PD_PreviousSession then
+       begin
+         Application.MessageBox(PChar(FLang.GMS('e117')),
                                 PChar(FLang.GMS('e108')),
                                 MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
        end else
@@ -1862,6 +1872,12 @@ begin
    if ErrorCode = PD_FolderNotUnique then
    begin
      Application.MessageBox(PChar(Format(FLang.GMS('e111'), [SourceNode.Text])),
+                            PChar(FLang.GMS('e108')),
+                            MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+   end else
+   if ErrorCode = PD_PreviousSession then
+   begin
+     Application.MessageBox(PChar(FLang.GMS('e117')),
                             PChar(FLang.GMS('e108')),
                             MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
    end else
@@ -2133,12 +2149,12 @@ end;
   werden Name, Länge, Größe und Herkunft angezeigt.                            }
 
 procedure TForm1.AddItemToListView(const Item: string; ListView: TListView);
-var NewItem  : TListItem;
-    IconIndex: Integer;
-    Size     : {$IFDEF LargeFiles} Int64 {$ELSE} Integer {$ENDIF};
-    Name     : string;
-    Caption  : string;
-    Filetype : string;
+var NewItem    : TListItem;
+    IconIndex  : Integer;
+    Size       : {$IFDEF LargeFiles} Int64 {$ELSE} Integer {$ENDIF};
+    Name       : string;
+    Caption    : string;
+    Filetype   : string;
     TrackLength: Extended;
 begin
   if (FSettings.General.Choice = cDataCD) or
@@ -2149,6 +2165,8 @@ begin
     NewItem.Caption := Caption;
     FFileTypeInfo.GetFileInfo(Name, IconIndex, Filetype);
     NewItem.ImageIndex := IconIndex;
+    if (FSettings.General.Choice = cDataCD) and (Pos('>', Item) > 0) then
+      Name := FLang.GMS('g010');
     {Verhindern, daß bei Dateien mit weniger als 512 Byte 0 KiByte angezeigt
      werden.}
     if (Size > 0) and (Size <= 512) then Size := Size + 512;
@@ -4790,6 +4808,12 @@ begin
         Application.MessageBox(PChar(FLang.GMS('e501')),
                                PChar(FLang.GMS('g001')),
                                MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+      end else
+      if ErrorCode = PD_PreviousSession then
+      begin
+        Application.MessageBox(PChar(FLang.GMS('e117')),
+                               PChar(FLang.GMS('g001')),
+                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
       end;
     end;
   end else {CD-Label}
@@ -4898,6 +4922,12 @@ begin
     if ErrorCode = PD_NameTooLong then
     begin
       Application.MessageBox(PChar(FLang.GMS('e501')),
+                             PChar(FLang.GMS('g001')),
+                             MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+    end else
+    if ErrorCode = PD_PreviousSession then
+    begin
+      Application.MessageBox(PChar(FLang.GMS('e117')),
                              PChar(FLang.GMS('g001')),
                              MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
     end;
@@ -5265,6 +5295,7 @@ end;
 procedure TForm1.CDETreeViewPopupMenuPopup(Sender: TObject);
 var Node: TTreeNode;
     Root: TTreeNode;
+    Temp: Boolean;
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -5302,6 +5333,10 @@ begin
     CDETreeViewPopupN3.Visible := True;
     CDETreeViewPopupNewFolder.Visible := True;
   end;
+  Temp := FSettings.DataCD.Multi and FSettings.DataCD.ContinueCD and
+          (FSettings.General.Choice = cDataCD);
+  CDETreeViewPopupN4.Visible := Temp;
+  CDETreeViewPopupImport.Visible := Temp;
 end;
 
 { Data-CD, XCD: Set CD label }
@@ -5380,6 +5415,30 @@ begin
     cDataCD: UserNewFolder(CDETreeView);
     cXCD   : UserNewFolder(XCDETreeView);
   end;
+end;
+
+{ Data-CD: Multisession-CD importieren}
+
+procedure TForm1.CDETreeViewPopupImportClick(Sender: TObject);
+var Index   : Integer;
+    DeviceID: string;
+    Drive   : string;
+begin
+  Index := FSettings.General.TabSheetDrive[FSettings.General.Choice];
+  DeviceID := FDevices.CDWriter.Values[FDevices.CDWriter.Names[Index]];
+  Drive := FDevices.GetDriveLetter(DeviceID);
+  if Drive = '' then
+  begin
+    TLogWin.Inst.Add('No drive letter ...');
+    Exit;
+  end;
+  TLogWin.Inst.Add('Importing Session from Drive ' + DeviceID + ' -> ' + Drive);
+  FData.CDImportSession := True;
+  AddToPathlist(Drive);
+  FData.CDImportSession := False;
+  CheckDataCDFS(False);
+  UserAddFolderUpdateTree(CDETreeView);
+  UpdateGauges;
 end;
 
 { Kontextmenü der List-Views ---------------------------------------------------

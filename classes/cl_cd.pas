@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.01.2007
+  letzte Änderung  28.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,7 +18,8 @@
 
   TCD
 
-    Properties   CDSize
+    Properties   CDImportSession
+                 CDSize
                  FileCount
                  FolderCount
                  CDLabel
@@ -147,6 +148,7 @@ const CD_NoError = 0;          {Fehlercodes}
       CD_NoMP3Support = 13;
       CD_NoOggSupport = 14;
       CD_NoFLACSupport = 15;
+      CD_PreviousSession = 16;
 
 type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        Path           : string;
@@ -163,6 +165,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 
      TCD = class(TObject)
      private
+       FCDImportSession: Boolean;
        FCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        FCDSizeChanged: Boolean;
        FError: Byte;
@@ -191,6 +194,8 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetLastFolderAdded: string;
        function GetMaxFolderLevel(const Root: TNode): Integer;
        function GetMaxLevel: Integer;
+       function IsPreviousSessionFile(const Entry: string): Boolean; virtual;
+       function IsPreviousSessionFolder(const Path: string): Boolean; virtual;
        procedure FreeFileLists(Root: TNode);
        procedure InvalidateCounters;
        procedure NodeAddFile(const Name: string; const Node: TNode);
@@ -224,6 +229,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure SortFileList(const Path: string);
        procedure SortFolder(const Path: string);
        // property Root: TNode read FRoot;
+       property CDImportSession: Boolean read FCDImportSession write FCDImportSession;
        property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
        property FileCount: Integer read GetFileCount;
        property FolderCount: Integer read GetFolderCount;
@@ -240,6 +246,8 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function CountSmallForm2Files(Root: TNode): Integer;
        function GetForm2FileCount: Integer;
        function GetSmallForm2FileCount: Integer;
+       function IsPreviousSessionFile(const Entry: string): Boolean; override;
+       function IsPreviousSessionFolder(const Entry: string): Boolean; override;
        procedure NodeAddFolderRek(Name: string; Node: TNode); override;
        procedure NodeAddMovie(const Name: string; const Node: TNode);
      public
@@ -454,22 +462,62 @@ begin
   Result := Unique;
 end;
 
+{ IsPreviousSessionFile --------------------------------------------------------
+
+  True, wenn Datei aus der vorigen Session stammt.                             }
+
+function TCD.IsPreviousSessionFile(const Entry: string): Boolean;
+begin
+  Result := Pos('>', Entry) > 0;
+end;
+
+{ IsPreviousSessionFolder ------------------------------------------------------
+
+  True, wenn der Ordner aus der vorigen Session stammt.                        }
+
+function TCD.IsPreviousSessionFolder(const Path: string): Boolean;
+var Folder: TNode;
+    i     : Integer;
+begin
+  Result := False;
+  Folder := GetFolderFromPath(Path);
+  for i := 0 to TPList(Folder.Data)^.Count - 1 do
+  begin
+    Result := Result or IsPreviousSessionFile(TPList(Folder.Data)^[i]);
+    if Result then Break;
+  end;
+end;
+
 { NodeAddFile ------------------------------------------------------------------
 
   NodeAddFile fügt eine Datei in die Pfadliste des selektierten TreeNodes ein.
   Name       : Datei, die eingefügt wird
   Node       : Knoten im Tree, in dessen Liste eingefügt wird
 
-  Pfadlisten-Eintrag: <Name der Datei auf CD>:<Quellpfad>*<Größe in Bytes>     }
+  Pfadlisten-Eintrag: <Name der Datei auf CD>:<Quellpfad>*<Größe in Bytes>
+
+  '>' ist Flag für importierte Dateien aus letzter Session.                    }
 
 procedure TCD.NodeAddFile(const Name: string; const Node: TNode);
+var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Integer {$ENDIF};
+    Temp: string;
 begin
+  Size := GetFileSize(Name);
+  Temp := ExtractFileName(Name) + ':' + Name + '*' +
+                         {$IFDEF LargeFiles}
+                         FloatToStr(Size)
+                         {$ELSE}
+                         IntToStr(Size)
+                         {$ENDIF};
+  if FCDImportSession then Temp := Temp + '>';
+  TPList(Node.Data)^.Add(Temp);
+(*
   TPList(Node.Data)^.Add(ExtractFileName(Name) + ':' + Name + '*' +
                          {$IFDEF LargeFiles}
-                         FloatToStr(GetFileSize(Name))
+                         FloatToStr(Size{GetFileSize(Name)})
                          {$ELSE}
-                         IntToStr(GetFileSize(Name))
-                         {$ENDIF});
+                         IntToStr(Size{GetFileSize(Name)})
+                         {$ENDIF})                                            *)  
 end;
 
 { NodeAddFolder ----------------------------------------------------------------
@@ -887,6 +935,7 @@ var PList: TPList;
 begin
   inherited Create;
   FError := CD_NoError;
+  FCDImportSession := False;
   FCDSize := 0;
   FCDSizeChanged := False;
   FFileCount := 0;
@@ -1209,8 +1258,14 @@ begin
   Name := ExtractFileNameFromEntry(SourceList[Index]);
   if FileIsUnique(Name, DestFolder) then
   begin
-    DestList.Add(SourceList[Index]);
-    SourceList.Delete(Index);
+    if not IsPreviousSessionFile(SourceList[Index]) then
+    begin
+      DestList.Add(SourceList[Index]);
+      SourceList.Delete(Index);
+    end else
+    begin
+      FError := CD_PreviousSession;
+    end;
   end else
   begin
     FError := CD_FileNotUnique;
@@ -1243,8 +1298,14 @@ begin
   begin
     if FolderIsUnique(Folder.Text, DestFolder) then
     begin
-      Folder.MoveTo(DestFolder);
-      FMaxLevelChanged := True;
+      if not IsPreviousSessionFolder(SourcePath) then
+      begin
+        Folder.MoveTo(DestFolder);
+        FMaxLevelChanged := True;
+      end else
+      begin
+        FError := CD_PreviousSession;
+      end;
     end else
     begin
       FError := CD_FolderNotUnique;
@@ -1298,8 +1359,14 @@ begin
     begin
       if FolderIsUnique(Name, ParentFolder) then
       begin
-        {alles ok, neuen Namen setzen}
-        Folder.Text := Name;
+        if not IsPreviousSessionFolder(Path) then
+        begin
+          {alles ok, neuen Namen setzen}
+          Folder.Text := Name;
+        end else
+        begin
+          FError := CD_PreviousSession;
+        end;
       end else
       begin
         FError := CD_FolderNotUnique;
@@ -1333,11 +1400,17 @@ begin
     begin
       if FileIsUnique(Name, Folder) then
       begin
-        {alles ok, neuen Namen setzen}
         Temp := FileList[Index];
-        Delete(Temp, 1, Pos(':', Temp) - 1);
-        Insert(Name, Temp, 1);
-        FileList[Index] := Temp;
+        if not IsPreviousSessionFile(Temp) then
+        begin
+          {alles ok, neuen Namen setzen}
+          Delete(Temp, 1, Pos(':', Temp) - 1);
+          Insert(Name, Temp, 1);
+          FileList[Index] := Temp;
+        end else
+        begin
+          FError := CD_PreviousSession;
+        end;
       end else
       begin
         FError := CD_FileNotUnique;
@@ -1597,9 +1670,12 @@ procedure TCD.CreateBurnList(List: TStringList);
     for i := 0 to TPList(Root.Data)^.Count - 1 do
     begin
       Temp := Path + TPList(Root.Data)^[i];
-      {Zusatzinfos entfernen}
-      Temp := StringLeft(Temp, '*');
-      List.Add(Temp);
+      if Pos('>', Temp) = 0 then
+      begin
+        {Zusatzinfos entfernen}
+        Temp := StringLeft(Temp, '*');
+        List.Add(Temp);
+      end;
     end;
     {Falls Verzeichnis leer ist (keine Dateien, keine Ordner), Dummy-Eintrag
      erzeugen, aber nur, wenn es nicht das Root-Directory ist.}
@@ -1626,6 +1702,24 @@ end;
 { TXCD ----------------------------------------------------------------------- }
 
 { TXCD - private }
+
+{ IsPreviousSessionFile --------------------------------------------------------
+
+  Diese Funktion wird bei XCDs nicht benötigt und liefert daher immer False.   }
+
+function TXCD.IsPreviousSessionFile(const Entry: string): Boolean;
+begin
+  Result := False;
+end;
+
+{ IsPreviousSessionFolder ------------------------------------------------------
+
+  Diese Funktion wird bei XCDs nicht benötigt und liefert daher immer False.   }
+
+function TXCD.IsPreviousSessionFolder(const Entry: string): Boolean;
+begin
+  Result := False;
+end;
 
 { NodeAddMovie -----------------------------------------------------------------
 

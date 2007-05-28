@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.03.2007
+  letzte Änderung  28.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -115,6 +115,7 @@ begin
     Add('g007=MiByte');
     Add('g008=GiByte');
     Add('g009=[aktiv]');
+    Add('g010=vorige Session');
     {$IFDEF ShowCmdError}
     Add('e001=Es ist ein Fehler aufgetreten!');
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');
@@ -152,6 +153,7 @@ begin
     Add('e114=%d Form2-Datei(en) gefunden mit weniger als 348.601 Bytes.\nXCDs mit so kleinen Dateien können nur als ''Single-Track-Image''\ngeschrieben werden. ');
     Add('e115=Angabe für Start- oder Endsektor fehlt.');
     Add('e116=Kein Ordner für die temporären Dateien angegeben!');
+    Add('e117=Dateien oder Ordner aus vorigen Sessions können nicht\nverschoben oder umbenannt werden.');
     Add('m101=Image auswählen');
     Add('m102=Image speichern unter');
     Add('m103=Dateien auswählen');
