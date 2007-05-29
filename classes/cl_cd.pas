@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.05.2007
+  letzte Änderung  29.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -63,6 +63,7 @@
     Methoden     AddFile(const AddName, DestPath: string); override;
                  ChangeForm2Status(const Name, Path: string)
                  CreateVerifyList(List: TStringList)
+                 ExportDataToFile(Root: TNode; var File: TextFile)
 
 
   TAudioCD
@@ -214,7 +215,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure DeleteFolder(const Path: string);
        procedure DeleteFromPathlistByIndex(const Index: Integer; const Path: string);
        procedure DeleteFromPathlistByName(const Name, Path: string);
-       procedure ExportDataToFile(Root: TNode; var F: TextFile);
+       procedure ExportDataToFile(Root: TNode; var F: TextFile); virtual;
        procedure ExportStructureToStringList(List: TStringList);
        procedure ExportStructureToTreeView(Tree: TTreeView);
        procedure ImportStructureFromStringList(List: TStringList);
@@ -255,6 +256,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure ChangeForm2Status(const Name, Path: string);
        procedure CreateBurnList(List: TStringList); override;
        procedure CreateVerifyList(List: TStringList);
+       procedure ExportDataToFile(Root: TNode; var F: TextFile); override;
        property AddAsForm2: Boolean write FAddAsForm2;
        property Form2FileCount: Integer read GetForm2FileCount;
        property SmallForm2FileCount: Integer read GetSmallForm2FileCount;
@@ -969,11 +971,11 @@ end;
   schreibt die Einträge aus den Dateilisten in eine Textdatei.                 }
 
 procedure TCD.ExportDataToFile(Root: TNode; var F: TextFile);
-var Node: TNode;
-    i: Integer;
-    q: Integer;
-    Path: string;
-    Temp: string;
+var Node      : TNode;
+    i         : Integer;
+    OldSession: Boolean;
+    Path      : string;
+    Temp      : string;
 begin
   {Pfad innerhalb des Trees bestimmen}
   Path := GetPathFromFolder(Root);
@@ -983,13 +985,9 @@ begin
     for i := 0 to TPList(Root.Data)^.Count - 1 do
     begin
       Temp := Path + TPList(Root.Data)^[i];
-      q := Pos('>', Temp);
+      OldSession := Pos('>', Temp) > 0;
       Temp := StringLeft(Temp, '*');
-      if q > 0 then
-      begin
-        Temp := Temp + '>';
-      end;
-      Writeln(F, Temp);
+      if not OldSession then Writeln(F, Temp);
     end;
   end;
   {nächster Knoten}
@@ -1839,6 +1837,39 @@ begin
 end;
 
 { TXCD - public }
+
+procedure TXCD.ExportDataToFile(Root: TNode; var F: TextFile);
+var Node: TNode;
+    i: Integer;
+    q: Integer;
+    Path: string;
+    Temp: string;
+begin
+  {Pfad innerhalb des Trees bestimmen}
+  Path := GetPathFromFolder(Root);
+  {Dateiliste speichern}
+  if (Root <> nil) and (Root.Data <> nil) then
+  begin
+    for i := 0 to TPList(Root.Data)^.Count - 1 do
+    begin
+      Temp := Path + TPList(Root.Data)^[i];
+      q := Pos('>', Temp);
+      Temp := StringLeft(Temp, '*');
+      if q > 0 then
+      begin
+        Temp := Temp + '>';
+      end;
+      Writeln(F, Temp);
+    end;
+  end;
+  {nächster Knoten}
+  Node := Root.GetFirstChild;
+  while Node <> nil do
+  begin
+    ExportDataToFile(Node, F);
+    Node := Root.GetNextChild(Node);
+  end;
+end;
 
 { NodeAddFolderRek -------------------------------------------------------------
 
