@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.05.2007
+  letzte Änderung  30.05.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1095,8 +1095,9 @@ end;
 
 procedure TCD.AddFile(const AddName, DestPath: string);
 var IsFile, IsDir: Boolean;
-    Name: string;
-    DestFolder: TNode;
+    Index        : Integer;
+    Name         : string;
+    DestFolder   : TNode;
 begin
   DestFolder := GetFolderFromPath(DestPath);
   {$IFDEF DebugAddFiles}
@@ -1136,6 +1137,15 @@ begin
         InvalidateCounters;
       end else
       begin
+        {Sonderbehandlung für Dateien aus vorigen Sessions}
+        Index := GetIndexOfFile(Name, DestPath);
+        if IsPreviousSessionFile(TPList(DestFolder.Data)^[Index]) then
+        begin
+          {alte Dateien können durch neue gleichen Namens ersetzt werden}
+          DeleteFromPathlistByIndex(Index, DestPath);
+          NodeAddFile(AddName, DestFolder);
+          InvalidateCounters;
+        end else
         FError := CD_FileNotUnique;
       end;
     end;
