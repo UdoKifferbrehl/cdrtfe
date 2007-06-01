@@ -1,9 +1,9 @@
 { f_filesystem.pas: Dateisystemfunktionen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.09.2006
+  letzte Änderung  01.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -73,6 +73,7 @@ function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
+function DummyFileName: string;
 function FileAccess(const Name: string; const OpenMode, ShareMode: Word): Boolean;
 function FilenameIsValid(const Name: string): Boolean;
 function FileSystemIsFAT(const Path: string): Boolean;
@@ -197,21 +198,45 @@ end;
 
 function DummyDirName: string;
 begin
-  Result := ProgDataDir + '\dummy';
+  Result := ProgDataDir + cDummyDir;
+end;
+
+{ DummyDirName -----------------------------------------------------------------
+
+  Name des Dummy-Verzeichnisses.                                               }
+
+function DummyFileName: string;
+begin
+  Result := ProgDataDir + cDummyFile;
 end;
 
 { DummyDir ---------------------------------------------------------------------
 
   Um auch leere Verzeichnisse auf die CD schreiben zu können, benötigen wir ein
   leeres Dummy-Verzeichnis. Mode: True   - Verzeichnis erstellen
-                                  Falase - Verzeichnis löschen                 }
+                                  Falae  - Verzeichnis löschen
+  Zusätzlich benötigen wir noch eine Dummy-Datei, falls Dateien aus einer
+  bereits vorhandenen Session versteckt werden sollen.                         }
 
 procedure DummyDir(Mode: Boolean);
+var DummyFile: TextFile;
 begin
+  {Dummy-Verzeichnis}
   case Mode of
     True : if not DirectoryExists(DummyDirName) then MkDir(DummyDirName);
     False: if DirectoryExists(DummyDirName) then RemoveDir(DummyDirName);
   end;
+  {Dummy-Datei}
+  case Mode of
+    True : if not FileExists(DummyFileName) then
+           begin
+             AssignFile(DummyFile, DummyFileName);
+             Rewrite(DummyFile);
+             Close(DummyFile);
+           end;
+    False: if FileExists(DummyFileName) then DeleteFile(DummyFileName);
+  end;
+
 end;
 
 { GetFileSize ------------------------------------------------------------------

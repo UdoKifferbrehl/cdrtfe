@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2007
+  letzte Änderung  01.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -522,6 +522,12 @@ begin
         CmdM := CmdM + ' -hide boot.catalog';
         if Joliet then CmdM := CmdM + ' -hide-joliet boot.catalog';
       end;
+    end;
+    if FData.DataCDFilesToDelete then
+    begin
+      Temp := QuotePath(MakePathCygwinConform(DummyFileName));
+      CmdM := CmdM + ' -hide ' + Temp;
+      CmdM := CmdM + ' -hide-joliet ' + Temp;
     end;
     if VolId <> '' then CmdM := CmdM + ' -volid "' + VolId + '"';   // ' -V "'
     if MkisofsUseCustOpts then

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.05.2007
+  letzte Änderung  01.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -177,6 +177,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FFolderAdded: string;
        FMaxLevel: Integer;
        FMaxLevelChanged: Boolean;
+       FPrevSessDelList: TStringList;
        FRoot: TNode;
        function CountFiles(Root: TNode): Integer;
        function CountFolders(Root: TNode): Integer;
@@ -187,6 +188,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetPathFromFolder(const Root: TNode): string;
        function GetCDLabel: string;
        function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       function GetFilesToDelete: Boolean;       
        function GetFileCount: Integer;
        function GetFolderCount: Integer;
        function GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
@@ -202,6 +204,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure NodeAddFile(const Name: string; const Node: TNode);
        procedure NodeAddFolder(const Name: string; Node: TNode);
        procedure NodeAddFolderRek(Name: string; Node: TNode); virtual;
+       procedure SetCDImportSession(Mode: Boolean);
      public
        constructor Create;
        destructor Destroy; override;
@@ -230,7 +233,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure SortFileList(const Path: string);
        procedure SortFolder(const Path: string);
        // property Root: TNode read FRoot;
-       property CDImportSession: Boolean read FCDImportSession write FCDImportSession;
+       property CDImportSession: Boolean read FCDImportSession write SetCDImportSession;
        property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
        property FileCount: Integer read GetFileCount;
        property FolderCount: Integer read GetFolderCount;
@@ -238,6 +241,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property LastError: Byte read GetLastError;
        property LastFolderAdded: string read GetLastFolderAdded;
        property MaxLevel: Integer read GetMaxLevel;
+       property FilesToDelete: Boolean read GetFilesToDelete;
      end;
 
      TXCD = class(TCD)
@@ -387,6 +391,17 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 { TCD - private }
 
+{ SetCDImportSession -----------------------------------------------------------
+
+  Wenn eine bereits vorhandene Session eingelesen werden soll, müssen die Daten
+  anders behandelt werden. Daher ist ImportCDSession auf True gesetzt werden.  }
+
+procedure TCD.SetCDImportSession(Mode: Boolean);
+begin
+  FCDImportSession := Mode;
+  if Mode then FPrevSessDelList.Clear;
+end;
+
 { GetLastError -----------------------------------------------------------------
 
   GetLastError gibt den Fehlercode aus FError und setzt FError auf No_Error.   }
@@ -395,6 +410,15 @@ function TCD.GetLastError: Byte;
 begin
   Result := FError;
   FError := CD_NoError;
+end;
+
+{ GetFilesToDelete -------------------------------------------------------------
+
+  True, wenn Dateien aus einer vorigen Session gelöscht werden sollen.         }
+
+function TCD.GetFilesToDelete: Boolean;
+begin
+  Result := FPrevSessDelList.Count > 0;
 end;
 
 { FreeFileLists ----------------------------------------------------------------
@@ -946,6 +970,7 @@ begin
   FFolderCountChanged := False;
   FMaxLevel := 0;
   FMaxLevelChanged := False;
+  FPrevSessDelList := TStringList.Create;
   {Wurzel erzeugen}
   FRoot := TNode.Create(nil);
   FRoot.Text := 'CD';
@@ -960,6 +985,7 @@ end;
 destructor TCD.Destroy;
 begin
   {alle Dateilisten freigeben}
+  FPrevSessDelList.Free;
   FreeFileLists(FRoot);
   FRoot.Free;
   inherited Destroy;
@@ -1188,8 +1214,16 @@ procedure TCD.DeleteFromPathlistByIndex(const Index: Integer;
 var FileList: TStringList;
 begin
   FileList := GetFileList(Path);
-  if (Index > -1) and (Index < FileList.Count) then FileList.Delete(Index);
-  InvalidateCounters;
+  if (Index > -1) and (Index < FileList.Count) then
+  begin
+    if IsPreviousSessionFile(FileList[Index]) then
+    begin
+      {Verstecken einer bereits vorhandenen Datei}
+      FPrevSessDelList.Add(Path + FileList[Index]);
+    end;
+    FileList.Delete(Index);
+    InvalidateCounters;
+  end;
 end;
 
 { DeleteFromPathlistByName -----------------------------------------------------
@@ -1247,6 +1281,7 @@ begin
     Folder := FRoot.GetNextChild(FRoot);
   end;
   InvalidateCounters;
+  FPrevSessDelList.Clear;
 end;
 
 { MoveFileByIndex --------------------------------------------------------------
@@ -1665,6 +1700,7 @@ end;
   mkisofs übergeben wird.                                                      }
 
 procedure TCD.CreateBurnList(List: TStringList);
+var i: Integer;
 
   procedure CreateBurnListRek(Root: TNode);
   var Node: TNode;
@@ -1703,7 +1739,11 @@ procedure TCD.CreateBurnList(List: TStringList);
 
 begin
   CreateBurnListRek(FRoot);
-  // FormDebug.Memo2.Lines.Assign(List);
+  {Dateien, die aus einer bestehen Session entfernt werden sollen.}
+  for i := 0 to FPrevSessDelList.Count - 1 do
+  begin
+    List.Add(StringLeft(FPrevSessDelList[i], ':') + ':' + DummyFileName);
+  end;
 end;
 
 

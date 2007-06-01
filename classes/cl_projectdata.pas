@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.05.2007
+  letzte Änderung  01.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -24,6 +24,7 @@
                  AddAsForm2
                  CDImportSession
                  CompressedAudioFilesPresent
+                 DataCDFilesToDelete
                  LastError
                  LastFolderAdded
                  OnProgressBarHide
@@ -173,6 +174,7 @@ type TProjectData = class(TObject)
        function CDTextLength: Integer;
        function CDTextPresent: Boolean;
        function GetCDLabel(const Choice: Byte): string;
+       function GetDataCDFilesToDelete: Boolean;
        function GetFileList(const Path: string; const Choice: Byte): TStringList;
        function GetForm2FileCount: Integer;
        function GetProjectMaxLevel(const Choice: Byte): Integer;
@@ -218,6 +220,7 @@ type TProjectData = class(TObject)
        property AcceptOgg: Boolean read FAcceptOgg write SetAcceptOgg;
        property AcceptFLAC: Boolean read FAcceptFLAC write SetAcceptFLAC;
        property CompressedAudioFilesPresent: Boolean read GetCompressedAudioFilesPresent;
+       property DataCDFilesToDelete: Boolean read GetDataCDFilesToDelete;
        property Lang: TLang write FLang;
        property LastError: Byte read GetLastError;
        property LastFolderAdded: string read GetLastFolderAdded;
@@ -311,6 +314,15 @@ function TProjectData.GetLastFolderAdded: string;
 begin
   Result := FFolderAdded;
   FFolderAdded := '';
+end;
+
+{ GetDataCDFilesToDelete -------------------------------------------------------
+
+  True, wenn Dateien aus der vorigen Session gelöscht werden sollen.           }
+
+function TProjectData.GetDataCDFilesToDelete: Boolean;
+begin
+  Result := FDataCD.FilesToDelete;
 end;
 
 { SetXCDAddMode ----------------------------------------------------------------

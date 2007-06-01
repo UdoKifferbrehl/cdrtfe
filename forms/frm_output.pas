@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2007
+  letzte Änderung  01.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -102,6 +102,7 @@ begin
     Memo1.Height := self.ClientHeight - 49; {44}
     ButtonOk.Top := Memo1.Height + 14;
     ButtonOk.Left := Memo1.Width + 8 - 75;
+    CheckBoxAutoUpdate.Top := Memo1.Height + 14;
   end else
   if Screen.PixelsPerInch > 96 then
   begin
@@ -109,6 +110,7 @@ begin
     Memo1.Height := self.ClientHeight - 58; {53}
     ButtonOk.Top := ClientHeight - 39;
     ButtonOk.Left := ClientWidth - 8 - ButtonOk.Width;
+    CheckBoxAutoUpdate.Top := ClientHeight - 39;
   end;
 end;
 
