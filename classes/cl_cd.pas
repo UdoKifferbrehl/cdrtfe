@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.06.2007
+  letzte Änderung  03.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,6 +21,7 @@
     Properties   CDImportSession
                  CDSize
                  FileCount
+                 FileCountPrevSess
                  FolderCount
                  CDLabel
                  LastError
@@ -171,6 +172,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FCDSizeChanged: Boolean;
        FError: Byte;
        FFileCount: Integer;
+       FFileCountPrevSess: Integer;
        FFileCountChanged: Boolean;
        FFolderCountChanged: Boolean;
        FFolderCount: Integer;
@@ -178,8 +180,10 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FMaxLevel: Integer;
        FMaxLevelChanged: Boolean;
        FPrevSessDelList: TStringList;
+       FHasImportedSessions: Boolean;
        FRoot: TNode;
        function CountFiles(Root: TNode): Integer;
+       function CountFilesPrevSess(Root: TNode): Integer;
        function CountFolders(Root: TNode): Integer;
        function ExtractFileNameFromEntry(const Entry: string): string;
        function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
@@ -190,6 +194,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetFilesToDelete: Boolean;       
        function GetFileCount: Integer;
+       function GetFileCountPrevSess: Integer;
        function GetFolderCount: Integer;
        function GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetIndexOfFile(Name, Path: string): Integer;
@@ -236,6 +241,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property CDImportSession: Boolean read FCDImportSession write SetCDImportSession;
        property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
        property FileCount: Integer read GetFileCount;
+       property FileCountPrevSess: Integer read GetFileCountPrevSess;
        property FolderCount: Integer read GetFolderCount;
        property CDLabel: string read GetCDLabel;
        property LastError: Byte read GetLastError;
@@ -384,7 +390,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      atl_oggvorbis,
-     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo,
+     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo,        cl_logwindow,
      cl_mpegvinfo;
 
 { TCD ------------------------------------------------------------------------ }
@@ -503,14 +509,37 @@ end;
 
 function TCD.IsPreviousSessionFolder(const Path: string): Boolean;
 var Folder: TNode;
-    i     : Integer;
-begin
-  Result := False;
-  Folder := GetFolderFromPath(Path);
-  for i := 0 to TPList(Folder.Data)^.Count - 1 do
+
+  function IsPreviousSessionFolderRek(Root: TNode): Boolean;
+  var i   : Integer;
+      Node: TNode;
   begin
-    Result := Result or IsPreviousSessionFile(TPList(Folder.Data)^[i]);
-    if Result then Break;
+    Result := False;
+    Node := Root;
+    for i := 0 to TPList(Node.Data)^.Count - 1 do
+    begin
+      Result := Result or IsPreviousSessionFile(TPList(Node.Data)^[i]);
+      if Result then Break;
+    end;
+    {Unterordner prüfen}
+    Node := Root.GetFirstChild;
+    while Node <> nil do
+    begin
+      Result := Result or IsPreviousSessionFolderRek(Node);
+      {nächster Knoten}
+      Node := Root.GetNextChild(Node);
+    end;
+  end;
+
+begin
+  {nur testen, wenn wirklich alte Sessions importiert wurden}
+  if FHasImportedSessions then
+  begin
+    Folder := GetFolderFromPath(Path);
+    Result := IsPreviousSessionFolderRek(Folder);
+  end else
+  begin
+    Result := False;
   end;
 end;
 
@@ -535,7 +564,11 @@ begin
                          {$ELSE}
                          IntToStr(Size)
                          {$ENDIF};
-  if FCDImportSession then Temp := Temp + '>';
+  if FCDImportSession then
+  begin
+    Temp := Temp + '>';
+    FHasImportedSessions := True;
+  end;
   TPList(Node.Data)^.Add(Temp);
 (*
   TPList(Node.Data)^.Add(ExtractFileName(Name) + ':' + Name + '*' +
@@ -756,10 +789,61 @@ begin
   end;
 end;
 
+{ GetFileCountPrevSess ---------------------------------------------------------
+
+  Der Betrag von GetFileCount ist die Anzahl aller Dateien, die zur CD hinzuge-
+  fügt wurden und aus einer alten Session stammen.
+  Das Vorzeichen wird als Flag verwendet:
+    positiv     keine der alten Dateien/Ordner soll versteckt werden
+    negativ     Dateien oder Ordner wurden gelöscht                            }
+
+function TCD.GetFileCountPrevSess: Integer;
+begin
+  if FHasImportedSessions then
+  begin
+    Result := CountFilesPrevSess(FRoot);
+    if FPrevSessDelList.Count > 0 then Result := Result * -1;
+  end else
+    Result := 0;
+end;
+
+{ CountFilesPrevSess -----------------------------------------------------------
+
+  Zählt rekursiv die Anzahl aller Dateien ausgehend von Knoten Root.           }
+
+function TCD.CountFilesPrevSess(Root: TNode): Integer;
+var Node: TNode;
+    c   : Integer;
+    i   : Integer;
+begin
+  if (Root <> nil) and (Root.Data <> nil) then
+  begin
+    c := 0;
+    for i := 0 to TPList(Root.Data)^.Count - 1 do
+    begin
+      if Pos('>', TPList(Root.Data)^[i]) > 0 then
+      begin
+        c := c + 1;
+      end;
+    end;
+    Result := c;
+  end else
+  begin
+    Result := 0;
+  end;
+  {nächster Knoten}
+  Node := Root.GetFirstChild;
+  while Node <> nil do
+  begin
+    Result := Result + CountFilesPrevSess(Node);
+    Node := Root.GetNextChild(Node);
+  end;
+end;
+
 { GetFolderCount ---------------------------------------------------------------
 
   GetFolderCount liefert die Anzahl aller Ordner, die zur CD hinzugefügt
-  wurden.}
+  wurden.                                                                      }
 
 function TCD.GetFolderCount: Integer;
 begin
@@ -828,8 +912,8 @@ end;
 function TCD.GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64
                                                        {$ELSE} Longint {$ENDIF};
 var Node: TNode;
-    i: Integer;
-    s: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+    i   : Integer;
+    s   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
 begin
   {$IFDEF DebugGetFolderSize}
   FormDebug.Memo1.Lines.Add('GetFolderSize: ' + Root.Text);
@@ -965,12 +1049,14 @@ begin
   FCDSize := 0;
   FCDSizeChanged := False;
   FFileCount := 0;
+  FFileCountPrevSess := 0;
   FFileCountChanged := False;
   FFolderCount := 0;
   FFolderCountChanged := False;
   FMaxLevel := 0;
   FMaxLevelChanged := False;
   FPrevSessDelList := TStringList.Create;
+  FHasImportedSessions := False;
   {Wurzel erzeugen}
   FRoot := TNode.Create(nil);
   FRoot.Text := 'CD';
@@ -1238,7 +1324,9 @@ begin
   DeleteFromPathlistByIndex(Index, Path);
 end;
 
-{ DeleteFolder löscht den durch Path bestimmten Ordner, es sei denn, es handelt
+{ DeleteFolder -----------------------------------------------------------------
+
+  DeleteFolder löscht den durch Path bestimmten Ordner, es sei denn, es handelt
   sich um das Stammverzeichnis.                                                }
 
 procedure TCD.DeleteFolder(const Path: string);
@@ -1247,6 +1335,10 @@ begin
   if Path <> '' then
   begin
     Folder := GetFolderFromPath(Path);
+    {Verstecken eines bereits vorhandenen Ordners}
+    if IsPreviousSessionFolder(Path) then
+      FPrevSessDelList.Add(GetPathFromFolder(Folder.Parent) +
+                           Folder.Text + ':');
     {Dateilisten freigeben}
     FreeFileLists(Folder);
     {Ordner mit Unterordnern löschen}
@@ -1282,6 +1374,7 @@ begin
   end;
   InvalidateCounters;
   FPrevSessDelList.Clear;
+  FHasImportedSessions := False;  
 end;
 
 { MoveFileByIndex --------------------------------------------------------------
@@ -1724,7 +1817,8 @@ var i: Integer;
     {Falls Verzeichnis leer ist (keine Dateien, keine Ordner), Dummy-Eintrag
      erzeugen, aber nur, wenn es nicht das Root-Directory ist.}
     if (Root.Level > 0) and
-       (TPList(Root.Data)^.Count = 0) and not Root.HasChildren then
+       (TPList(Root.Data)^.Count = 0) and not Root.HasChildren and
+       not IsPreviousSessionFolder(Path) then
     begin
       List.Add(Path + ':' + DummyDirName);
     end;
@@ -1838,8 +1932,8 @@ end;
 
 function TXCD.CountSmallForm2Files(Root: TNode): Integer;
 var Node: TNode;
-    c: Integer;
-    i: Integer;
+    c   : Integer;
+    i   : Integer;
     Temp: string;
 begin
   if (Root <> nil) and (Root.Data <> nil) then

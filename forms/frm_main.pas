@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.05.2007
+  letzte Änderung  03.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5423,6 +5423,7 @@ procedure TForm1.CDETreeViewPopupImportClick(Sender: TObject);
 var Index   : Integer;
     DeviceID: string;
     Drive   : string;
+    VolInfo : TVolumeInfo;
 begin
   Index := FSettings.General.TabSheetDrive[FSettings.General.Choice];
   DeviceID := FDevices.CDWriter.Values[FDevices.CDWriter.Names[Index]];
@@ -5432,12 +5433,16 @@ begin
     TLogWin.Inst.Add('No drive letter ...');
     Exit;
   end;
-  TLogWin.Inst.Add('Importing Session from Drive ' + DeviceID + ' -> ' + Drive);
+  VolInfo.Drive := Drive;
+  TLogWin.Inst.Add(Format(FLang.GMS('g011'), [Drive, DeviceID]));
   FData.CDImportSession := True;
   AddToPathlist(Drive);
   FData.CDImportSession := False;
   CheckDataCDFS(False);
   UserAddFolderUpdateTree(CDETreeView);
+  GetVolumeInfo(VolInfo);
+  FData.SetCDLabel(VolInfo.Name, FSettings.General.Choice);
+  CDETreeView.Items[0].Text := VolInfo.Name;
   UpdateGauges;
 end;
 

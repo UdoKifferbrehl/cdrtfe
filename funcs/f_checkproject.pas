@@ -2,10 +2,10 @@
 
   f_checkproject.pas: Einstellungen und Daten prüfen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.09.2006
+  letzte Änderung  03.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -31,7 +31,7 @@ unit f_checkproject;
 
 interface
 
-uses Forms, Windows, SysUtils, FileCtrl,
+uses Windows, SysUtils, FileCtrl,
      {eigene Klassendefinitionen/Units}
      cl_projectdata, cl_settings, cl_lang, constant;
 
@@ -45,10 +45,11 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
                       FLang: TLang): Boolean;
 
   function CheckProjectDataCD: Boolean;
-  var FileCount: Integer;
-      DummyI   : Integer;
-      DummyL: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
-      DummyE   : Extended;
+  var FileCount        : Integer;
+      FileCountPrevSess: Integer;
+      DummyI           : Integer;
+      DummyL           : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+      DummyE           : Extended;
   begin
     with FData, FSettings.DataCD, FLang do
     begin
@@ -56,18 +57,26 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if not OnTheFly and (IsoPath = '') then
       begin
         Result := False;
-        // Fehlermeldung := 'Name für die Image-Datei fehlt!';
-        Application.MessageBox(PChar(GMS('e101')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Name für die Image-Datei fehlt}
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONSTOP or
+                   MB_SYSTEMMODAL);
       end;
-      GetProjectInfo(FileCount, DummyI, DummyL, DummyE, DummyI,
-                     FSettings.General.Choice);
+      GetProjectInfo(FileCount, DummyI, DummyL, DummyE, FileCountPrevSess,
+                     FSettings.General.Choice); 
       if (FileCount = 0) and not Boot then
       begin
         Result := False;
-        // Fehlermeldung := 'Keine Dateien oder Ordner ausgewählt!';
-        Application.MessageBox(PChar(GMS('e102')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Keine Dateien oder Ordner ausgewählt}
+        ShowMsgDlg(GMS('e102'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
+      end;
+      if Result and (FileCountPrevSess > 0) and
+         (FileCount - Abs(FileCountPrevSess) = 0) then
+      begin
+        Result := False;
+        {Keine Veränderung}
+        ShowMsgDlg(GMS('e118'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
     end;
   end;
@@ -86,31 +95,31 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if TrackCount = 0 then
       begin
         Result := False;
-        // Fehlermeldung := 'Keine Titel ausgewählt!';
-        Application.MessageBox(PChar(GMS('e103')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Keine Titel ausgewählt}
+        ShowMsgDlg(GMS('e103'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       if CDText and not CDTextPresent and not UseInfo then
       begin
         Result := False;
-        // keine CD-Text-Daten
-        Application.MessageBox(PChar(GMS('ecdtext01')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {keine CD-Text-Daten}
+        ShowMsgDlg(GMS('ecdtext01'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       if CDTextLength > (252 * 12) then
       begin
         Result := False;
-        // zu viel CD-Text
-        Application.MessageBox(PChar(GMS('ecdtext02')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {zu viel CD-Text}
+        ShowMsgDlg(GMS('ecdtext02'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       if FData.CompressedAudioFilesPresent and
          (FSettings.General.TempFolder = '') then
       begin
         Result := False;
-        // es muß ein temp. Verzeichnis für die Konvertierung angegeben sein
-        Application.MessageBox(PChar(GMS('e116')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {es muß ein temp. Verzeichnis für die Konvertierung angegeben sein}
+        ShowMsgDlg(GMS('e116'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
     end;
   end;
@@ -125,9 +134,9 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if GetForm2FileCount = 0 then
       begin
         Result := False;
-        // Fehlermeldung := 'Keine Form2-Dateien ausgewählt!';
-        Application.MessageBox(PChar(GMS('e104')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Keine Form2-Dateien ausgewählt}
+        ShowMsgDlg(GMS('e104'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       {Wenn es Form2-Dateien mit weniger als 348.601 Bytes gibt, dann warnen und
        Single-Track-Image empfehlen}
@@ -135,16 +144,16 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         Meldung := Format(GMS('e114'), [GetSmallForm2FileCount]);
-        Application.MessageBox(PChar(Meldung), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(Meldung, GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       {Eine Pfad für das Image brauchen wir auch.}
       if IsoPath = '' then
       begin
         Result := False;
-        // Fehlermeldung := 'Name für die Image-Datei fehlt!';
-        Application.MessageBox(PChar(GMS('e101')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Name für die Image-Datei fehlt}
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
     end;
   end;
@@ -163,16 +172,16 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if (TrackCount = 0) or (Tracks = '') then
       begin
         Result := False;
-        // Fehlermeldung := 'Keine Audio-Tracks gewählt oder vorhanden!';
-        Application.MessageBox(PChar(GMS('e105')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Keine Audio-Tracks gewählt oder vorhanden}
+        ShowMsgDlg(GMS('e105'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       if Path = '' then
       begin
         Result := False;
-        // Fehlermeldung := 'Verzeichnisangabe fehlt!';
-        Application.MessageBox(PChar(GMS('e106')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Verzeichnisangabe fehlt}
+        ShowMsgDlg(GMS('e106'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
     end;
   end;
@@ -186,18 +195,19 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
          ((FSettings.Readcd.IsoPath = '') and FSettings.General.ImageRead) then
       begin
         Result := False;
-        // Fehlermeldung := 'Name für die Image-Datei fehlt!';
-        Application.MessageBox(PChar(GMS('e101')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Name für die Image-Datei fehlt}
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
+      {Angabe für Start- oder Endsektor fehlt}
       if FSettings.Readcd.Range then
       begin
         if (FSettings.Readcd.Startsec = '') or
            (FSettings.Readcd.Endsec = '') then
         begin
           Result := False;
-          Application.MessageBox(PChar(GMS('e115')), PChar(GMS('g001')),
-            MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+          ShowMsgDlg(GMS('e115'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                     MB_SYSTEMMODAL);
         end;
       end;
     end;
@@ -218,17 +228,17 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if TrackCount = 0 then
       begin
         Result := False;
-        // Fehlermeldung := 'Keine Titel ausgewählt!';
-        Application.MessageBox(PChar(GMS('evcd01')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Keine Titel ausgewählt}
+        ShowMsgDlg(GMS('evcd01'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
       {Eine Pfad für das Image brauchen wir auch.}
       if IsoPath = '' then
       begin
         Result := False;
-        // Fehlermeldung := 'Name für die Image-Datei fehlt!';
-        Application.MessageBox(PChar(GMS('e101')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        {Name für die Image-Datei fehlt}
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
     end;
   end;
@@ -241,8 +251,8 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if (SourcePath = '') or not DirectoryExists(SourcePath) then
       begin
         Result := False;
-        Application.MessageBox(PChar(GMS('edvdv01')), PChar(GMS('g001')),
-          MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('edvdv01'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);
       end;
     end;
   end;
