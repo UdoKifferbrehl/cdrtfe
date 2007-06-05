@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.06.2007
+  letzte Änderung  05.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -73,6 +73,7 @@
                  MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte)
                  MP3FilesPresent: Boolean;
                  OggFilesPresent: Boolean;
+                 ProjectIsEmpty(const Choice: Byte): Boolean
                  NewFolder(const Path, Name: string; const Choice: Byte)
                  RenameFileByIndex(const Index: Integer; const Path, Name: string; const MaxLength, Choice: Byte)
                  RenameFileByName(const Path, OldName, Name: string; const MaxLength, Choice: Byte)
@@ -180,6 +181,7 @@ type TProjectData = class(TObject)
        function GetProjectMaxLevel(const Choice: Byte): Integer;
        function GetSmallForm2FileCount: Integer;
        function GetTrackPause(const Index: Integer): string;
+       function ProjectIsEmpty(const Choice: Byte): Boolean;
        function TrackPausePresent: Boolean;
        procedure AddToPathlist(const AddName, DestPath: string; const Choice: Byte);
        procedure CheckDataCDFS(const Path: string; const MaxLength: Byte; const CheckFolder, CheckAccess: Boolean);
@@ -1501,6 +1503,19 @@ end;
 procedure TProjectData.SetDVDSourcePath(const Path: string);
 begin
   FDVDVideo.SourcePath := Path;
+end;
+
+{ ProjectIsEmpty ---------------------------------------------------------------
+
+  True, wenn keine Daten zu einen Projekt hinzugefügt wurden.                  }
+
+function TProjectData.ProjectIsEmpty(const Choice: Byte): Boolean;
+begin
+  case Choice of
+    cDataCD: Result := (FDataCD.FileCount = 0) and (FDataCD.FolderCount = 0);
+  else
+    Result := False;
+  end;
 end;
 
 

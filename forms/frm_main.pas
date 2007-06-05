@@ -5335,7 +5335,8 @@ begin
   end;
   {Darf alte Session importiert werden?}
   Temp := FSettings.DataCD.Multi and FSettings.DataCD.ContinueCD and
-          (FSettings.General.Choice = cDataCD);
+          (FSettings.General.Choice = cDataCD) and
+          FData.ProjectIsEmpty(cDataCD);
   CDETreeViewPopupN4.Visible := Temp;
   CDETreeViewPopupImport.Visible := Temp;
 end;
