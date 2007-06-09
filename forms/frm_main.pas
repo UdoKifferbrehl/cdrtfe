@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.06.2007
+  letzte Änderung  09.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -463,6 +463,7 @@ type
     procedure DeviceArrival(Drive: string);
     procedure DeviceRemoval(Drive: string);
     procedure HandleError(const ErrorCode: Byte; const Name: string);
+    procedure HandleKeyboardShortcut(const Key: Word);
     procedure MessageShow(const s: string);
     procedure ProgressBarHide;
     procedure ProgressBarShow(const Max: Integer);
@@ -4138,11 +4139,82 @@ end;
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
                              Shift: TShiftState);
 begin
+  if  ssAlt in Shift then
+  begin
+    HandleKeyboardShortcut(Key);
+  end else
   case Key of
     VK_F12: ToggleStayOnTopState;
   end;
 end;
 
+{ HandleKeyboardShortcut -------------------------------------------------------
+
+  nimmt die eigentlich Auswertung der Tastenkombination vor.                   }
+
+procedure TForm1.HandleKeyboardShortcut(const Key: Word);
+
+  procedure HKSAddFiles;
+  begin
+    case FSettings.General.Choice of
+      cDataCD : begin
+                  UserAddFile(CDETreeView);
+                  ShowFolderContent(CDETreeView, CDEListView);
+                end;
+      cXCD    : begin
+                  UserAddFile(XCDETreeView);
+                  ShowFolderContent(XCDETreeView, XCDEListView1);
+                end;
+      cAudioCD,
+      cVideoCD: UserAddTrack;
+    end;
+  end;
+
+  procedure HKSAddFolder;
+  begin
+    case FSettings.General.Choice of
+      cDataCD: UserAddFolder(CDETreeView);
+      cXCD   : UserAddFolder(XCDETreeView);
+    end;
+  end;
+
+  procedure HKSDeleteAll;
+  begin
+    case FSettings.General.Choice of
+      cDataCD : CDESpeedButton5Click(nil);
+      cXCD    : XCDESpeedButton7Click(nil);
+    end;
+  end;
+
+  procedure HKSTrackUp;
+  begin
+    case FSettings.General.Choice of
+      cAudioCD : AudioSpeedButton2Click(nil);
+      cVideoCD : VideoSpeedButton2Click(nil);
+    end;
+  end;
+
+  procedure HKSTrackDown;
+  begin
+    case FSettings.General.Choice of
+      cAudioCD : AudioSpeedButton3Click(nil);
+      cVideoCD : VideoSpeedButton3Click(nil);
+    end;
+  end;
+
+begin
+  case Key of
+    {VK_O}$4F: HKSAddFiles;
+    {VK_V}$56: begin
+                 if FSettings.General.Choice = cXCD then
+                 begin FSettings.General.XCDAddMovie := True; HKSAddFiles; end;
+               end;
+    {VK_F}$46: HKSAddFolder;
+    {VK_X}$58: HKSDeleteAll;
+    VK_UP    : HKSTRackUp;
+    VK_DOWN  : HKSTrackDown;
+  end;
+end;
 
 
 { Button-Events -------------------------------------------------------------- }
@@ -5114,7 +5186,7 @@ end;
 procedure TForm1.CDESpeedButton5Click(Sender: TObject);
 begin
   UserDeleteAll(CDETreeView);
-  {mit einem neuen Projekt sollen auch die alten Ausnahmen gelöscgt werden}
+  {mit einem neuen Projekt sollen auch die alten Ausnahmen gelöscht werden}
   FData.IgnoreNameLengthErrors := False;
   FData.ErrorListIgnore.Clear;  
 end;
