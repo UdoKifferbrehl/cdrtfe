@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.06.2007
+  letzte Änderung  10.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,6 +21,9 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
+     {$IFDEF Delphi7Up}
+     ActnList,
+     {$ENDIF}
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
@@ -390,6 +393,15 @@ type
     DropFileTargetXCDETreeView: TDropFileTarget;
     {$ENDIF}
     StayOnTopState: Boolean;
+    {$IFDEF Delphi7Up}
+    ActionList: TActionList;
+    ActionUserAddFile: TAction;
+    ActionUserAddFileForm2: TAction;
+    ActionUserAddFolder: TAction;
+    ActionUserDeleteAll: TAction;
+    ActionUserTrackUp: TAction;
+    ActionUserTrackDown: TAction;
+    {$ENDIF}    
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
@@ -477,6 +489,17 @@ type
     procedure DropFileTargetTreeViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewLeave(Sender: TObject);
     {$ENDIF}
+    {ActionList/Actions}
+    {$IFDEF Delphi7Up}
+    procedure InitActions;
+    procedure ActionUserAddFileExecute(Sender: TObject);
+    procedure ActionUserAddFileForm2Execute(Sender: TObject);
+    procedure ActionUserAddFolderExecute(Sender: TObject);
+    procedure ActionUserDeleteAllExecute(Sender: TObject);
+    procedure ActionUserTrackUpExecute(Sender: TObject);
+    procedure ActionUserTrackDownExecute(Sender: TObject);
+    {$ENDIF}
+
   public
     { Public declarations }
   end;
@@ -3476,6 +3499,9 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
+  {$IFDEF Delphi7Up}
+  InitActions;
+  {$ENDIF}
   {$IFDEF WriteLogfile} AddLog('TForm1.FormCreate' + CRLF, 0); {$ENDIF}
   SetFont(Self);
   FInstanceTermination := False;
@@ -4139,10 +4165,12 @@ end;
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
                              Shift: TShiftState);
 begin
+  {$IFNDEF Delphi7Up}
   if  ssAlt in Shift then
   begin
     HandleKeyboardShortcut(Key);
   end else
+  {$ENDIF}
   case Key of
     VK_F12: ToggleStayOnTopState;
   end;
@@ -4209,8 +4237,8 @@ begin
                  if FSettings.General.Choice = cXCD then
                  begin FSettings.General.XCDAddMovie := True; HKSAddFiles; end;
                end;
-    {VK_F}$46: HKSAddFolder;
-    {VK_X}$58: HKSDeleteAll;
+    {VK_I}$49: HKSAddFolder;
+    VK_Delete: HKSDeleteAll;
     VK_UP    : HKSTRackUp;
     VK_DOWN  : HKSTrackDown;
   end;
@@ -6034,6 +6062,80 @@ begin
   ExpandNodeDelayed(nil, True);
 end;
 
+{$IFDEF Delphi7Up}
+{ Actions -------------------------------------------------------------------- }
+
+{ InitActions ------------------------------------------------------------------
+
+  initialisiert die Actions. Action werden benötigt, da im OnKeyDown-Event des
+  Hauptfensters immer ein Beep erzeugt wird, nei Actions jedoch nicht.         }
+
+procedure TForm1.InitActions;
+begin
+  {ActionList erstellen}
+  ActionList := TActionList.Create(Form1);
+  {Actions erstellen - Dateien/Tracks hinzufügen}
+  ActionUserAddFile := TAction.Create(ActionList);
+  ActionUserAddFile.ShortCut := ShortCut($4F{VK_O}, [ssAlt]);
+  ActionUserAddFile.OnExecute := ActionUserAddFileExecute;
+  ActionUserAddFile.ActionList := ActionList;
+  {Actions erstellen - Form2-Dateien hinzufügen}
+  ActionUserAddFileForm2 := TAction.Create(ActionList);
+  ActionUserAddFileForm2.ShortCut := ShortCut($56{VK_V}, [ssAlt]);
+  ActionUserAddFileForm2.OnExecute := ActionUserAddFileForm2Execute;
+  ActionUserAddFileForm2.ActionList := ActionList;
+  {Actions erstellen - Ordner hinzufügen}
+  ActionUserAddFolder := TAction.Create(ActionList);
+  ActionUserAddFolder.ShortCut := ShortCut($49{VK_I}, [ssAlt]);
+  ActionUserAddFolder.OnExecute := ActionUserAddFolderExecute;
+  ActionUserAddFolder.ActionList := ActionList;
+  {Actions erstellen - Alles löschen}
+  ActionUserDeleteAll := TAction.Create(ActionList);
+  ActionUserDeleteAll.ShortCut := ShortCut(VK_Delete, [ssAlt]);
+  ActionUserDeleteAll.OnExecute := ActionUserDeleteAllExecute;
+  ActionUserDeleteAll.ActionList := ActionList;
+  {Actions erstellen - Track nach oben bewegen}
+  ActionUserTrackUp := TAction.Create(ActionList);
+  ActionUserTrackUp.ShortCut := ShortCut(VK_UP, [ssAlt]);
+  ActionUserTrackUp.OnExecute := ActionUserTrackUpExecute;
+  ActionUserTrackUp.ActionList := ActionList;
+  {Actions erstellen - Track nach unten bewegen}
+  ActionUserTrackDown := TAction.Create(ActionList);
+  ActionUserTrackDown.ShortCut := ShortCut(VK_Down, [ssAlt]);
+  ActionUserTrackDown.OnExecute := ActionUserTrackDownExecute;
+  ActionUserTrackDown.ActionList := ActionList;
+end;
+
+procedure TForm1.ActionUserAddFileExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($4F);
+end;
+
+procedure TForm1.ActionUserAddFileForm2Execute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($56);
+end;
+
+procedure TForm1.ActionUserAddFolderExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($49);
+end;
+
+procedure TForm1.ActionUserDeleteAllExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut(VK_DELETE);
+end;
+
+procedure TForm1.ActionUserTrackUpExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut(VK_UP);
+end;
+
+procedure TForm1.ActionUserTrackDownExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut(VK_DOWN);
+end;
+{$ENDIF}
 
 { Hilfsfunktionen ------------------------------------------------------------ }
 
