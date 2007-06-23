@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cdrtfe.dpr: Hauptprogramm
 
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.01.2007
+  letzte Änderung  19.06.2007
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -37,6 +37,7 @@ program cdrtfe;
 
 uses
   Forms,
+  f_logfile in 'support\f_logfile.pas',
   frm_main in 'forms\frm_main.pas' {Form1},
   frm_datacd_fs in 'forms\frm_datacd_fs.pas' {FormDataCDFS},
   frm_datacd_options in 'forms\frm_datacd_options.pas' {FormDataCDOptions},
@@ -78,7 +79,6 @@ uses
   userevents in 'support\userevents.pas',
   user_messages in 'support\user_messages.pas',
   cl_logwindow in 'support\cl_logwindow.pas',
-  f_logfile in 'support\f_logfile.pas',
   cl_filetypeinfo in 'system\cl_filetypeinfo.pas',
   cl_imagelists in 'system\cl_imagelists.pas',
   cl_peheader in 'system\cl_peheader.pas',

@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  05.03.2007
+  letzte Änderung  18.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -201,7 +201,7 @@ end;
 procedure TLogWin.Add(s: string);
 begin
   {$IFDEF WriteLogfile}
-  if FLog.Count > 0 then AddLog(FLog[FLog.Count - 1], 0);
+  if FLog.Count > 0 then AddLog('> ' + FLog[FLog.Count - 1], 0);
   {$ENDIF}
   
   {Wenn nötig, Platz schaffen}

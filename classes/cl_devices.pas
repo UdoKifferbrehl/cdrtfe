@@ -5,7 +5,7 @@
   Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2007
+  letzte Änderung  21.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -141,31 +141,28 @@ end;
 
 {$IFDEF WriteLogfile}
 procedure TDevices.WriteLog;
-var i: Integer;
 begin
-  AddLog('Device-Lists:' + CRLF, 0);
-  AddLog('FLocalCDDevices:', 0);
-  for i := 0 to FLocalCDDevices.Count - 1 do AddLog('  ' + FLocalCDDevices[i], 0);
-  AddLog(CRLF + 'FLocalCDWriter:', 0);
-  for i := 0 to FLocalCDWriter.Count - 1 do AddLog('  ' + FLocalCDWriter[i], 0);
-  AddLog(CRLF + 'FLocalCDReader:', 0);
-  for i := 0 to FLocalCDReader.Count - 1 do AddLog('  ' + FLocalCDReader[i], 0);
-  AddLog(CRLF + 'FLocalCDDriveLetter:', 0);
-  for i := 0 to FLocalCDDriveLetter.Count - 1 do AddLog('  ' + FLocalCDDriveLetter[i], 0);
-  AddLog(CRLF + 'FLocalCDSpeedList:', 0);
-  for i := 0 to FLocalCDSpeedList.Count - 1 do AddLog('  ' + FLocalCDSpeedList[i], 0);
-
-  AddLog(CRLF + CRLF + 'FRemoteCDDevices:', 0);
-  for i := 0 to FRemoteCDDevices.Count - 1 do AddLog('  ' + FRemoteCDDevices[i], 0);
-  AddLog(CRLF + 'FRemoteCDWriter:', 0);
-  for i := 0 to FRemoteCDWriter.Count - 1 do AddLog('  ' + FRemoteCDWriter[i], 0);
-  AddLog(CRLF + 'FRemoteCDReader:', 0);
-  for i := 0 to FRemoteCDReader.Count - 1 do AddLog('  ' + FRemoteCDReader[i], 0);
-  AddLog(CRLF + 'FRemoteCDDriveLetter:', 0);
-  for i := 0 to FRemoteCDDriveLetter.Count - 1 do AddLog('  ' + FRemoteCDDriveLetter[i], 0);
-  AddLog(CRLF + 'FRemoteCDSpeedList:', 0);
-  for i := 0 to FRemoteCDSpeedList.Count - 1 do AddLog('  ' + FRemoteCDSpeedList[i], 0);
-  AddLog(CRLF + CRLF, 0);
+  AddLogCode(1202);
+  AddLogcode(1203);
+  AddLog(FLocalCDDevices.Text, 13);
+  AddLogCode(1204);
+  AddLog(FLocalCDWriter.Text, 13);
+  AddLogCode(1205);
+  AddLog(FLocalCDReader.Text, 13);
+  AddLogCode(1206);
+  AddLog(FLocalCDDriveLetter.Text, 13);
+  AddLogCode(1207);
+  AddLog(FLocalCDSpeedList.Text, 13);
+  AddLogCode(1208);
+  AddLog(FRemoteCDDevices.Text, 13);
+  AddLogCode(1209);
+  AddLog(FRemoteCDWriter.Text, 13);
+  AddLogCode(1210);
+  AddLog(FRemoteCDReader.Text, 13);
+  AddLogCode(1211);
+  AddLog(FRemoteCDDriveLetter.Text, 13);
+  AddLogCode(1212);
+  AddLog(FRemoteCDSpeedList.Text, 13);
 end;
 {$ENDIF}
 
@@ -522,6 +519,7 @@ end;
 
 procedure TDevices.DetectDrives;
 begin
+  {$IFDEF WriteLogfile} AddLogCode(1200); {$ENDIF}
   case FUseRSCSI of
     False: DetectCDDrives(FLocalCDWriter, FLocalCDReader, FLocalCDDevices,
                           FLocalCDDriveLetter, FLocalCDSpeedList);
@@ -533,6 +531,7 @@ begin
   {$ENDIF}
   {$IFDEF WriteLogfile}
   WriteLog;
+  AddLogCode(1201);
   {$ENDIF}
 end;
 

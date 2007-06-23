@@ -550,14 +550,19 @@ var Thread      : TDOSThread;
     Buffer      : array[0..1] of Char;
 begin
   {$IFDEF WriteLogfile}
+  AddLogCode(1100);
   case FastMode of
-    True : AddLog('FastMode: True  -> BuffSize = 512' + CRLF, 0);
-    False: AddLog('FastMode: False -> BuffSize = 10' + CRLF, 0);
+    True : AddLog('FastMode: True  -> BuffSize = 512' + CRLF, 12);
+    False: AddLog('FastMode: False -> BuffSize = 10' + CRLF, 12);
   end;
   {$ENDIF}
   Thread := TDOSThread.Create(lpCommandLine, GetStdErr, True);
   Thread.FreeOnTerminate := False;
   Thread.FastMode := FastMode;
+  {$IFDEF WriteLogfile}
+  AddLogCode(1101);
+  AddLog(string(lpCommandLine) + CRLF, 12);
+  {$ENDIF}
   Thread.Resume;
 
   while Thread.Running do
@@ -590,6 +595,7 @@ begin
       end;
     end;
   end;
+  {$IFDEF WriteLogfile}AddLogCode(1102);{$ENDIF}
 
   Result := Thread.Output;
   {$IFDEF DebugGetDOSOutputThread}
@@ -618,8 +624,8 @@ begin
   Result := GetDOSOutputEx(lpCommandLine, GetStdErr, FastMode);
   {$ENDIF}
   {$IFDEF WriteLogfile}
-  AddLog(string(lpCommandLine) + CRLF, 0);
-  AddLog(Result + CRLF + CRLF, 0);
+  AddLogCode(1103);
+  AddLog(Result, 12);
   {$ENDIF}
 end;
 

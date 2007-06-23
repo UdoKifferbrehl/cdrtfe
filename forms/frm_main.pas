@@ -3502,7 +3502,7 @@ begin
   {$IFDEF Delphi7Up}
   InitActions;
   {$ENDIF}
-  {$IFDEF WriteLogfile} AddLog('TForm1.FormCreate' + CRLF, 0); {$ENDIF}
+  {$IFDEF WriteLogfile} AddLogCode(1051); {$ENDIF}
   SetFont(Self);
   FInstanceTermination := False;
   {Ein paar Objekte brauchen wir, egal ob es sich um die erste oder zweite
@@ -3655,7 +3655,7 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  {$IFDEF WriteLogfile} AddLog('TForm1.FormDestroy' + CRLF, 0); {$ENDIF}
+  {$IFDEF WriteLogfile} AddLogCode(1052); {$ENDIF}
   {$IFDEF UseOLEDragDrop}
   if not FInstanceTermination then FreeDropTargets;
   {$ENDIF}
@@ -3696,7 +3696,7 @@ procedure TForm1.FormShow(Sender: TObject);
 var i: Byte;
     OldChoice: Byte;
 begin
-  {$IFDEF WriteLogfile} AddLog('TForm1.FormShow' + CRLF, 0); {$ENDIF}
+  {$IFDEF WriteLogfile} AddLogCode(1053); {$ENDIF}
   {einmal jedes Tab aktivieren, sonst funktioniert FormResize nicht richtig.
    Auﬂerdem wird damit gew‰hrleistet, daﬂ FSettings.General.Choice initialisiert
    ist.}
@@ -3747,7 +3747,7 @@ end;
 
 procedure TForm1.FormActivate(Sender: TObject);
 begin
-  {$IFDEF WriteLogfile} AddLog('TForm1.FormActivate' + CRLF, 0); {$ENDIF}
+  {$IFDEF WriteLogfile} AddLogCode(1054); {$ENDIF}
   if FSettings.CmdLineFlags.ExecuteProject then
   begin
     SetSettings;
@@ -4037,7 +4037,7 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  {$IFDEF WriteLogfile} AddLog('TForm1.FormClose' + CRLF, 0); {$ENDIF}
+  {$IFDEF WriteLogfile} AddLogCode(1055); {$ENDIF}
   {Einstellungen speichern}
   SaveWinPos;
   if FSettings.General.AutoSaveOnExit then
@@ -6198,7 +6198,7 @@ initialization
   FormDebug.Show;
   {$ENDIF}
   {$IFDEF WriteLogfile}
-  AddLog('frm_main.pas initialization', 0);
+  AddLogCode(1050);
   {$ENDIF}
   {$IFDEF ShowTime}
   TC  := TTimeCount.Create;
@@ -6213,7 +6213,7 @@ finalization
   FormDebug.Free;
   {$ENDIF}
   {$IFDEF WriteLogfile}
-  AddLog('frm_main.pas finalization', 0);
+  AddLogCode(1056);
   {$ENDIF}
   DeviceChangeNotifier.Free;
   {$IFDEF ShowTime}
