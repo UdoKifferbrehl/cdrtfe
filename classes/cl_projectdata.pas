@@ -20,7 +20,8 @@
 
     Properties   AcceptMP3
                  AcceptOgg
-                 AccpetFLAC
+                 AcceptFLAC
+                 AcceptApe
                  AddAsForm2
                  CDImportSession
                  CompressedAudioFilesPresent
@@ -120,12 +121,15 @@ const PD_NoError = 0;          {Fehlercodes}
       PD_NoOggSupport = 14;
       PD_NoFLACSupport = 15;
       PD_PreviousSession = 16;
+      PD_InvalidApeFile = 17;
+      PD_NoApeSupport = 18;
 
 type TProjectData = class(TObject)
      private
        FAcceptMP3: Boolean;
        FAcceptOgg: Boolean;
        FAcceptFLAC: Boolean;
+       FAcceptApe: Boolean;
        FLang: TLang;
        FDataCD: TCD;
        FAudioCD: TAudioCD;
@@ -148,6 +152,7 @@ type TProjectData = class(TObject)
        procedure SetAcceptMP3(Mode: Boolean);
        procedure SetAcceptOgg(Mode: Boolean);
        procedure SetAcceptFLAC(Mode: Boolean);
+       procedure SetAcceptApe(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
        procedure SetCDImportSession(Mode: Boolean);
        procedure SetOnProjectError(EventHandler: TProjectErrorEvent);
@@ -221,6 +226,7 @@ type TProjectData = class(TObject)
        property AcceptMP3: Boolean read FAcceptMP3 write SetAcceptMP3;
        property AcceptOgg: Boolean read FAcceptOgg write SetAcceptOgg;
        property AcceptFLAC: Boolean read FAcceptFLAC write SetAcceptFLAC;
+       property AcceptApe: Boolean read FAcceptApe write SetAcceptApe;
        property CompressedAudioFilesPresent: Boolean read GetCompressedAudioFilesPresent;
        property DataCDFilesToDelete: Boolean read GetDataCDFilesToDelete;
        property Lang: TLang write FLang;
@@ -381,6 +387,16 @@ begin
   FAudioCD.AcceptFLAC := Mode;
 end;
 
+{ SetAcceptApe -----------------------------------------------------------------
+
+  Wenn mac.exe (Monkey's Audio) existiert, können Ape-Dateien verwendet werden.}
+
+procedure TProjectData.SetAcceptApe(Mode: Boolean);
+begin
+  FAcceptApe := Mode;
+  FAudioCD.AcceptApe := Mode;
+end;
+
 { SetOnProjectError ------------------------------------------------------------
 
   OnProjectError kann nicht direkt gesetzt werden, da er auch an FAudioCD durch-
@@ -424,6 +440,7 @@ begin
   FAcceptMP3 := True;
   FAcceptOgg := True;
   FAcceptFLAC := True;
+  FAcceptApe := True;
 end;
 
 destructor TProjectData.Destroy;
@@ -488,9 +505,11 @@ begin
     CD_InvalidMP3File: FError := PD_InvalidMP3File;
     CD_InvalidOggFile: FError := PD_InvalidOggFile;
     CD_InvalidFLACFile: FError := PD_InvalidFLACFile;
+    CD_InvalidApeFile: FError := PD_InvalidApeFile;
     CD_NoMP3Support: FError := PD_NoMP3Support;
     CD_NoOggSupport: FError := PD_NoOggSupport;
     CD_NoFLACSupport: FError := PD_NoFLACSupport;
+    CD_NoApeSupport: FError := PD_NoApeSupport;    
   end;
 end;
 

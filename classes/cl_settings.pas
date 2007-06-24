@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2007
+  letzte Änderung  24.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -136,6 +136,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        OggencOk   : Boolean;
        FLACOk     : Boolean;
        LameOk     : Boolean;
+       MonkeyOk   : Boolean;
        RrencOk    : Boolean;
        RrdecOk    : Boolean;
      end;
@@ -619,6 +620,7 @@ begin
     OggdecOk    := True;
     OggencOk    := True;
     FLACOk      := True;
+    MonkeyOk    := True;
     RrencOk     := True;
     RrdecOk     := True;
   end;

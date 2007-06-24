@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.06.2007
+  letzte Änderung  24.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -125,7 +125,7 @@ begin
     Add('f001=ISO-Image (*.iso)|*.iso;*.iso_00|CUE-Image (*.cue)|*.cue');
     Add('f002=ISO-Image (*.iso)|*.iso;*.iso_00');
     Add('f003=Namen ohne Endung eingeben!|*.*');
-    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg; *.flac)|*.wav;*.mp3;*.ogg;*.flac|Playlist (*.m3u)|*.m3u');
+    Add('f004=Sound-Dateien (*.wav; *.mp3; *.ogg; *.flac; *.ape)|*.wav;*.mp3;*.ogg;*.flac;*.ape|Playlist (*.m3u)|*.m3u');
     Add('f005=Movie-Dateien (*.avi)|*.avi|Alle Dateien|*.*');
     Add('f006=cdrtfe Projekt-Dateien (*.cfp)|*.cfp');
     Add('f007=Image-Dateien (*.bin; *.img; *.ima)|*.bin;*.img;*.ima|Alle Dateien|*.*');
@@ -210,6 +210,7 @@ begin
     Add('eprocs03=%s: falsches MP3-Format.');
     Add('eprocs04=%s: falsches Ogg-Format.');
     Add('eprocs05=%s: falsches FLAC-Format.');
+    Add('eprocs06=%s: falsches APE-Format.');
     {Messages - Preferences}
     Add('mpref01=ShellExtensions registriert.');
     Add('mpref02=Registryeinträge der ShellExtensions entfernt.');
@@ -243,7 +244,8 @@ begin
     Add('minit08=Ohne die Datei vcdimager.exe können keine Video-CDs erstellt werden.\n ');
     Add('minit09=Ohne madplay.exe werden MP3-Tracks nicht unterstützt.\n ');
     Add('minit10=Ohne oggdec.exe werden Ogg-Vorbis-Tracks nicht unterstützt.\n ');
-    Add('minit11=Ohne flac.exe werden FLAC-Tracks nicht unterstützt.\n ');    
+    Add('minit11=Ohne flac.exe werden FLAC-Tracks nicht unterstützt.\n ');
+    Add('minit12=Ohne mac.exe werden APE-Tracks nicht unterstützt.\n ');            
     {Messages - Burning}
     Add('eburn01=Es ist keine CD eingelegt!');
     Add('eburn02=Diese CD kann nicht beschrieben werden. Entweder handelt es sich\num eine CD-ROM oder die CD-R(W) wurde bereits abgeschlossen.');

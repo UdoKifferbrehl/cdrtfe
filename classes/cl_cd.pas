@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_cd.pas: Datentypen zur Speicherung der Pfadlisten
 
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.06.2007
+  letzte Änderung  24.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -79,6 +79,7 @@
                  AcceptMP3
                  AcceptOgg
                  AcceptFLAC
+                 AcceptApe
 
     Methoden     AddTrack(const Name: string)
                  Create
@@ -151,6 +152,8 @@ const CD_NoError = 0;          {Fehlercodes}
       CD_NoOggSupport = 14;
       CD_NoFLACSupport = 15;
       CD_PreviousSession = 16;
+      CD_InvalidApeFile = 17;
+      CD_NoApeSupport = 18;
 
 type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        Path           : string;
@@ -277,6 +280,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FAcceptMP3: Boolean;
        FAcceptOgg: Boolean;
        FAcceptFLAC: Boolean;
+       FAcceptApe: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
        FError: Byte;
@@ -322,6 +326,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property AcceptMP3: Boolean read FAcceptMP3 write FAcceptMP3;
        property AcceptOgg: Boolean read FAcceptOgg write FAcceptOgg;
        property AcceptFLAC: Boolean read FAcceptFLAC write FAcceptFLAC;
+       property AcceptApe: Boolean read FAcceptApe write FAcceptApe;
        property CDTextLength: Integer  read GetCDTextLength;
        property CDTextPresent: Boolean read GetCDTextPresent;
        property CDTime: Extended read GetCDTime;
@@ -390,8 +395,8 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      atl_oggvorbis,
-     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo,        cl_logwindow,
-     cl_mpegvinfo;
+     f_filesystem, f_misc, f_strings, cl_mpeginfo, cl_flacinfo, f_wininfo,{        cl_logwindow,}
+     cl_mpegvinfo, cl_apeinfo;
 
 { TCD ------------------------------------------------------------------------ }
 
@@ -2355,7 +2360,8 @@ begin
     Ext := LowerCase(ExtractFileExt(List[i]));
     Result := Result or (Ext = cExtMP3)
                      or (Ext = cExtOgg)
-                     or (Ext = cExtFlac);
+                     or (Ext = cExtFlac)
+                     or (Ext = cExtApe);
   end;
   List.Free;
 end;
@@ -2509,6 +2515,7 @@ begin
   FAcceptMP3 := True;
   FAcceptOgg := True;
   FAcceptFLAC := True;
+  FAcceptApe := True;
 end;
 
 destructor TAudioCD.Destroy;
@@ -2531,10 +2538,12 @@ var Size              : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
     Temp, CDText      : string;
     CDTextArgs        : TAutoCDText;
     Ok, Wave, MP3,
-    Ogg, FLAC, M3u    : Boolean;
+    Ogg, FLAC, Ape,
+    M3u               : Boolean;
     MPEGFile          : TMPEGFile;
     OggFile           : TOggVorbis;
     FLACFile          : TFLACFile;
+    ApeFile           : TApeFile;
 begin
   if FileExists(Name) then
   begin
@@ -2542,6 +2551,7 @@ begin
     MP3  := LowerCase(ExtractFileExt(Name)) = cExtMP3;
     Ogg  := LowerCase(ExtractFileExt(Name)) = cExtOgg;
     FLAC := LowerCase(ExtractFileExt(Name)) = cExtFlac;
+    Ape  := LowerCase(ExtractFileExt(Name)) = cExtApe;
     M3u  := LowerCase(ExtractFileExt(Name)) = cExtM3u;
     Ok := False;
     Size := GetFileSize(Name);
@@ -2641,6 +2651,31 @@ begin
       end else
       begin
         FError := CD_NoFLACSupport;
+      end;
+    end else
+    if Ape then
+    begin
+      if FAcceptApe then
+      begin
+        {Bestimmung der Länge könnte etwas dauern}
+        Application.ProcessMessages;
+        ApeFile := TApeFile.Create(Name);
+        ApeFile.GetInfo;
+        TrackLength := ApeFile.Length;
+        CDTextArgs.Title := ''; //ApeFile.TagTitle;
+        CDTextArgs.Performer := ''; //ApeFile.TagArtist;
+        CDTextArgs.FileName := Name;
+        CDTextArgs.IsWave := Wave;
+        CDText := AutoCDText(CDTextArgs);
+        ApeFile.Free;
+        Ok := TrackLength > 0;
+        if not Ok then
+        begin
+          FError := CD_InvalidApeFile;
+        end;
+      end else
+      begin
+        FError := CD_NoApeSupport;
       end;
     end;
     if Ok then

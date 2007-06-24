@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.06.2007
+  letzte Änderung  24.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -747,9 +747,9 @@ var i         : Integer;
 
   { PrepareCompressedToWavConversion -------------------------------------------
 
-    PrepareCompressedToWavConversion bereitet die Konvertierung der MP3-, Ogg-
-    und FLAC-Dateien in Wave-Dateien vor, d.h. die BurnList wird angepaßt und
-    die entsprechenden Madplay-, Oggdec- oder flac-Aufrufe werden generiert.
+    PrepareCompressedToWavConversion bereitet die Konvertierung der MP3-, Ogg-,
+    FLAC- und Ape-Dateien in Wave-Dateien vor, d.h. die BurnList wird angepaßt
+    und die entsprechenden Madplay-, Oggdec- oder flac-Aufrufe werden generiert.
     Die Namen der temporären Dateien werden in FVList gespeichert.             }
 
   procedure PrepareCompressedToWavConversion;
@@ -784,6 +784,11 @@ var i         : Integer;
         begin
           CmdTemp := StartUpDir + cFLACBin + ' -d ' + QuotePath(Source) +
                      ' -o ' + QuotePath(Target) + CR
+        end else
+        if (Ext = cExtApe) then
+        begin
+          CmdTemp := StartUpDir + cMonkeyBin + ' ' + QuotePath(Source) + ' ' +
+                     QuotePath(Target) + ' -d' + CR
         end;
         FVList.Add(Target);
       end;

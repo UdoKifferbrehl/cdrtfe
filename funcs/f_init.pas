@@ -74,6 +74,7 @@ begin
       cOggdecBin       := ReadString(T, 'OggdecBin', cOggdecBin);
       cOggencBin       := ReadString(T, 'OggencBin', cOggencBin);
       cFLACBin         := ReadString(T, 'FLACBin', cFLACBin);
+      cMonkeyBin       := ReadString(T, 'MonkeyBin', cFLACBin);
       cRrencBin        := ReadString(T, 'RrencBin', cRrencBin);
       cRrdecBin        := ReadString(T, 'RrdecBin', cRrdecBin);
       cM2F2ExtractBin  := ReadString(T, 'M2F2ExtractBin', cM2F2ExtractBin);
@@ -189,6 +190,12 @@ begin
       begin
         TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit11'));
       end;
+      {Ist Monkey da? Falls nicht, Ape-Dateien ignorieren.}
+      MonkeyOk := FileExists(StartUpDir + cMonkeyBin + cExtExe);
+      if not MonkeyOk then
+      begin
+//        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit12'));
+      end; 
       {Version von cdrecord/mkisofs prüfen.}
       CheckVersion(Settings);
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei

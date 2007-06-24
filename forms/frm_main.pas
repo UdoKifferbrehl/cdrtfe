@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.06.2007
+  letzte Änderung  24.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1345,9 +1345,11 @@ begin
       PD_InvalidMP3File : Add(Format(FLang.GMS('eprocs03'), [Name]));
       PD_InvalidOggFile : Add(Format(FLang.GMS('eprocs04'), [Name]));
       PD_InvalidFLACFile: Add(Format(FLang.GMS('eprocs05'), [Name]));
+      PD_InvalidApeFile : Add(Format(FLang.GMS('eprocs06'), [Name]));
       PD_NoMP3Support   : Add(Name + ': ' + FLang.GMS('minit09'));
       PD_NoOggSupport   : Add(Name + ': ' + FLang.GMS('minit10'));
       PD_NoFLACSupport  : Add(Name + ': ' + FLang.GMS('minit11'));
+      PD_NoApeSupport   : Add(Name + ': ' + FLang.GMS('minit12'));
     end;
   end;
 end;
@@ -3562,11 +3564,12 @@ begin
     {prüfen, ob alle Dateien da sind}
     if CheckFiles(FSettings, FLang) then
     begin
-      {Wenn die entrpechenden Programme vorhanden sind, können MP3-, Ogg- und
-       FLAC-DAteien verwendet werden.}
+      {Wenn die entrpechenden Programme vorhanden sind, können MP3-, Ogg-, Ape-
+       und FLAC-Dateien verwendet werden.}
       FData.AcceptMP3 := FSettings.FileFlags.MadplayOk;
       FData.AcceptOgg := FSettings.FileFlags.OggdecOk;
       FData.AcceptFLAC := FSettings.FileFlags.FLACOk;
+      FData.AcceptApe := FSettings.FileFlags.MonkeyOk;
       {$IFDEF RegistrySettings}
       {Einstellungen laden: Registry}
       FSettings.LoadFromRegistry;

@@ -18,6 +18,10 @@ Credits
   atl_oggvorbis.pas: Audio Tools Library, Class TOggVorbis - for extracting
   information from Ogg Vorbis file header. Copyright (c) 2001 by Jurgen Faul.
 
+  cl_apeinfo.pas - Unit for extracting Monkey's Audio file information - is
+  based on Monkey.pas from the Audio Tools Library 2.3 (Copyright (c) 2000-
+  2002 by Jurgen Faul, 2003-2005 by The MAC Team).
+
   cl_peheader.pas - Unit for accessing Windows PE file information - is based
   on pe.pas by K. Karthik.
 

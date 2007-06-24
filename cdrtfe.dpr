@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.06.2007
+  letzte Änderung  24.06.2007
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -70,6 +70,7 @@ uses
   cl_mpeginfo in 'support\cl_mpeginfo.pas',
   cl_mpegvinfo in 'support\cl_mpegvinfo.pas',
   cl_flacinfo in 'support\cl_flacinfo.pas',
+  cl_apeinfo in 'support\cl_apeinfo.pas',
   f_misc in 'support\f_misc.pas',
   f_cygwin in 'support\f_cygwin.pas',
   f_strings in 'support\f_strings.pas',
