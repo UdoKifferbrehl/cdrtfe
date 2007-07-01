@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2007
+  letzte Änderung  27.06.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,9 +52,13 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
   handen ist.                                                                  }
 
 procedure GetToolNames;
-const T : string = 'Tools';
-var Ini: TIniFile;
+const T    : string = 'Tools';
+      cPath: string = 'PATH';
+var Ini : TIniFile;
+    Path: string;
+    Temp: string;
 begin
+  {cdrtfe_tools.ini hat Vorrang}
   if FileExists(StartUpDir + cIniFileTools) then
   begin
     Ini := TIniFile.Create(StartUpDir + cIniFileTools);
@@ -85,6 +89,45 @@ begin
       if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
     end;
     Ini.Free;
+  end else
+  {keine cdrtfe_tools.ini gefunden, dafür aber StartUpDir\cToolDir}
+  if DirectoryExists(StartUpDir + cToolDir) then
+  begin
+    Path := cToolDir;
+    cCdrecordBin     := Path + cCdrtoolsDir  + cCdrecordBin;
+    cMkisofsBin      := Path + cCdrtoolsDir  + cMkisofsBin;
+    cCdda2wavBin     := Path + cCdrtoolsDir  + cCdda2wavBin;
+    cReadcdBin       := Path + cCdrtoolsDir  + cReadcdBin;
+    cShBin           := Path + cCygwinDir    + cShBin;
+    cMode2CDMakerBin := Path + cXCDDir       + cMode2CDMakerBin;
+    cVCDImagerBin    := Path + cVCDImagerDir + cVCDImagerBin;
+    cCdrdaoBin       := Path + cCdrdaoDir    + cCdrdaoBin;
+    cMadplayBin      := Path + cSoundDir     + cMadplayBin;
+    cLameBin         := Path + cSoundDir     + cLameBin;
+    cOggdecBin       := Path + cSoundDir     + cOggdecBin;
+    cOggencBin       := Path + cSoundDir     + cOggencBin;
+    cFLACBin         := Path + cSoundDir     + cFLACBin;
+    cMonkeyBin       := Path + cSoundDir     + cMonkeyBin;
+    cRrencBin        := Path + cXCDDir       + cRrencBin;
+    cRrdecBin        := Path + cXCDDir       + cRrdecBin;
+    cM2F2ExtractBin  := Path + cXCDDir       + cM2F2ExtractBin;
+    cDat2FileBin     := Path + cXCDDir       + cDat2FileBin;
+    cD2FGuiBin       := Path + cXCDDir       + cD2FGuiBin;
+    {cygwin1.dll}
+    Temp := cCygwin1Dll;
+    cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
+    if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
+    {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisiter.}
+    if FileExists(StartUpDir + '\' + cCygwin1Dll) then
+    begin
+      Path := GetEnvVarValue(cPath);
+      Path := Path + ';' + StartUpDir + cToolDir + cCygwinDir;
+      SetEnvVarValue(cPath, Path);
+    end else
+    begin
+      {cygwin1.dll muß sich im System-Suchpfad befinden.}
+      cCygwin1Dll := Temp;
+    end;
   end;
 end;
 
