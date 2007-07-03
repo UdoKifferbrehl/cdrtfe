@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  18.06.2007
+  letzte Änderung  01.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,6 +19,7 @@
   TLogWindow
 
     Properties   OutWindowHandle
+                 OnUpdatePanels
 
     Methoden     Add(s: string)
                  AddToLine(s: string)
@@ -41,7 +42,7 @@ unit cl_logwindow;
 
 interface
 
-uses Windows, Forms, Classes, SysUtils, StdCtrls;
+uses Windows, Forms, Classes, SysUtils, StdCtrls, userevents;
 
 type TLogWin = class(TObject)
      private
@@ -49,6 +50,8 @@ type TLogWin = class(TObject)
        FMemo           : TMemo;
        FMemo2          : TMemo;
        FOutWindowHandle: THandle;
+       FOnUpdatePanels : TUpdatePanelsEvent;
+       procedure UpdatePanels(const s1, s2: string);
      protected
        constructor CreateInstance;
        class function AccessInstance(Request: Integer): TLogWin;
@@ -73,6 +76,7 @@ type TLogWin = class(TObject)
        function ProcessProgress(const s: string): string;            // wird später ausgelagert!
        {$ENDIF}
        property OutWindowHandle: THandle read FOutWindowHandle;
+       property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
      end;
 
 implementation
@@ -83,6 +87,16 @@ uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
 { TLogWindow ----------------------------------------------------------------- }
 
 { TLogWindow - private }
+
+{ UpdatePanels -----------------------------------------------------------------
+
+  Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
+  FSettings.General.MessageToShow auszugeben.                                  }
+
+procedure TLogWin.UpdatePanels(const s1, s2: string);
+begin
+  if Assigned(FOnUpdatePanels) then FOnUpdatePanels(s1, s2);
+end;
 
 { TLogWindow - protected }
 
@@ -296,6 +310,7 @@ begin
       Copy(Application.Title, Pos(']', Application.Title) + 2,
         Length(Application.Title) - Pos(']', Application.Title) + 2);
   {$ENDIF}
+  UpdatePanels('<>', s);
 end;
 
 { ShowProgressTaskBarString ----------------------------------------------------
@@ -314,6 +329,7 @@ begin
       Copy(Application.Title, Pos(']', Application.Title) + 2,
         Length(Application.Title) - Pos(']', Application.Title) + 2);
   {$ENDIF}
+  // UpdatePanels('<>', s);
 end;
 
 { ProcessProgress --------------------------------------------------------------

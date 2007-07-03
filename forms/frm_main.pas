@@ -3539,7 +3539,8 @@ begin
   {Diese wichtigen drei Objekte global verfügbar machen.}
   TCdrtfeData.Instance.SetObjects(FLang, FSettings, FData);
   {Ausgabefenster global verfügbar machen.}
-  TLogWin.Inst.SetMemo(Memo1);  
+  TLogWin.Inst.SetMemo(Memo1);
+  TLogWin.Inst.OnUpdatePanels := UpdatePanels;  
   {Kommandzeile auswerten}
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
