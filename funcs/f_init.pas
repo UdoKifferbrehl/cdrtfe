@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.06.2007
+  letzte Änderung  15.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,16 +43,19 @@ procedure CheckVersion(Settings: TSettings);
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     cl_logwindow,
+     cl_logwindow, f_logfile,
      f_filesystem, f_process, f_wininfo, f_environment, f_strings, constant;
 
 { GetToolNames -----------------------------------------------------------------
 
   Die Dateinamen der Tools aus der cdrtfe_tools.ini lesen, sofern diese vor-
-  handen ist.                                                                  }
+  handen ist.
+  Für cygwin1.dll gilt: Falls sich die DLL auch im Suchpfad befindet, wird diese
+  bereits vorhandene Version genutzt, ansonsten die Version aus \tools\cygwin.
+  Einstellungen aus cdrtfe_tools.ini haben Vorrang.                            }
 
 procedure GetToolNames;
-const T    : string = 'Tools';
+const cTool: string = 'Tools';
       cPath: string = 'PATH';
 var Ini : TIniFile;
     Path: string;
@@ -65,30 +68,31 @@ begin
     {Namen lesen}
     with Ini do
     begin
-      cCdrecordBin     := ReadString(T, 'CdrecordBin', cCdrecordBin);
-      cMkisofsBin      := ReadString(T, 'MkisofsBin', cMkisofsBin);
-      cCdda2wavBin     := ReadString(T, 'Cdda2wavBin', cCdda2wavBin);
-      cReadcdBin       := ReadString(T, 'ReadcdBin', cReadcdBin);
-      cShBin           := ReadString(T, 'ShBin', cShBin);
-      cMode2CDMakerBin := ReadString(T, 'Mode2CDMakerBin', cMode2CDMakerBin);
-      cVCDImagerBin    := ReadString(T, 'VCDImagerBin', cVCDImagerBin);
-      cCdrdaoBin       := ReadString(T, 'CdrdaoBin', cCdrdaoBin);
-      cMadplayBin      := ReadString(T, 'MadplayBin', cMadplayBin);
-      CLameBin         := ReadString(T, 'LameBin', cLameBin);
-      cOggdecBin       := ReadString(T, 'OggdecBin', cOggdecBin);
-      cOggencBin       := ReadString(T, 'OggencBin', cOggencBin);
-      cFLACBin         := ReadString(T, 'FLACBin', cFLACBin);
-      cMonkeyBin       := ReadString(T, 'MonkeyBin', cFLACBin);
-      cRrencBin        := ReadString(T, 'RrencBin', cRrencBin);
-      cRrdecBin        := ReadString(T, 'RrdecBin', cRrdecBin);
-      cM2F2ExtractBin  := ReadString(T, 'M2F2ExtractBin', cM2F2ExtractBin);
-      cDat2FileBin     := ReadString(T, 'Dat2FileBin', cDat2FileBin);
-      cD2FGuiBin       := ReadString(T, 'D2FGuiBin', cD2FGuiBin);
+      cCdrecordBin     := ReadString(cTool, 'CdrecordBin', cCdrecordBin);
+      cMkisofsBin      := ReadString(cTool, 'MkisofsBin', cMkisofsBin);
+      cCdda2wavBin     := ReadString(cTool, 'Cdda2wavBin', cCdda2wavBin);
+      cReadcdBin       := ReadString(cTool, 'ReadcdBin', cReadcdBin);
+      cShBin           := ReadString(cTool, 'ShBin', cShBin);
+      cMode2CDMakerBin := ReadString(cTool, 'Mode2CDMakerBin', cMode2CDMakerBin);
+      cVCDImagerBin    := ReadString(cTool, 'VCDImagerBin', cVCDImagerBin);
+      cCdrdaoBin       := ReadString(cTool, 'CdrdaoBin', cCdrdaoBin);
+      cMadplayBin      := ReadString(cTool, 'MadplayBin', cMadplayBin);
+      CLameBin         := ReadString(cTool, 'LameBin', cLameBin);
+      cOggdecBin       := ReadString(cTool, 'OggdecBin', cOggdecBin);
+      cOggencBin       := ReadString(cTool, 'OggencBin', cOggencBin);
+      cFLACBin         := ReadString(cTool, 'FLACBin', cFLACBin);
+      cMonkeyBin       := ReadString(cTool, 'MonkeyBin', cFLACBin);
+      cRrencBin        := ReadString(cTool, 'RrencBin', cRrencBin);
+      cRrdecBin        := ReadString(cTool, 'RrdecBin', cRrdecBin);
+      cM2F2ExtractBin  := ReadString(cTool, 'M2F2ExtractBin', cM2F2ExtractBin);
+      cDat2FileBin     := ReadString(cTool, 'Dat2FileBin', cDat2FileBin);
+      cD2FGuiBin       := ReadString(cTool, 'D2FGuiBin', cD2FGuiBin);
       {cygwin1.dll}
       cCygwin1Dll      := ExtractFilePath(cCdrecordBin) + cCygwin1Dll;
       if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
     end;
     Ini.Free;
+    AddLogCode(1252);
   end else
   {keine cdrtfe_tools.ini gefunden, dafür aber StartUpDir\cToolDir}
   if DirectoryExists(StartUpDir + cToolDir) then
@@ -117,16 +121,18 @@ begin
     Temp := cCygwin1Dll;
     cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
     if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
-    {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisiter.}
+    if FindInSearchPath(Temp) <> '' then
+    begin
+      cCygwin1Dll := Temp;
+      AddLogCode(1250);
+    end else
+    {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisitert.}
     if FileExists(StartUpDir + '\' + cCygwin1Dll) then
     begin
+      AddLogCode(1251);
       Path := GetEnvVarValue(cPath);
       Path := Path + ';' + StartUpDir + cToolDir + cCygwinDir;
       SetEnvVarValue(cPath, Path);
-    end else
-    begin
-      {cygwin1.dll muß sich im System-Suchpfad befinden.}
-      cCygwin1Dll := Temp;
     end;
   end;
 end;

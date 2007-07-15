@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  22.06.2007
+  letzte Änderung  15.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,6 +68,10 @@ begin
     Add('1210=FRemoteCDReader:');
     Add('1211=FRemoteCDDriveLetter:');
     Add('1212=FRemoteCDSpeedList:');
+    {f_init.pas}
+    Add('1250=cygwin1.dll found in search path.');
+    Add('1251=cygwin1.dll not found in search path, using Dll from \tools\cygwin');
+    Add('1252=Using file paths from cdrtfe_tools.ini.');
   end;
 end;
 
