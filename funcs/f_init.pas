@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.07.2007
+  letzte Änderung  20.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,8 +43,41 @@ procedure CheckVersion(Settings: TSettings);
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     cl_logwindow, f_logfile,
+     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     cl_logwindow,
      f_filesystem, f_process, f_wininfo, f_environment, f_strings, constant;
+
+{ ShowToolPath -----------------------------------------------------------------
+
+  zeigt die Pfade aller Tools.                                                 }
+
+{$IFDEF WriteLogFile}
+procedure ShowToolPath;
+begin
+  AddLogCode(1253);
+  AddLog('cCdrecordBin      ' + cCdrecordBin, 3);
+  AddLog('cMkisofsBin       ' + cMkisofsBin, 3);
+  AddLog('cCdda2wavBin      ' + cCdda2wavBin, 3);
+  AddLog('cReadcdBin        ' + cReadcdBin, 3);
+  AddLog('cShBin            ' + cShBin, 3);
+  AddLog('cMode2CDMakerBin  ' + cMode2CDMakerBin, 3);
+  AddLog('cVCDImagerBin     ' + cVCDImagerBin, 3);
+  AddLog('cCdrdaoBin        ' + cCdrdaoBin, 3);
+  AddLog('cMadplayBin       ' + cMadplayBin, 3);
+  AddLog('cLameBin          ' + cLameBin, 3);
+  AddLog('cOggdecBin        ' + cOggdecBin, 3);
+  AddLog('cOggencBin        ' + cOggencBin, 3);
+  AddLog('cFLACBin          ' + cFLACBin, 3);
+  AddLog('cMonkeyBin        ' + cMonkeyBin, 3);
+  AddLog('cRrencBin         ' + cRrencBin, 3);
+  AddLog('cRrdecBin         ' + cRrdecBin, 3);
+  AddLog('cM2F2ExtractBin   ' + cM2F2ExtractBin, 3);
+  AddLog('cDat2FileBin      ' + cDat2FileBin, 3);
+  AddLog('cD2FGuiBin        ' + cD2FGuiBin, 3);
+  AddLog('cCygwin1Dll       ' + cCygwin1Dll, 3);
+  AddLog(' ', 3);
+end;
+{$ENDIF}
 
 { GetToolNames -----------------------------------------------------------------
 
@@ -61,40 +94,7 @@ var Ini : TIniFile;
     Path: string;
     Temp: string;
 begin
-  {cdrtfe_tools.ini hat Vorrang}
-  if FileExists(StartUpDir + cIniFileTools) then
-  begin
-    Ini := TIniFile.Create(StartUpDir + cIniFileTools);
-    {Namen lesen}
-    with Ini do
-    begin
-      cCdrecordBin     := ReadString(cTool, 'CdrecordBin', cCdrecordBin);
-      cMkisofsBin      := ReadString(cTool, 'MkisofsBin', cMkisofsBin);
-      cCdda2wavBin     := ReadString(cTool, 'Cdda2wavBin', cCdda2wavBin);
-      cReadcdBin       := ReadString(cTool, 'ReadcdBin', cReadcdBin);
-      cShBin           := ReadString(cTool, 'ShBin', cShBin);
-      cMode2CDMakerBin := ReadString(cTool, 'Mode2CDMakerBin', cMode2CDMakerBin);
-      cVCDImagerBin    := ReadString(cTool, 'VCDImagerBin', cVCDImagerBin);
-      cCdrdaoBin       := ReadString(cTool, 'CdrdaoBin', cCdrdaoBin);
-      cMadplayBin      := ReadString(cTool, 'MadplayBin', cMadplayBin);
-      CLameBin         := ReadString(cTool, 'LameBin', cLameBin);
-      cOggdecBin       := ReadString(cTool, 'OggdecBin', cOggdecBin);
-      cOggencBin       := ReadString(cTool, 'OggencBin', cOggencBin);
-      cFLACBin         := ReadString(cTool, 'FLACBin', cFLACBin);
-      cMonkeyBin       := ReadString(cTool, 'MonkeyBin', cFLACBin);
-      cRrencBin        := ReadString(cTool, 'RrencBin', cRrencBin);
-      cRrdecBin        := ReadString(cTool, 'RrdecBin', cRrdecBin);
-      cM2F2ExtractBin  := ReadString(cTool, 'M2F2ExtractBin', cM2F2ExtractBin);
-      cDat2FileBin     := ReadString(cTool, 'Dat2FileBin', cDat2FileBin);
-      cD2FGuiBin       := ReadString(cTool, 'D2FGuiBin', cD2FGuiBin);
-      {cygwin1.dll}
-      cCygwin1Dll      := ExtractFilePath(cCdrecordBin) + cCygwin1Dll;
-      if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
-    end;
-    Ini.Free;
-    AddLogCode(1252);
-  end else
-  {keine cdrtfe_tools.ini gefunden, dafür aber StartUpDir\cToolDir}
+  {standardmäßig sollen sich die Tools im Ordner \tools\ befinden}
   if DirectoryExists(StartUpDir + cToolDir) then
   begin
     Path := cToolDir;
@@ -124,17 +124,84 @@ begin
     if FindInSearchPath(Temp) <> '' then
     begin
       cCygwin1Dll := Temp;
-      AddLogCode(1250);
+      {$IFDEF WriteLogfile} AddLogCode(1250); {$ENDIF}
     end else
     {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisitert.}
     if FileExists(StartUpDir + '\' + cCygwin1Dll) then
     begin
-      AddLogCode(1251);
+      {$IFDEF WriteLogfile} AddLogCode(1251); {$ENDIF}
       Path := GetEnvVarValue(cPath);
       Path := Path + ';' + StartUpDir + cToolDir + cCygwinDir;
       SetEnvVarValue(cPath, Path);
     end;
   end;
+  {Angaben aus der cdrtfe_tools.ini haben jedoch Vorrang.}
+  if FileExists(StartUpDir + cIniFileTools) then
+  begin
+    Ini := TIniFile.Create(StartUpDir + cIniFileTools);
+    with Ini do
+    begin
+      Temp := ReadString(cTool, 'CdrecordBin', '');
+      if Temp <> '' then cCdrecordBin := Temp;
+
+      Temp := ReadString(cTool, 'MkisofsBin', '');
+      if Temp <> '' then cMkisofsBin := Temp;
+
+      Temp := ReadString(cTool, 'Cdda2wavBin', '');
+      if Temp <> '' then cCdda2wavBin := Temp;
+
+      Temp := ReadString(cTool, 'ReadcdBin', '');
+      if Temp <> '' then cReadcdBin := Temp;
+
+      Temp := ReadString(cTool, 'ShBin', '');
+      if Temp <> '' then cShBin := Temp;
+
+      Temp := ReadString(cTool, 'Mode2CDMakerBin', '');
+      if Temp <> '' then cMode2CDMakerBin := Temp;
+
+      Temp := ReadString(cTool, 'VCDImagerBin', '');
+      if Temp <> '' then cVCDImagerBin := Temp;
+
+      Temp := ReadString(cTool, 'CdrdaoBin', '');
+      if Temp <> '' then cCdrdaoBin := Temp;
+
+      Temp := ReadString(cTool, 'MadplayBin', '');
+      if Temp <> '' then cMadplayBin := Temp;
+
+      Temp := ReadString(cTool, 'LameBin', '');
+      if Temp <> '' then cReadcdBin := Temp;
+
+      Temp := ReadString(cTool, 'OggdecBin', '');
+      if Temp <> '' then CLameBin := Temp;
+
+      Temp := ReadString(cTool, 'OggencBin', '');
+      if Temp <> '' then cOggencBin := Temp;
+
+      Temp := ReadString(cTool, 'FLACBin', '');
+      if Temp <> '' then cFLACBin := Temp;
+
+      Temp := ReadString(cTool, 'MonkeyBin', '');
+      if Temp <> '' then cMonkeyBin := Temp;
+
+      Temp := ReadString(cTool, 'RrencBin', '');
+      if Temp <> '' then cRrencBin := Temp;
+
+      Temp := ReadString(cTool, 'RrdecBin', '');
+      if Temp <> '' then cRrdecBin := Temp;
+
+      Temp := ReadString(cTool, 'M2F2ExtractBin', '');
+      if Temp <> '' then cM2F2ExtractBin := Temp;
+
+      Temp := ReadString(cTool, 'Dat2FileBin', '');
+      if Temp <> '' then cDat2FileBin := Temp;
+
+      Temp := ReadString(cTool, 'D2FGuiBin', '');
+      if Temp <> '' then cD2FGuiBin := Temp;
+    end;
+    Ini.Free;
+    {$IFDEF WriteLogfile} AddLogCode(1252); {$ENDIF}
+  end;
+  {$IFDEF WriteLogFile} ShowToolPath; {$ENDIF}
 end;
 
 { CheckFiles -------------------------------------------------------------------

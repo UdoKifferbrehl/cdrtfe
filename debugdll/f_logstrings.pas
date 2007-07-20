@@ -70,8 +70,9 @@ begin
     Add('1212=FRemoteCDSpeedList:');
     {f_init.pas}
     Add('1250=cygwin1.dll found in search path.');
-    Add('1251=cygwin1.dll not found in search path, using Dll from \tools\cygwin');
+    Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');
     Add('1252=Using file paths from cdrtfe_tools.ini.');
+    Add('1253=Tool paths:');
   end;
 end;
 

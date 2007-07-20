@@ -92,8 +92,9 @@ begin
       TimeInfo := TimeCounter.CurrentTimeAsString + ': ';
     case Mode of
       0: ;
-      1: TimeInfo := TIEmpty;
-      2: TimeInfo := TimeInfo + '  ';
+      1: TimeInfo := TimeInfo + '  ';
+      2: TimeInfo := TIEmpty;
+      3: TimeInfo := TIEmpty + '  ';
     end;
     List.Add(TimeInfo + Text);
   end;
