@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.06.2007
+  letzte Änderung  21.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -150,7 +150,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,
-     f_misc, f_helper, constant, user_messages;
+     f_misc, f_helper, cl_cueinfo, constant, user_messages;
 
 { TCDAction ------------------------------------------------------------------ }
 
@@ -1787,6 +1787,7 @@ procedure TCDAction.WriteImage;
 var i         : Integer;
     Cmd,
     Temp, Name: string;
+    CueFile   : TCueFile;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   {Kommandozeile zusammenstellen}
@@ -1836,6 +1837,9 @@ begin
     end;
   end else
   begin
+    {Es ist ein CUE-Image, Infos ermitteln}
+    CueFile := TCueFile.Create(FSettings.Image.IsoPath);
+    CueFile.GetInfo;
     with FSettings.Image, FSettings.Cdrdao, FSettings.Cdrecord do
     begin
       {Kommandozeile für cdrdao}
@@ -1874,10 +1878,12 @@ begin
         if DMASpeedCheck and ForceSpeed then
                             Cmd := Cmd + ' -force';
         if Overburn    then Cmd := Cmd + ' -overburn';
+        if CueFile.IsAudio then Cmd := Cmd + ' -pad';
         Cmd := Cmd + ' -dao cuefile=' +
                      QuotePath(MakePathConform(IsoPath));
       end;
     end;
+    CueFile.Free;
   end;
   {Kommando ausführen}
   {$IFDEF Confirm}
