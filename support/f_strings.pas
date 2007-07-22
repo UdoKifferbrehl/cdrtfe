@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2007 Oliver Valencia
 
-  letzte Änderung  26.04.2007
+  letzte Änderung  22.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,6 +15,7 @@
 
     EnumToStr(ArgType: PTypeInfo; var Arg): string
     FormatTime(const Time: Extended): string
+    IsQuoted(const S: string): Boolean
     QuotePath(const S: string): string
     ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string
     ReplaceCharFirst(s: string; const SearchChar, ReplaceChar: Char): string
@@ -25,6 +26,7 @@
     StringLeft(const Source, Delimiter: string): string;
     StringRight(const Source, Delimiter: string): string;
     StrToFloatDef(const S: string; Default: Extended): Extended
+    UnQuote(const S: string): string
 
 }
 
@@ -45,6 +47,7 @@ var UnitByte  : string = 'Byte';    // für SizeToString, damit eine Übersetzung
 
 function EnumToStr(ArgType: PTypeInfo; var Arg): string;
 function FormatTime(const Time: Extended): string;
+function IsQuoted(const S: string): Boolean;
 function QuotePath(const S: string): string;
 function ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string;
 function ReplaceCharFirst(s: string; const SearchChar, ReplaceChar: Char): string;
@@ -53,6 +56,7 @@ function SizeToString(const Size: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$
 function StringLeft(const Source, Delimiter: string): string;
 function StringRight(const Source, Delimiter: string): string;
 function StrToFloatDef(const S: string; Default: Extended): Extended;
+function UnQuote(const S: string): string;
 procedure SplitString(Source, Delimiter: string; var Target1, Target2: string);
 procedure SizeToStringSetUnits(const B, KiB, MiB, GiB: string);
 
@@ -189,6 +193,36 @@ begin
   end else
   begin
     Result := S;
+  end;
+end;
+
+{ IsQuoted ---------------------------------------------------------------------
+
+  IsQuoted prüft, ob der Strins S in doppelten Anführungszeichen (") steht.    }
+
+function IsQuoted(const S: string): Boolean;
+var Len: Integer;
+begin
+  Len := Length(S);
+  if Len > 0 then
+    Result := (S[1] = '"') and (S[Len] = '"')
+  else
+    Result := False;
+end;
+
+{ UnQuote ----------------------------------------------------------------------
+
+  UnQuote entfernt doppelte Anführungszeichen (") am Anfang und am Ende von S. }
+
+function UnQuote(const S: string): string;
+var Len: Integer;
+begin
+  Len := Length(S);
+  Result := S;
+  if Len > 0 then
+  begin
+    if Result[Len] = '"' then Delete(Result, Len, 1);
+    if Result[1]   = '"' then Delete(Result, 1, 1);
   end;
 end;
 

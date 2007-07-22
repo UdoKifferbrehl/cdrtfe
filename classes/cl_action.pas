@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.07.2007
+  letzte Änderung  22.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1839,7 +1839,13 @@ begin
   begin
     {Es ist ein CUE-Image, Infos ermitteln}
     CueFile := TCueFile.Create(FSettings.Image.IsoPath);
+    CueFile.Settings := FSettings;
     CueFile.GetInfo;
+    if CueFile.CompressedFilesPresent then
+    begin
+      CueFile.SaveTempCueFile;
+      FVList.Assign(CueFile.TempFiles);
+    end;
     with FSettings.Image, FSettings.Cdrdao, FSettings.Cdrecord do
     begin
       {Kommandozeile für cdrdao}
@@ -1856,7 +1862,11 @@ begin
         if Speed <> ''              then Cmd := Cmd + ' --speed ' + Speed;
         if FSettings.Cdrecord.Dummy then Cmd := Cmd + ' --simulate';
         if Overburn                 then Cmd := Cmd + ' --overburn';
-        Cmd := Cmd + ' ' + QuotePath(MakePathConform(IsoPath));
+        if CueFile.CompressedFilesPresent then
+          Cmd := CueFile.CommandLines +
+                 Cmd + ' ' + QuotePath(MakePathConform(CueFile.TempFileName))
+        else
+          Cmd := Cmd + ' ' + QuotePath(MakePathConform(IsoPath));
       end;
       if (not FSettings.FileFlags.CdrdaoOk and CanWriteCueImage) or
          (not WriteCueImages and CanWriteCueImage) then
@@ -1879,8 +1889,13 @@ begin
                             Cmd := Cmd + ' -force';
         if Overburn    then Cmd := Cmd + ' -overburn';
         if CueFile.IsAudio then Cmd := Cmd + ' -pad';
-        Cmd := Cmd + ' -dao cuefile=' +
-                     QuotePath(MakePathConform(IsoPath));
+        Cmd := Cmd + ' -dao cuefile=';
+        if CueFile.CompressedFilesPresent then
+          Cmd := CueFile.CommandLines + 
+                 Cmd + QuotePath(MakePathConform(CueFile.TempFileName))
+        else
+          Cmd := Cmd + QuotePath(MakePathConform(IsoPath));
+
       end;
     end;
     CueFile.Free;
@@ -2504,6 +2519,17 @@ begin
       begin
         Temp := ProgDataDir + cShCmdFile + '_' + Format('%.2d', [i + 1]);
         if FileExists(Temp) then DeleteFile(Temp);
+      end;
+    end;
+
+    if FLastAction = cCDImage then
+    begin
+      FEjectDevice := FSettings.Image.Device;
+      DeleteFile(FSettings.AudioCD.CDTextFile);
+      {temporäre Wave-Dateien löschen}
+      // if FData.CompressedAudioFilesPresent then
+      begin
+        for i := 0 to FVList.Count - 1 do DeleteFile(FVList[i]);
       end;
     end;
 

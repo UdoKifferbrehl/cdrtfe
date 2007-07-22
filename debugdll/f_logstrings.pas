@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  15.07.2007
+  letzte Änderung  22.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -73,6 +73,8 @@ begin
     Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');
     Add('1252=Using file paths from cdrtfe_tools.ini.');
     Add('1253=Tool paths:');
+    {cl_cueinfo.pas}
+    Add('1270=Creating temporary cue file');
   end;
 end;
 
