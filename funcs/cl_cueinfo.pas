@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  22.07.2007
+  letzte Änderung  23.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,6 +20,7 @@
     Properties   Name
                  IsAudio
                  CompressedFilesPresent
+                 CueOk
 
     Methoden     Create
                  GetInfo
@@ -32,22 +33,29 @@ unit cl_cueinfo;
 
 interface
 
-uses Classes, SysUtils,
-     cl_settings;
+uses Windows, Classes, SysUtils,
+     cl_settings, cl_lang;
 
 type TCueFile = class(TObject)
      private
        FFileName              : string;
        FTempFileName          : string;
        FSettings              : TSettings;
+       FLang                  : TLang;
        FCueFile               : TStringList;
        FTempCueFile           : TStringList;
        FTempFiles             : TStringList;
        FCommandLines          : string;
        FIsAudio               : Boolean;
        FCompressedFilesPresent: Boolean;
+       FMP3                   : Boolean;
+       FOgg                   : Boolean;
+       FFlac                  : Boolean;
+       FApe                   : Boolean;
+       FCueOk                 : Boolean;
        function GetIsAudio: Boolean;
        function GetCompressedFilesPresent: Boolean;
+       function GetCueOk: Boolean;
        procedure AddCommandLine(const Source, Target: string);
        procedure CreateTempCueFile;
      public
@@ -58,15 +66,17 @@ type TCueFile = class(TObject)
        property IsAudio: Boolean read FIsAudio;
        property CompressedFilesPresent: Boolean read FCompressedFilesPresent;
        property Settings: TSettings read FSettings write FSettings;
+       property Lang: TLang read FLang write FLang;
        property TempFiles: TStringList read FTempFiles;
        property CommandLines: string read FCommandLines;
        property TempFileName: string read FTempFileName;
+       property CueOk: Boolean read FCueOk;
      end;
 
 implementation
 
 uses {$IFDEF WriteLogFile} f_logfile, {$ENDIF}
-     constant, f_strings, f_filesystem;
+     constant, f_strings, f_filesystem, f_misc;
 
 { TCueFile ------------------------------------------------------------------- }
 
@@ -110,22 +120,26 @@ begin
   begin
     if (Ext = cExtMP3) then
     begin
+      FMP3 := True;
       CmdTemp := StartUpDir + cMadplayBin +
                  ' -v -S -b 16 -R 44100 -o wave:' +
                  QuotePath(Target) + ' ' + QuotePath(Source) + CR
     end else
     if (Ext = cExtOgg) then
     begin
+      FOgg := True;
       CmdTemp := StartUpDir + cOggdecBin + ' -b 16 -o ' +
                  QuotePath(Target) + ' ' + QuotePath(Source) + CR
     end else
     if (Ext = cExtFlac) then
     begin
+      FFlac := True;
       CmdTemp := StartUpDir + cFLACBin + ' -d ' + QuotePath(Source) +
                  ' -o ' + QuotePath(Target) + CR
     end else
     if (Ext = cExtApe) then
     begin
+      FApe := True;
       CmdTemp := StartUpDir + cMonkeyBin + ' ' + QuotePath(Source) + ' ' +
                  QuotePath(Target) + ' -d' + CR
     end;
@@ -155,7 +169,6 @@ begin
       q := LastDelimiter(' ', Temp) - 1;
       Name := Copy(Temp, p, q - p + 1);
       Delete(Temp, p, q - p + 1);
-
       Quoted := IsQuoted(Name);
       if Quoted then Name := UnQuote(Name);
       if LowerCase(ExtractFileExt(Name)) <> cExtWav then
@@ -181,6 +194,41 @@ begin
   {$ENDIF}
 end;
 
+{ GetCueOk ---------------------------------------------------------------------
+
+  prüft, ob die komprimierten Formate unterstützt werden, wenn nicht wird
+  eine Fehlermeldung ausgegeben und FCueOk auf False gesetzt.                  }
+
+function TCueFile.GetCueOk: Boolean;
+var Temp: string;
+begin
+  Result := True;
+  if FMP3 and not FSettings.FileFlags.MadplayOk then
+  begin
+    Result := False;
+    Temp := FLang.GMS('minit09');
+  end else
+  if FOgg and not FSettings.FileFlags.OggdecOk then
+  begin
+    Result := False;
+    Temp := FLang.GMS('minit10')
+  end else
+  if FFlac and not FSettings.FileFlags.FLACOk then
+  begin
+    Result := False;
+    Temp := FLang.GMS('minit11')
+  end else
+  if FApe and not FSettings.FileFlags.MonkeyOk then
+  begin
+    Result := False;
+    Temp := FLang.GMS('minit12')
+  end;
+  if not Result then
+  begin
+    ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONWARNING);
+  end;
+end;
+
 { TCueFile - public }
 
 constructor TCueFile.Create(const CueFile: string);
@@ -192,6 +240,11 @@ begin
   FCommandLines := '';
   FTempFileName := '';
   FIsAudio := False;
+  FMp3 := False;
+  FOgg := False;
+  FFlac := False;
+  FApe := False;
+  FCueOk := True;
 end;
 
 destructor TCueFile.Destroy;
@@ -212,7 +265,11 @@ begin
     FCueFile.LoadFromFile(FFileName);
     FIsAudio := GetIsAudio;
     FCompressedFilesPresent := GetCompressedFilesPresent;
-    if FCompressedFilesPresent then CreateTempCueFile;
+    if FCompressedFilesPresent then
+    begin
+      CreateTempCueFile;
+      FCueOk := GetCueOk;
+    end;
   end;
 end;
 

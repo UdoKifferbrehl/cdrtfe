@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.07.2007
+  letzte Änderung  23.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1788,9 +1788,11 @@ var i         : Integer;
     Cmd,
     Temp, Name: string;
     CueFile   : TCueFile;
+    Ok        : Boolean;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   {Kommandozeile zusammenstellen}
+  Ok := True;
   if Pos(cExtCue, LowerCase(FSettings.Image.IsoPath)) = 0 then
   begin
     with FSettings.Cdrecord, FSettings.Image do
@@ -1840,6 +1842,7 @@ begin
     {Es ist ein CUE-Image, Infos ermitteln}
     CueFile := TCueFile.Create(FSettings.Image.IsoPath);
     CueFile.Settings := FSettings;
+    CueFile.Lang := FLang;
     CueFile.GetInfo;
     if CueFile.CompressedFilesPresent then
     begin
@@ -1898,21 +1901,28 @@ begin
 
       end;
     end;
+    Ok := CueFile.CueOk;
     CueFile.Free;
   end;
   {Kommando ausführen}
-  {$IFDEF Confirm}
-  if not (FSettings.CmdLineFlags.ExecuteProject or
-          FSettings.General.NoConfirm) then
+  if not Ok then
   begin
-    {Brennvorgang starten?}
-    i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                PChar(FLang.GMS('mburn02')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    i := 0;
   end else
-  {$ENDIF}
   begin
-    i := 1;
+    {$IFDEF Confirm}
+    if not (FSettings.CmdLineFlags.ExecuteProject or
+            FSettings.General.NoConfirm) then
+    begin
+      {Brennvorgang starten?}
+      i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
+                                  PChar(FLang.GMS('mburn02')),
+             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    end else
+    {$ENDIF}
+    begin
+      i := 1;
+    end;
   end;
   if i = 1 then
   begin
