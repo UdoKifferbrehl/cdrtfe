@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  23.07.2007
+  letzte Änderung  24.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -280,11 +280,14 @@ end;
 procedure TCueFile.SaveTempCueFile;
 var Name: string;
 begin
-  Name := FFileName;
-  Insert('.tmp', Name, LastDelimiter('.', Name));
-  FTempFiles.Add(Name);
-  FTempCueFile.SaveToFile(Name);
-  FTempFileName := Name;
+  if FCueOk then
+  begin
+    Name := FFileName;
+    Insert('.tmp', Name, LastDelimiter('.', Name));
+    FTempFiles.Add(Name);
+    FTempCueFile.SaveToFile(Name);
+    FTempFileName := Name;
+  end;
 end;
 
 end.
