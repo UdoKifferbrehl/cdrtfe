@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.07.2007
+  letzte Änderung  24.07.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1891,7 +1891,11 @@ begin
         if DMASpeedCheck and ForceSpeed then
                             Cmd := Cmd + ' -force';
         if Overburn    then Cmd := Cmd + ' -overburn';
-        if CueFile.IsAudio then Cmd := Cmd + ' -pad';
+        if CueFile.IsAudio then
+        begin
+          Cmd := Cmd + ' -pad';
+          if FSettings.AudioCD.CDText then Cmd := Cmd + ' -text';
+        end;
         Cmd := Cmd + ' -dao cuefile=';
         if CueFile.CompressedFilesPresent then
           Cmd := CueFile.CommandLines + 
