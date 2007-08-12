@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.07.2007
+  letzte Änderung  12.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1611,47 +1611,63 @@ end;
   gelöst wurde.                                                                }
 
 procedure TForm1.UserAddFolder(Tree: TTreeView);
-var dir: string;
-    Name: string;
-    Path: string;
+var Dir      : string;
+    Name     : string;
+    Path     : string;
+    PathList : TStringList;
     ErrorCode: Byte;
+    Count, i : Integer;
 begin
   {sicherstellen, daß ein Knoten selektiert ist}
   SelectRootIfNoneSelected(Tree);
-  dir := ChooseDir(FLang.GMS('g002'), Form1.Handle);
-  Name := dir;
-  Delete(Name, 1, LastDelimiter('\', Name));
-  if dir <> '' then
+  PathList := TStringList.Create;
+  {$IFDEF MultipleFolderBrowsing}
+  Dir := ChooseMultipleFolders(FLang.GMS('g002'), '', PathList);
+  Count := PathList.Count;
+  {$ELSE}
+  Dir := ChooseDir(FLang.GMS('g002'), Form1.Handle);
+  Count := 1;
+  {$ENDIF}
+  for i := 0 to Count - 1 do
   begin
-    {$IFDEF ShowTimeAddFolder}
-    TC.StartTimeCount;
+    {$IFDEF MultipleFolderBrowsing}
+    Dir := PathList[i];
     {$ENDIF}
-    Path := GetPathFromNode(Tree.Selected);
-    Form1.StatusBar.Panels[0].Text := FLang.GMS('m117');
-    {$IFDEF DebugAddFiles}
-    Deb('', 3);
-    Deb('calling AddToPathlist: add folder ' + dir + '; Choice is: ' +
-        IntToStr(FSettings.General.Choice), 3);
-    {$ENDIF}
-    FData.AddToPathlist(dir, Path, FSettings.General.Choice);
-    ErrorCode := FData.LastError;
-    {$IFDEF ShowTimeAddFolder}
-    TC.StopTimeCount;
-    TLogWin.Inst.Add('add folder: ' + TC.TimeAsString);
-    {$ENDIF}
-    if ErrorCode = PD_FolderNotUnique then
+    Name := Dir;    
+    Delete(Name, 1, LastDelimiter('\', Name));
+    if Name <> '' then
     begin
-      Application.MessageBox(PChar(Format(FLang.GMS('e111'), [Name])),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
-    end else
-    begin
-      {Änderungen im GUI nachvollziehen}
-      CheckDataCDFS(False);
-      UserAddFolderUpdateTree(Tree);
-      UpdateGauges;
+      {$IFDEF ShowTimeAddFolder}
+      TC.StartTimeCount;
+      {$ENDIF}
+      Path := GetPathFromNode(Tree.Selected);
+      Form1.StatusBar.Panels[0].Text := FLang.GMS('m117');
+      {$IFDEF DebugAddFiles}
+      Deb('', 3);
+      Deb('calling AddToPathlist: add folder ' + Dir + '; Choice is: ' +
+          IntToStr(FSettings.General.Choice), 3);
+      {$ENDIF}
+      FData.AddToPathlist(Dir, Path, FSettings.General.Choice);
+      ErrorCode := FData.LastError;
+      {$IFDEF ShowTimeAddFolder}
+      TC.StopTimeCount;
+      TLogWin.Inst.Add('add folder: ' + TC.TimeAsString);
+      {$ENDIF}
+      if ErrorCode = PD_FolderNotUnique then
+      begin
+        Application.MessageBox(PChar(Format(FLang.GMS('e111'), [Name])),
+                               PChar(FLang.GMS('g001')),
+                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+      end else
+      begin
+        {Änderungen im GUI nachvollziehen}
+        CheckDataCDFS(False);
+        UserAddFolderUpdateTree(Tree);
+        UpdateGauges;
+      end;
     end;
   end;
+  PathList.Free;
 end;
 
 { UserAddFolderUpdateTree ------------------------------------------------------

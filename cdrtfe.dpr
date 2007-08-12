@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.07.2007
+  letzte Änderung  12.08.2007
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -90,7 +90,10 @@ uses
   f_process in 'system\f_process.pas',
   f_filesystem in 'system\f_filesystem.pas',
   cl_diskinfo in 'funcs\cl_diskinfo.pas',
-  cl_cueinfo in 'funcs\cl_cueinfo.pas',  
+  cl_cueinfo in 'funcs\cl_cueinfo.pas',
+  {$IFDEF MultipleFolderBrowsing}
+  dlg_folderbrowse in 'system\dlg_folderbrowse.pas',
+  {$ENDIF}
   {$IFDEF UseOLEDragDrop}
   DropTarget in 'import\oledragdrop\DropTarget.pas',
   DropSource in 'import\oledragdrop\DropSource.pas',

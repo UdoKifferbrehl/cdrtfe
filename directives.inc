@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2007 Oliver Valencia
 
-  letzte Änderung  20.01.2007
+  letzte Änderung  12.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -288,10 +288,25 @@
 
 (* ------------------------------------------------------------------ Logfile *)
 
-{$DEFINE xWriteLogfile}
+{$DEFINE WriteLogfile}
          // schreibt ein Logfile
          //   - betrifft: f_process.pas, cl_devices.pas, cl_logwindow.pas,
          //     frm_main.pas
+
+
+(* --------------------------------------------------- MultipleFolderBrowsing *)
+
+{$DEFINE MultipleFolderBrowsing}
+         // erlaubt es, über einen alternativen Ordner-Auswahldialog mehrere
+         // Ordner zugleich auszuwählen.
+         //   - betrifft: frm_main.pas, f_filesystem.pas, cdrtfe.dpr
+
+{$IFDEF GPLonly}
+  {$UNDEF MultipleFolderBrowsing}
+{$ENDIF}
+{$IFNDEF Delphi7Up}
+  {$UNDEF MultipleFolderBrowsing}
+{$ENDIF}
 
 
 (* --------------------------------------------------------- ExceptionLogging *)
