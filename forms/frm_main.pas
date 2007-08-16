@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.08.2007
+  letzte Änderung  16.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -374,7 +374,6 @@ type
     procedure MainMenuResetClick(Sender: TObject);
     procedure MainMenuHelpClick(Sender: TObject);
     procedure CDETreeViewPopupImportClick(Sender: TObject);
-    procedure ButtonExit(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -402,7 +401,8 @@ type
     ActionUserDeleteAll: TAction;
     ActionUserTrackUp: TAction;
     ActionUserTrackDown: TAction;
-    {$ENDIF}    
+    {$ENDIF}
+    FImageTabFirstShow: Boolean;
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
@@ -500,7 +500,7 @@ type
     procedure ActionUserTrackUpExecute(Sender: TObject);
     procedure ActionUserTrackDownExecute(Sender: TObject);
     {$ENDIF}
-
+    procedure ImageTabInitRadioButtons;
   public
     { Public declarations }
   end;
@@ -3428,6 +3428,31 @@ begin
   InitTreeView(XCDETreeView, cXCD);
 end;
 
+{ ImageTabInitRadioButtons -----------------------------------------------------
+
+  Workaround for odd behaviour when changing to radio buttons via Tab.         }
+
+procedure TForm1.ImageTabInitRadioButtons;
+var TAO, DAO, RAW: Boolean;
+    OldControl   : TWinControl;
+begin
+  if Form1.Active and (PageControl1.ActivePage = TabSheet7) then
+  begin
+    OldControl := ActiveControl;
+    TAO := RadioButtonImageTAO.Checked;
+    DAO := RadioButtonImageDAO.Checked;
+    RAW := RadioButtonImageRAW.Checked;
+    RadioButtonImageTAO.SetFocus;
+    RadioButtonImageDAO.SetFocus;
+    RadioButtonImageRAW.SetFocus;
+    RadioButtonImageTAO.Checked := TAO;
+    RadioButtonImageDAO.Checked := DAO;
+    RadioButtonImageRAW.Checked := RAW;
+    FImageTabFirstShow := False;
+    OldControl.SetFocus;
+  end;
+end;
+
 
 { Eventverarbeitung ---------------------------------------------------------- }
 
@@ -3518,6 +3543,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
+  FImageTabFirstShow := True;
   {$IFDEF Delphi7Up}
   InitActions;
   {$ENDIF}
@@ -4538,18 +4564,6 @@ begin
   FAction.AbortAction;
 end;
 
-{ Workaround for odd behaviour when changing to radio buttons via Tab }
-
-procedure TForm1.ButtonExit(Sender: TObject);
-begin
-  if (Sender as TButton) = ButtonImageSelectPath then
-  begin
-    if RadioButtonImageTAO.Checked then RadioButtonImageTAO.SetFocus;
-    if RadioButtonImageDAO.Checked then RadioButtonImageDAO.SetFocus;
-    if RadioButtonImageRAW.Checked then RadioButtonImageRAW.SetFocus;
-  end;
-end;
-
 
 { Menu-Events ---------------------------------------------------------------- }
 
@@ -4701,6 +4715,8 @@ begin
   CheckControls;
   UpdateGauges;
   UpdateOptionPanel;
+  {Workaround for odd RadioButton behaviour}
+  if FImageTabFirstShow then ImageTabInitRadioButtons;
 end;
 
 
