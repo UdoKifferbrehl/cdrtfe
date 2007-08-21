@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.08.2007
+  letzte Änderung  21.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1622,7 +1622,8 @@ begin
   SelectRootIfNoneSelected(Tree);
   PathList := TStringList.Create;
   {$IFDEF MultipleFolderBrowsing}
-  Dir := ChooseMultipleFolders(FLang.GMS('g002'), '', PathList);
+  Dir := ChooseMultipleFolders(FLang.GMS('g002'), '', FLang.GMS('g012'),
+                               PathList);
   Count := PathList.Count;
   {$ELSE}
   Dir := ChooseDir(FLang.GMS('g002'), Form1.Handle);
