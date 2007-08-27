@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.07.2007
+  letzte Änderung  27.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,6 +22,7 @@
 
     CheckEnvironment(Settings: TSettings)
     CheckFiles(Settings: TSettings; Lang: TLang): Boolean
+    CheckMkisofsImports: Boolean;
     CheckVersion(Settings: TSettings);
 
 }
@@ -37,6 +38,7 @@ uses Windows, Classes, Forms, SysUtils, Dialogs, FileCtrl, IniFiles,
      cl_lang, cl_settings, cl_peheader;
 
 function CheckFiles(Settings: TSettings; Lang: TLang): Boolean;
+function CheckMkisofsImports: Boolean;
 procedure CheckEnvironment(Settings: TSettings);
 procedure CheckVersion(Settings: TSettings);
 
@@ -202,6 +204,58 @@ begin
     {$IFDEF WriteLogfile} AddLogCode(1252); {$ENDIF}
   end;
   {$IFDEF WriteLogFile} ShowToolPath; {$ENDIF}
+  {.mkisofsrc: Einige Versionen von mkisofs suchen diese Konfigurationsdatei,
+   das kann dauern, wenn im nicht vorhandenen HOME-Verzeichnis gesucht wird.
+   Daher die Umgebungsvariable setzten.}
+  Temp := ExtractFilePath(StartUpDir + cMkisofsBin + cExtExe) + cMkisofsRCFile;
+  if FileExists(Temp) then
+  begin
+    SetEnvVarValue(cMKISOFSRC, Temp);
+    {$IFDEF WriteLogfile}
+    AddLogCode(1254);
+    AddLog('Path: ' + Temp, 3);
+    AddLog(' ', 3);
+    {$ENDIF}
+  end;
+end;
+
+{ CheckMkisofsImports ----------------------------------------------------------
+
+  Mkisofs kann je nach Version noch zuästzliche DLLs importieren.
+  True: alle benötigten DLLs vorhanden                                         }
+
+function CheckMkisofsImports: Boolean;
+var DllList: TStringList;
+    i      : Integer;
+    DllPath: string;
+    DllOk  : Boolean;
+    s      : string;
+begin
+  Result := True;
+  DllPath := ExtractFilePath(StartUpDir + '\' + cCygwin1Dll);
+  {$IFDEF WriteLogfile}
+  AddLogCode(1255);
+  AddLog('DLL Path: ' + DllPath, 3);
+  {$ENDIF}
+  DllList := TStringList.Create;
+  GetImportList(StartUpDir + cMkisofsBin + cExtExe, DllList);
+  {Testen, ob die cygwin-DLLs vorhanden sind}
+  for i := 0 to DllList.Count - 1 do
+  begin
+    if Pos('cyg', DllList[i]) > 0 then
+    begin
+      DllOk := FileExists(DllPath + DllList[i]);
+      Result := Result and DllOk;      
+      {$IFDEF WriteLogfile}
+      if DllOk then s := 'ok' else s := 'not found';
+      AddLog('Checking ' + DllList[i] + ' ... ' +  s, 3);
+     {$ENDIF}
+    end;
+  end;
+  DllList.Free;
+  {$IFDEF WriteLogfile}
+  AddLog(' ', 3);
+  {$ENDIF}
 end;
 
 { CheckFiles -------------------------------------------------------------------
@@ -213,7 +267,8 @@ end;
   Die Versionsprüfung findet seit cdrtfe 1.0.2.0 nun auch hier statt.          }
 
 function CheckFiles(Settings: TSettings; Lang:TLang): Boolean;
-var Ok: Boolean;
+var Ok       : Boolean;
+    MkisofsOk: Boolean;
 begin
   GetToolNames;
   with Settings.FileFlags do
@@ -229,6 +284,9 @@ begin
                 (FindInSearchPath(cCygwin1Dll) <> '');
     {Weitermachen, wenn cdrtools + cygwin oder Mingw32-cdrtools vorhanden sind.}
     Ok := CdrtoolsOk and (CygwinOk or Mingw);
+    {Weitere Tests für mkisofs}
+    MkisofsOk := CheckMkisofsImports;
+    Ok := Ok and MkisofsOk;
     Result := Ok;
     {Ohne cdrtools oder cygwin1.dll können wir uns den Rest sparen.}
     if not Ok then
@@ -236,8 +294,13 @@ begin
       if not CdrtoolsOk then
         MessageBox(Application.Handle, PChar(Lang.GMS('einit01')),
                    PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION) else
+      if not CygwinOk then
         MessageBox(Application.Handle, PChar(Lang.GMS('einit02')),
+                   PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION) else
+      if not MkisofsOk then
+        MessageBox(Application.Handle, PChar(Lang.GMS('einit03')),
                    PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION);
+
       {Programm abbrechen!}
       Application.ShowMainForm:= False;
       Application.Terminate;

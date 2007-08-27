@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.03.2007
+  letzte Änderung  26.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -44,6 +44,8 @@ uses Classes, Forms, Windows, SysUtils,
 type TActionThread = class(TThread)
      private
        FCommandLine: string;
+       FCurrentDir : string;
+       FlpCurrentDir : PChar;
        {$IFDEF ShowCmdError}
        FExitCode: Integer;
        {$ENDIF}
@@ -69,7 +71,7 @@ type TActionThread = class(TThread)
        procedure DOutputErrorMessage;
        procedure SendTerminationMessage;
      public
-       constructor Create(const CmdLine: string; const Suspended: Boolean);
+       constructor Create(const CmdLine, CurrentDir: string; const Suspended: Boolean);
        property MessageOk: string write FMessageOk;
        property MessageAborted: string write FMessageAborted;
        property EnvironmentBlock: Pointer write FEnvironmentBlock;
@@ -91,7 +93,8 @@ procedure SendCRToThread(Thread: TActionThread);
 
 implementation
 
-uses cl_logwindow, user_messages, constant, f_misc, f_process, f_wininfo;
+uses cl_logwindow, user_messages, constant, f_misc, f_process, f_wininfo,
+     f_helper;
 
 { TActionThread -------------------------------------------------------------- }
 
@@ -430,7 +433,7 @@ begin
     lpStartupInfo.wShowWindow := SW_HIDE;
     if CreateProcess(nil, PChar(FCommandLine), nil, nil, True,
                      CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
-                     FEnvironmentBlock, nil,
+                     FEnvironmentBlock, PChar(FlpCurrentDir),
                      lpStartupInfo, lpProcessInformation) then
     begin
       try
@@ -533,7 +536,7 @@ end;
 
 { TActionThread - public }
 
-constructor TActionThread.Create(const CmdLine: string;
+constructor TActionThread.Create(const CmdLine, CurrentDir: string;
                                  const Suspended: Boolean);
 begin
   inherited Create(Suspended);
@@ -544,6 +547,11 @@ begin
   FEnvironmentBlock := nil;
   FWinLastError := 0;
   FErrorInfo := '';
+  FCurrentDir := CurrentDir;
+  if FCurrentDir <> '' then
+    FlpCurrentDir := PChar(FCurrentDir)
+  else
+    FlpCurrentDir := nil;
   {$IFDEF ShowCmdError}
   FExitCode := 0;
   {$ENDIF}
@@ -561,8 +569,10 @@ end;
 procedure DisplayDOSOutput(const CommandLine: string;
                            var Thread: TActionThread; Lang: TLang;
                            const EnvironmentBlock: Pointer);
+var CurrentDir: string;
 begin
-  Thread := TActionThread.Create(CommandLine, True);
+  CurrentDir := GetCurrentFolder(CommandLine);
+  Thread := TActionThread.Create(CommandLine, CurrentDir, True);
   Thread.MessageOk := Lang.GMS('moutput01');
   Thread.MessageAborted := Lang.GMS('moutput02');
   Thread.FreeOnTerminate := True;

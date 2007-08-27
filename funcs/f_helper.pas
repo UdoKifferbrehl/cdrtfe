@@ -4,11 +4,11 @@
 
   Copyright (c) 2005-2007 Oliver Valencia
 
-  letzte Änderung  06.02.2007
+  letzte Änderung  26.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
   f_helper.pas stellt Hilfsfunktionen zur Verfügung
     * Reload bei einem Laufwerk durchführen
@@ -16,16 +16,18 @@
     * Eingabe-Liste für rrenc erzeugen
     * DVD-Video-Quellordner prüfen
     * prüfen, ob eine DVD eingelegt ist
+    * für Spezialfälle aktuelles Verzeichnis festlegen
 
 
   exportierte Funktionen/Prozeduren:
 
     ConvertXCDParamListToRrencInputList(Source, Dest: TStringList)
     DiskIsDVD(const Dev: string): Boolean
-    EjectDisk(const Dev: string);
-    LoadDisk(const Dev: string);
-    ReloadDisk(const Dev: string): Boolean;
-    IsValidDVDSource(const Path: string): Boolean;
+    EjectDisk(const Dev: string)
+    LoadDisk(const Dev: string)
+    ReloadDisk(const Dev: string): Boolean
+    IsValidDVDSource(const Path: string): Boolean
+    GetCurrentFolder(const CommandLine: string): string
 
 }
 
@@ -35,9 +37,10 @@ unit f_helper;
 
 interface
 
-uses Classes, FileCtrl;
+uses Classes, FileCtrl, SysUtils;
 
 function DiskIsDVD(const Dev: string): Boolean;
+function GetCurrentFolder(const CommandLine: string): string;
 function IsValidDVDSource(const Path: string): Boolean;
 function ReloadDisk(const Dev: string): Boolean;
 procedure EjectDisk(const Dev: string);
@@ -173,6 +176,26 @@ begin
   p := Pos(LF, Temp);
   Temp := Copy(Temp, 1, p);
   Result := Pos('DVD', Temp) > 0;
+end;
+
+{ GetCurrentDir ----------------------------------------------------------------
+
+  aktuelles Verzeichnis in Abhänigkeit des Befehls für CreateProcess festlegen.}
+
+function GetCurrentFolder(const CommandLine: string): string;
+var Temp: string;
+begin
+  Temp := '';
+  {Workaround for mkisofs 2.01.01a28 and above: Zeichensatztabellen werden im
+   aktuellen Verzeicnis gesucht, wenn cygwin nicht komplett installiert ist.}
+  if Pos(cMkisofsBin, CommandLine) > 0 then
+  begin
+    Temp := ExtractFilePath(CommandLine);
+    Delete(Temp, Length(Temp), 1);
+    Temp := Temp + cSiconvDir;
+  end;
+  if not DirectoryExists(Temp) then Temp := '';  
+  Result := Temp;
 end;
 
 end.

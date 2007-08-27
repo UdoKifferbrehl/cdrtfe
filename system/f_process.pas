@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2007
+  letzte Änderung  26.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,7 +40,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
-     cl_logwindow, f_wininfo, constant;
+     cl_logwindow, f_wininfo, f_helper, constant;
 
      {Typ-Deklarationen für die Callback-Funktion}
 type PProcessWindow = ^TProcessWindow;
@@ -301,6 +301,7 @@ end;                        *)
 type TDOSThread = class(TThread)
      private
        FCommandLine    : PChar;
+       FCurrentDir     : PChar;
        FGetStdErr      : Boolean;
        FRunning        : Boolean;
        FUserReloadDisk : Boolean;    // User soll ENTER drücken
@@ -328,7 +329,7 @@ type TDOSThread = class(TThread)
        procedure Debug;
        {$ENDIF}
      public
-       constructor Create(const CmdLine: PChar; const GetStdErr, Suspended: Boolean);
+       constructor Create(const CmdLine, CurrentDir: PChar; const GetStdErr, Suspended: Boolean);
        property Output: string read FOutput;
        property StdIn: THandle read FPStdIn;
        property PID: DWORD read FPID;
@@ -430,7 +431,7 @@ begin
     lpStartupInfo.wShowWindow := SW_HIDE;
     if CreateProcess(nil, PChar(FCommandLine), nil, nil, True,
                      CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
-                     nil, nil,
+                     nil, PChar(FCurrentDir),
                      lpStartupInfo, lpProcessInformation) then
     begin
       try
@@ -520,11 +521,12 @@ end;
 
 { TDOSThread - public }
 
-constructor TDOSThread.Create(const CmdLine: PChar;
+constructor TDOSThread.Create(const CmdLine, CurrentDir: PChar;
                               const GetStdErr, Suspended: Boolean);
 begin
   inherited Create(Suspended);
   FCommandLine  := CmdLine;
+  FCurrentDir   := CurrentDir;
   FGetStdErr    := GetStdErr;
   FWinLastError := 0;
   FErrorInfo    := '';
@@ -548,6 +550,8 @@ var Thread      : TDOSThread;
     Msg, Cap    : string;
     Window      : HWnd;
     Buffer      : array[0..1] of Char;
+    lpCurrentDir: PChar;
+    CurrentDir  : string;
 begin
   {$IFDEF WriteLogfile}
   AddLogCode(1100);
@@ -556,7 +560,12 @@ begin
     False: AddLog('FastMode: False -> BuffSize = 10' + CRLF, 12);
   end;
   {$ENDIF}
-  Thread := TDOSThread.Create(lpCommandLine, GetStdErr, True);
+  CurrentDir := GetCurrentFolder(string(lpCommandLine));
+  if CurrentDir <> '' then
+    lpCurrentDir := PChar(CurrentDir)
+  else
+    lpCurrentDir := nil;
+  Thread := TDOSThread.Create(lpCommandLine, lpCurrentDir, GetStdErr, True);
   Thread.FreeOnTerminate := False;
   Thread.FastMode := FastMode;
   {$IFDEF WriteLogfile}

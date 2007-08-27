@@ -1,8 +1,8 @@
 { cl_peheader.pas: Funktionen zum Auswerten der PE-Header einer EXE-Datei
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
 
-  letzte Änderung  17.08.2006
+  letzte Änderung  27.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,7 +38,7 @@
   exportierte Funktionen/Prozeduren:
 
     ImportsDll(const FileName, DllName: string): Boolean;
-
+    GetImportList(const FileName: string; List: TStringList);
 
   Verwendung:
   
@@ -177,6 +177,7 @@ type TImageDOSHeader = record
      end;
 
 function ImportsDll(const FileName, DllName: string): Boolean;
+procedure GetImportList(const FileName: string; List: TStringList);
 
 implementation
 
@@ -592,6 +593,29 @@ begin
   end else
   begin
     Result := False;
+  end;
+end;
+
+{ GetImportList ----------------------------------------------------------------
+
+  liefert eine Liste der Importe.                                              }
+
+procedure GetImportList(const FileName: string; List: TStringList);
+var PEHeader: TPEHeader;
+    DllList: TStringList;
+begin
+  if FileExists(FileName) then
+  begin
+    DllList := TStringList.Create;
+    PEHeader := TPEHeader.Create;
+    PEHeader.FileName := FileName;
+    PEHeader.LoadInMemory := True;
+    PEHeader.Initialize;
+    PEHeader.ResolveImportDllList;
+    PEHeader.GetImportDllList(DllList);
+    PEHeader.Free;
+    List.Assign(DllList);
+    DllList.Free;
   end;
 end;
 

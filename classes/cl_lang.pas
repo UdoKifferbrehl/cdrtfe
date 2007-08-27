@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.08.2007
+  letzte Änderung  27.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -235,6 +235,7 @@ begin
     {Messages - Init}
     Add('einit01=Die cdrtools konnten nicht (vollständig) gefunden werden!\nFolgende Dateien werden unbedingt benötigt: cdrecord.exe,\nmkisofs.exe. Siehe auch readme.txt.');
     Add('einit02=Die Datei cygwin1.dll konnte nicht gefunden werden! Sie muß\nentweder im cdrtfe-Verzeichnis oder im Suchpfad vorhanden sein.');
+    Add('einit03=Es fehlen eine oder mehrere DLLs, die von mkisofs.exe benötigt werden!');
     Add('minit01=Ohne die Datei cdda2wav.exe ist das Auslesen von Audio-Tracks nicht möglich.\n ');
     Add('minit02=Ohne die Datei sh.exe ist unter Win9x, ME ein on-the-fly-Brennen nicht möglich.\nSiehe readme.txt für Download-Link.\n ');
     Add('minit03=Ohne die Datei mode2cdmaker.exe kann keine XCDs (Mode 2 Form 2)\nerstellt werden.\n ');
