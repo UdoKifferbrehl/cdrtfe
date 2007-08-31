@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.06.2007
+  letzte Änderung  31.08.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -482,6 +482,10 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      constant, f_filesystem, f_wininfo;
+
+{$IFNDEF Delphi7Up}
+const CSIDL_MyMusic = $000d;
+{$ENDIF}     
 
 { TSettings ------------------------------------------------------------------ }
 
@@ -999,6 +1003,7 @@ var DefaultDir      : string;
     DefaultImageName: string;
     DefaultImageFile: string;
 begin
+  {Vorgaben für Images und temporäre Ordner}
   DefaultDir       := f_filesystem.TempDir;
   DefaultImageName := DefaultDir + cDefaultIsoName;
   DefaultImageFile := DefaultImageName + cExtIso;
@@ -1009,6 +1014,12 @@ begin
     if VideoCD.IsoPath    = '' then VideoCD.IsoPath    := DefaultImageName;
     if DVDVideo.IsoPath   = '' then DVDVideo.IsoPath   := DefaultImageFile;
     if General.TempFolder = '' then General.TempFolder := DefaultDir;
+  end;
+  {Vorgabe für Wave-Dateien von CD (DAE)}
+  DefaultDir := GetShellFolder(CSIDL_MyMusic);
+  if (DefaultDir <> '') then
+  begin
+    if DAE.Path           = '' then DAE.Path           := DefaultDir;
   end;
 end;
 
@@ -1022,6 +1033,7 @@ var DefaultDir      : string;
     DefaultImageName: string;
     DefaultImageFile: string;
 begin
+  {Images und temporäre Verzeichnisse}
   DefaultDir       := f_filesystem.TempDir;
   DefaultImageName := DefaultDir + cDefaultIsoName;
   DefaultImageFile := DefaultImageName + cExtIso;
@@ -1030,6 +1042,9 @@ begin
   if VideoCD.IsoPath    = DefaultImageName then VideoCD.IsoPath    := '';
   if DVDVideo.IsoPath   = DefaultImageFile then DVDVideo.IsoPath   := '';
   if General.TempFolder = DefaultDir       then General.TempFolder := '';
+  {DAE-Pfad}
+  DefaultDir := GetShellFolder(CSIDL_MyMusic);
+  if DAE.Path           = DefaultDir       then DAE.Path           := '';
 end;
 
 { TSettings - public }
