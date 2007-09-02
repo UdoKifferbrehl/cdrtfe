@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.08.2007
+  letzte Änderung  02.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -283,6 +283,7 @@ begin
     Add('mburn13=Überprüfe Disk ...');
     Add('mburn14=%s MiByte zu schreiben; %s MiByte verbleibend.\n\n');
     Add('mburn15=DVD+RW-Disks können nicht gelöscht werden.\nSie werden einfach überschrieben.');
+    Add('mburn16=Bitte Ziel-Disk einlegen.\nSoll der Brennvorgang gestartet werden?');
     {Messages - Verify}
     Add('mverify01=Vergleiche Dateien ...');
     Add('mverify02=%d Fehler gefunden.');

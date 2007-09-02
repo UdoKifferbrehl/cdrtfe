@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.08.2007
+  letzte Änderung  02.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -258,6 +258,7 @@ type
     N4: TMenuItem;
     CDETreeViewPopupN4: TMenuItem;
     CDETreeViewPopupImport: TMenuItem;
+    CheckBoxReadCDWriteCopy: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -691,6 +692,13 @@ begin
     FAction.Action := cVerifyDVDVideo;
     FAction.StartAction;
   end else
+  {1:1-Kopie: Nach dem Auslesen gleich schreiben}
+  if (FAction.LastAction = cCDImage) and FSettings.Readcd.DoCopy and
+     FSettings.General.ImageRead and FSettings.General.CDCopy then
+  begin
+    FAction.Action := cCDImage;
+    FAction.StartAction;
+  end else
   begin
     {Falls kein Vergleich stattfindet, gleich weiter}
     SendMessage(Handle, WM_VTerminated, 0, 0);
@@ -1018,13 +1026,14 @@ begin
   RadioButtonImageWrite.Checked := not FSettings.General.ImageRead;  
   with FSettings.Readcd do
   begin
-    EditReadCDIsoPath.Text        := IsoPath;
-    EditReadCDStartSec.Text       := StartSec;
-    EditReadCDEndSec.Text         := EndSec;
-    CheckBoxReadCDNoerror.Checked := Noerror;
-    CheckBoxReadCDNocorr.Checked  := Nocorr;
-    CheckBoxReadCDClone.Checked   := Clone;
-    CheckBoxReadCDRange.Checked   := Range;
+    EditReadCDIsoPath.Text          := IsoPath;
+    EditReadCDStartSec.Text         := StartSec;
+    EditReadCDEndSec.Text           := EndSec;
+    CheckBoxReadCDNoerror.Checked   := Noerror;
+    CheckBoxReadCDNocorr.Checked    := Nocorr;
+    CheckBoxReadCDClone.Checked     := Clone;
+    CheckBoxReadCDRange.Checked     := Range;
+    CheckBoxReadCDWriteCopy.Checked := DoCopy;
   end;
   with FSettings.Image do
   begin
@@ -1184,6 +1193,7 @@ begin
     Range    := CheckBoxReadCDRange.Checked;
     Device   := GetDevice(cCDImage);
     Speed    := GetSpeed(cCDImage);
+    DoCopy   := CheckBoxReadCDWriteCopy.Checked;
   end;
   with FSettings.Image do
   begin
@@ -3084,6 +3094,8 @@ procedure TForm1.CheckControls;
       GroupBoxReadCD.Controls[i].Enabled :=
         RadioButtonImageRead.Checked and FSettings.FileFlags.ReadcdOk;
     end;
+    CheckBoxReadCDWriteCopy.Enabled :=
+      RadioButtonImageRead.Checked and FSettings.FileFlags.ReadcdOk;    
     {Sektoren}
     if RadioButtonImageRead.Checked then
     begin

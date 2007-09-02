@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.07.2007
+  letzte Änderung  02.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -118,6 +118,7 @@ type (*{ TCheckMediumArgs faßt einige Variablen zusammen, die in den verschieden
        procedure SetPanels(const s1, s2: string);
        procedure StartVerification(const Action: Byte);
        procedure WriteImage;
+       procedure WriteImageCopy;
        procedure WriteTOC;
        procedure SetFSettings(Value: TSettings);
        {Events}
@@ -1764,17 +1765,15 @@ begin
   {$ENDIF}
   with FSettings.Readcd do
   begin
+    FSettings.General.CDCopy := DoCopy;
     Cmd := Cmd + ' dev=' + Device;
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
+    if DoCopy  then Cmd := Cmd + ' retries=1';
     if Clone   then Cmd := Cmd + ' -clone';
     if Nocorr  then Cmd := Cmd + ' -nocorr';
     if Noerror then Cmd := Cmd + ' -noerror';
     if Range   then Cmd := Cmd + ' sectors=' + Startsec + '-' + Endsec;
-    IsoPath := MakePathConform(IsoPath);
-    {$IFDEF QuoteCommandlinePath}
-    IsoPath := QuotePath(IsoPath);
-    {$ENDIF}
-    Cmd := Cmd + ' f=' + IsoPath;
+    Cmd := Cmd + ' f=' + QuotePath(MakePathConform(IsoPath));
   end;
   DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
 end;
@@ -1924,6 +1923,70 @@ begin
              MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
     end else
     {$ENDIF}
+    begin
+      i := 1;
+    end;
+  end;
+  if i = 1 then
+  begin
+    CheckEnvironment(FSettings);
+    DisplayDOSOutput(Cmd, FActionThread, FLang,
+                     FSettings.Environment.EnvironmentBlock);
+  end else
+  begin
+    SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
+  end;
+end;
+
+{ WriteImageCopy ---------------------------------------------------------------
+
+  schreibt das Image beim 1:1-Kopieren auf die Disk.                           }
+
+procedure TCDAction.WriteImageCopy;
+var i         : Integer;
+    Cmd       : string;
+    Ok        : Boolean;
+begin
+  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  {Kommandozeile zusammenstellen}
+  Ok := True;
+  with FSettings.Cdrecord, FSettings.ReadCD do
+  begin
+    Cmd := StartUpDir + cCdrecordBin;
+    {$IFDEF QuoteCommandlinePath}
+    Cmd := QuotePath(Cmd);
+    {$ENDIF}
+    Cmd := Cmd + ' gracetime=5 dev=' + Device;
+    if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
+    if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
+    if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
+    if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
+    if CdrecordUseCustOpts then
+      Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
+    if Verbose     then Cmd := Cmd + ' -v';
+    if Dummy       then Cmd := Cmd + ' -dummy';
+    if DMASpeedCheck and ForceSpeed then
+                        Cmd := Cmd + ' -force';
+    if Clone       then Cmd := Cmd + ' -clone -' + FSettings.Image.RAWMode else
+                        Cmd := Cmd + ' -sao';
+    Cmd := Cmd + ' ' + QuotePath(MakePathConform(IsoPath));
+  end;
+  {Kommando ausführen}
+  if not Ok then
+  begin
+    i := 0;
+  end else
+  begin
+    {_$IFDEF Confirm - Diese Abfrage ist zwingend nötig!}
+    if not (FSettings.CmdLineFlags.ExecuteProject or
+            FSettings.General.NoConfirm) then
+    begin
+      {Brennvorgang starten?}
+      i := Application.MessageBox(PChar(FLang.GMS('mburn16')),
+                                  PChar(FLang.GMS('mburn02')),
+             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    end else
+    {_$ENDIF}
     begin
       i := 1;
     end;
@@ -2416,6 +2479,21 @@ end;
 
 procedure TCDAction.StartAction;
 var TempAction: Byte;
+
+  procedure StartImageAction;
+  begin
+    case FSettings.General.ImageRead of
+      True : case FSettings.General.CDCopy of
+               True: begin
+                       WriteImageCopy;
+                       FSettings.General.CDCopy := False;
+                     end;
+               False: ReadImage;
+             end;
+      False: WriteImage;
+    end;
+  end;
+
 begin
   TempAction := Action;
   case TempAction of
@@ -2425,12 +2503,7 @@ begin
     cCDRW          : DeleteCDRW;
     cCDInfos       : GetCDInfos;
     cDAE           : DAEGrabTracks;
-    cCDImage       : begin
-                       case FSettings.General.ImageRead of
-                         True : ReadImage;
-                         False: WriteImage;
-                       end;
-                     end;
+    cCDImage       : StartImageAction;
     cVideoCD       : CreateVideoCD;
     cDVDVideo      : CreateVideoDVD;
     cDAEReadTOC    : DAEReadTOC;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.08.2007
+  letzte Änderung  02.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,6 +70,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
      TGeneralSettings = record
        Choice        : Byte;
        ImageRead     : Boolean;
+       CDCopy        : Boolean;                     // True: 1:1-Kopie schreiben
        TabSheetDrive : array [1..TabSheetCount] of Byte;
        TabSheetSpeed : array [1..TabSheetCount] of Integer;
        CharSets      : TStringList;
@@ -372,6 +373,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Range   : Boolean;
        Startsec: string;
        Endsec  : string;
+       DoCopy  : Boolean;
      end;
 
      { Einstellungen: Video-CD }
@@ -561,6 +563,7 @@ begin
       TabSheetSpeed[i] := -1;
     end;
     ImageRead := True;
+    CDCopy := False;
     NoConfirm := False;
     TabFrmSettings := cCdrtfe;
     TabFrmDAE      := cTabDAE;
@@ -865,6 +868,7 @@ begin
     Range    := False;
     Startsec := '';
     Endsec   := '';
+    DoCopy   := False;
   end;
 
   {Video-CD}
@@ -1638,6 +1642,7 @@ var PF: TIniFile; // ProjectFile
       WriteBool(Section, 'Range', Range);
       WriteString(Section, 'Startsec', Startsec);
       WriteString(Section, 'Endsec', Endsec);
+      WriteBool(Section, 'DoCopy', DoCopy);
     end;
 
     {VideoCD}
@@ -2053,6 +2058,7 @@ var PF: TIniFile; // ProjectFile
       Range := ReadBool(Section, 'Range', False);
       StartSec := ReadString(Section, 'Startsec', '');
       EndSec := ReadString(Section, 'Endsec', '');
+      DoCopy := ReadBool(Section, 'DoCopy', False);
     end;
     ProgressBarUpdate(11);
 
@@ -2412,6 +2418,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteBool(Section, 'Range', Range);
       WriteString(Section, 'Startsec', Startsec);
       WriteString(Section, 'Endsec', Endsec);
+      WriteBool(Section, 'DoCopy', DoCopy);
     end;
 
     {VideoCD}
@@ -2774,6 +2781,7 @@ var PF: TRegIniFile; // ProjectFile
       Range := ReadBool(Section, 'Range', False);
       StartSec := ReadString(Section, 'Startsec', '');
       EndSec := ReadString(Section, 'Endsec', '');
+      DoCopy := ReadBool(Section, 'DoCopy');
     end;
     Shared.ProgressBarPosition := 11;
     ProgressBarUpdate;
