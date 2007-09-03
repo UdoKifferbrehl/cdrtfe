@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  01.07.2007
+  letzte Änderung  03.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -337,6 +337,9 @@ end;
   ermittelt aus den Ausgaben der Kommandozeilenprogramme die Fortschrittsinfos.}
 
 function TLogWin.ProcessProgress(const s: string): string;
+{$J+}
+const TotalSectors: Integer = 0;
+{$J-}
 var Temp    : string;
     Progress: string;
     a, b    : string;
@@ -379,6 +382,17 @@ begin
   if Pos('[Pro', Temp) > 0 then
   begin
     Progress := 'I: ' + Trim(Copy(Temp, 11, Pos('%', Temp) - 10));
+  end else
+  {readcd: [end: ...] + [addr: ...]}
+  if Pos('end:', Temp) = 1 then
+  begin
+    Delete(Temp, 1, 4);
+    TotalSectors := StrToIntDef(Trim(Temp), 1);
+  end else
+  if Pos('addr:', Temp) = 1 then
+  begin
+    ia := StrToIntDef(Trim(Copy(Temp, 6, Pos('cnt', Temp) - 6)), 0);
+    Progress := 'R: ' + FormatFloat('##0%', (ia / TotalSectors) *100)
   end;
   {cdrdao: wrote x of y ...} (*
   if Pos('Wrote', Temp > 0 then
