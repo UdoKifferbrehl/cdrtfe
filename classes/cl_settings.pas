@@ -485,9 +485,7 @@ implementation
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      constant, f_filesystem, f_wininfo;
 
-{$IFNDEF Delphi7Up}
 const CSIDL_MyMusic = $000d;
-{$ENDIF}     
 
 { TSettings ------------------------------------------------------------------ }
 

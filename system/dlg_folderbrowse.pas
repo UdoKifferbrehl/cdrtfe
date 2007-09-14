@@ -58,6 +58,7 @@ type TFolderBrowser = class(TComponent)
      private
        FPath           : string;
        FPathList       : TStringList;
+       FInitOk         : Boolean;
        {Dialog-Form}
        FHeight         : Integer;
        FLeft           : Integer;
@@ -87,6 +88,7 @@ type TFolderBrowser = class(TComponent)
        constructor Create(AOwner: TComponent); override;
        destructor Destroy; override;
        function Execute: Boolean; virtual;
+       property InitOk: Boolean read FInitOk;
        {Dialog-Properties}
        property Caption       : string read FCaption write FCaption;
        property Title         : string read FTitle write FTitle;
@@ -109,6 +111,9 @@ type TFolderBrowser = class(TComponent)
      end;
 
 implementation
+
+const cComCtl32Name      : string   = 'comctl32.dll';
+      cComCtl32MinVersion: Cardinal = $00050051;           // >=5.81
 
 { TFolderBrowser ------------------------------------------------------------- }
 
@@ -229,6 +234,9 @@ begin
   FMultiselect     := False;
   FColCaption      := 'ausgewählte Ordner';
   FPathList        := TStringList.Create;
+  {Die ShellShock-Kompoenten funktioniern nur mit comctl32.dll in der Version
+   5.81 oder höher korrekt. Sonst treten Access Violations auf.}
+  FInitOk := GetFileVersion(cComCtl32Name) >= cComCtl32MinVersion;
 end;
 
 destructor TFolderBrowser.Destroy;

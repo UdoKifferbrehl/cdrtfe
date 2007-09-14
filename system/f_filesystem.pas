@@ -384,19 +384,28 @@ function ChooseMultipleFolders(const Caption, Title, ColCaption: string;
                                PathList: TStringList): string;
 {$IFDEF MultipleFolderBrowsing}
 var FolderBrowser: TFolderBrowser;
+    Dir          : string;
 begin
   FolderBrowser := TFolderBrowser.Create(nil);
-  FolderBrowser.Height      := 365;
-  FolderBrowser.Width       := 330;
-  FolderBrowser.Caption     := Caption;
-  FolderBrowser.Title       := Title;
-  FolderBrowser.ColCaption  := ColCaption;
-  FolderBrowser.SpecialRoot := sfDesktop;
-  FolderBrowser.Multiselect := True;
-  if FolderBrowser.Execute then
+  if FolderBrowser.InitOk then
   begin
-    PathList.Assign(FolderBrowser.PathList);
-    Result := FolderBrowser.Path;
+    FolderBrowser.Height      := 365;
+    FolderBrowser.Width       := 330;
+    FolderBrowser.Caption     := Caption;
+    FolderBrowser.Title       := Title;
+    FolderBrowser.ColCaption  := ColCaption;
+    FolderBrowser.SpecialRoot := sfDesktop;
+    FolderBrowser.Multiselect := True;
+    if FolderBrowser.Execute then
+    begin
+      PathList.Assign(FolderBrowser.PathList);
+      Result := FolderBrowser.Path;
+    end;
+  end else
+  begin
+    Dir := ChooseDir(Caption, 0{OwnerHandle});
+    PathList.Add(Dir);
+    Result := Dir;
   end;
   FolderBrowser.Free;
 end;
