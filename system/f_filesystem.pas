@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.08.2007
+  letzte Änderung  15.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -25,7 +25,7 @@
 
     CDLabelIsValid(const VolID: string):Boolean
     ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
-    ChooseMultipleFolders(const Caption, Title: string; PathList: TStringList): string
+    ChooseMultipleFolders(const Caption, Title: string; const OwnerHandle: HWnd; PathList: TStringList): string
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)
     FileAccess(const Name: string; const OpenMode, ShareMode: Word): Boolean;
@@ -72,7 +72,7 @@ type {Datentype für Laufwerksinfos}
 
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
-function ChooseMultipleFolders(const Caption, Title, ColCaption: string; PathList: TStringList): string;
+function ChooseMultipleFolders(const Caption, Title, ColCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
 function DummyFileName: string;
@@ -349,31 +349,31 @@ end;
   zeigt einen Auswahldialog für Verzeichnisse an.                              }
 
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
-var
-  lpItemID: PItemIDList;
-  Malloc: IMalloc;
-  BrowseInfo: TBrowseInfo;
-  DisplayName: array[0..MAX_PATH] of char;
-  TempPath: array[0..MAX_PATH] of char;
-  NewPath: string ;
+var lpItemID   : PItemIDList;
+    Malloc     : IMalloc;
+    BrowseInfo : TBrowseInfo;
+    DisplayName: array[0..MAX_PATH] of Char;
+    TempPath   : array[0..MAX_PATH] of Char;
+    NewPath    : string;
 begin
-  Result := '' ;
-  FillChar(BrowseInfo, sizeof(TBrowseInfo), #0);
+  Result := '';
+  FillChar(BrowseInfo, SizeOf(TBrowseInfo), #0);
   ShGetMalloc(Malloc);
-  with BrowseInfo do begin
-    hwndOwner := OwnerHandle;
+  with BrowseInfo do
+  begin
+    hwndOwner      := OwnerHandle;
     pszDisplayName := @DisplayName;
-    lpszTitle := PChar (Caption) ;
-    ulFlags := 0 ;
+    lpszTitle      := PChar(Caption);
+    ulFlags        := 0;
   end;
   lpItemID := SHBrowseForFolder(BrowseInfo);
-  if lpItemId <> nil then begin
+  if lpItemId <> nil then
+  begin
     SHGetPathFromIDList(lpItemID, TempPath);
     NewPath := TempPath;
-    Malloc.Free(lpItemId)
+    Malloc.Free(lpItemId);
   end;
-  if DirectoryExists (NewPath) then
-    Result := (NewPath) ;
+  if DirectoryExists(NewPath) then Result := NewPath;
 end;
 
 { ChooseMultipleFolders --------------------------------------------------------
@@ -381,37 +381,30 @@ end;
   zeigt einen Auswahldialog für einen oder mehrere Ordner an.                  }
 
 function ChooseMultipleFolders(const Caption, Title, ColCaption: string;
+                               const OwnerHandle: HWnd;
                                PathList: TStringList): string;
 {$IFDEF MultipleFolderBrowsing}
 var FolderBrowser: TFolderBrowser;
     Dir          : string;
 begin
   FolderBrowser := TFolderBrowser.Create(nil);
-  if FolderBrowser.InitOk then
+  FolderBrowser.Height      := 365;
+  FolderBrowser.Width       := 330;
+  FolderBrowser.Caption     := Caption;
+  FolderBrowser.Title       := Title;
+  FolderBrowser.ColCaption  := ColCaption;
+  FolderBrowser.SpecialRoot := sfDesktop;
+  FolderBrowser.Multiselect := True;
+  FolderBrowser.OwnerHandle := OwnerHandle;
+  if FolderBrowser.Execute then
   begin
-    FolderBrowser.Height      := 365;
-    FolderBrowser.Width       := 330;
-    FolderBrowser.Caption     := Caption;
-    FolderBrowser.Title       := Title;
-    FolderBrowser.ColCaption  := ColCaption;
-    FolderBrowser.SpecialRoot := sfDesktop;
-    FolderBrowser.Multiselect := True;
-    if FolderBrowser.Execute then
-    begin
-      PathList.Assign(FolderBrowser.PathList);
-      Result := FolderBrowser.Path;
-    end;
-  end else
-  begin
-    Dir := ChooseDir(Caption, 0{OwnerHandle});
-    PathList.Add(Dir);
-    Result := Dir;
+    PathList.Assign(FolderBrowser.PathList);
+    Result := FolderBrowser.Path;
   end;
   FolderBrowser.Free;
 end;
 {$ELSE}
 begin
-
 end;
 {$ENDIF}
 

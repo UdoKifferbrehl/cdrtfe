@@ -2,7 +2,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  12.08.2007
+  letzte Änderung  15.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,6 +12,9 @@
     * Anzeige der verfügbaren Ordner (auch Windows-Spezial-Ordner)
     * Auswahl der anzuzeigenden Ordner und des Startordners
     * Möglichkeit einen oder auch mehrere Ordner auszuwählen
+    * Die Verwendung der ShellShock-Komponenten setzt die Datei comctl32.dll in
+      der Version 5.81 oder höher voraus. Bei niedrigeren Versionen wird der
+      Standard-Auswahldialog für einen einzelnen Ordner verwendet.
 
 
   TFolderBrowser
@@ -32,6 +35,8 @@
                  Path
                  PathList
                  Count
+                 OwnerHandle
+                 InitOk
 
     Methoden     Create(AOwner: TComponent)
                  Execute: Boolean
@@ -45,7 +50,7 @@ unit dlg_folderbrowse;
 interface
 
 uses Classes, Windows, Forms, StdCtrls, Controls, FileCtrl, SysUtils, ComCtrls,
-     SsBase, StShlCtl;
+     ShlObj, ActiveX, SsBase, StShlCtl;
 
 type TFolderBrowser = class(TComponent)
        {Dialog und dessen Komponenten}
@@ -59,6 +64,7 @@ type TFolderBrowser = class(TComponent)
        FPath           : string;
        FPathList       : TStringList;
        FInitOk         : Boolean;
+       FOwnerHandle    : HWnd;
        {Dialog-Form}
        FHeight         : Integer;
        FLeft           : Integer;
@@ -78,6 +84,7 @@ type TFolderBrowser = class(TComponent)
        FButtonCapOk    : string;
        FButtonCapCancel: string;
        function GetCount: Integer;
+       function SelectSingleFolder(const Caption: string; const OwnerHandle: HWnd): string;
        procedure SetInitialDir(const Value: string);
        procedure STVClick(Sender: TObject);
        procedure STVKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -89,6 +96,7 @@ type TFolderBrowser = class(TComponent)
        destructor Destroy; override;
        function Execute: Boolean; virtual;
        property InitOk: Boolean read FInitOk;
+       property OwnerHandle: HWnd write FOwnerHandle;
        {Dialog-Properties}
        property Caption       : string read FCaption write FCaption;
        property Title         : string read FTitle write FTitle;
@@ -118,6 +126,41 @@ const cComCtl32Name      : string   = 'comctl32.dll';
 { TFolderBrowser ------------------------------------------------------------- }
 
 { TFolderBrowser - private }
+
+{ SelectSingleFolder -----------------------------------------------------------
+
+  zeigt einen Auswahldialog für Verzeichnisse an. Ein einzelner Ordner kann
+  gewählt werden. Diese Funktioen wird verwendet, wenn die Version der
+  comctl32.dll nicht mindesten 5.81 ist.                                       }
+
+function TFolderBrowser.SelectSingleFolder(const Caption: string;
+                                           const OwnerHandle: HWnd): string;
+var lpItemID   : PItemIDList;
+    Malloc     : IMalloc;
+    BrowseInfo : TBrowseInfo;
+    DisplayName: array[0..MAX_PATH] of Char;
+    TempPath   : array[0..MAX_PATH] of Char;
+    NewPath    : string;
+begin
+  Result := '';
+  FillChar(BrowseInfo, SizeOf(TBrowseInfo), #0);
+  ShGetMalloc(Malloc);
+  with BrowseInfo do
+  begin
+    hwndOwner      := OwnerHandle;
+    pszDisplayName := @DisplayName;
+    lpszTitle      := PChar(Caption);
+    ulFlags        := 0;
+  end;
+  lpItemID := SHBrowseForFolder(BrowseInfo);
+  if lpItemId <> nil then
+  begin
+    SHGetPathFromIDList(lpItemID, TempPath);
+    NewPath := TempPath;
+    Malloc.Free(lpItemId);
+  end;
+  if DirectoryExists(NewPath) then Result := NewPath;
+end;
 
 { GetCount ---------------------------------------------------------------------
 
@@ -237,6 +280,7 @@ begin
   {Die ShellShock-Kompoenten funktioniern nur mit comctl32.dll in der Version
    5.81 oder höher korrekt. Sonst treten Access Violations auf.}
   FInitOk := GetFileVersion(cComCtl32Name) >= cComCtl32MinVersion;
+  FOwnerHandle := 0;
 end;
 
 destructor TFolderBrowser.Destroy;
@@ -254,109 +298,120 @@ var NewTop   : Integer;
     NewBottom: Integer;
     LVHeight : Integer;
 begin
-  {Dialog erstellen}
-  FBDialog              := TForm.Create(Self);
-  FBDialog.ClientHeight := FHeight;
-  FBDialog.Left         := FLeft;
-  FBDialog.Top          := FTop;
-  FBDialog.ClientWidth  := FWidth;
-  FBDialog.Position     := FPosition;
-  FBDialog.BorderStyle  := bsDialog;
-  FBDialog.ModalResult  := mrNone;
-  FBDialog.KeyPreview   := True;
-  FBDialog.Caption      := FCaption;
-  {Ereignisse}
-  //FBDialog.OnKeyDown    := OpenDirDlgKeyDown;
-
-  {Label}
-  NewTop := 8;
-  FBLabelTitle := TLabel.Create(Self);
-  with FBLabelTitle do
+  if FInitOk then
   begin
-    SetBounds(8, NewTop, FWidth - 16, 13);
-    Font.Size  := Font.Size + 1;
-    Parent     := FBDialog;
-    Autosize   := True;
-    Caption    := FTitle;
-  end;
-  NewTop := NewTop + 8 + FBLabelTitle.Height;
+    {Dialog erstellen}
+    FBDialog              := TForm.Create(Self);
+    FBDialog.ClientHeight := FHeight;
+    FBDialog.Left         := FLeft;
+    FBDialog.Top          := FTop;
+    FBDialog.ClientWidth  := FWidth;
+    FBDialog.Position     := FPosition;
+    FBDialog.BorderStyle  := bsDialog;
+    FBDialog.ModalResult  := mrNone;
+    FBDialog.KeyPreview   := True;
+    FBDialog.Caption      := FCaption;
+    {Ereignisse}
+    //FBDialog.OnKeyDown    := OpenDirDlgKeyDown;
 
-  {Cancel-Button}
-  FBButtonCancel := TButton.Create(Self);
-  with FBButtonCancel do
-  begin
-    SetBounds(FWidth - 8 - 75, FHeight - 30, 75, 25);
-    Parent      := FBDialog;
-    Caption     := FButtonCapCancel;
-    ModalResult := mrAbort;
-  end;
-
-  {OK-Button}
-  FBButtonOk := TButton.Create(Self);
-  with FBButtonOk do
-  begin
-    SetBounds(FWidth - 8 - 2*75 - 5, FHeight - 30, 75, 25);
-    Parent      := FBDialog;
-    Caption     := FButtonCapOk;
-    ModalResult := mrOk;
-  end;
-  NewBottom := FBButtonOk.Top - 8;
-
-  {ListView}
-  if FMultiselect then
-  begin
-    LVHeight := 120;
-    FBListView := TListView.Create(Self);
-    with FBListView do
+    {Label}
+    NewTop := 8;
+    FBLabelTitle := TLabel.Create(Self);
+    with FBLabelTitle do
     begin
-      SetBounds(8, NewBottom - LVHeight, FWidth - 16, LVHeight);
-      Parent             := FBDialog;
-      ViewStyle          := vsReport;
-      CheckBoxes         := False;
-      OnKeyDown          := LVKeyDown;
-      TabStop            := True;
-      Columns.Add;
-      Columns[0].Caption := FColCaption;
-      Columns[0].Width   := FBListView.Width;
+      SetBounds(8, NewTop, FWidth - 16, 13);
+      Font.Size  := Font.Size + 1;
+      Parent     := FBDialog;
+      Autosize   := True;
+      Caption    := FTitle;
     end;
-    NewBottom := FBListView.Top - 8;
-  end;
+    NewTop := NewTop + 8 + FBLabelTitle.Height;
 
-  {ShellTreeView}
-  FBShellTreeView := TStShellTreeView.Create(Self);
-  with FBShellTreeView do
-  begin
-    SetBounds(8, NewTop, FWidth - 16, FHeight - NewTop - (FHeight - NewBottom));
-    Parent := FBDialog;
-    SpecialRootFolder := FSpecialRoot;
-    if DirectoryExists(FRoot) then
+    {Cancel-Button}
+    FBButtonCancel := TButton.Create(Self);
+    with FBButtonCancel do
     begin
-      RootFolder := FRoot;
-      SpecialRootFolder := sfNone;
+      SetBounds(FWidth - 8 - 75, FHeight - 30, 75, 25);
+      Parent      := FBDialog;
+      Caption     := FButtonCapCancel;
+      ModalResult := mrAbort;
     end;
-    if Length(FInitialDir) > 0 then
+
+    {OK-Button}
+    FBButtonOk := TButton.Create(Self);
+    with FBButtonOk do
     begin
-      FBShellTreeView.StartInFolder := FInitialDir;
-    end else
-    begin
-      FBShellTreeView.SpecialStartInFolder := FSpecialStartIn;
+      SetBounds(FWidth - 8 - 2*75 - 5, FHeight - 30, 75, 25);
+      Parent      := FBDialog;
+      Caption     := FButtonCapOk;
+      ModalResult := mrOk;
     end;
-    HideSelection    := False;
-    OnClick          := STVClick;
-    OnKeyDown        := STVKeyDown;
-  end;
+    NewBottom := FBButtonOk.Top - 8;
 
-  {TabOrder}
-  FBShellTreeView.TabOrder := 0;
-  if FMultiselect then FBListView.TabOrder      := 1;
-  FBButtonOk.TabOrder      := 2;
-  FBButtonCancel.TabOrder  := 3;
+    {ListView}
+    if FMultiselect then
+    begin
+      LVHeight := 120;
+      FBListView := TListView.Create(Self);
+      with FBListView do
+      begin
+        SetBounds(8, NewBottom - LVHeight, FWidth - 16, LVHeight);
+        Parent             := FBDialog;
+        ViewStyle          := vsReport;
+        CheckBoxes         := False;
+        OnKeyDown          := LVKeyDown;
+        TabStop            := True;
+        Columns.Add;
+        Columns[0].Caption := FColCaption;
+        Columns[0].Width   := FBListView.Width;
+      end;
+      NewBottom := FBListView.Top - 8;
+    end;
 
-  Result := FBDialog.ShowModal = mrOK;
-  if FBDialog.ModalResult = mrOK then
+    {ShellTreeView}
+    FBShellTreeView := TStShellTreeView.Create(Self);
+    with FBShellTreeView do
+    begin
+      SetBounds(8, NewTop, FWidth - 16, FHeight - NewTop - (FHeight - NewBottom));
+      Parent := FBDialog;
+      SpecialRootFolder := FSpecialRoot;
+      if DirectoryExists(FRoot) then
+      begin
+        RootFolder := FRoot;
+        SpecialRootFolder := sfNone;
+      end;
+      if Length(FInitialDir) > 0 then
+      begin
+        FBShellTreeView.StartInFolder := FInitialDir;
+      end else
+      begin
+        FBShellTreeView.SpecialStartInFolder := FSpecialStartIn;
+      end;
+      HideSelection    := False;
+      OnClick          := STVClick;
+      OnKeyDown        := STVKeyDown;
+    end;
+
+    {TabOrder}
+    FBShellTreeView.TabOrder := 0;
+    if FMultiselect then FBListView.TabOrder      := 1;
+    FBButtonOk.TabOrder      := 2;
+    FBButtonCancel.TabOrder  := 3;
+
+    Result := FBDialog.ShowModal = mrOK;
+    if FBDialog.ModalResult = mrOK then
+    begin
+      FPath := FBShellTreeView.SelectedFolder.Path;
+      if FPathList.Count = 0 then InsertFolder(FPath);
+    end;
+  end else
   begin
-    FPath := FBShellTreeView.SelectedFolder.Path;
-    if FPathList.Count = 0 then InsertFolder(FPath);                           
+    {Wenn comctl32.dll nicht mindesten in Version 5.81 vorliegt, verursachen die
+     ShelShock-Komponenten beim Freigeben des Dialogs Access-Violations. Daher
+     als Fallback den normalen Dialog verwenden.}
+    FPath := SelectSingleFolder(FCaption, FOwnerHandle);
+    if FPathList.Count = 0 then FPathList.Add(FPath);
+    Result := FPath <> '';
   end;
 end;
 
