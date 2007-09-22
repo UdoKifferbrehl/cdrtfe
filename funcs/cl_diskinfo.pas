@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  18.03.2007
+  letzte Änderung  22.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -183,22 +183,23 @@ function ExtractInfo(const Data, SearchString, Delimiter1,
                            Delimiter2: string): string;
 var p   : Integer;
     Temp: string;
-begin                                      //   Deb('ExtracInfo:', 2);
-  Temp := Data;                            //   Deb('  ' + SearchString, 2);
-  p := Pos(SearchString, Temp);            //   Deb('   Found at position: ' + IntToStr(p), 2);
+begin                                       //  Deb('ExtracInfo:', 2);
+  Temp := Data;                             //  Deb('  ' + SearchString, 2);
+  p := Pos(SearchString, Temp);             //  Deb('   Found at position: ' + IntToStr(p), 2);
   if p > 0 then
   begin
-    Delete(Temp, 1, p);                    //   Deb('  Delete(Temp, 1, p) -> "' + Temp + '"', 2);
-    p := Pos(Delimiter1, Temp);            //   Deb('  Delimiter1 found at position: ' + IntToStr(p), 2);
-    Delete(Temp, 1, p);                    //   Deb('  Delete(Temp, 1, p) -> "' + Temp + '"', 2);
-    p := Pos(Delimiter2, Temp);            //   Deb('  Delimiter2 found at position: ' + IntToStr(p), 2);
+    Delete(Temp, 1, p);                     //  Deb('  Delete(Temp, 1, p) -> "' + Temp + '"', 2);
+    p := Pos(Delimiter1, Temp);             //  Deb('  Delimiter1 found at position: ' + IntToStr(p), 2);
+    p := p + Length(Delimiter1) - 1;
+    Delete(Temp, 1, p);                     //  Deb('  Delete(Temp, 1, p) -> "' + Temp + '"', 2);
+    p := Pos(Delimiter2, Temp);             //  Deb('  Delimiter2 found at position: ' + IntToStr(p), 2);
     if p > 0 then Temp := Copy(Temp, 1, p -1);
-    Temp := Trim(Temp);                    //   Deb('  Trim(Copy(Temp, 1, p -1) - > "' + Temp + '"', 2);
+    Temp := Trim(Temp);                     //  Deb('  Trim(Copy(Temp, 1, p -1) - > "' + Temp + '"', 2);
     Result := Temp;
   end else
   begin
     Result := '';
-  end;                                     //   Deb('', 2);
+  end;                                      //  Deb('', 2);
 end;
 
 { TFormSelectDVD ------------------------------------------------------------- }
@@ -1354,6 +1355,11 @@ begin
   end;
   {Anzahl freier Sektoren}
   Temp := ExtractInfo(FMediumInfo, 'Remaining writable size', ':', LF);
+  {Sonderbehandlung für unformatierte DVD+RW}
+  if (FDIskType = DT_DVD_PlusRW) and (Temp = '') then
+  begin
+    Temp := ExtractInfo(FMediumInfo, 'phys size', '...', LF);
+  end;
   FSecFree := StrToIntDef(Temp, 0);
   {Dvd leer? Fortsetzbar?}
   Temp := ExtractInfo(FMediumInfo, 'disk status', ':', LF);
