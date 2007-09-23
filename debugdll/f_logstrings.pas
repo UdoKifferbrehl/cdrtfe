@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  27.08.2007
+  letzte Änderung  23.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -54,6 +54,7 @@ begin
     Add('1101=Running commandline');
     Add('1102=Commandline executed');
     Add('1103=Commandline output:');
+    Add('1104=Current Directory:');
     {cl_devices.pas}
     Add('1200=Entering TDevices.DetectDrives -----------------------------------------------------------');
     Add('1201=Leaving TDevices.DetectDrives ------------------------------------------------------------');

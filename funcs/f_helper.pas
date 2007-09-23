@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2007 Oliver Valencia
 
-  letzte Änderung  26.08.2007
+  letzte Änderung  23.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -49,7 +49,8 @@ procedure ConvertXCDParamListToRrencInputList(Source, Dest: TStringList);
 
 implementation
 
-uses f_filesystem, f_process, f_strings, constant;
+uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     f_filesystem, f_process, f_strings, constant;
 
 { ReloadDisk -------------------------------------------------------------------
 
@@ -196,6 +197,10 @@ begin
   end;
   if not DirectoryExists(Temp) then Temp := '';  
   Result := Temp;
+  {$IFDEF WriteLogfile}
+  // AddLogCode(1104);
+  // AddLog(Result + CRLF, 2);
+  {$ENDIF}
 end;
 
 end.
