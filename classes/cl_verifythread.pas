@@ -2,10 +2,10 @@
 
   cl_verifyhread.pas: Quell- und Zieldateien vergleichen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.09.2006
+  letzte Änderung  28.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -120,7 +120,7 @@ implementation
 
 uses {$IFDEF ShowVerifyTime} f_misc, {$ENDIF}
      cl_logwindow,
-     f_filesystem, f_strings, f_crc, f_helper, user_messages,
+     f_filesystem, f_strings, f_crc, f_helper, f_wininfo, user_messages,
      constant;
 
 type TM2F2FileHeader = packed record  // RIFF-Header der Mode2/Form2-Dateien
@@ -243,9 +243,23 @@ end;
   Reload durchführen, falls FReload = True.                                    }
 
 procedure TVerificationThread.ReloadMedium;
+var DismountOk: Boolean;
+    Drive     : string;
 begin
+  FLine := FLang.GMS('mverify04');
+  Synchronize(DAddLine);
+  DismountOk := False;
+  {Unter WinNT und höher versuchen wir es erst einmal mit Dismount.}
+  if (FDrive <> '') and PlatformWinNT then
+  begin
+    {$IFDEF VerifyShowDetails}
+    FLine := 'Dismounting Drive: ' + FDrive;
+    Synchronize(DAddLine);
+    {$ENDIF}
+    DismountOk := DismountVolume(Drive);
+  end;
   {$IFNDEF NoReload}
-  if FReload then
+  if FReload and not DismountOk then
   begin
     FLine := FLang.GMS('mverify04');
     Synchronize(DAddLine);
@@ -852,7 +866,7 @@ begin
   if FXCD then if FXCDExt = '' then FXCDExt := 'dat';
   {CD-Laufwerk mit der gerade beschriebenen CD suchen}
   Drive := GetDrive;
-  if not Terminated {FTerminate} then
+  if not Terminated then
   begin
     if Drive = '' then
     begin

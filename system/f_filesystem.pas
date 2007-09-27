@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte ƒnderung  15.09.2007
+  letzte ƒnderung  28.09.2007
 
   Dieses Programm ist freie Software. Sie kˆnnen es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,6 +15,7 @@
     * Laufwerksliste erstellen
     * Datei im Suchpfad finden
     * Laufwerk auf eingelegtes Medium pr¸fen
+    * Laufwerk/Volume dismounten
     * Auswahldialoge f¸r Ordner
     * Funktionen, um bestimmte Ordner zu finden
     * Infos ¸ber Laufwerke (Name, Dateisystem, Seriennummer, ...)
@@ -26,6 +27,7 @@
     CDLabelIsValid(const VolID: string):Boolean
     ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
     ChooseMultipleFolders(const Caption, Title: string; const OwnerHandle: HWnd; PathList: TStringList): string
+    DismountVolume(Drive: string): Boolean
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)
     FileAccess(const Name: string; const OpenMode, ShareMode: Word): Boolean;
@@ -73,6 +75,7 @@ type {Datentype f¸r Laufwerksinfos}
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function ChooseMultipleFolders(const Caption, Title, ColCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
+function DismountVolume(Drive: string): Boolean; 
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
 function DummyFileName: string;
@@ -599,6 +602,69 @@ end;
 function IsUNCPath(const Path: string): Boolean;
 begin
   Result := (Pos('\\', Path) = 1) or (Pos('//', Path) = 1);
+end;
+
+{ DismountVolume ---------------------------------------------------------------
+
+  Alle Handles zum Volume schlieﬂen. Dies zwingt Windows, eine gerade ge-
+  schriebene CD neu einzulesen, ohne das Laufwerk zu ˆffnen. Nur unter Win NT,
+  2k, XP oder hˆher.                                                           }
+
+function DismountVolume(Drive: string): Boolean;
+const LOCK_TIMEOUT = 3000;
+      LOCK_RETRIES = 3;
+      {Konstanten f¸r Volume Funktionen}
+      METHOD_BUFFERED             = 0;
+      FILE_ANY_ACCESS             = 0;
+      FILE_DEVICE_FILE_SYSTEM     = $00000009;
+      FSCTL_LOCK_VOLUME           = (FILE_DEVICE_FILE_SYSTEM shl 16) or
+                                    (FILE_ANY_ACCESS shl 14) or (6 shl 2) or
+                                    METHOD_BUFFERED;
+      FSCTL_UNLOCK_VOLUME         = ((FILE_DEVICE_FILE_SYSTEM shl 16) or
+                                     (FILE_ANY_ACCESS shl 14) or (7 shl 2) or
+                                      METHOD_BUFFERED);
+      FSCTL_DISMOUNT_VOLUME       = ((FILE_DEVICE_FILE_SYSTEM shl 16) or
+                                     (FILE_ANY_ACCESS shl 14) or (8 shl 2) or
+                                      METHOD_BUFFERED);
+var iWaitTimeout  : Integer;
+    iTryCount     : Integer;
+    bLocked       : Boolean;
+    sVolumeName   : string;
+    bIOResult     : Boolean;
+    cBytesReturned: {$IFDEF Delphi4Up}Cardinal{$ELSE}Longint{$ENDIF};
+    hVolumeHandle : THandle;
+
+begin
+  if Length(Drive) > 2 then Drive := Copy(Drive, 1, 2);
+  bLocked := False;
+  iWaitTimeout := LOCK_TIMEOUT div LOCK_RETRIES;
+  sVolumeName := '\\.\' + Drive;
+  {Laufwerks-Handle erzeugen}
+  hVolumeHandle := CreateFile(PChar(sVolumeName), GENERIC_READ or GENERIC_WRITE,
+                              FILE_SHARE_READ or FILE_SHARE_WRITE,
+                              nil, OPEN_EXISTING, 0, 0);
+  if hVolumeHandle = INVALID_HANDLE_VALUE then
+  begin
+    Result := False;
+    CloseHandle(hVolumeHandle);
+    Exit;
+  end;
+  {alle Handles schlieﬂen}
+  for iTryCount := 0 to LOCK_RETRIES do
+  begin
+    bIOResult := DeviceIoControl(hVolumeHandle, FSCTL_DISMOUNT_VOLUME,
+                                 nil, 0, nil, 0, cBytesReturned, nil);
+    if bIOResult then
+    begin
+     bLocked := true;
+     Break;
+    end;
+    Sleep(iWaitTimeout);
+  end;
+  {Volume-Handle freigeben}
+  CloseHandle(hVolumeHandle);
+  Sleep(LOCK_TIMEOUT);
+  Result := bLocked;
 end;
 
 initialization
