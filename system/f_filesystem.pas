@@ -75,7 +75,7 @@ type {Datentype für Laufwerksinfos}
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function ChooseMultipleFolders(const Caption, Title, ColCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
-function DismountVolume(Drive: string): Boolean; 
+function DismountVolume(const Drive: string): Boolean; 
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
 function DummyFileName: string;
@@ -610,7 +610,7 @@ end;
   schriebene CD neu einzulesen, ohne das Laufwerk zu öffnen. Nur unter Win NT,
   2k, XP oder höher.                                                           }
 
-function DismountVolume(Drive: string): Boolean;
+function DismountVolume(const Drive: string): Boolean;
 const LOCK_TIMEOUT = 3000;
       LOCK_RETRIES = 3;
       {Konstanten für Volume Funktionen}
@@ -630,15 +630,16 @@ var iWaitTimeout  : Integer;
     iTryCount     : Integer;
     bLocked       : Boolean;
     sVolumeName   : string;
+    sDrive        : string;
     bIOResult     : Boolean;
     cBytesReturned: {$IFDEF Delphi4Up}Cardinal{$ELSE}Longint{$ENDIF};
     hVolumeHandle : THandle;
 
 begin
-  if Length(Drive) > 2 then Drive := Copy(Drive, 1, 2);
+  sDrive := Copy(Drive, 1, 2);
   bLocked := False;
   iWaitTimeout := LOCK_TIMEOUT div LOCK_RETRIES;
-  sVolumeName := '\\.\' + Drive;
+  sVolumeName := '\\.\' + sDrive;
   {Laufwerks-Handle erzeugen}
   hVolumeHandle := CreateFile(PChar(sVolumeName), GENERIC_READ or GENERIC_WRITE,
                               FILE_SHARE_READ or FILE_SHARE_WRITE,

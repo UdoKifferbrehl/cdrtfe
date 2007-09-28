@@ -244,7 +244,6 @@ end;
 
 procedure TVerificationThread.ReloadMedium;
 var DismountOk: Boolean;
-    Drive     : string;
 begin
   FLine := FLang.GMS('mverify04');
   Synchronize(DAddLine);
@@ -256,13 +255,11 @@ begin
     FLine := 'Dismounting Drive: ' + FDrive;
     Synchronize(DAddLine);
     {$ENDIF}
-    DismountOk := DismountVolume(Drive);
+    DismountOk := DismountVolume(FDrive);
   end;
   {$IFNDEF NoReload}
   if FReload and not DismountOk then
   begin
-    FLine := FLang.GMS('mverify04');
-    Synchronize(DAddLine);
     {$IFDEF VerifyShowDetails}
     FLine := 'Device: ' + FDevice;
     Synchronize(DAddLine);

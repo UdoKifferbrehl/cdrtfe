@@ -42,7 +42,7 @@ ExeDescription=
 [Directories]
 OutputDir=i:\burn
 UnitOutputDir=units
-SearchPath=import\jcl_mini;import\tpshellshock_mini;..\..\extcomp\vcl;..\..\extcomp\tpshellshock;
+SearchPath=import\scsi;import\jcl_mini;import\tpshellshock_mini;..\..\extcomp\vcl;..\..\extcomp\tpshellshock;
 Packages=VCLX30;VCL30;VCLDB30;VCLDBX30;INETDB30;INET30;VCLSMP30;QRPT30;TEEUI30;TEEDB30;TEE30;DSS30;IBEVNT30
 Conditionals=
 DebugSourceDirs=

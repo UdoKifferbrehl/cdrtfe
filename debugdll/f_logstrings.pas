@@ -58,7 +58,7 @@ begin
     {cl_devices.pas}
     Add('1200=Entering TDevices.DetectDrives -----------------------------------------------------------');
     Add('1201=Leaving TDevices.DetectDrives ------------------------------------------------------------');
-    Add('1202=Device-Lists:');
+    Add('1202=Device lists:');
     Add('1203=FLocalCDDevices:');
     Add('1204=FLocalCDWriter:');
     Add('1205=FLocalCDReader:');
@@ -69,6 +69,7 @@ begin
     Add('1210=FRemoteCDReader:');
     Add('1211=FRemoteCDDriveLetter:');
     Add('1212=FRemoteCDSpeedList:');
+    Add('1213=Scanning Devices via SCSI Interface');
     {f_init.pas}
     Add('1250=cygwin1.dll found in search path.');
     Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');

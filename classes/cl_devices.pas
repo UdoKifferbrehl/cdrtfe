@@ -5,7 +5,7 @@
   Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.06.2007
+  letzte Änderung  28.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,7 +47,7 @@ type TDevices = class(TObject)
        FLocalCDWriter      : TStringList;   // <vendor name>=h,t,l
        FLocalCDReader      : TStringList;
        FLocalCDDevices     : TStringList;
-       FLocalCDDriveLetter : TStringList;   // <vendor name>=<drive>
+       FLocalCDDriveLetter : TStringList;   // h,t,l=<drive>
        FLocalCDSpeedList   : TStringList;   // <vendor name>[R|W]=speedlist
        FLocalDrives        : string;
        FRemoteCDWriter     : TStringList;
@@ -63,6 +63,7 @@ type TDevices = class(TObject)
        function GetCDWriter     : TStringList;
        function GetCDDriveLetter: TStringList;
        function GetCDSpeedList  : TStringList;
+       procedure AssignDriveLetters;
        procedure DetectCDDrives(CDWriter, CDReader, CDDevices, CDDriveLetter, CDSpeedList: TStringList);
        procedure GetDriveSpeeds(PrcapInfo, CDSpeedList: TStringList; Dev, DevName: string; IsWriter: Boolean);
        {$IFDEF DebugDeviceList}
@@ -92,7 +93,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
-     cl_cdrtfedata,
+     cl_cdrtfedata, cl_deviceenum,
      constant, f_filesystem, f_strings, f_process, f_helper, f_misc;
 
 const DefaultSpeedList : string
@@ -326,6 +327,58 @@ begin
   {$ENDIF}
 end;
 
+{ AssignDriveLetters -----------------------------------------------------------
+
+  Diese Prozedur ordnet jedem durch cdrecord gefundenen Laufwerk den Windows-
+  Laufwerksbuchstaben zu. Zunächst wird versucht, dies durch einen eigenen
+  Scan-Lauf zu erledigen. Sollte dabei kein Buchstabe gefunden werden, werden
+  die Angaben aus LocalDrives=... verwendet.                                   }
+
+procedure TDevices.AssignDriveLetters;
+var SCSIDevices: TSCSIDevices;
+    i          : Integer;
+    Found      : Boolean;
+    DeviceID   : string;
+    DriveLetter: string;
+    Temp       : string;
+begin
+  {$IFDEF WriteLogFile}
+  AddLogCode(1213);
+  {$ENDIF}
+  SCSIDevices := TSCSIDevices.Create;
+  SCSIDevices.Init;
+  SCSIDevices.Scanbus;
+  {$IFDEF WriteLogFile}
+  AddLogCode(1202);
+  AddLog(SCSIDevices.Log.Text, 3);
+  AddLog(SCSIDevices.DeviceIDList.Text + CRLF +
+         SCSIDevices.DeviceList.Text + CRLF, 3);
+  {$ENDIF}
+
+  {Zuweisungen der Buchstaben}
+  for i := 0 to FLocalCDDevices.Count - 1 do
+  begin
+    DeviceID := FLocalCDDevices[i];
+    Delete(DeviceID, 1, LastDelimiter('=', DeviceID));
+    {Ist diese DeviceID schon vorhanden? Wenn ja, vorhanden DriveLetter holen.}
+    Found := Pos(DeviceID, FLocalCDDriveLetter.Text) > 0;
+    if Found then Temp := FLocalCDDriveLetter.Values[DeviceID];
+    {neuen DriveLetter laut SCSI-Scan holen}
+    DriveLetter := SCSIDevices.DeviceIDList.Values[DeviceID];
+    {DriveLetter ersetzen bzw. hinzufügen}
+    if Found then
+    begin
+      // if not ManualDriveLetter then
+      FLocalCDDriveLetter.Values[DeviceID] := LowerCase(DriveLetter);
+    end else
+    begin
+      FLocalCDDriveLetter.Add(DeviceID + '=' + LowerCase(DriveLetter));
+    end;
+  end;
+
+  SCSIDevices.Free;
+end;
+
 { DetectCDDrives ---------------------------------------------------------------
 
   DetectCDDrives sucht alle vorhandenen CD-Laufwerke und die dazugehörigen
@@ -521,8 +574,11 @@ procedure TDevices.DetectDrives;
 begin
   {$IFDEF WriteLogfile} AddLogCode(1200); {$ENDIF}
   case FUseRSCSI of
-    False: DetectCDDrives(FLocalCDWriter, FLocalCDReader, FLocalCDDevices,
-                          FLocalCDDriveLetter, FLocalCDSpeedList);
+    False: begin
+             DetectCDDrives(FLocalCDWriter, FLocalCDReader, FLocalCDDevices,
+                            FLocalCDDriveLetter, FLocalCDSpeedList);
+             AssignDriveLetters;
+           end;
     True : DetectCDDrives(FRemoteCDWriter, FRemoteCDReader, FRemoteCDDevices,
                           FRemoteCDDriveLetter, FRemoteCDSpeedList);
   end;

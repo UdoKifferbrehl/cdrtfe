@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.08.2007
+  letzte Änderung  28.09.2007
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -84,6 +84,7 @@ uses
   cl_imagelists in 'system\cl_imagelists.pas',
   cl_peheader in 'system\cl_peheader.pas',
   cl_devicechange in 'system\cl_devicechange.pas',
+  cl_deviceenum in 'system\cl_deviceenum.pas',
   f_largeint in 'system\f_largeint.pas',
   f_wininfo in 'system\f_wininfo.pas',
   f_environment in 'system\f_environment.pas',
