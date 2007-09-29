@@ -58,6 +58,7 @@ type TDevices = class(TObject)
        FRemoteDrives       : string;
        FRSCSIHost          : string;
        FUseRSCSI           : Boolean;
+       FAssignManually     : Boolean;
        function GetCDDevices    : TStringList;
        function GetCDReader     : TStringList;
        function GetCDWriter     : TStringList;
@@ -87,6 +88,7 @@ type TDevices = class(TObject)
        property RemoteDrives: string read FRemoteDrives write FRemoteDrives;
        property RSCSIHost: string read FRSCSIHost write FRSCSIHost;
        property UseRSCSI: Boolean read FUseRSCSI write FUseRSCSI;
+       property AssignManually: Boolean read FAssignManually write FAssignManually;
      end;
 
 implementation
@@ -331,8 +333,12 @@ end;
 
   Diese Prozedur ordnet jedem durch cdrecord gefundenen Laufwerk den Windows-
   Laufwerksbuchstaben zu. Zunächst wird versucht, dies durch einen eigenen
-  Scan-Lauf zu erledigen. Sollte dabei kein Buchstabe gefunden werden, werden
-  die Angaben aus LocalDrives=... verwendet.                                   }
+  Scan-Lauf zu erledigen.
+    FAssignManually = 1   ->  nur Zuweisungen laut LocalDrives
+    FAssignManually = 0   ->  Zuweisungen laut Scan, es sei denn es gibt in
+                              LocalDrives einen Buchstaben für das Laufwerk
+    FAssignManually = 0 &
+    LocalDrives lees      ->  nur Zuweisungen laut Scan                        }
 
 procedure TDevices.AssignDriveLetters;
 var SCSIDevices: TSCSIDevices;
@@ -343,6 +349,8 @@ var SCSIDevices: TSCSIDevices;
     Temp       : string;
 begin
   {$IFDEF WriteLogFile}
+  AddLogCode(1214);
+  AddLog(FLocalCDDriveLetter.Text + CRLF, 3);
   AddLogCode(1213);
   {$ENDIF}
   SCSIDevices := TSCSIDevices.Create;
@@ -354,7 +362,6 @@ begin
   AddLog(SCSIDevices.DeviceIDList.Text + CRLF +
          SCSIDevices.DeviceList.Text + CRLF, 3);
   {$ENDIF}
-
   {Zuweisungen der Buchstaben}
   for i := 0 to FLocalCDDevices.Count - 1 do
   begin
@@ -368,14 +375,13 @@ begin
     {DriveLetter ersetzen bzw. hinzufügen}
     if Found then
     begin
-      // if not ManualDriveLetter then
-      FLocalCDDriveLetter.Values[DeviceID] := LowerCase(DriveLetter);
+      if not FAssignManually and (Temp = '') then
+        FLocalCDDriveLetter.Values[DeviceID] := LowerCase(DriveLetter);
     end else
     begin
       FLocalCDDriveLetter.Add(DeviceID + '=' + LowerCase(DriveLetter));
     end;
   end;
-
   SCSIDevices.Free;
 end;
 
@@ -687,6 +693,7 @@ begin
   FRemoteDrives        := '';
   FRSCSIHost           := '';
   FUseRSCSI            := False;
+  FAssignManually      := False;
 end;
 
 destructor TDevices.Destroy;

@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  23.09.2007
+  letzte Änderung  29.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,6 +70,7 @@ begin
     Add('1211=FRemoteCDDriveLetter:');
     Add('1212=FRemoteCDSpeedList:');
     Add('1213=Scanning Devices via SCSI Interface');
+    Add('1214=DriveLetters according to cdrtfe.ini, [Drives], LocalDrives');
     {f_init.pas}
     Add('1250=cygwin1.dll found in search path.');
     Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');

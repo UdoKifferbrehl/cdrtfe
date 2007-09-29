@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.09.2007
+  letzte Änderung  29.09.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -158,6 +158,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        RSCSIString        : string;
        {lokale Laufwerke}
        LocalDrives        : string;
+       AssignManually     : Boolean;
      end;
 
      { Einstellungen: cdrecord/mkisofs allgemein}
@@ -640,11 +641,12 @@ begin
 
   with Drives do
   begin
-    UseRSCSI     := False;
-    Host         := '';
-    RemoteDrives := '';
-    RSCSIString  := '';
-    LocalDrives  := '';
+    UseRSCSI       := False;
+    Host           := '';
+    RemoteDrives   := '';
+    RSCSIString    := '';
+    LocalDrives    := '';
+    AssignManually := False;
   end;                        
 
   {allgemeine Einstellungen: cdrecord}
@@ -1411,6 +1413,7 @@ var PF: TIniFile; // ProjectFile
         WriteString(Section, 'Host', Host);
         WriteString(Section, 'RemoteDrives', RemoteDrives);
         WriteString(Section, 'LocalDrives', LocalDrives);
+        WriteBool(Section, 'AssignManually', AssignManually);
       end;
     end;
     {$ENDIF}
@@ -1804,6 +1807,7 @@ var PF: TIniFile; // ProjectFile
         if UseRSCSI then RSCSIString := 'REMOTE:' + Host + ':' else
           RSCSIString := '';
         LocalDrives := ReadString(Section, 'LocalDrives', '');
+        AssignManually := ReadBool(Section, 'AssignManually', False);
       end;
       {Hacks}
       Section := 'Hacks';
