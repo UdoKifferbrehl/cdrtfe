@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.09.2007
+  letzte Änderung  03.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,7 +26,7 @@
 
     CDLabelIsValid(const VolID: string):Boolean
     ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
-    ChooseMultipleFolders(const Caption, Title: string; const OwnerHandle: HWnd; PathList: TStringList): string
+    ChooseMultipleFolders(const Caption, Title, ColCaption string; const OwnerHandle: HWnd; PathList: TStringList): string
     DismountVolume(Drive: string): Boolean
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.09.2007
+  letzte Änderung  03.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -117,7 +117,8 @@ begin
     Add('g009=[aktiv]');
     Add('g010=vorige Session');
     Add('g011=Importiere vorige Session von Laufwerk %s (ID: %s) ...');
-    Add('g012=ausgewählte Ordner');
+    Add('g012=ausgewählte Ordner (mit Entf aus Liste löschen)');
+    Add('g013=mehrere Ordner mit Alt-Einfg auswählen');
     {$IFDEF ShowCmdError}
     Add('e001=Es ist ein Fehler aufgetreten!');
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');

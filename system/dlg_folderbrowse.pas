@@ -2,7 +2,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  15.09.2007
+  letzte Änderung  03.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -320,7 +320,7 @@ begin
     with FBLabelTitle do
     begin
       SetBounds(8, NewTop, FWidth - 16, 13);
-      Font.Size  := Font.Size + 1;
+      // Font.Size  := Font.Size + 1;
       Parent     := FBDialog;
       Autosize   := True;
       Caption    := FTitle;
@@ -363,7 +363,7 @@ begin
         TabStop            := True;
         Columns.Add;
         Columns[0].Caption := FColCaption;
-        Columns[0].Width   := FBListView.Width;
+        Columns[0].Width   := FBListView.Width - 20;
       end;
       NewBottom := FBListView.Top - 8;
     end;

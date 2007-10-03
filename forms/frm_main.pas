@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.09.2007
+  letzte Änderung  03.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -403,7 +403,9 @@ type
     ActionUserTrackUp: TAction;
     ActionUserTrackDown: TAction;
     {$ENDIF}
-    FImageTabFirstShow: Boolean;
+    FImageTabFirstShow : Boolean;
+    FImageTabFirstWrite: Boolean;
+    FCheckingControls  : Boolean;
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
@@ -1632,8 +1634,8 @@ begin
   SelectRootIfNoneSelected(Tree);
   PathList := TStringList.Create;
   {$IFDEF MultipleFolderBrowsing}
-  Dir := ChooseMultipleFolders(FLang.GMS('g002'), '', FLang.GMS('g012'),
-                               Form1.Handle, PathList);
+  Dir := ChooseMultipleFolders(FLang.GMS('g002'), FLang.GMS('g013'),
+                               FLang.GMS('g012'), Form1.Handle, PathList);
   Count := PathList.Count;
   {$ELSE}
   Dir := ChooseDir(FLang.GMS('g002'), Form1.Handle);
@@ -3168,6 +3170,13 @@ procedure TForm1.CheckControls;
       CheckBoxImageOverburn.Enabled := True;
       CheckBoxImageClone.Enabled := False;
     end;
+    {Workaround for odd RadioButton behaviour}
+    if FImageTabFirstWrite and Form1.Active and
+       RadioButtonImageWrite.Checked then
+    begin
+      FImageTabFirstWrite := False;
+      ImageTabInitRadioButtons;
+    end;
   end;
 
   {TabSheet8: Video-CD }
@@ -3194,6 +3203,7 @@ procedure TForm1.CheckControls;
   end;
 
 begin
+  FCheckingControls := True;
   case FSettings.General.Choice of
     cDataCD  : SetDrives(FDevices.CDWriter);
     cAudioCD : SetDrives(FDevices.CDWriter);
@@ -3205,7 +3215,7 @@ begin
     cCDInfos : begin
                  CheckControlsCDInfos;
                  SetDrives(FDevices.CDDevices);
-               end;  
+               end;
     cDAE     : begin
                  CheckControlsDAE;
                  SetDrives(FDevices.CDDevices);
@@ -3218,6 +3228,7 @@ begin
     cDVDVideo: SetDrives(FDevices.CDWriter);
   end;
   CheckControlsSpeeds;
+  FCheckingControls := False;  
 end;
 
 { SetButtons -------------------------------------------------------------------
@@ -3450,7 +3461,7 @@ var TAO, DAO, RAW: Boolean;
     OldControl   : TWinControl;
 begin
   if Form1.Active and (PageControl1.ActivePage = TabSheet7) and
-     not FSettings.General.ImageRead then
+     RadioButtonImageWrite.Checked then
   begin
     OldControl := ActiveControl;
     TAO := RadioButtonImageTAO.Checked;
@@ -3557,7 +3568,9 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
-  FImageTabFirstShow := True;
+  FImageTabFirstShow  := True;
+  FImageTabFirstWrite := True;
+  FCheckingControls   := False;
   {$IFDEF Delphi7Up}
   InitActions;
   {$ENDIF}
@@ -4731,7 +4744,11 @@ begin
   UpdateGauges;
   UpdateOptionPanel;
   {Workaround for odd RadioButton behaviour}
-  if FImageTabFirstShow then ImageTabInitRadioButtons;
+  if FImageTabFirstShow and Form1.Active and
+     (PageControl1.ActivePage = TabSheet7) then
+  begin
+    ImageTabInitRadioButtons;
+  end;
 end;
 
 
@@ -5939,7 +5956,7 @@ end;
 
 procedure TForm1.CheckBoxClick(Sender: TObject);
 begin
-  CheckControls;
+  if not FCheckingControls then CheckControls;
 end;
 
 
