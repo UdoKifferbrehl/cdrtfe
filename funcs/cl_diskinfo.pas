@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  22.09.2007
+  letzte Änderung  05.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -76,20 +76,22 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
 
      TDiskInfo = class(TObject)
      private
-       FSettings   : TSettings;
-       FLang       : TLang;
-       FDevice     : string;
-       FSectors    : Integer;
-       FSecFree    : Integer;
-       FSize       : Double;
-       FSizeUsed   : Double;
-       FSizeFree   : Double;
-       FTime       : Double;
-       FTimeFree   : Double;
-       FMsInfo     : string;
-       FIsDVD      : Boolean;
-       FDiskType   : TDiskType;
-       FUseProfiles: Boolean;
+       FSettings     : TSettings;
+       FLang         : TLang;
+       FDevice       : string;
+       FSectors      : Integer;
+       FSecFree      : Integer;
+       FSize         : Double;
+       FSizeUsed     : Double;
+       FSizeFree     : Double;
+       FTime         : Double;
+       FTimeFree     : Double;
+       FMsInfo       : string;
+       FIsDVD        : Boolean;
+       FDiskType     : TDiskType;
+       FUseProfiles  : Boolean;
+       FForcedFormat : Boolean;
+       FFormatCommand: string;
        function DiskInserted(const CDInfo: string): Boolean;
        function GetCDType(const CDInfo: string): TDiskType;
        function GetDVDType(const DVDInfo: string): TDiskType; virtual;
@@ -102,17 +104,19 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        constructor Create;
        function CheckMedium(var Args: TCheckMediumArgs): Boolean; virtual; abstract;
        procedure GetDiskInfo(const Device: string; const Audio: Boolean); virtual; abstract;
-       property Sectors : Integer   read FSectors;
-       property SecFree : Integer   read FSecFree;
-       property Size    : Double    read FSize;
-       property SizeUsed: Double    read FSizeUsed;
-       property SizeFree: Double    read FSizeFree;
-       property Time    : Double    read FTime;
-       property TimeFree: Double    read FTimeFree;
-       property MsInfo  : string    read FMsInfo;
-       property IsDVD   : Boolean   read FIsDVD;
-       property DiskType: TDiskType read FDiskType;
-     END;
+       property Sectors      : Integer   read FSectors;
+       property SecFree      : Integer   read FSecFree;
+       property Size         : Double    read FSize;
+       property SizeUsed     : Double    read FSizeUsed;
+       property SizeFree     : Double    read FSizeFree;
+       property Time         : Double    read FTime;
+       property TimeFree     : Double    read FTimeFree;
+       property MsInfo       : string    read FMsInfo;
+       property IsDVD        : Boolean   read FIsDVD;
+       property DiskType     : TDiskType read FDiskType;
+       property ForcedFormat : Boolean   read FForcedFormat; // für neue DVD+RWs
+       property FormatCommand: string    read FFormatCommand;
+     end;
 
      TDiskInfoA = class(TDiskInfo)
      private
@@ -330,18 +334,20 @@ begin
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add('  InitDiskInfo (TDiskInfo)');
   {$ENDIF}
-  FDevice      := '';
-  FSectors     := 0;
-  FSecFree     := 0;
-  FSize        := 0;
-  FSizeUsed    := 0;
-  FSizeFree    := 0;
-  FTime        := 0;
-  FTimeFree    := 0;
-  FMsInfo      := '';
-  FIsDVD       := False;
-  FDiskType    := DT_CD;
-  FUseProfiles := True;
+  FDevice        := '';
+  FSectors       := 0;
+  FSecFree       := 0;
+  FSize          := 0;
+  FSizeUsed      := 0;
+  FSizeFree      := 0;
+  FTime          := 0;
+  FTimeFree      := 0;
+  FMsInfo        := '';
+  FIsDVD         := False;
+  FDiskType      := DT_CD;
+  FUseProfiles   := True;
+  FForcedFormat  := False;
+  FFormatCommand := '';
 end;
 
 { DiskInserted -----------------------------------------------------------------
@@ -1353,19 +1359,25 @@ begin
     DT_DVD_PlusR, DT_DVD_PlusRW: FSectors := StrToInt(cDiskTypeBlocks[2, 1]);
     DT_DVD_PlusRDL             : FSectors := StrToInt(cDiskTypeBlocks[4, 1]);
   end;
-  {Anzahl freier Sektoren}
-  Temp := ExtractInfo(FMediumInfo, 'Remaining writable size', ':', LF);
-  {Sonderbehandlung für unformatierte DVD+RW}
-  if (FDIskType = DT_DVD_PlusRW) and (Temp = '') then
-  begin
-    Temp := ExtractInfo(FMediumInfo, 'phys size', '...', LF);
-  end;
-  FSecFree := StrToIntDef(Temp, 0);
   {Dvd leer? Fortsetzbar?}
   Temp := ExtractInfo(FMediumInfo, 'disk status', ':', LF);
   FDiskEmpty := Temp = 'empty';
   FDiskComplete := Temp = 'complete';
-  FDiskAppendable := Temp = 'incomplete/appendable';
+  FDiskAppendable := Temp = 'incomplete/appendable';  
+  {Anzahl freier Sektoren}
+  Temp := ExtractInfo(FMediumInfo, 'Remaining writable size', ':', LF);
+  {Sonderbehandlung für unformatierte DVD+RW}
+  if (FDIskType = DT_DVD_PlusRW) and (Temp = '') and FDiskEmpty then
+  begin
+    Temp := ExtractInfo(FMediumInfo, 'phys size', '...', LF);
+    FForcedFormat := True;
+    FFormatCommand := QuotePath(StartUpDir + cCdrecordBin) +
+                      ' gracetime=5 dev=' + FDevice + ' -v -format';
+    {$IFDEF DebugReadCDInfo}
+    Deb('This seems to be an empty (maiden) DVD+RW.', 1);
+    {$ENDIF}
+  end;
+  FSecFree := StrToIntDef(Temp, 0);
   {Multiborderinfo ermitteln}
   StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);
   LastSec  := ExtractInfo(FMediumInfo, 'Next writable address', ':', LF);
@@ -1443,7 +1455,7 @@ end;
 procedure TDiskInfoM.GetDiskInfo(const Device: string; const Audio: Boolean);
 begin
   {$IFDEF DebugReadCDInfo}
-  FormDebug.Memo1.Lines.Add('Entering TDiskInfoA.GetDiskInfo');
+  FormDebug.Memo1.Lines.Add('Entering TDiskInfoM.GetDiskInfo');
   FormDebug.Memo1.Lines.Add('  Device: ' + Device);
   if Audio then FormDebug.Memo1.Lines.Add('  Audio: True');
   {$ENDIF}
@@ -1451,6 +1463,8 @@ begin
   {Variablen initialisieren}
   InitDiskInfo;
   FDevice := Device;
+  FForcedFormat  := False;
+  FFormatCommand := '';  
 
   {ATIP auslesen}
   FMediumInfo := GetMediumInfo(False);

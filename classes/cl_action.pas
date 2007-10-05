@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.09.2007
+  letzte Änderung  05.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,26 +53,9 @@ interface
 
 uses Classes, Forms, StdCtrls, ComCtrls, Controls, Windows, SysUtils,
      cl_settings, cl_projectdata, cl_lang, cl_actionthread, cl_verifythread,
-     cl_devices, {f_diskinfo,} cl_diskinfo, f_largeint, userevents;
+     cl_devices, cl_diskinfo, f_largeint, userevents;
 
-type (*{ TCheckMediumArgs faßt einige Variablen zusammen, die in den verschiedenen
-       Prozeduren benötigt werden, damit diese leichter an CheckMedium übergeben
-       werden können.}
-
-     TCheckMediumArgs = record
-       {allgemein}
-       Choice        : Byte;
-       {Daten-CD}
-       ForcedContinue: Boolean;
-       CDSize        : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
-       SectorsNeededS: string;
-       SectorsNeededI: Integer;
-       TaoEndSecCount: Integer;
-       {Audio-CD}
-       CDTime        : Extended;
-     end;          *)
-
-     TCDAction = class(TObject)
+type TCDAction = class(TObject)
      private
        FAction: Byte;
        FLastAction: Byte;
@@ -381,7 +364,8 @@ var i              : Integer;
     Temp           : string;
     BurnList       : TStringList;
     CmdC, CmdM,
-    CmdOnTheFly    : string;
+    CmdOnTheFly,
+    CmdFormat      : string;
     FHPathList,
     FHShCmd        : TextFile;
     CMArgs         : TCheckMediumArgs;
@@ -660,6 +644,15 @@ begin
       CmdC := Temp + CmdC;
     end;
   end;
+  {Kommando für das Formatieren ganz neuer DVD+RWs}
+  // if DVDPlusRWFormat then
+  begin
+    if FDisk.ForcedFormat and not FSettings.Cdrecord.Dummy and
+       not FSettings.Cdrecord.SimulDrv then
+      CmdFormat := FDisk.FormatCommand + CR
+    else
+      CmdFormat := '';
+  end;
   BurnList.Free;
   {Kommandos ausführen}
   if not Ok then
@@ -704,18 +697,18 @@ begin
         CmdOnTheFly := QuotePath(CmdOnTheFly);
         {$ENDIF}
         CmdOnTheFly := CmdOnTheFly + ' ' + Temp;
-        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
+        DisplayDOSOutput(CmdFormat + CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
-        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
+        DisplayDOSOutput(CmdFormat + CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end;
     end else
     begin
       if not FSettings.DataCD.ImageOnly then
       begin
-        DisplayDOSOutput(CmdM + CR + CmdC, FActionThread, FLang,
+        DisplayDOSOutput(CmdFormat + CmdM + CR + CmdC, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
