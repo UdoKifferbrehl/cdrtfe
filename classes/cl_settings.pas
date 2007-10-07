@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.09.2007
+  letzte Änderung  07.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -163,17 +163,18 @@ type { GUI-Settings, Flags und Hilfsvariablen }
 
      { Einstellungen: cdrecord/mkisofs allgemein}
      TSettingsCdrecord = record
-       FixDevice : string;  // Laufwerk zum fixieren, nur temporär
-       Dummy     : Boolean; // gilt auch für cdrdao
-       Eject     : Boolean;
-       Verbose   : Boolean;
-       Burnfree  : Boolean;
-       SimulDrv  : Boolean;
-       FIFO      : Boolean;
-       FIFOSize  : Integer;
-       ForceSpeed: Boolean;
-       AutoErase : Boolean;
-       Erase     : Boolean;
+       FixDevice  : string;  // Laufwerk zum fixieren, nur temporär
+       Dummy      : Boolean; // gilt auch für cdrdao
+       Eject      : Boolean;
+       Verbose    : Boolean;
+       Burnfree   : Boolean;
+       SimulDrv   : Boolean;
+       FIFO       : Boolean;
+       FIFOSize   : Integer;
+       ForceSpeed : Boolean;
+       AutoErase  : Boolean;
+       Erase      : Boolean;
+       AllowFormat: Boolean;
        {zusätzliche Kommandotzeilenoptionen}
        CdrecordUseCustOpts  : Boolean;
        MkisofsUseCustOpts   : Boolean;
@@ -652,17 +653,18 @@ begin
   {allgemeine Einstellungen: cdrecord}
   with Cdrecord do
   begin
-    FixDevice  := '';
-    Dummy      := False;
-    Eject      := False;
-    Verbose    := False;
-    Burnfree   := True;
-    SimulDrv   := False;
-    FIFO       := False;
-    FIFOSize   := 4;
-    ForceSpeed := False;
-    AutoErase  := False;
-    Erase      := False;
+    FixDevice   := '';
+    Dummy       := False;
+    Eject       := False;
+    Verbose     := False;
+    Burnfree    := True;
+    SimulDrv    := False;
+    FIFO        := False;
+    FIFOSize    := 4;
+    ForceSpeed  := False;
+    AutoErase   := False;
+    Erase       := False;
+    AllowFormat := False;
     CdrecordUseCustOpts   := False;
     MkisofsUseCustOpts    := False;
     CdrecordCustOptsIndex := -1;
@@ -1431,6 +1433,7 @@ var PF: TIniFile; // ProjectFile
       WriteInteger(Section, 'FIFOSize', FIFOSize);
       WriteBool(Section, 'ForceSpeed', ForceSpeed);
       WriteBool(Section, 'AutoErase', AutoErase);
+      WriteBool(Section, 'AllowFormat', AllowFormat);
       WriteBool(Section, 'CdrecordUseCustOpts', CdrecordUseCustOpts);
       WriteInteger(Section, 'CdrecordCustOptsIndex', CdrecordCustOptsIndex);
       WriteInteger(Section, 'CdrecordCustOptsCount', CdrecordCustOpts.Count);
@@ -1831,6 +1834,7 @@ var PF: TIniFile; // ProjectFile
       FIFOSize := ReadInteger(Section, 'FIFOSize', 4);
       ForceSpeed := ReadBool(Section, 'ForceSpeed', False);
       AutoErase := ReadBool(Section, 'AutoErase', False);
+      AllowFormat := ReadBool(Section, 'AllowFormat', False);
       CdrecordUseCustOpts := ReadBool(Section, 'CdrecordUseCustOpts', False);
       CdrecordCustOptsIndex := ReadInteger(Section,
                                            'CdrecordCustOptsIndex', -1);

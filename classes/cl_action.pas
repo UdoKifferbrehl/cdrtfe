@@ -359,7 +359,7 @@ end;
 function TCDAction.GetFormatCommand: string;
 begin
   Result := '';
-  // if DVDPlusRWFormat then
+  if FSettings.Cdrecord.AllowFormat then
   begin
     if FDisk.ForcedFormat and not FSettings.Cdrecord.Dummy and
        not FSettings.Cdrecord.SimulDrv then
