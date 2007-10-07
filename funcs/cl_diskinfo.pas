@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  05.10.2007
+  letzte Änderung  07.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -367,13 +367,18 @@ end;
   MediumIsDVD liefert True, wenn die Disk eine DVD ist, False sonst.           }
 
 function TDiskInfo.MediumIsDVD(const CDInfo: string): Boolean;
+var Temp: string;
 begin
+{
   if (Pos('Driver flags   : DVD', CDInfo) > 0) or    // ProDVD
      (Pos('Found DVD media', CDInfo) > 0) then       // DVD-Hack
   begin
     Result := True;
   end else
-    Result := False;
+    Result := False; }
+  Temp := ExtractInfo(CDInfo, 'Driver flags', ':', LF);
+  Result := (Pos('DVD', Temp) > 0) or                // Pro-DVD
+            (Pos('Found DVD media', CDInfo) > 0);    // DVD-Hack or wodim
 end;
 
 { GetDVDType -------------------------------------------------------------------

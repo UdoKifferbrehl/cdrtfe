@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.10.2007
+  letzte Änderung  07.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,10 +38,6 @@
 
   TCDAction hieß ursprünglich TAction und wurde umbenannt, da ab Delphi 4 eine
   Komponente TAction eingeführt wurde.
-
-  Beim Zusammenstellen der Kommandozeilen werden der Einfachheit und
-  Übersichtlichkeit die verkürzten if-Statements verwendet, obwohl sie nicht dem
-  Object-Pascal-Style-Guide entsprechen.
 
 }
 
@@ -81,6 +77,7 @@ type TCDAction = class(TObject)
        FStatusBar: TStatusBar;
        FProgressBar: TProgressBar;
        function GetAction: Byte;
+       function GetFormatCommand: string;
        function MakePathConform(const Path: string): string;
        function MakePathEntryMkisofsConform(const Path: string): string;
        function GetSectorNumber(const MkisofsOptions: string): string;
@@ -353,6 +350,23 @@ begin
   end;
   Output.Free;
   SetPanels ('<>', '');
+end;
+
+{ GetFormatCommand -------------------------------------------------------------
+
+  liefert, falls nötig die Befehlszeile zum Formatieren einer DVD+RW.          }
+
+function TCDAction.GetFormatCommand: string;
+begin
+  Result := '';
+  // if DVDPlusRWFormat then
+  begin
+    if FDisk.ForcedFormat and not FSettings.Cdrecord.Dummy and
+       not FSettings.Cdrecord.SimulDrv then
+    begin
+      Result := FDisk.FormatCommand + CR;
+    end;
+  end;
 end;
 
 { CreateDataDisk ---------------------------------------------------------------
@@ -645,14 +659,7 @@ begin
     end;
   end;
   {Kommando für das Formatieren ganz neuer DVD+RWs}
-  // if DVDPlusRWFormat then
-  begin
-    if FDisk.ForcedFormat and not FSettings.Cdrecord.Dummy and
-       not FSettings.Cdrecord.SimulDrv then
-      CmdFormat := FDisk.FormatCommand + CR
-    else
-      CmdFormat := '';
-  end;
+  CmdFormat := GetFormatCommand;
   BurnList.Free;
   {Kommandos ausführen}
   if not Ok then
@@ -2260,6 +2267,7 @@ procedure TCDACtion.CreateVideoDVD;
 var Ok          : Boolean;
     i           : Integer;
     CmdC, CmdM,
+    CmdFormat,
     CmdOnTheFly : string;
     SourceArg   : string;
     CMArgs      : TCheckMediumArgs;
@@ -2374,6 +2382,8 @@ begin
       CmdC := Temp + CmdC;
     end;
   end;
+  {Kommando für das Formatieren ganz neuer DVD+RWs}
+  CmdFormat := GetFormatCommand;
 
   {Kommandos ausführen}
   if not Ok then
@@ -2411,18 +2421,18 @@ begin
         CmdOnTheFly := QuotePath(CmdOnTheFly);
         {$ENDIF}
         CmdOnTheFly := CmdOnTheFly + ' ' + Temp;
-        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
+        DisplayDOSOutput(CmdFormat + CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
-        DisplayDOSOutput(CmdOnTheFly, FActionThread, FLang,
+        DisplayDOSOutput(CmdFormat + CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end;
     end else
     begin
       if not FSettings.DVDVideo.ImageOnly then
       begin
-        DisplayDOSOutput(CmdM + CR + CmdC, FActionThread, FLang,
+        DisplayDOSOutput(CmdFormat + CmdM + CR + CmdC, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
       end else
       begin
