@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.10.2007
+  letzte Änderung  14.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,6 +20,7 @@
     * Funktionen, um bestimmte Ordner zu finden
     * Infos über Laufwerke (Name, Dateisystem, Seriennummer, ...)
     * Zugriff auf Datei prüfen
+    * Dateiversion
 
 
   exportierte Funktionen/Prozeduren:
@@ -37,6 +38,8 @@
     GetDirSize(Verzeichnis: string): Longint
     GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte
     GetFileSize(const Filename: string): Longint
+    GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word): Boolean
+    GetFileVersionString(const FileName: string): string;
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
     GetVolumeInfo(var VolInfo: TVolumeInfo)
@@ -86,6 +89,8 @@ function FindInSearchPath(const Name: string): string;
 function GetDirSize(Verzeichnis: string): Longint;
 function GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte;
 function GetFileSize(const FileName: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+function GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word): Boolean;
+function GetFileVersionString(const FileName: string): string;
 function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function IsUNCPath(const Path: string): Boolean;
@@ -666,6 +671,58 @@ begin
   CloseHandle(hVolumeHandle);
   Sleep(LOCK_TIMEOUT);
   Result := bLocked;
+end;
+
+{ GetFileVersionNumbers --------------------------------------------------------
+
+  GetFileVersionNumbers liefert die Versionsinformationen einer Datei als
+  einzelne Zahlen.                                                             }
+
+function GetFileVersionNumbers(const Filename: string;
+                               var V1, V2, V3, V4: Word): Boolean;
+var VerInfoSize : Integer;
+    VerValueSize: DWord;
+    Dummy       : DWord;
+    VerInfo     : Pointer;
+    VerValue    : PVSFixedFileInfo;
+begin
+  VerInfoSize := GetFileVersionInfoSize(PChar(Filename), Dummy);
+  Result := False;
+  if VerInfoSize <> 0 then
+  begin
+    GetMem(VerInfo, VerInfoSize);
+    try
+      if GetFileVersionInfo(PChar(Filename), 0, VerInfoSize, VerInfo) then
+      begin
+        if VerQueryValue(VerInfo, '\', Pointer(VerValue), VerValueSize) then
+          with VerValue^ do
+          begin
+            V1 := dwFileVersionMS shr 16;
+            V2 := dwFileVersionMS and $FFFF;
+            V3 := dwFileVersionLS shr 16;
+            V4 := dwFileVersionLS and $FFFF;
+          end;
+        Result := True;
+      end;
+    finally
+      FreeMem(VerInfo, VerInfoSize);
+    end;
+  end;
+end;
+
+{ GetFileVersionString ---------------------------------------------------------
+
+  GetFileVersionString liefert die Versionsnummer einer Datei als String.      }
+
+function GetFileVersionString(const FileName: string): string;
+var V1, V2, V3, V4: Word;
+begin
+  Result := '';
+  if GetFileVersionNumbers(FileName, V1, V2, V3, V4) then
+    Result := IntToStr(V1) + '.' +
+              IntToStr(V2) + '.' +
+              IntToStr(V3) + '.' +
+              IntToStr(V4);
 end;
 
 initialization

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.09.2007
+  letzte Änderung  14.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -37,6 +37,7 @@ type
     RichEdit1: TRichEdit;
     StaticText6: TStaticText;
     ButtonSwitch: TButton;
+    StaticText7: TStaticText;
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure Label2Click(Sender: TObject);
@@ -68,7 +69,7 @@ implementation
   {$R ../resource/credits_ex.res}
 {$ENDIF}
 
-uses constant, f_misc;
+uses constant, f_misc, f_filesystem;
 
 const Cdrtfe_Version     = 'cdrtfe 1.3pre3'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
@@ -94,6 +95,8 @@ begin
   StaticText2.Caption := Cdrtfe_Description;
   StaticText3.Caption := Cdrtfe_Copyright;
   StaticText6.Caption := Cdrtfe_Copyright2;
+  StaticText7.Caption := '(' + GetFileVersionString(Application.ExeName) + ')';
+  StaticText7.Left := StaticText1.Left + StaticText1.Width + 10;
   Label1.Caption      := Cdrtfe_Homepage;
   Label2.Caption      := Cdrtfe_eMail;
 
