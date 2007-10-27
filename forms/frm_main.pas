@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.10.2007
+  letzte Änderung  27.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1635,7 +1635,8 @@ begin
   PathList := TStringList.Create;
   {$IFDEF MultipleFolderBrowsing}
   Dir := ChooseMultipleFolders(FLang.GMS('g002'), FLang.GMS('g013'),
-                               FLang.GMS('g012'), Form1.Handle, PathList);
+                               FLang.GMS('g012'), FLang.GMS('mlang02'),
+                               FLang.GMS('mlang03'), Form1.Handle, PathList);
   Count := PathList.Count;
   {$ELSE}
   Dir := ChooseDir(FLang.GMS('g002'), Form1.Handle);

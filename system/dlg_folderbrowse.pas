@@ -2,7 +2,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  03.10.2007
+  letzte Änderung  27.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -101,6 +101,8 @@ type TFolderBrowser = class(TComponent)
        property Caption       : string read FCaption write FCaption;
        property Title         : string read FTitle write FTitle;
        property ColCaption    : string read FColCaption write FColCaption;
+       property OkCaption     : string read FButtonCapOk write FButtonCapOk;
+       property CancelCaption : string read FButtonCapCancel write FButtonCapCancel;
        property Height        : Integer read FHeight write FHeight;
        property Left          : Integer read FLeft write FLeft;
        property Top           : Integer read FTop write FTop;

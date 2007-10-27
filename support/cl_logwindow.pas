@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  03.09.2007
+  letzte Änderung  27.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -223,6 +223,7 @@ begin
   begin
     FMemo.Clear;
     if Assigned(FMemo2) then FMemo2.Clear;
+    Add('');
   end;
 
   FLog.Add(s);
@@ -277,6 +278,7 @@ begin
   FLog.Clear;
   FMemo.Clear;
   if Assigned(FMemo2) then FMemo2.Clear;
+  Add('');
 end;
 
 { SaveLog ----------------------------------------------------------------------

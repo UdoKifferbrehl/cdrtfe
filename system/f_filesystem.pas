@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.10.2007
+  letzte Änderung  27.10.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,7 +27,7 @@
 
     CDLabelIsValid(const VolID: string):Boolean
     ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
-    ChooseMultipleFolders(const Caption, Title, ColCaption string; const OwnerHandle: HWnd; PathList: TStringList): string
+    function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string
     DismountVolume(Drive: string): Boolean
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)
@@ -77,7 +77,7 @@ type {Datentype für Laufwerksinfos}
 
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
-function ChooseMultipleFolders(const Caption, Title, ColCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
+function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
 function DismountVolume(const Drive: string): Boolean; 
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
@@ -388,7 +388,8 @@ end;
 
   zeigt einen Auswahldialog für einen oder mehrere Ordner an.                  }
 
-function ChooseMultipleFolders(const Caption, Title, ColCaption: string;
+function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption,
+                                     CancelCaption: string;
                                const OwnerHandle: HWnd;
                                PathList: TStringList): string;
 {$IFDEF MultipleFolderBrowsing}
@@ -396,14 +397,16 @@ var FolderBrowser: TFolderBrowser;
     Dir          : string;
 begin
   FolderBrowser := TFolderBrowser.Create(nil);
-  FolderBrowser.Height      := 365;
-  FolderBrowser.Width       := 330;
-  FolderBrowser.Caption     := Caption;
-  FolderBrowser.Title       := Title;
-  FolderBrowser.ColCaption  := ColCaption;
-  FolderBrowser.SpecialRoot := sfDesktop;
-  FolderBrowser.Multiselect := True;
-  FolderBrowser.OwnerHandle := OwnerHandle;
+  FolderBrowser.Height        := 365;
+  FolderBrowser.Width         := 330;
+  FolderBrowser.Caption       := Caption;
+  FolderBrowser.Title         := Title;
+  FolderBrowser.ColCaption    := ColCaption;
+  FolderBrowser.OkCaption     := OkCaption;
+  FolderBrowser.CancelCaption := CancelCaption;
+  FolderBrowser.SpecialRoot   := sfDesktop;
+  FolderBrowser.Multiselect   := True;
+  FolderBrowser.OwnerHandle   := OwnerHandle;
   if FolderBrowser.Execute then
   begin
     PathList.Assign(FolderBrowser.PathList);
