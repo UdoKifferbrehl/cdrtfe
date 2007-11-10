@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.06.2007
+  letzte Änderung  10.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -169,7 +169,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       Result := True;
       GetProjectInfo(DummyI, DummyI, DummyL, DummyE, TrackCount,
                      FSettings.General.Choice);
-      if (TrackCount = 0) or (Tracks = '') then
+      if (TrackCount = 0) or (Tracks = '') and not DoCopy then
       begin
         Result := False;
         {Keine Audio-Tracks gewählt oder vorhanden}

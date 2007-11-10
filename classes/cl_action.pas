@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.10.2007
+  letzte Änderung  10.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -130,7 +130,7 @@ type TCDAction = class(TObject)
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,
+     f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,            
      f_misc, f_helper, cl_cueinfo, constant, user_messages;
 
 { TCDAction ------------------------------------------------------------------ }
@@ -1463,12 +1463,13 @@ var Compressed: Boolean;
     with FSettings.DAE do
     begin
       CommandLine := ' dev=' + Device;
-      if Speed <> '' then CommandLine := CommandLine + ' speed=' + Speed;
-      CommandLine := CommandLine + ' verbose-level=summary';
+      if Speed <> ''    then CommandLine := CommandLine + ' speed=' + Speed;
+      CommandLine := CommandLine + ' verbose-level=all'; //'summary';
       CommandLine := CommandLine + ' -gui';
-      if Bulk       then CommandLine := CommandLine + ' -bulk';
-      if NoInfoFile then CommandLine := CommandLine + ' -no-infofile';
-      if Paranoia   then CommandLine := CommandLine + ' -paranoia';
+      if Paranoia       then CommandLine := CommandLine + ' -paranoia';
+      if Bulk or DoCopy then CommandLine := CommandLine + ' -bulk';
+      if NoInfoFile
+         and not DoCopy then CommandLine := CommandLine + ' -no-infofile';
     end;
     Result := CommandLine;
   end;
@@ -1735,17 +1736,123 @@ var Compressed: Boolean;
     TrackList.Free;
   end;
 
+  { DAEGrabTracksCopy ----------------------------------------------------------
+
+    Dies ist die vereinfachte Variante für das Auslesen der Tracks bei einer
+    1:1-Kopie einer Audio-CD.                                                  }
+
+  procedure DAEGrabTracksCopy;
+  var CommandLine        : string;
+      Cmd                : string;
+      OutPath            : string;
+  begin
+    SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+    with FSettings.DAE do
+    begin
+      CommandLine := StartUpDir + cCdda2wavBin;
+      {$IFDEF QuoteCommandlinePath}
+      CommandLine := QuotePath(CommandLine);
+      {$ENDIF}
+      CommandLine := CommandLine + Cdda2wavStdCmdLine;
+      if Path[Length(Path)] <> '\' then Path := Path + '\';
+      OutPath := MakePathConform(Path + Prefix);
+    end;
+    Cmd := Cmd + CommandLine + ' ' + QuotePath(OutPath);
+    DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
+  end;
+
+  { DAEWriteTracks -------------------------------------------------------------
+
+    Tracks schreiben für 1:1-Kopie.                                            }
+
+  procedure DAEWriteTracks;
+  var i         : Integer;
+      Cmd       : string;
+      OutPath   : string;
+      Ok        : Boolean;
+  begin
+    SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+    {Kommandozeile zusammenstellen}
+    Ok := True;
+    with FSettings.DAE, FSettings.Cdrecord do
+    begin
+      if Path[Length(Path)] <> '\' then Path := Path + '\';
+      OutPath := MakePathConform(Path + Prefix + '*.wav');
+      Cmd := StartUpDir + cCdrecordBin;
+      {$IFDEF QuoteCommandlinePath}
+      Cmd := QuotePath(Cmd);
+      {$ENDIF}
+      Cmd := Cmd + ' gracetime=5 dev=' + Device;
+      if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
+      if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
+      if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
+      if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
+      if CdrecordUseCustOpts then
+        Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
+      if Verbose     then Cmd := Cmd + ' -v';
+      if Dummy       then Cmd := Cmd + ' -dummy';
+      if DMASpeedCheck and ForceSpeed then
+                          Cmd := Cmd + ' -force';
+      Cmd := Cmd + ' -sao -audio -useinfo -text '
+                 + QuotePath(OutPath);
+    end;
+    {Kommando ausführen}
+    if not Ok then
+    begin
+      i := 0;
+    end else
+    begin
+      {_$IFDEF Confirm - Diese Abfrage ist zwingend nötig!}
+      if not (FSettings.CmdLineFlags.ExecuteProject or
+              FSettings.General.NoConfirm) then
+      begin
+        {Brennvorgang starten?}
+        i := Application.MessageBox(PChar(FLang.GMS('mburn16')),
+                                    PChar(FLang.GMS('mburn02')),
+               MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      end else
+      {_$ENDIF}
+      begin
+        i := 1;
+      end;
+    end;
+    if i = 1 then
+    begin
+      CheckEnvironment(FSettings);
+      DisplayDOSOutput(Cmd, FActionThread, FLang,
+                       FSettings.Environment.EnvironmentBlock);
+    end else
+    begin
+      SendMessage(FFormHandle, {WM_ButtonsOn}WM_VTerminated, 0, 0);
+    end;
+
+  end;
+
 begin
   with FSettings.DAE do
   begin
-    Compressed := Mp3 or Ogg or Flac or Custom;
-    if PrefixNames and not Compressed then
+    if not DoCopy then
     begin
-      DAEGrabTracksSimple;
-    end;
-    if not PrefixNames or Compressed then
+      Compressed := Mp3 or Ogg or Flac or Custom;
+      if PrefixNames and not Compressed then
+      begin
+        DAEGrabTracksSimple;
+      end;
+      if not PrefixNames or Compressed then
+      begin
+        DAEGrabTracksEx;
+      end;
+    end else
     begin
-      DAEGrabTracksEx;
+      if FSettings.General.CDCopy then
+      begin
+        DAEWriteTracks;
+        FSettings.General.CDCopy := False;
+      end else
+      begin
+        FSettings.General.CDCopy := DoCopy;
+        DAEGrabTracksCopy;
+      end;
     end;
   end;
 end;
@@ -2543,6 +2650,7 @@ end;
 procedure TCDAction.CleanUp(const Phase: Byte);
 var i   : Integer;
     Temp: string;
+    Path: string;
 begin
   {Phase 1: TForm1.WMITerminated}
   if Phase = 1 then
@@ -2676,6 +2784,24 @@ begin
         FData.DeleteFromPathlistByName(ExtractFileName(FSettings.XCD.XCDInfoFile),
                                        '', cXCD);
     end;
+
+    if FLastAction = cDAE then
+    begin
+      if FSettings.DAE.DoCopy then
+      begin
+        for i := 1 to 99 do
+        begin
+          Path := FSettings.DAE.Path;
+          if Path[Length(Path)] <> '\' then Path := Path + '\';
+          Path := Path + FSettings.DAE.Prefix + '_';
+          Temp := Path + Format('%.2d', [i]) + '.wav';
+          if FileExists(Temp) then DeleteFile(Temp);
+          Temp := Path + Format('%.2d', [i]) + '.inf';
+          if FileExists(Temp) then DeleteFile(Temp);
+        end;
+      end;
+    end;
+
     Eject;
     FLastAction := cNoAction;
   end;

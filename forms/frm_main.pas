@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.10.2007
+  letzte Änderung  10.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -259,6 +259,7 @@ type
     CDETreeViewPopupN4: TMenuItem;
     CDETreeViewPopupImport: TMenuItem;
     CheckBoxReadCDWriteCopy: TCheckBox;
+    LabelDAECopy: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -674,7 +675,7 @@ begin
   {EnvironmentBlock entsorgen, falls nötig}
   if FSettings.Environment.EnvironmentSize > 0 then CheckEnvironment(FSettings);
   {Aufräumen: aufgrund des Multithreadings hierher verschoben}
-  FAction.CleanUp(2);
+  FAction.CleanUp(2);  
   {Thread zu Vergleichen der Dateien starten}
   if (FAction.LastAction = cDataCD) and FSettings.DataCD.Verify  and
      not (FSettings.DataCD.ImageOnly or FSettings.Cdrecord.Dummy) then
@@ -701,6 +702,12 @@ begin
     FAction.Action := cCDImage;
     FAction.StartAction;
   end else
+  {1:1-Kopie (Audio-CD): Nach dem Auslesen sofort schreiben}
+  if (FAction.LastAction = cDAE) and FSettings.General.CDCopy then
+  begin
+    FAction.Action := cDAE;
+    FAction.StartAction;
+  end else
   begin
     {Falls kein Vergleich stattfindet, gleich weiter}
     SendMessage(Handle, WM_VTerminated, 0, 0);
@@ -714,7 +721,7 @@ end;
 
 procedure TForm1.WMVTerminated(var Msg: TMessage);
 var LogFile: string;
-begin
+begin                           
   {$IFDEF ShowExecutionTime}
   TC2.StopTimeCount;
   TLogWin.Inst.Add('Time: ' + TC2.TimeAsString);
@@ -2694,6 +2701,7 @@ begin
       SetLabel(LabelDAEOgg, Ogg);
       SetLabel(LabelDAEFlac, Flac);
       SetLabel(LabelDAECustom, Custom);
+      SetLabel(LabelDAECopy, DoCopy);
     end;
   end;
   if Fsettings.General.Choice = cVideoCD then
@@ -2925,6 +2933,10 @@ begin
         Ogg := False;
         Flac := False;
       end;
+    end;
+    if L = LabelDAECopy then
+    begin
+      DoCopy := not DoCopy;
     end;
   end;
   {Video-CD}

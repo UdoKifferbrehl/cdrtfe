@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.10.2007
+  letzte Änderung  10.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -349,6 +349,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        LamePreset : string;
        CustomCmd  : string;
        CustomOpt  : string;
+       DoCopy     : Boolean;
      end;
 
      { Einstellungen: Image schreiben }
@@ -842,6 +843,7 @@ begin
     LamePreset  := 'standard';
     CustomCmd   := '';
     CustomOpt   := '';
+    DoCopy      := False;
   end;
 
   {Image schreiben}
@@ -1616,6 +1618,7 @@ var PF: TIniFile; // ProjectFile
       WriteString(Section, 'LamePreset', LamePreset);
       WriteString(Section, 'CustomCmd', CustomCmd);
       WriteString(Section, 'CustomOpt', CustomOpt);
+      WriteBool(Section, 'DoCopy', DoCopy);
     end;
 
     {Image schreiben}
@@ -2032,6 +2035,7 @@ var PF: TIniFile; // ProjectFile
       LamePreset := ReadString(Section, 'LamePreset', 'standard');
       CustomCmd := ReadString(Section, 'CustomCmd', '');
       CustomOpt := ReadString(Section, 'CustomOpt', '');
+      DoCopy := ReadBool(Section, 'DoCopy', False);
     end;
     ProgressBarUpdate(9);
 
@@ -2394,6 +2398,7 @@ var PF: TRegIniFile; // ProjectFile
       WriteString(Section, 'LamePreset', LamePreset);
       WriteString(Section, 'CustomCmd', CustomCmd);
       WriteString(Section, 'CustomOpt', CustomOpt);
+      WriteBool(Section, 'DoCopy', DoCopy);
     end;
 
     {Image schreiben}
@@ -2753,6 +2758,7 @@ var PF: TRegIniFile; // ProjectFile
       LamePreset := ReadString(Section, 'LamePreset', 'standard');
       CustomCmd := ReadString(Section, 'CustomCmd', '');
       CustomOpt := ReadString(Section, 'CustemOpt', '');
+      DoCopy := ReadBool(Section, 'DoCopy', False);
     end;
     Shared.ProgressBarPosition := 9;
     ProgressBarUpdate;
