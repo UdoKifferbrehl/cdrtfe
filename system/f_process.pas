@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.08.2007
+  letzte Änderung  11.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,6 +20,7 @@
   exportierte Funktionen/Prozeduren:
 
     GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string
+    GetProcessWindow(const TargetProcessID: Cardinal): HWnd
     IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean
 
 }
@@ -30,11 +31,14 @@ unit f_process;
 
 interface
 
-uses Windows, Classes, Forms, SysUtils;
+uses Windows, Classes, Forms, SysUtils, TlHelp32;
 
+function GetChildProcessByModuleName(const Name: string; const ParentID: DWORD): DWORD;
 function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string;
 function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
 function IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean;
+function KillProcessSoftly(const hProcess: Cardinal; var uExitCode: Cardinal): Boolean;
+function KillChildProcessesByName(const Name: string; const ParentID: DWORD): Boolean;
 
 implementation
 
@@ -83,6 +87,117 @@ begin
   ProcWndInfo.FoundWindow := 0;
   EnumWindows(@EnumWindowsProc, Integer(@ProcWndInfo));
   Result := ProcWndInfo.FoundWindow;
+end;
+
+{ KillProcessSoftly ------------------------------------------------------------
+
+  beendet einen Prozess, indem ein RemoteThread im Kontext des Prozesses ge-
+  startet wird, der ExitProcess ausführt.                                      }
+
+function KillProcessSoftly(const hProcess: Cardinal;
+                           var   uExitCode: Cardinal): Boolean;
+{$IFDEF Delphi7Up}
+var iExitCode: Cardinal;
+    iThreadId: Cardinal;
+{$ELSE}
+var iExitCode: Integer;
+    iThreadId: Integer;
+{$ENDIF}
+    hThread  : Cardinal;
+    hKernel  : HMODULE;
+    pExitProc: TFarProc;
+begin
+  {True - Erfolg, Thread beendet}
+  Result := True;
+
+  if not GetExitCodeProcess(hProcess, iExitCode) then
+  begin
+    {Kein ExitCode -> irgendetwas ist nicht in Ordnung}
+    Result := False
+  end else
+  if iExitCode <> STILL_ACTIVE then
+  begin
+    {Prozess schon beendet}
+    uExitCode := iExitCode
+  end else
+  begin
+    {Adresse von ExitProcess bestimmen}
+    hKernel := GetModuleHandle('Kernel32');
+    pExitProc := GetProcAddress(hKernel, 'ExitProcess');
+    {Remote-Thread im Prozess erzeugen}
+    Result := False;
+    hThread := CreateRemoteThread(hProcess, nil, 0, pExitProc,
+                                  Pointer(uExitCode), 0, iThreadId);
+    if hThread <> 0 then
+    begin
+      WaitForSingleObject(hProcess, INFINITE);
+      CloseHandle(hThread);
+      Result := True;
+    end;
+  end;
+end;
+
+{ GetChildProcessByModuleName --------------------------------------------------
+
+  liefert den ersten Child-Prozess mit vorgegebenem Modul-Namen eines Prozesses
+  mit der gegebenen ID.                                                        }
+
+function GetChildProcessByModuleName(const Name: string;
+                                     const ParentID: DWORD): DWORD;
+var hSnapshot: THandle;
+    Next     : Boolean;
+    pe       : TProcessEntry32;
+begin
+  Result := 0;
+  hSnapshot := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if hSnapshot <> INVALID_HANDLE_VALUE then
+  begin
+    FillChar(pe, SizeOf(pe), 0);
+    pe.dwSize := SizeOf(pe);
+    Next := Process32First(hSnapshot, pe);
+    while Next do
+    begin
+      if AnsiCompareText(StrPas(@pe.szExeFile), Name) = 0 then
+      begin
+        Result := pe.th32ProcessID;
+        Next := False;
+      end else
+      begin
+        Next := Process32Next(hSnapshot, pe);
+      end;
+    end;
+    CloseHandle(hSnapshot);
+  end;
+end;
+
+{ KillChildProcessesByName -----------------------------------------------------
+
+  beendet alle Child-Prozesse mit dem gegebenen Modul-Namem des Parent-Prozesses
+  mit der gegebenen ID.                                                        }
+
+function KillChildProcessesByName(const Name: string;
+                                  const ParentID: DWORD): Boolean;
+const MaxRetry = 3;
+var PID     : DWORD;
+    PHandle : THandle;
+    ExitCode: Cardinal;
+    Count   : Integer;
+begin
+  Result := False;
+  Count := 0;
+  repeat
+    Inc(Count);
+    PID := GetChildProcessByModuleName(Name, ParentID);
+    if PID > 0 then
+    begin
+      PHandle := OpenProcess(PROCESS_ALL_ACCESS, False, PID);
+      if PHandle <> INVALID_HANDLE_VALUE then
+      begin
+        Result := KillProcessSoftly(PHandle, ExitCode);
+      end;
+      CloseHandle(PHandle);
+    end;
+  until (PID = 0) or (Count > MaxRetry);
 end;
 
 { IsFirstInstance --------------------------------------------------------------

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.08.2007
+  letzte Änderung  11.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -72,21 +72,15 @@ type TActionThread = class(TThread)
        procedure SendTerminationMessage;
      public
        constructor Create(const CmdLine, CurrentDir: string; const Suspended: Boolean);
+       property Commandline: string read FCommandline;
        property MessageOk: string write FMessageOk;
        property MessageAborted: string write FMessageAborted;
        property EnvironmentBlock: Pointer write FEnvironmentBlock;
        property PID: DWORD read FPID;
+       property PHandle: THandle read FPHandle;
        property StdIn: THandle read FPStdIn;
      end;
-(*
-     {Typ-Deklarationen für die Callback-Funktion}
-     PProcessWindow = ^TProcessWindow;
 
-     TProcessWindow = record
-                        TargetProcessID: Cardinal;
-                        FoundWindow: HWnd;
-                      end;
-*)
 procedure DisplayDOSOutput(const CommandLine: string; var Thread: TActionThread; Lang: TLang; const EnvironmentBlock: Pointer);
 procedure TerminateExecution(Thread: TActionThread);
 procedure SendCRToThread(Thread: TActionThread);
@@ -441,7 +435,7 @@ begin
         CloseHandle(NewStdIn);
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
-        FPID := lpProcessInformation.dwProcessId;
+        FPID := lpProcessInformation.dwProcessId; 
         Buffer[0] := #0;
         Temp := '';
         repeat
@@ -617,28 +611,42 @@ end;                            *)
 
   TerminateExecution bricht die Ausführung der Kommandozeilenprogramme ab,
   indem das unsichtbare Fenster den Keyboard-Focus erhält und per keyb_event
-  die Tastatur-Kombination crtl-c simuliert wird. Ein Abbruch mittles
+  die Tastatur-Kombination Ctrl-c simuliert wird. Ein Abbruch mittles
   TermintaProcess ist nicht empfehlenswert, das Übermitteln von ctrl-c über
-  SrdIn hat nicht fdunktioniert.                                               }
+  StdIn hat nicht fdunktioniert.
+  Unter WinXP ist mit der Cygwin1-DLL ab Version 1.5.20 eine andere Vorgehens-
+  weise nötig, da das simulierte Ctrl-C nicht mehr funktioniert. Der Prozess
+  (und die möglicherweise vorhandenen Child-Prozesse) werden per Remote-Thread
+  beendet.                                                                     }
 
 procedure TerminateExecution(Thread: TActionThread);
-var Window: Hwnd;
-
+var Window  : Hwnd;
+    ExitCode: Cardinal;
 begin
   if Thread <> nil then
   begin
     {Dem Thread signalisieren, daß er die noch ausstehenden Kommandozeilen -
      sofern vorhanden - nicht ausführen soll.}
     Thread.Terminate;
-    {Dem Kommandozeilenprogramm ein Ctrl-C senden. Es soll schließlich geordnet
-     abgebrochen werden. Ein gewaltsamer Abbruch mit TerminateProcess könnte
-     negative Auswirkungen (Speicherlecks usw.) haben.}
-    Window := GetProcessWindow(Thread.PID);
-    SetForeGroundWindow(Window);
-    Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), 0, 0);
-    Keybd_Event($43, MapVirtualKey($43,0), 0, 0);
-    Keybd_Event($43, MapVirtualKey($43,0), KEYEVENTF_KEYUP, 0);
-    Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), KEYEVENTF_KEYUP, 0);
+    if PlatformWin2kXP {and cygwinver > 1.5.19} then
+    begin
+      {Prozess beenden}
+      KillProcessSoftly(Thread.PHandle, ExitCode);
+      {Child-Prozesse beenden: cdrecord, mkisofs}
+      KillChildProcessesByName('cdrecord.exe', Thread.PID);
+      KillChildProcessesByName('lame.exe', Thread.PID);
+      KillChildProcessesByName('flac.exe', Thread.PID);
+      KillChildProcessesByName('oggenc.exe', Thread.PID);
+    end else
+    begin
+      {Dem Kommandozeilenprogramm ein Ctrl-C senden.}
+      Window := GetProcessWindow(Thread.PID);
+      SetForeGroundWindow(Window);
+      Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), 0, 0);
+      Keybd_Event($43, MapVirtualKey($43,0), 0, 0);
+      Keybd_Event($43, MapVirtualKey($43,0), KEYEVENTF_KEYUP, 0);
+      Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), KEYEVENTF_KEYUP, 0);
+    end;
   end;
 end;
 
