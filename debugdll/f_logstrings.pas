@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  29.09.2007
+  letzte Änderung  13.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -49,12 +49,16 @@ begin
     Add('1054=TForm1.FormActivate');
     Add('1055=TForm1.FormClose');
     Add('1056=frm_main.pas finalization');
-    {f_process.pas}
+    {f_process.pas/cl_actionthread.pas}
     Add('1100=GetDOSOutputEx:');
     Add('1101=Running commandline');
     Add('1102=Commandline executed');
     Add('1103=Commandline output:');
     Add('1104=Current Directory:');
+    Add('1105=Terminating commandline processes');
+    Add('1106=Sending Ctrl-c to processes');
+    Add('1107=Killing process softly');
+    Add('1108=Killing child processes');
     {cl_devices.pas}
     Add('1200=Entering TDevices.DetectDrives -----------------------------------------------------------');
     Add('1201=Leaving TDevices.DetectDrives ------------------------------------------------------------');

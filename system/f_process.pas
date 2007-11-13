@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.11.2007
+  letzte Änderung  13.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -107,6 +107,9 @@ var iExitCode: Integer;
     hKernel  : HMODULE;
     pExitProc: TFarProc;
 begin
+  {$IFDEF WriteLogfile}
+  AddLog('  KillProcessSoftly - PHandle: ' + IntToStr(hProcess), 3);
+  {$ENDIF}
   {True - Erfolg, Thread beendet}
   Result := True;
 
@@ -157,10 +160,15 @@ begin
     Next := Process32First(hSnapshot, pe);
     while Next do
     begin
-      if AnsiCompareText(StrPas(@pe.szExeFile), Name) = 0 then
+      if (AnsiCompareText(StrPas(@pe.szExeFile), Name) = 0) {and
+         (pe.th32ParentProcessID = ParentID) } then
       begin
         Result := pe.th32ProcessID;
         Next := False;
+        {$IFDEF WriteLogfile}
+        AddLog('  Found ChildProcess: ProcessID: ' + IntToStr(Result) +
+               '; ParentProcessID: ' + IntToStr(pe.th32ParentProcessID), 3);
+        {$ENDIF}
       end else
       begin
         Next := Process32Next(hSnapshot, pe);
@@ -183,6 +191,9 @@ var PID     : DWORD;
     ExitCode: Cardinal;
     Count   : Integer;
 begin
+  {$IFDEF WriteLogfile}
+  AddLog('KillChildProcessByName - Name: ' + Name, 3);
+  {$ENDIF}
   Result := False;
   Count := 0;
   repeat
@@ -193,6 +204,10 @@ begin
       PHandle := OpenProcess(PROCESS_ALL_ACCESS, False, PID);
       if PHandle <> INVALID_HANDLE_VALUE then
       begin
+        {$IFDEF WriteLogfile}
+        AddLog('  Killing ProcessID: ' + IntToStr(PID) +
+               '; ProcessHandle: ' + IntToStr(PHandle), 3);
+        {$ENDIF}
         Result := KillProcessSoftly(PHandle, ExitCode);
       end;
       CloseHandle(PHandle);

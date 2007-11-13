@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.11.2007
+  letzte Änderung  13.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -88,7 +88,9 @@ procedure SendCRToThread(Thread: TActionThread);
 implementation
 
 uses cl_logwindow, user_messages, constant, f_misc, f_process, f_wininfo,
+    {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      f_helper;
+
 
 { TActionThread -------------------------------------------------------------- }
 
@@ -623,6 +625,10 @@ procedure TerminateExecution(Thread: TActionThread);
 var Window  : Hwnd;
     ExitCode: Cardinal;
 begin
+  {$IFDEF WriteLogfile}
+  AddLog(' ', 2);
+  AddLogCode(1105);
+  {$ENDIF}
   if Thread <> nil then
   begin
     {Dem Thread signalisieren, daß er die noch ausstehenden Kommandozeilen -
@@ -630,8 +636,16 @@ begin
     Thread.Terminate;
     if PlatformWin2kXP {and cygwinver > 1.5.19} then
     begin
+      {$IFDEF WriteLogfile}
+      AddLogCode(1107);
+      AddLog('ProcessID: ' + IntToStr(Thread.PID) +
+             '; ProcessHandle: ' + IntToStr(Thread.PHandle), 3);
+      {$ENDIF}
       {Prozess beenden}
       KillProcessSoftly(Thread.PHandle, ExitCode);
+      {$IFDEF WriteLogfile}
+      AddLog(' ', 2); AddLogCode(1108);
+      {$ENDIF}
       {Child-Prozesse beenden: cdrecord, mkisofs}
       KillChildProcessesByName('cdrecord.exe', Thread.PID);
       KillChildProcessesByName('lame.exe', Thread.PID);
@@ -639,6 +653,9 @@ begin
       KillChildProcessesByName('oggenc.exe', Thread.PID);
     end else
     begin
+      {$IFDEF WriteLogfile}
+      AddLogCode(1106);
+      {$ENDIF}
       {Dem Kommandozeilenprogramm ein Ctrl-C senden.}
       Window := GetProcessWindow(Thread.PID);
       SetForeGroundWindow(Window);
@@ -648,6 +665,9 @@ begin
       Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), KEYEVENTF_KEYUP, 0);
     end;
   end;
+  {$IFDEF WriteLogfile}
+  AddLog(' ', 2);
+  {$ENDIF}
 end;
 
 { SendCRToThread ---------------------------------------------------------------
