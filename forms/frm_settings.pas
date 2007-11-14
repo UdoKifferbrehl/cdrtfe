@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 22.04.2007
+  letzte Änderung 14.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -81,6 +81,8 @@ type
     RadioButtonAutoEraseDisabled: TRadioButton;
     RadioButtonAutoErase: TRadioButton;
     CheckBoxAutoSaveOnExit: TCheckBox;
+    GroupBoxCdrecordFormat: TGroupBox;
+    CheckBoxCdrecordFormat: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -203,6 +205,7 @@ begin
     ComboBoxMkisofsCustOpts.ItemIndex        := MkisofsCustOptsIndex;
     CheckBoxCdrecordAllowHigherSpeed.Checked := ForceSpeed;
     CheckBoxCdrecordEject.Checked            := Eject;
+    CheckBoxCdrecordFormat.Checked           := AllowFormat;
   end;
   CheckBoxCdrdaoCueImage.Enabled := FSettings.FileFlags.CdrdaoOk and
                                     FSettings.Cdrecord.CanWriteCueImage;
@@ -245,6 +248,7 @@ begin
     MkisofsCustOpts.Assign(ComboBoxMkisofsCustOpts.Items);
     ForceSpeed := CheckBoxCdrecordAllowHigherSpeed.Checked;
     Eject := CheckBoxCdrecordEject.Checked;
+    AllowFormat := CheckBoxCdrecordFormat.Checked;
   end;
   FSettings.General.TabFrmSettings := GetActivePage;
   FSettings.General.CDTextUseTags := RadioButtonCDTextUseTags.Checked;

@@ -2,9 +2,9 @@
 
   frm_dae_options.pas: DAE: Optionen
 
-  Copyright (c) 2006 Oliver Valencia
+  Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  11.09.2006
+  letzte Änderung  14.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,6 +68,7 @@ type
     EditCustomOpt: TEdit;
     LabelCustomCmd: TLabel;
     LabelCustomOpt: TLabel;
+    CheckBoxDAEWriteCopy: TCheckBox;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -157,6 +158,7 @@ begin
     CheckBoxDAEBulk.Checked              := Bulk;
     CheckBoxDAELibParanoia.Checked       := Paranoia;
     CheckBoxDAENoInfofiles.Checked       := NoInfoFile;
+    CheckBoxDAEWriteCopy.Checked         := DoCopy;
     EditDAEPrefix.Text                   := Prefix;
     EditDAENamePattern.Text              := NamePattern;
     RadioButtonDAEUsePrefix.Checked      := PrefixNames;
@@ -192,6 +194,7 @@ begin
     Bulk        := CheckBoxDAEBulk.Checked;
     Paranoia    := CheckBoxDAELibParanoia.Checked;
     NoInfoFile  := CheckBoxDAENoInfofiles.Checked;
+    DoCopy      := CheckBoxDAEWriteCopy.Checked;
     Prefix      := EditDAEPrefix.Text;
     NamePattern := EditDAENamePattern.Text;
     PrefixNames := RadioButtonDAEUsePrefix.Checked;
