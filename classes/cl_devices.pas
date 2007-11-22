@@ -5,7 +5,7 @@
   Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.09.2007
+  letzte Änderung  22.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -67,9 +67,6 @@ type TDevices = class(TObject)
        procedure AssignDriveLetters;
        procedure DetectCDDrives(CDWriter, CDReader, CDDevices, CDDriveLetter, CDSpeedList: TStringList);
        procedure GetDriveSpeeds(PrcapInfo, CDSpeedList: TStringList; Dev, DevName: string; IsWriter: Boolean);
-       {$IFDEF DebugDeviceList}
-       procedure ShowDeviceLists;
-       {$ENDIF}
        {$IFDEF WriteLogfile}
        procedure WriteLog;
        {$ENDIF}
@@ -104,39 +101,6 @@ const DefaultSpeedList : string
 { TDevices ------------------------------------------------------------------- }
 
 { TDevices - private }
-
-{ ShowDeviceLists --------------------------------------------------------------
-
-  alle internen Listen anzeigen.                                               }
-
-{$IFDEF DebugDeviceList}
-procedure TDevices.ShowDeviceLists;
-var i: Integer;
-begin
-  Deb('FLocalCDDevices:', 1);
-  for i := 0 to FLocalCDDevices.Count - 1 do Deb(FLocalCDDevices[i], 1);
-  Deb(CRLF + 'FLocalCDWriter:', 1);
-  for i := 0 to FLocalCDWriter.Count - 1 do Deb(FLocalCDWriter[i], 1);
-  Deb(CRLF + 'FLocalCDReader:', 1);
-  for i := 0 to FLocalCDReader.Count - 1 do Deb(FLocalCDReader[i], 1);
-  Deb(CRLF + 'FLocalCDDriveLetter:', 1);
-  for i := 0 to FLocalCDDriveLetter.Count - 1 do Deb(FLocalCDDriveLetter[i], 1);
-  Deb(CRLF + 'FLocalCDSpeedList:', 1);
-  for i := 0 to FLocalCDSpeedList.Count - 1 do Deb(FLocalCDSpeedList[i], 1);
-
-  Deb(CRLF + CRLF + 'FRemoteCDDevices:', 1);
-  for i := 0 to FRemoteCDDevices.Count - 1 do Deb(FRemoteCDDevices[i], 1);
-  Deb(CRLF + 'FRemoteCDWriter:', 1);
-  for i := 0 to FRemoteCDWriter.Count - 1 do Deb(FRemoteCDWriter[i], 1);
-  Deb(CRLF + 'FRemoteCDReader:', 1);
-  for i := 0 to FRemoteCDReader.Count - 1 do Deb(FRemoteCDReader[i], 1);
-  Deb(CRLF + 'FRemoteCDDriveLetter:', 1);
-  for i := 0 to FRemoteCDDriveLetter.Count - 1 do Deb(FRemoteCDDriveLetter[i], 1);
-  Deb(CRLF + 'FRemoteCDSpeedList:', 1);
-  for i := 0 to FRemoteCDSpeedList.Count - 1 do Deb(FRemoteCDSpeedList[i], 1);
-  Deb(CRLF + CRLF, 1);
-end;
-{$ENDIF}
 
 { WriteLog ---------------------------------------------------------------------
 
@@ -234,8 +198,8 @@ var i, p         : Integer;
     DVDSpeeds    : string;
     MaxCD, MaxDVD: string;
 begin
-  {$IFDEF DebugDriveSpeedDetection}
-  Deb('Enter GetDriveSpeeds', 3);
+  {$IFDEF WriteLogfile}
+  AddLogCode(1215);
   SpeedCount := 0;
   {$ENDIF}
   CDSpeeds  := StdSpeed;
@@ -245,8 +209,8 @@ begin
   {Schreibgeschwindigkeiten}
   if IsWriter then
   begin
-    {$IFDEF DebugDriveSpeedDetection}
-    Deb('  Device can write discs, getting write speeds ...', 3);
+    {$IFDEF WriteLogfile}
+    AddLogCode(1217);
     {$ENDIF}
     Offset := -1;
     repeat
@@ -265,8 +229,8 @@ begin
       end;
     end else
     begin
-      {$IFDEF DebugDriveSpeedDetection}
-      Deb('  No speed list, getting max. write speed ...', 3);
+      {$IFDEF WriteLogFile}
+      AddLogCode(1218);
       {$ENDIF}
       Offset := -1;
       repeat
@@ -287,18 +251,19 @@ begin
     end;
     if DVD then CDSpeedList.Add(DevName + '[W]=' + DVDSpeeds) else
                 CDSpeedList.Add(DevName + '[W]=' + CDSpeeds);
-    {$IFDEF DebugDriveSpeedDetection}
-    Deb('    Number of write speeds: ' + IntToStr(SpeedCount), 3);
-    Deb('    MaxCDSpeed            : ' + MaxCD, 3);
-    Deb('    MaxDVDSpeed           : ' + MaxDVD, 3);
-    Deb('    CDSpeeds              : ' + CDSpeeds, 3);
-    Deb('    DVDSpeeds             : ' + DVDSpeeds, 3);
+    {$IFDEF WriteLogfile}
+    AddLog('    Number of write speeds: ' + IntToStr(SpeedCount), 2);
+    AddLog('    MaxCDSpeed            : ' + MaxCD, 2);
+    AddLog('    MaxDVDSpeed           : ' + MaxDVD, 2);
+    AddLog('    CDSpeeds              : ' + CDSpeeds, 2);
+    AddLog('    DVDSpeeds             : ' + DVDSpeeds, 2);
+    AddLog('', 2);
     {$ENDIF}
   end;
 
   {Lesegeschwindigkeiten}
-  {$IFDEF DebugDriveSpeedDetection}
-  Deb('  Getting read speeds ...', 3);
+  {$IFDEF WriteLogfile}
+  AddLogCode(1219);
   {$ENDIF}
   Offset := -1;
   repeat
@@ -318,14 +283,16 @@ begin
   end;
   if DVD then CDSpeedList.Add(DevName + '[R]=' + DVDSpeeds) else
               CDSpeedList.Add(DevName + '[R]=' + CDSpeeds);
-  {$IFDEF DebugDriveSpeedDetection}
-  Deb('    MaxCDSpeed            : ' + MaxCD, 3);
-  Deb('    MaxDVDSpeed           : ' + MaxDVD, 3);
-  Deb('    CDSpeeds              : ' + CDSpeeds, 3);
-  Deb('    DVDSpeeds             : ' + DVDSpeeds, 3);
-  if DVD then Deb('  Using DVDSpeeds.', 3) else
-              Deb('  Using CDSpeeds.', 3);
-  Deb(CRLF, 3);
+  {$IFDEF WriteLogfile}
+  AddLog('    MaxCDSpeed            : ' + MaxCD, 2);
+  AddLog('    MaxDVDSpeed           : ' + MaxDVD, 2);
+  AddLog('    CDSpeeds              : ' + CDSpeeds, 2);
+  AddLog('    DVDSpeeds             : ' + DVDSpeeds, 2);
+  AddLog(CRLF, 2);
+  if DVD then AddLog('    Using DVDSpeeds.', 2) else
+              AddLog('    Using CDSpeeds.', 2);
+  AddLog(CRLF, 2);
+  AddLogCode(1216);
   {$ENDIF}
 end;
 
@@ -433,9 +400,6 @@ begin
   if FUseRSCSI then CommandLine := CommandLine + ' dev=' + FRSCSIHost;
   CommandLine := CommandLine + ' -scanbus';
   Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
-  {$IFDEF DebugDriveDetection}
-  Deb(CommandLine, 2);
-  {$ENDIF}
   for i := (Output.Count - 1) downto 0 do
   begin
     if Pos(SearchString, Output.Strings[i]) = 0 then
@@ -469,9 +433,6 @@ begin
     CommandLine := CommandLine + ' dev=' + Dev + ' -prcap';
     Output.Clear;
     Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
-    {$IFDEF DebugDriveDetection}
-    Deb(CommandLine, 2);
-    {$ENDIF}
     IsWriter := False;
     {$IFDEF UseDummyDevices}
     if FUseRSCSI then IsWriter:=true;
@@ -588,9 +549,6 @@ begin
     True : DetectCDDrives(FRemoteCDWriter, FRemoteCDReader, FRemoteCDDevices,
                           FRemoteCDDriveLetter, FRemoteCDSpeedList);
   end;
-  {$IFDEF DebugDeviceList}
-  ShowDeviceLists;
-  {$ENDIF}
   {$IFDEF WriteLogfile}
   WriteLog;
   AddLogCode(1201);
@@ -613,14 +571,14 @@ var DriveName: string;
     {nach Laufwerks-ID und -Namen suchen}
     ID := GetNameByValue(CDDriveLetter, Drive);
     Name := GetNameByValue(CDDevices, ID);
-    {$IFDEF DebugDriveSpeedDetection}
+    {$IFDEF WriteLogfile}
     if ID <> '' then
     begin
-      Deb('  Drive ID  : ' + ID, 3);
-      Deb('  Drive Name: ' + Name, 3);
+      AddLog('Drive ID  : ' + ID, 2);
+      AddLog('Drive Name: ' + Name, 2);
     end else
-      Deb('  Drive ID  : not found in list.', 3);
-    Deb(CRLF, 3);
+      AddLog('Drive ID  : not found in list.', 2);
+    AddLog('', 2);
     {$ENDIF}
   end;
 
@@ -644,9 +602,9 @@ var DriveName: string;
   end;
 
 begin
-  {$IFDEF DebugDriveSpeedDetection}
-  Deb('Enter UpdateSpeedLists', 3);
-  Deb('  Drive     : ' + Drive + ':', 3);
+  {$IFDEF WriteLogfile}
+  AddLogCode(1220);
+  AddLog('Drive     : ' + Drive + ':' + CRLF, 2);
   {$ENDIF}
   Output := TStringList.Create;
   GetDriveNameID(Drive, DriveID, DriveName);
@@ -671,8 +629,8 @@ begin
     end;
   end;
   Output.Free;
-  {$IFDEF DebugDeviceList}
-  ShowDeviceLists;
+  {$IFDEF WriteLogfile}
+  AddLogCode(1220);
   {$ENDIF}
 end;
 

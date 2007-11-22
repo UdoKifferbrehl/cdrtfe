@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.11.2007
+  letzte Änderung  22.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3657,14 +3657,8 @@ begin
       FData.AcceptOgg := FSettings.FileFlags.OggdecOk;
       FData.AcceptFLAC := FSettings.FileFlags.FLACOk;
       FData.AcceptApe := FSettings.FileFlags.MonkeyOk;
-      {$IFDEF RegistrySettings}
-      {Einstellungen laden: Registry}
-      FSettings.LoadFromRegistry;
-      {$ENDIF}
-      {$IFDEF IniSettings}
       {Einstellungen laden: Ini}
       FSettings.LoadFromFile(cIniFile);
-      {$ENDIF}
       {Datenverzeichnis anlegen (WinNT/2k/XP)}
       if FSettings.General.PortableMode then OverrideProgDataDir(True);
       ProgDataDirCreate;      
@@ -4134,12 +4128,7 @@ begin
   if FSettings.General.AutoSaveOnExit then
   begin
     SetSettings;
-    {$IFDEF RegistrySettings}
-    FSettings.SaveToRegistry;
-    {$ENDIF}
-    {$IFDEF IniSettings}
     FSettings.SaveToFile(cIniFile);
-    {$ENDIF}
   end;
 end;
 
@@ -4206,10 +4195,6 @@ begin
   SendMessage(Self.Handle, WM_ButtonsOff, 0, 0);
   FAction.Action := cVerify{XCD};
   FAction.StartAction;
-  {$ENDIF}
-  {$IFDEF DebugSettings}
-  SetSettings;
-  FSettings.ShowSettings;
   {$ENDIF}
   {$IFDEF AddCDText}
   FData.GetProjectInfo(DummyI, DummyI, DummyI, DummyE, TrackCount, cAudioCD);
@@ -4652,14 +4637,8 @@ procedure TForm1.MainMenuReloadDefaultsClick(Sender: TObject);
 var Temp: Byte;
 begin
   Temp := FSettings.General.Choice;
-  {$IFDEF RegistrySettings}
-  {Einstellungen laden: Registry}
-  FSettings.LoadFromRegistry;
-  {$ENDIF}
-  {$IFDEF IniSettings}
   {Einstellungen laden: Ini}
   FSettings.LoadFromFile(cIniFile);
-  {$ENDIF}
   {Einstellungen in GUI übernehmen}
   GetSettings;
   FSettings.General.Choice := Temp;

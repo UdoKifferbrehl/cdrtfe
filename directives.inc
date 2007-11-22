@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2007 Oliver Valencia
 
-  letzte Änderung  12.08.2007
+  letzte Änderung  22.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -48,33 +48,11 @@
          //    - betrifft: cl_actionthread.pas, cl_logwindow.pas
 
 
-(* ------------------------------------- Einstellungen in Registry spreichern *)
+(* ----------------------------------------------------------- Taskbareintrag *)
 
 {$DEFINE xTitleFirst}
          // Taskbar-Eintrag: cdrtfe [aktiv] statt [aktiv] cdrtfe
          //    - betrifft: frm_amin.pas, cl_logwindow.pas
-
-
-(* ------------------------------------- Einstellungen in Registry spreichern *)
-
-{$DEFINE xRegistrySettings}
-         // Einstellungen werden auf Wunsch in der Registry gespeichert und beim
-         // Programmstart automatisch geladen.
-         //    - betrifft: frm_main.pas, frm_settings.pas, cl_settings.pas
-
-
-(* ----------------------------------- Einstellungen in cdrtfe.ini spreichern *)
-
-{$DEFINE IniSettings}
-         // Einstellungen werden auf Wunsch in cdrtfe.ini gespeichert und beim
-         // Programmstart automatisch geladen.
-         //    - betrifft: frm_main.pas, frm_settings.pas, cl_settings.pas
-
-{$IFDEF IniSettings}{$UNDEF RegistrySettings}{$ENDIF}
-         // Dies stellt sicher, daß die Einstellungen nicht sowohl in der
-         // Registry als auch in der cdrtfe.ini gesichert werden.
-         // Falls beide Direktiven aktiv sind, hat die Speicherung in der
-         // Ini-Datei Vorrang.
 
 
 (* ----------------------------------------------------- QuoteCommandlinePath *)
@@ -384,10 +362,6 @@
          //   - Anzeige, wann Properties aktualisiert werden
          //   - betrifft: frm_main.pas, cl_cd.pas
 
-{$DEFINE xDebugSettings}
-         // Anzeige der internen Einstellungen
-         //   - betrifft: frm_main.pas, cl_settings.pas
-
 {$DEFINE xDebugMaxFileNameLength}
          // Anzeige der maximalen Dateinamenlänge
          //   - betrifft: frm_main.pas
@@ -442,18 +416,6 @@
 {$DEFINE xDebugCreateInfoFile}
          // hält die Programmausführung nach der Dateierstellung an
          //   - frm_main.pas
-
-{$DEFINE xDebugDeviceList}
-         // zeigt den Inhalt aller Laufwerkslisten
-         //   - betrifft: cl_devices.pas
-
-{$DEFINE xDebugDriveDetection}
-         // Anzeige der cdrecord-Aufrufe zur Laufwerkserkennung
-         //   - betrifft: cl_devices.pas
-
-{$DEFINE xDebugDriveSpeedDetection}
-         // Anzeige der Zwischenergebnisse zur Speed-Erkennung
-         //   - betrifft: cl_devices.pas
 
 {$DEFINE xDebugGetDOSOutputThread}
          // Anzeige der Kommandozeilenaufrufe in GetDOSOutputThreaded

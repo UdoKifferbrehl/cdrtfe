@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 14.11.2007
+  letzte Änderung  22.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -405,12 +405,7 @@ begin
   if InputOk then
   begin
     SetSettings;
-    {$IFDEF RegistrySettings}
-    FSettings.SaveToRegistry;
-    {$ENDIF}
-    {$IFDEF IniSettings}
     FSettings.SaveToFile(cIniFile);
-    {$ENDIF}
     ShowMessage(FLang.GMS('mpref05'));
   end;
 end;
@@ -419,12 +414,7 @@ end;
 
 procedure TFormSettings.ButtonSettingsDeleteClick(Sender: TObject);
 begin
-  {$IFDEF RegistrySettings}
-  FSettings.DeleteFromRegistry;
-  {$ENDIF}
-  {$IFDEF IniSettings}
   FSettings.DeleteIniFile;
-  {$ENDIF}
   ShowMessage(FLang.GMS('mpref06'));
 end;
 
@@ -473,19 +463,7 @@ procedure TFormSettings.FormShow(Sender: TObject);
 begin
   SetFont(Self);
   FLang.SetFormLang(Self);
-  {$IFDEF RegistrySettings}
-  StaticText5.Caption := FLang.GMS('m301');
-  {$ENDIF}
-  {$IFDEF IniSettings}
   StaticText5.Caption := FLang.GMS('m302');
-  {$ENDIF}
-  {$IFNDEF RegistrySettings}{$IFNDEF IniSettings}
-  StaticText5.Enabled := False;
-  ButtonSettingsSave.Enabled := False;
-  ButtonSettingsDelete.Enabled := False;
-  GroupBoxSettings.Enabled := False;
-  {$ENDIF}{$ENDIF}
-
   FShellExtIsSet := ShellExtensionsRegistered;
   GetSettings;
   CheckControls(Sender);

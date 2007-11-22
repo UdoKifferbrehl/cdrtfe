@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  13.11.2007
+  letzte Änderung  22.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -75,6 +75,13 @@ begin
     Add('1212=FRemoteCDSpeedList:');
     Add('1213=Scanning Devices via SCSI Interface');
     Add('1214=DriveLetters according to cdrtfe.ini, [Drives], LocalDrives');
+    Add('1215=Entering TDevices.GetDriveSpeeds ***********                                       -------');
+    Add('1216=Leaving TDevices.GetDriveSpeeds ************                                       -------');
+    Add('1217=Device can write discs, getting write speeds ...');
+    Add('1218=No speed list, getting max. write speed ...');
+    Add('1219=Getting read speeds ...');
+    Add('1220=Entering TDevices.UpdateSpeedLists ***********                                     -------');
+    Add('1221=Leaving TDevices.UpdateSpeedLists ************                                     -------');
     {f_init.pas}
     Add('1250=cygwin1.dll found in search path.');
     Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');
