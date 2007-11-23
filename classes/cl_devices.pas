@@ -5,7 +5,7 @@
   Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -630,7 +630,7 @@ begin
   end;
   Output.Free;
   {$IFDEF WriteLogfile}
-  AddLogCode(1220);
+  AddLogCode(1221);
   {$ENDIF}
 end;
 

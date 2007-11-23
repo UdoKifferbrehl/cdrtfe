@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.08.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -64,18 +64,20 @@ const {die GUID für cdrtfe}
 
       {für TSettings.General.TabFrmSettings}
       cCdrtfe    = 1;
-      cCdrecord  = 2;
-      cCdrecord2 = 3;
-      cCdrdao    = 4;
-      cCDAudio   = 5;
+      cCdrtfe2   = 2;
+      cCdrecord  = 3;
+      cCdrecord2 = 4;
+      cCdrdao    = 5;
+      cCDAudio   = 6;
 
       {für TSettings.General.TabFrmDAE}
       cTabDAE    = 1;
       cTabCDDB   = 2;
 
       {für TSetting.General.TabFrmDCDFS}
-      cTabFSGen  = 1;
-      cTabFSISO  = 2;
+      cTabFSGen     = 1;
+      cTabFSISO     = 2;
+      cTabFSSpecial = 3;
 
       {Standard-Puffergröße}
       cBufSize = $800;

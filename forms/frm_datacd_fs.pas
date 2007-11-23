@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -75,6 +75,22 @@ type
     EditBootLoadSize: TEdit;
     LabelBootLoadSegAdr: TLabel;
     LabelBootLoadSize: TLabel;
+    TabSheetSpecial: TTabSheet;
+    GroupBoxMeta: TGroupBox;
+    CheckBoxUseMeta: TCheckBox;
+    EditPublisher: TEdit;
+    EditPreparer: TEdit;
+    EditCopyright: TEdit;
+    EditSystem: TEdit;
+    LabelPublisher: TLabel;
+    LabelPreparer: TLabel;
+    LabelCopyright: TLabel;
+    LabelSystem: TLabel;
+    GroupBoxSpecial: TGroupBox;
+    CheckBoxTransTBL: TCheckBox;
+    CheckBoxHideTransTBL: TCheckBox;
+    CheckBoxNLPathtables: TCheckBox;
+    CheckBoxHideRRMoved: TCheckBox;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -202,6 +218,15 @@ begin
     EditBootLoadSegAdr.Text       := BootSegAdr;
     EditBootLoadSize.Text         := BootLoadSize;
     CheckBoxFindDups.Checked      := FindDups;
+    CheckBoxUseMeta.Checked       := UseMeta;
+    EditPublisher.Text            := IDPublisher;
+    EditPreparer.Text             := IDPreparer;
+    EditCopyright.Text            := IDCopyright;
+    EditSystem.Text               := IDSystem;
+    CheckBoxTransTBL.Checked      := TransTBL;
+    CheckBoxHideTransTBL.Checked  := HideTransTBL;
+    CheckBoxNLPathtables.Checked  := NLPathTBL;
+    CheckBoxHideRRMoved.Checked   := HideRRMoved;
   end;
   ActivateTab;
 end;
@@ -242,6 +267,15 @@ begin
     BootSegAdr    := EditBootLoadSegAdr.Text;
     BootLoadSize  := EditBootLoadSize.Text;
     FindDups      := CheckBoxFindDups.Checked;
+    UseMeta       := CheckBoxUseMeta.Checked;
+    IDPublisher   := Copy(EditPublisher.Text, 1, 128);
+    IDPreparer    := Copy(EditPreparer.Text, 1, 128);
+    IDCopyright   := Copy(EditCopyright.Text, 1, 37);
+    IDSystem      := Copy(EditSystem.Text, 1, 32);
+    TransTBL      := CheckBoxTransTBL.Checked;
+    HideTransTBL  := CheckBoxHideTransTBL.Checked;
+    NLPathTBL     := CheckBoxNLPathtables.Checked;
+    HideRRMoved   := CheckBoxHideRRMoved.Checked;
     {wenn kein RockRidge, dann auch kein Multisession}
     if not RockRidge then
     begin
@@ -323,6 +357,18 @@ begin
   LabelBootLoadSize.Enabled := Temp;
   EditBootLoadSegAdr.Enabled := Temp;
   EditBootLoadSize.Enabled := Temp;
+  {Meta-Daten}
+  EditPublisher.Enabled := CheckBoxUseMeta.Checked;
+  EditPreparer.Enabled := CheckBoxUseMeta.Checked;
+  EditCopyright.Enabled := CheckBoxUseMeta.Checked;
+  EditSystem.Enabled := CheckBoxUseMeta.Checked;
+  LabelPublisher.Enabled := CheckBoxUseMeta.Checked;
+  LabelPreparer.Enabled := CheckBoxUseMeta.Checked;
+  LabelCopyright.Enabled := CheckBoxUseMeta.Checked;
+  LabelSystem.Enabled := CheckBoxUseMeta.Checked;
+  {spezielle Optionen}
+  CheckBoxHideTransTBL.Enabled := CheckBoxTransTBL.Checked;
+  CheckBoxNLPathtables.Enabled := FSettings.Cdrecord.HaveNLPathtables;
 end;
 
 

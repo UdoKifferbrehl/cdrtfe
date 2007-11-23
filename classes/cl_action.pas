@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.11.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -393,7 +393,7 @@ begin
   BurnList := TStringList.Create;
   DummyDir(True);
   FData.CreateBurnList(BurnList, cDataCD);
-  // Ok := True;
+  Ok := True;
   SimulDev := 'cdr';
   CMArgs.ForcedContinue := False;
   CMArgs.Choice := cDataCD;
@@ -498,6 +498,13 @@ begin
     if ISONoTrans   then CmdM := CmdM + ' -no-iso-translate';
     if ISODeepDir   then CmdM := CmdM + ' -disable-deep-relocation'; // ' -D';
     if ISONoVer     then CmdM := CmdM + ' -omit-version-number';     // ' -N';
+    if TransTBL     then
+    begin
+      CmdM := CmdM + ' -T';
+      if Joliet and HideTransTBL then CmdM := CmdM + ' -hide-joliet-trans-tbl';
+    end;
+    if NLPathTBL and HaveNLPathtables then
+                         CmdM := CmdM + ' -no-limit-pathtables';
     if Boot         then
     begin
       CmdM := CmdM + ' -eltorito-boot ' + QuotePath(ExtractFileName(BootImage));
@@ -515,11 +522,14 @@ begin
         CmdM := CmdM + ' -hide ' + QuotePath(ExtractFileName(BootImage));
         if Joliet then CmdM := CmdM + ' -hide-joliet '
                                     + QuotePath(ExtractFileName(BootImage));
+        if UDF and HaveHideUDF then CmdM := CmdM + ' -hide-udf '
+                                    + QuotePath(ExtractFileName(BootImage));
       end;
       if BootCatHide  then
       begin
         CmdM := CmdM + ' -hide boot.catalog';
         if Joliet then CmdM := CmdM + ' -hide-joliet boot.catalog';
+        if UDF and HaveHideUDF then CmdM := CmdM + ' -hide-udf boot.catalog';
       end;
     end;
     if FData.DataCDFilesToDelete then
@@ -527,8 +537,18 @@ begin
       Temp := QuotePath(MakePathCygwinConform(DummyFileName));
       CmdM := CmdM + ' -hide ' + Temp;
       CmdM := CmdM + ' -hide-joliet ' + Temp;
+      if HaveHideUDF then CmdM := CmdM + ' -hide-udf ' + Temp;
     end;
-    if VolId <> '' then CmdM := CmdM + ' -volid "' + VolId + '"';   // ' -V "'
+    if HideRRMoved and RockRidge then
+                        CmdM := CmdM + ' -hide-rr-moved';
+    if VolId <> '' then CmdM := CmdM + ' -volid ' + QuotePath(VolId);
+    if UseMeta then
+    begin
+      CmdM := CmdM + ' -publisher ' + QuotePath(IDPublisher);
+      CmdM := CmdM + ' -p ' + QuotePath(IDPreparer);
+      CmdM := CmdM + ' -copyright ' + QuotePath(IDCopyright);
+      CmdM := CmdM + ' -sysid ' + QuotePath(IDSystem);
+    end;
     if MkisofsUseCustOpts then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
     CmdM := CmdM + ' -path-list '
@@ -545,19 +565,13 @@ begin
     {Zusammenstellung prüfen}
     if not ImageOnly or OnTheFly then
     begin
+      Ok := FDisk.CheckMedium(CMArgs);
       {Bei DVD als Simulationstreiber dvd_simul verwenden.}
-      if not FDisk.IsDVD then
-      begin
-        Ok := FDisk.CheckMedium(CMArgs);
-      end else
+      if FDisk.IsDVD then
       begin
         SimulDev := 'dvd';
-        {if FSettings.FileFlags.ProDVD then} Ok := FDisk.CheckMedium(CMArgs);
       end;
-    end else
-    begin
-      Ok := FDisk.CheckMedium(CMArgs);
-    end;
+    end;    
     {Bei ContinueCD = True ohne vorige Sessions, also bei ForcedContinue = True,
      dürfen diese Parameter nicht verwendet werden.}
     if Multi and not CMArgs.ForcedContinue then

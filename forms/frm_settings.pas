@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -83,6 +83,9 @@ type
     CheckBoxAutoSaveOnExit: TCheckBox;
     GroupBoxCdrecordFormat: TGroupBox;
     CheckBoxCdrecordFormat: TCheckBox;
+    GroupBoxDetectSpeeds: TGroupBox;
+    TabSheetDrives: TTabSheet;
+    CheckBoxDetectSpeeds: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -207,6 +210,7 @@ begin
     CheckBoxCdrecordEject.Checked            := Eject;
     CheckBoxCdrecordFormat.Checked           := AllowFormat;
   end;
+  CheckBoxDetectSpeeds.Checked := FSettings.General.DetectSpeeds;
   CheckBoxCdrdaoCueImage.Enabled := FSettings.FileFlags.CdrdaoOk and
                                     FSettings.Cdrecord.CanWriteCueImage;
   CheckBoxForceGenericMMC.Enabled := FSettings.FileFlags.CdrdaoOk;
@@ -254,6 +258,7 @@ begin
   FSettings.General.CDTextUseTags := RadioButtonCDTextUseTags.Checked;
   FSettings.General.CDTextTP := RadioButtonCDTextTP.Checked;
   FSettings.Cdrecord.AutoErase := RadioButtonAutoErase.Checked;
+  FSettings.General.DetectSpeeds := CheckBoxDetectSpeeds.Checked;
 end;
 
 { CheckControls ----------------------------------------------------------------

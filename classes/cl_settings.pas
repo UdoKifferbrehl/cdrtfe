@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -184,6 +184,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        WritingModeRequired: Boolean;  // 2.01a26: -tao|-dao|-raw verpflichtend
        DMASpeedCheck      : Boolean;  // 2.01a33: DMA-Geschwindigkeitsprüfung
        HaveMediaInfo      : Boolean;  // 2.01.01a21: -minfo
+       HaveNLPathtables   : Boolean;  // 2.01.01a31: -no-limit-pathtables
+       HaveHideUDF        : Boolean;  // 2.01.01a32: -hide-udf
      end;
 
      {Einstellungen: cdrdao allgemein}
@@ -235,6 +237,16 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        VolId       : string;
        MsInfo      : string;
        FindDups    : Boolean;
+       TransTBL    : Boolean;
+       HideTransTBL: Boolean;
+       NLPathTBL   : Boolean;
+       HideRRMoved : Boolean;
+       {Meta-Daten}
+       UseMeta     : Boolean;
+       IDPublisher : string;
+       IDPreparer  : string;
+       IDCopyright : string;
+       IDSystem    : string;
        {Einstellungen: cdrecord}
        Device      : string;
        Speed       : string;
@@ -656,6 +668,8 @@ begin
     WritingModeRequired := False;
     DMASpeedCheck       := False;
     HaveMediaInfo       := False;
+    HaveNLPathtables    := False;
+    HaveHideUDF         := False;
   end;
 
   {allgemeine Einstellungen: cdrdao}
@@ -709,6 +723,16 @@ begin
     VolId        := '';
     MsInfo       := '';
     FindDups     := False;
+    TransTBL     := False;
+    HideTransTBL := True;
+    NLPathTBL    := False;
+    HideRRMoved  := False;
+    {Meta-Daten}
+    UseMeta      := False;
+    IDPublisher  := '';
+    IDPreparer   := '';
+    IDCopyright  := '';
+    IDSystem     := '';
     {Einstellungen: cdrecord}
     Device       := '';
     Speed        := '';
@@ -1218,6 +1242,16 @@ var PF     : TIniFile; // ProjectFile
       WriteString(Section, 'BootLoadSize', BootLoadSize);
       WriteString(Section, 'VolId', VolId);
       WriteBool(Section, 'FindDups', FindDups);
+      WriteBool(Section, 'TransTBL', TransTBL);
+      WriteBool(Section, 'HideTransTBL', HideTransTBL);
+      WriteBool(Section, 'NLPathTBL', NLPathTBL);
+      WriteBool(Section, 'HideRRMoved', HideRRMoved);
+      {Meta-Daten}
+      WriteBool(Section, 'UseMeta', UseMeta);
+      WriteString(Section, 'Publisher', IDPublisher);
+      WriteString(Section, 'Preparer', IDPreparer);
+      WriteString(Section, 'Copyright', IDCopyright);
+      WriteString(Section, 'System', IDSystem);
       {Einstellungen: cdrecord}
       WriteString(Section, 'Device', Device);
       WriteString(Section, 'Speed', Speed);
@@ -1621,6 +1655,16 @@ var PF     : TIniFile; // ProjectFile
       BootLoadSize := ReadString(Section, 'BootLoadSize', '');
       VolId := ReadString(Section, 'VolId', '');
       FindDups := ReadBool(Section, 'FindDups', False);
+      TransTBL := ReadBool(Section, 'TransTBL', False);
+      HideTransTBL := ReadBool(Section, 'HideTransTBL', True);
+      NLPathTBL := ReadBool(Section, 'NLPathTBL', False);
+      HideRRMoved := ReadBool(Section, 'HideRRMoved', False);
+      {Meta-Daten}
+      UseMeta := ReadBool(Section, 'UseMeta', False);
+      IDPublisher := ReadString(Section, 'Publisher', '');
+      IDPreparer := ReadString(Section, 'Preparer', '');
+      IDCopyright := ReadString(Section, 'Copyright', '');
+      IDSystem := ReadString(Section, 'System', '');
       {Einstellungen: cdrecord}
       Device := ReadString(Section, 'Device', '');
       Speed := ReadString(Section, 'Speed', '');

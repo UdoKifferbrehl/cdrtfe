@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.08.2007
+  letzte Änderung  23.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -533,16 +533,22 @@ begin
     VersionValue >= GetVersionValue('2.01.01a21');
   {haben wir es cdrecord-ProDVD zu tun?}
   Settings.FileFlags.ProDVD := Pos('-ProDVD-', Output) > 0;
-(*
+
   {mkisofs-Version}
   Cmd := StartUpDir + cMkisofsBin;
   {$IFDEF QuoteCommandlinePath}
   Cmd := QuotePath(Cmd);
   {$ENDIF}
   Cmd := Cmd + ' -version';
-  Output := GetDosOutput(PChar(Cmd), True);
+  Output := GetDosOutput(PChar(Cmd), False, True);
   VersionString := GetVersionString(Output);
-*)
+  VersionValue := GetVersionValue(VersionString);
+  {ab mkisofs 2.01.01a31 gibt es -no-limit-pathtables}
+  Settings.Cdrecord.HaveNLPathtables :=
+    VersionValue >= GetVersionValue('2.01.01a31');
+  {ab mkisofs 2.01.01a32 gibt es -hide-udf}
+  Settings.Cdrecord.HaveHideUDF :=
+    VersionValue >= GetVersionValue('2.01.01a32');
 end;
 
 { CheckEnvironment -------------------------------------------------------------
