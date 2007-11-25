@@ -540,7 +540,8 @@ begin
   Cmd := QuotePath(Cmd);
   {$ENDIF}
   Cmd := Cmd + ' -version';
-  Output := GetDosOutput(PChar(Cmd), False, True);
+  Output := GetDosOutput(PChar(Cmd), True, True);
+  if Output[1] <> 'm' then Delete(Output, 1, Pos(LF, Output));
   VersionString := GetVersionString(Output);
   VersionValue := GetVersionValue(VersionString);
   {ab mkisofs 2.01.01a31 gibt es -no-limit-pathtables}
