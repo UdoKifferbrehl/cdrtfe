@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.11.2007
+  letzte Änderung  28.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -480,7 +480,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     constant, f_filesystem, f_wininfo;
+     constant, f_filesystem, f_wininfo, f_logfile;
 
 const CSIDL_MyMusic = $000d;
 
@@ -961,6 +961,15 @@ begin
           end;
         end;
       end;
+      {Sonderbehanldung, wenn cdrtfe im Portable-Mode ist}
+      if General.PortableMode then
+      begin
+        Temp := StartUpDir + cIniFile;
+        if not FileExists(Temp) then
+        begin
+          Temp := '';
+        end;
+      end;
       Result := Temp;
     end else
     begin
@@ -972,6 +981,10 @@ begin
       Result := Temp;
     end;
   end;
+  {$IFDEF WriteLogFile}
+  AddLogCode(1300);
+  AddLog(Temp + CRLF + ' ', 3);
+  {$ENDIF}
 end;
 
 { SetDefaultPath ---------------------------------------------------------------
@@ -1526,7 +1539,12 @@ var PF     : TIniFile; // ProjectFile
       begin
         {read-only}
         if not PortableMode then
+        begin
           PortableMode := ReadBool(Section, 'PortableMode', False);
+          {$IFDEF WriteLogFile}
+          if PortableMode then AddLogCode(1301);
+          {$ENDIF}
+        end;
       end;
       {Fensterpositionen}
       Section := 'WinPos';

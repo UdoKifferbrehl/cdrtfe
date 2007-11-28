@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  28.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -91,6 +91,9 @@ begin
     Add('1255=Checking mkisofs imports');
     {cl_cueinfo.pas}
     Add('1270=Creating temporary cue file');
+    {cl_settings.pas}
+    Add('1300=Path to cdrtfe.ini');
+    Add('1301=Portable Mode activated via cdrtfe.ini.')
   end;
 end;
 
