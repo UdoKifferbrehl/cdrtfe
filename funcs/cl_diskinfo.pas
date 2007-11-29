@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  07.10.2007
+  letzte Änderung  29.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -160,7 +160,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      cl_cdrtfedata,
-     f_filesystem, f_strings, f_process, f_misc, constant;
+     f_filesystem, f_strings, f_process, f_misc, f_helper, constant;
 
 type TFormSelectDVD = class(TForm)
        FLang: TLang;
@@ -556,7 +556,7 @@ begin
     True : VLevel := 'vv';
     False: VLevel := 'v';
   end;
-  CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' ' + CmdOption +
+  CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' ' + CmdOption +
                  ' -silent -' + VLevel;
   Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
@@ -579,7 +579,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   CmdCdrecord := QuotePath(CmdCdrecord);
   {$ENDIF}
-  CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' -msinfo -silent';
+  CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' -msinfo -silent';
   Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
@@ -704,7 +704,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   CmdCdrecord := QuotePath(CmdCdrecord);
   {$ENDIF}
-  CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' -toc -silent';
+  CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' -toc -silent';
   Output := GetDosOutput(PChar(CmdCdrecord), True, False);
   p := Pos('track:lout lba:', Output);
   if p > 0 then
@@ -1209,7 +1209,7 @@ begin
     True : VLevel := 'vv';
     False: VLevel := 'v';
   end;
-  CmdCdrecord := CmdCdrecord + ' dev=' + FDevice + ' ' + CmdOption +
+  CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' ' + CmdOption +
                  ' -silent -' + VLevel;
   Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
@@ -1377,7 +1377,7 @@ begin
     Temp := ExtractInfo(FMediumInfo, 'phys size', '...', LF);
     FForcedFormat := True;
     FFormatCommand := QuotePath(StartUpDir + cCdrecordBin) +
-                      ' gracetime=5 dev=' + FDevice + ' -v -format';
+                      ' gracetime=5 dev=' + SCSIIF(FDevice) + ' -v -format';
     {$IFDEF DebugReadCDInfo}
     Deb('This seems to be an empty (maiden) DVD+RW.', 1);
     {$ENDIF}

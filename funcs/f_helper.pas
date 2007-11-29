@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2007 Oliver Valencia
 
-  letzte Änderung  23.09.2007
+  letzte Änderung  29.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,6 +26,7 @@
     EjectDisk(const Dev: string)
     LoadDisk(const Dev: string)
     ReloadDisk(const Dev: string): Boolean
+    SCSIIF(const Dev: string): string
     IsValidDVDSource(const Path: string): Boolean
     GetCurrentFolder(const CommandLine: string): string
 
@@ -43,14 +44,38 @@ function DiskIsDVD(const Dev: string): Boolean;
 function GetCurrentFolder(const CommandLine: string): string;
 function IsValidDVDSource(const Path: string): Boolean;
 function ReloadDisk(const Dev: string): Boolean;
+function SCSIIF(const Dev: string): string;
 procedure EjectDisk(const Dev: string);
 procedure LoadDisk(const Dev: string);
 procedure ConvertXCDParamListToRrencInputList(Source, Dest: TStringList);
+procedure SetSCSIInterface(const SCSIIF: string);
 
 implementation
 
 uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      f_filesystem, f_process, f_strings, constant;
+
+const {$J+}
+      SCSIInterface: string = '';
+      {$J-}
+
+{ SetSCSIInterface -------------------------------------------------------------
+
+  setzt die 'statische' Variable SCSIInterface.                                }
+
+procedure SetSCSIInterface(const SCSIIF: string);
+begin
+  if SCSIIF <> '' then SCSIInterface := SCSIIF + ':';
+end;
+
+{ SCSIIF -----------------------------------------------------------------------
+
+  ergänzt die Device-ID um die optionale Interface-Angabe.                     }
+
+function SCSIIF(const Dev: string): string;
+begin
+  Result := SCSIInterface + Dev;
+end;
 
 { ReloadDisk -------------------------------------------------------------------
 
@@ -64,7 +89,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
   {$ENDIF}
-  Temp := Temp + ' dev=' + Dev + ' -eject';
+  Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -eject';
   Temp := GetDosOutput(PChar(Temp), True, False);
   ReloadError := (Pos('Cannot load media with this drive!', Temp) > 0) or
                  (Pos('Try to load media by hand.', Temp) > 0) or
@@ -75,7 +100,7 @@ begin
     {$IFDEF QuoteCommandlinePath}
     Temp := QuotePath(Temp);
     {$ENDIF}
-    Temp := Temp + ' dev=' + Dev + ' -load';
+    Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -load';
     Temp := GetDosOutput(PChar(Temp), True, False);
     ReloadError := (Pos('Cannot load media with this drive!', Temp) > 0) or
                    (Pos('Try to load media by hand.', Temp) > 0) or
@@ -95,7 +120,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
   {$ENDIF}
-  Temp := Temp + ' dev=' + Dev + ' -eject';
+  Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -eject';
   Temp := GetDosOutput(PChar(Temp), True, False);
 end;
 
@@ -110,7 +135,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
   {$ENDIF}
-  Temp := Temp + ' dev=' + Dev + ' -load';
+  Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -load';
   Temp := GetDosOutput(PChar(Temp), True, False);
 end;
 
@@ -170,7 +195,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
   {$ENDIF}
-  Temp := Temp + ' dev=' + Dev + ' -checkdrive';
+  Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -checkdrive';
   Temp := GetDosOutput(PChar(Temp), True, True);
   p := Pos('Driver flags   :', Temp);
   Delete(Temp, 1, p);

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.11.2007
+  letzte Änderung  29.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -577,13 +577,13 @@ begin
     if Multi and not CMArgs.ForcedContinue then
     begin
       if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + FDisk.MsInfo
-                                       + ' -prev-session ' + Device;
+                                       + ' -prev-session ' + SCSIIF(Device);
       if not ContinueCD and (FDisk.MsInfo <> '') then
                           CmdM := CmdM + ' -cdrecord-params '  + FDisk.MsInfo;
 
     end;
     {cdrecord-Kommandozeile zusammenstellen}
-    CmdC := ' gracetime=5 dev=' + Device;
+    CmdC := ' gracetime=5 dev=' + SCSIIF(Device);
     if Erase       then CmdC := CmdC + ' blank=fast';       
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -847,7 +847,7 @@ begin
     {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
     {$ENDIF}
-    Cmd := Cmd + ' gracetime=5 dev=' + Device;
+    Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
     if Erase       then Cmd := Cmd + ' blank=fast';
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -1077,7 +1077,7 @@ begin
       {$IFDEF QuoteCommandlinePath}
       CmdC := QuotePath(CmdC);
       {$ENDIF}
-      CmdC := CmdC + ' gracetime=5 dev=' + Device;
+      CmdC := CmdC + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then CmdC := CmdC + ' driver=cdr_simul';
@@ -1151,7 +1151,7 @@ begin
     {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
     {$ENDIF}
-    Cmd := Cmd + ' gracetime=9 dev=' + Device;
+    Cmd := Cmd + ' gracetime=9 dev=' + SCSIIF(Device);
     if All          then Cmd := Cmd + ' blank=all'     else
     if Fast         then Cmd := Cmd + ' blank=fast'    else
     if OpenSession  then Cmd := Cmd + ' blank=unclose' else
@@ -1219,10 +1219,11 @@ begin
       begin
         if FSettings.Drives.UseRSCSI then
           Cmd := Cmd + ' dev=' + FSettings.Drives.RSCSIString;
+        if SCSIIF('') <> '' then Cmd := Cmd + ' dev=' + SCSIIF('');
         Cmd := Cmd + ' -scanbus'
       end else
       begin
-        Cmd := Cmd + ' dev=' + Device;
+        Cmd := Cmd + ' dev=' + SCSIIF(Device);
         if Prcap  then Cmd := Cmd + ' -prcap'  else
         if Toc    then Cmd := Cmd + ' -toc'    else
         if Atip   then Cmd := Cmd + ' -atip'   else
@@ -1390,7 +1391,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   CommandLine := QuotePath(CommandLine);
   {$ENDIF}
-  CommandLine := CommandLine + ' dev=' + FSettings.DAE.Device + ' -toc';
+  CommandLine := CommandLine + ' dev=' + SCSIIF(FSettings.DAE.Device) + ' -toc';
   Output.Text := GetDOSOutput(PChar(CommandLine), True, False);
   if Pos('No disk / Wrong disk!', Output.text) = 0 then
   begin
@@ -1401,7 +1402,7 @@ begin
   {$IFDEF QuoteCommandlinePath}
   CommandLine := QuotePath(CommandLine);
   {$ENDIF}
-  CommandLine := CommandLine + ' dev=' + FSettings.DAE.Device +
+  CommandLine := CommandLine + ' dev=' + SCSIIF(FSettings.DAE.Device) +
                  ' verbose-level=toc -gui -info-only -no-infofile';
   if FSettings.DAE.UseCDDB then
   begin
@@ -1476,7 +1477,7 @@ var Compressed: Boolean;
     {unveränderlichen Teil der Kommandozeile zusammenstellen}
     with FSettings.DAE do
     begin
-      CommandLine := ' dev=' + Device;
+      CommandLine := ' dev=' + SCSIIF(Device);
       if Speed <> ''    then CommandLine := CommandLine + ' speed=' + Speed;
       CommandLine := CommandLine + ' verbose-level=all'; //'summary';
       CommandLine := CommandLine + ' -gui';
@@ -1796,7 +1797,7 @@ var Compressed: Boolean;
       {$IFDEF QuoteCommandlinePath}
       Cmd := QuotePath(Cmd);
       {$ENDIF}
-      Cmd := Cmd + ' gracetime=5 dev=' + Device;
+      Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
@@ -1887,7 +1888,7 @@ begin
   with FSettings.Readcd do
   begin
     FSettings.General.CDCopy := DoCopy;
-    Cmd := Cmd + ' dev=' + Device;
+    Cmd := Cmd + ' dev=' + SCSIIF(Device);
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
     if DoCopy  then Cmd := Cmd + ' retries=1';
     if Clone   then Cmd := Cmd + ' -clone';
@@ -1921,7 +1922,7 @@ begin
       {$IFDEF QuoteCommandlinePath}
       Cmd := QuotePath(Cmd);
       {$ENDIF}
-      Cmd := Cmd + ' gracetime=5 dev=' + Device;
+      Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
@@ -1999,7 +2000,7 @@ begin
         {$IFDEF QuoteCommandlinePath}
         Cmd := QuotePath(Cmd);
         {$ENDIF}
-        Cmd := Cmd + ' gracetime=5 dev=' + Device;
+        Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
         if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
         if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
         if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
@@ -2077,7 +2078,7 @@ begin
     {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
     {$ENDIF}
-    Cmd := Cmd + ' gracetime=5 dev=' + Device;
+    Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
@@ -2139,7 +2140,7 @@ begin
   {$ENDIF}
   with FSettings.Cdrecord do
   begin
-    Cmd := Cmd + ' gracetime=5 dev=' + FixDevice;
+    Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(FixDevice);
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
     if CdrecordUseCustOpts then
       Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
@@ -2335,7 +2336,7 @@ begin
       {$IFDEF QuoteCommandlinePath}
       CmdC := QuotePath(CmdC);
       {$ENDIF}
-      CmdC := CmdC + ' gracetime=5 dev=' + Device;
+      CmdC := CmdC + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then CmdC := CmdC + ' driver=cdr_simul';
@@ -2435,7 +2436,7 @@ begin
       end;
     end;
     {cdrecord}
-    CmdC := ' gracetime=5 dev=' + Device;
+    CmdC := ' gracetime=5 dev=' + SCSIIF(Device);
     if Erase       then CmdC := CmdC + ' blank=fast';    
     if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';

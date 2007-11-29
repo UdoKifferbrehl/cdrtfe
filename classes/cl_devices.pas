@@ -5,7 +5,7 @@
   Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.11.2007
+  letzte Änderung  29.11.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -398,6 +398,7 @@ begin
   CommandLine := QuotePath(CommandLine);
   {$ENDIF}
   if FUseRSCSI then CommandLine := CommandLine + ' dev=' + FRSCSIHost;
+  if SCSIIF('') <> '' then CommandLine := CommandLine + ' dev=' + SCSIIF('');
   CommandLine := CommandLine + ' -scanbus';
   Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
   for i := (Output.Count - 1) downto 0 do
@@ -430,7 +431,7 @@ begin
     {$IFDEF QuoteCommandlinePath}
     CommandLine := QuotePath(CommandLine);
     {$ENDIF}
-    CommandLine := CommandLine + ' dev=' + Dev + ' -prcap';
+    CommandLine := CommandLine + ' dev=' + SCSIIF(Dev) + ' -prcap';
     Output.Clear;
     Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
     IsWriter := False;
@@ -596,7 +597,7 @@ var DriveName: string;
     {$IFDEF QuoteCommandlinePath}
     CommandLine := QuotePath(CommandLine);
     {$ENDIF}
-    CommandLine := CommandLine + ' dev=' + Dev + ' -prcap';
+    CommandLine := CommandLine + ' dev=' + SCSIIF(Dev) + ' -prcap';
     Output.Clear;
     Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
   end;
