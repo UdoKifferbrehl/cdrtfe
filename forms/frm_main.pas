@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -476,6 +476,7 @@ type
     procedure WMWriteLog(var Msg: TMessage); message WM_WriteLog;
     procedure WMCheckDataFS(var Msg: TMessage); message WM_CheckDataFS;
     procedure WMMinimize(var Msg: TMessage); message WM_Minimize;
+    procedure WMDriveSettings(var Msg: TMessage); message WM_DriveSettings;
     {eigene Event-Handler}
     procedure DeviceArrival(Drive: string);
     procedure DeviceRemoval(Drive: string);
@@ -852,6 +853,25 @@ end;
 procedure TForm1.WMMinimize(var Msg: TMessage);
 begin
   FSettings.CmdLineFlags.Minimize := True;
+end;
+
+{ WMDriveSettings --------------------------------------------------------------
+
+  Wird WM_DriveSettings empfangen, haben sich Einstellungen für die Laufwerke
+  geändert.                                                                    }
+
+procedure TForm1.WMDriveSettings(var Msg: TMessage);
+begin
+  {$IFDEF WRiteLogFile} AddLogCode(1057); {$ENDIF}
+  if Msg.WParam = wmwpDrvSetSCSIChange then
+  begin
+    UpdatePanels('<>', FLang.GMS('m123'));
+    {anderes SCSI-Interface -> Rescan}
+    SetSCSIInterface(FSettings.Drives.SCSIInterface);
+    FDevices.Rescan;
+    CheckControls;
+    UpdatePanels('<>', '');
+  end;
 end;
 
 
@@ -3506,8 +3526,10 @@ begin
   // TLogWin.Inst.Add('Arrival: ' + Drive);
   if Form1.FSettings.General.DetectSpeeds then
   begin
+    Form1.UpdatePanels('<>', Form1.FLang.GMS('m124'));
     Form1.FDevices.UpdateSpeedLists(Drive);
     Form1.CheckControlsSpeeds;
+    Form1.UpdatePanels('<>', '');
   end;
 end;
 
@@ -4561,6 +4583,7 @@ begin
   try
     FormSettings.Settings := FSettings;
     FormSettings.Lang := FLang;
+    FormSettings.FormHandle := Self.Handle;
     FormSettings.OnMessageShow := Form1.MessageShow;
     FormSettings.ShowModal;
   finally

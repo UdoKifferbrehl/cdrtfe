@@ -4,7 +4,7 @@
 
   Copyright (c) 2007 Oliver Valencia
 
-  letzte Änderung  28.11.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -49,6 +49,7 @@ begin
     Add('1054=TForm1.FormActivate');
     Add('1055=TForm1.FormClose');
     Add('1056=frm_main.pas finalization');
+    Add('1057=Received Message: WM_DriveSettings');
     {f_process.pas/cl_actionthread.pas}
     Add('1100=GetDOSOutputEx:');
     Add('1101=Running commandline');
@@ -82,6 +83,7 @@ begin
     Add('1219=Getting read speeds ...');
     Add('1220=Entering TDevices.UpdateSpeedLists ***********                                     -------');
     Add('1221=Leaving TDevices.UpdateSpeedLists ************                                     -------');
+    Add('1222=Rescanning SCSI bus');
     {f_init.pas}
     Add('1250=cygwin1.dll found in search path.');
     Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');

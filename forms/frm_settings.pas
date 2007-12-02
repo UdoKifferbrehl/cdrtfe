@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_settings.pas: cdrtfe - Einstellungen
              
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.11.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -108,6 +108,8 @@ type
     FLang: TLang;
     FShellExtIsSet: Boolean;  // Die Variablen für die ShellExtensions spielen
     FShellExtToSet: Boolean;  // nur hier eine Rolle.
+    FSCSIOld: string;
+    FFormHandle: THandle;
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab;
@@ -120,6 +122,7 @@ type
     { Public declarations }
     property Lang: TLang read FLang write FLang;
     property Settings: TSettings read FSettings write FSettings;
+    property FormHandle: THandle read FFormHandle write FFormHandle;
     {Events}
     property OnMessageShow: TMessageShowEvent read FOnMessageShow write FOnMessageShow;
   end;
@@ -130,7 +133,7 @@ implementation
 
 {$R *.DFM}
 
-uses f_shellext, f_wininfo, f_filesystem, f_misc, constant;
+uses f_shellext, f_wininfo, f_filesystem, f_misc, constant, user_messages;
 
 {var}
 
@@ -227,7 +230,8 @@ begin
   RadioButtonAutoEraseDisabled.Checked := not FSettings.Cdrecord.AutoErase;
   RadioButtonSCSIAuto.Checked := FSettings.Drives.SCSIInterface = '';
   RadioButtonSCSIASPI.Checked := FSettings.Drives.SCSIInterface = 'ASPI';
-  RadioButtonSCSISPTI.Checked := FSettings.Drives.SCSIInterface = 'SPTI';  
+  RadioButtonSCSISPTI.Checked := FSettings.Drives.SCSIInterface = 'SPTI';
+  FSCSIOld := FSettings.Drives.SCSIInterface;
   ActivateTab;
 end;
 
@@ -408,6 +412,11 @@ begin
                  MessageShow(FLang.GMS('mpref02'));
                end;
       end;
+    end;
+    {SCSI-Interface}
+    if FSCSIOld <> FSettings.Drives.SCSIInterface then
+    begin
+      PostMessage(FFormHandle, WM_DriveSettings, wmwpDrvSetSCSIChange, 0);
     end;
     ModalResult := mrOK;
   end;

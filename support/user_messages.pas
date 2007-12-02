@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.05.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -41,10 +41,21 @@ const WM_CDRTFE           = WM_APP;
       WM_ACTIVATEVCDTAB   = WM_CDRTFE + 15;
       WM_ACTIVATEIMGTAB   = WM_CDRTFE + 16;
       WM_ACTIVATEDVDTAB   = WM_CDRTFE + 17;
-      {$IFDEF Experiment}
-      WM_Experiment       = WM_CDRTFE + 20;
-      {$ENDIF}
+      WM_DriveSettings    = WM_CDRTFE + 18;
+
+      {Parameter-Konstanten für WM_DriveSettings}
+      wmwpDrvSetSCSIChange = 1; // anderes Interface -> Rescan  
 
 implementation
+
+{ Dateils zu einigen Messages:
+
+  WM_DriveSettings: Diese Message wird ausgelöst, um dem Hauptfenster mitzu-
+                    teilen, daß sich etwas bei den Einstellungen zu den Lauf-
+                    werken geändert hat.
+
+                    wParam: wmwp
+
+  }
 
 end.

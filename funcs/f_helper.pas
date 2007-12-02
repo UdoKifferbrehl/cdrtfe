@@ -1,10 +1,10 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_helper.pas: Hilfsfunktionen
 
   Copyright (c) 2005-2007 Oliver Valencia
 
-  letzte Änderung  29.11.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,6 +27,7 @@
     LoadDisk(const Dev: string)
     ReloadDisk(const Dev: string): Boolean
     SCSIIF(const Dev: string): string
+    SetSCSIInterface(const SCSIIF: string);    
     IsValidDVDSource(const Path: string): Boolean
     GetCurrentFolder(const CommandLine: string): string
 
@@ -65,6 +66,7 @@ const {$J+}
 
 procedure SetSCSIInterface(const SCSIIF: string);
 begin
+  SCSIInterface := '';
   if SCSIIF <> '' then SCSIInterface := SCSIIF + ':';
 end;
 

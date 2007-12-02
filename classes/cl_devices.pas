@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
   Copyright (c) 2005-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.11.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -30,6 +30,7 @@
     Methoden     Create
                  DetectDrives
                  GetDriveLetter(const Dev: string): string
+                 Rescan
                  UpdateSpeedLists(const Drive: string);
 
 }
@@ -65,6 +66,7 @@ type TDevices = class(TObject)
        function GetCDDriveLetter: TStringList;
        function GetCDSpeedList  : TStringList;
        procedure AssignDriveLetters;
+       procedure ClearLists;
        procedure DetectCDDrives(CDWriter, CDReader, CDDevices, CDDriveLetter, CDSpeedList: TStringList);
        procedure GetDriveSpeeds(PrcapInfo, CDSpeedList: TStringList; Dev, DevName: string; IsWriter: Boolean);
        {$IFDEF WriteLogfile}
@@ -75,6 +77,7 @@ type TDevices = class(TObject)
        destructor Destroy; override;
        function GetDriveLetter(const Dev: string): string;
        procedure DetectDrives;
+       procedure Rescan;
        procedure UpdateSpeedLists(const Drive: string);
        property CDDevices    : TStringList read GetCDDevices;
        property CDReader     : TStringList read GetCDReader;
@@ -180,6 +183,24 @@ begin
     False: Result := FLocalCDSpeedList;
     True : Result := FRemoteCDSpeedList;
   end;
+end;
+
+{ ClearLists -------------------------------------------------------------------
+
+  löscht die Listen vor einem Rescan.                                          }
+
+procedure TDevices.ClearLists;
+begin
+  FLocalCDWriter.Clear;
+  FLocalCDReader.Clear;
+  FLocalCDDevices.Clear;
+  FLocalCDDriveLetter.Clear;
+  FLocalCDSpeedList.Clear;
+  FRemoteCDWriter.Clear;
+  FRemoteCDReader.Clear;
+  FRemoteCDDevices.Clear;
+  FRemoteCDDriveLetter.Clear;
+  FRemoteCDSpeedList.Clear;
 end;
 
 { GetDriveSpeeds ---------------------------------------------------------------
@@ -554,6 +575,17 @@ begin
   WriteLog;
   AddLogCode(1201);
   {$ENDIF}
+end;
+
+{ Rescan -----------------------------------------------------------------------
+
+  Rescan sucht erneut nach Laufwerken.                                         }
+
+procedure TDevices.Rescan;
+begin
+  {$IFDEF WriteLogFile} AddLogCode(1222); {$ENDIF}
+  ClearLists;
+  DetectDrives;
 end;
 
 { UpdateSpeedLists -------------------------------------------------------------

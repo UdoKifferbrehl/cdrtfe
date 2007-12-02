@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.10.2007
+  letzte Änderung  02.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -178,6 +178,8 @@ begin
     Add('m120=Dateiliste laden');
     Add('m121=Dateiliste speichern unter');
     Add('m122=%s Track(s): %s');
+    Add('m123=Suche Laufwerke ...');
+    Add('m124=Prüfe verfügbare Geschwindigkeiten ...');
     {GUI - Mkisofs}
     Add('c201=DVD-Video - Optionen');
     Add('e201=Name für das Boot-Image fehlt!');
