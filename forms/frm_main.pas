@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.12.2007
+  letzte Änderung  07.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -260,6 +260,8 @@ type
     CDETreeViewPopupImport: TMenuItem;
     CheckBoxReadCDWriteCopy: TCheckBox;
     LabelDAECopy: TLabel;
+    AudioListViewPopupN2: TMenuItem;
+    AudioListViewPopupPlay: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -376,6 +378,7 @@ type
     procedure MainMenuResetClick(Sender: TObject);
     procedure MainMenuHelpClick(Sender: TObject);
     procedure CDETreeViewPopupImportClick(Sender: TObject);
+    procedure AudioListViewPopupPlayClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -5770,6 +5773,8 @@ begin
     AudioListViewPopupN1.Visible := False;
     AudioListViewPopupMoveUp.Visible := False;
     AudioListViewPopupMoveDown.Visible := False;
+    AudioListViewPopupN2.Visible := False;
+    AudioListViewPopupPlay.Visible := False;
   end else
   begin
     AudioListViewPopupAddTrack.Visible := True;
@@ -5789,6 +5794,8 @@ begin
       AudioListViewPopupMoveUp.Visible := True;
       AudioListViewPopupMoveDown.Visible := True;
     end;
+    AudioListViewPopupN2.Visible := True;
+    AudioListViewPopupPlay.Visible := True;
   end;
 end;
 
@@ -5842,6 +5849,28 @@ begin
     UserMoveTrack(ListView, dDown);
   end;
 end;
+
+{ Audio-CD: Play track}
+
+procedure TForm1.AudioListViewPopupPlayClick(Sender: TObject);
+var Name    : string;
+    Cmd, Opt: string;
+    ListView: TListView;
+begin
+  ListView := nil;
+  case FSettings.General.Choice of
+    cAudioCD: ListView := AudioListView;
+    cVideoCD: ListView := VideoListView;
+  end;
+  if ListView <> nil then
+  begin
+    Name := QuotePath(ListView.Selected.SubItems[2]);
+    Cmd := QuotePath(FSettings.General.MPlayerCmd);
+    Opt := ReplaceString(FSettings.General.MPlayerOpt, '%N', Name);
+    ShellExecute(Form1.Handle, nil, PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
+  end;
+end;
+
 
 { Kontextmenü, sonstiges  ------------------------------------------------------
 

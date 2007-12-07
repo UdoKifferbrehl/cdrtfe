@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.12.2007
+  letzte Änderung  07.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -90,6 +90,11 @@ type
     RadioButtonSCSIAuto: TRadioButton;
     RadioButtonSCSIASPI: TRadioButton;
     RadioButtonSCSISPTI: TRadioButton;
+    GroupBoxMPlayer: TGroupBox;
+    EditMPlayerCmd: TEdit;
+    EditMplayerOpt: TEdit;
+    LabelMPlayerOpt: TLabel;
+    LabelMPlayerCmd: TLabel;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -232,6 +237,8 @@ begin
   RadioButtonSCSIASPI.Checked := FSettings.Drives.SCSIInterface = 'ASPI';
   RadioButtonSCSISPTI.Checked := FSettings.Drives.SCSIInterface = 'SPTI';
   FSCSIOld := FSettings.Drives.SCSIInterface;
+  EditMPlayerCmd.Text := FSettings.General.MPlayerCmd;
+  EditMPlayeropt.Text := FSettings.General.MPlayerOpt;
   ActivateTab;
 end;
 
@@ -273,6 +280,8 @@ begin
   if RadioButtonSCSIAuto.Checked then FSettings.Drives.SCSIInterface := '';
   if RadioButtonSCSIASPI.Checked then FSettings.Drives.SCSIInterface := 'ASPI';
   if RadioButtonSCSISPTI.Checked then FSettings.Drives.SCSIInterface := 'SPTI';
+  FSettings.General.MPlayerCmd := EditMPlayerCmd.Text;
+  FSettings.General.MPlayerOpt := EditMPlayerOpt.Text;
 end;
 
 { CheckControls ----------------------------------------------------------------

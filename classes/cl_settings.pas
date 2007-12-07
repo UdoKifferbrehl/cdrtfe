@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.11.2007
+  letzte Änderung  07.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -90,6 +90,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        PortableMode  : Boolean;
        DetectSpeeds  : Boolean;
        AutoSaveOnExit: Boolean;
+       MPlayerCmd    : string;
+       MPlayerOpt    : string;
      end;
 
      TWinPos = record
@@ -576,6 +578,8 @@ begin
     PortableMode := False;
     DetectSpeeds := False;
     AutoSaveOnExit := False;
+    MPlayerCmd := '';
+    MPlayerOpt := '';
   end;
 
   with WinPos do
@@ -1142,6 +1146,8 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'CDTextTP', CDTextTP);
       WriteBool(Section, 'DetectSpeeds', DetectSpeeds);
       WriteBool(Section, 'AutoSaveOnExit', AutoSaveOnExit);
+      WriteString(Section, 'MPlayerCmd', MPlayerCmd);
+      WriteString(Section, 'MPlayerOpt', MPlayerOpt);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1531,6 +1537,8 @@ var PF     : TIniFile; // ProjectFile
       CDTextTP := ReadBool(Section, 'CDTextTP', False);
       DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
       AutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
+      MPlayerCmd := ReadString(Section, 'MPlayerCmd', '');
+      MPlayerOpt := ReadString(Section, 'MPlayerOpt', '');      
     end;
     ProgressBarUpdate(1);
 
