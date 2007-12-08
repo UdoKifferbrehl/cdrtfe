@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.11.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -694,8 +694,7 @@ begin
                   FormatFloat('##0.###', (FDisk.SecFree -
                       (CMArgs.SectorsNeededI + CMArgs.TaoEndSecCount)) / 512)])
                 + Temp;
-      i := Application.MessageBox(PChar(Temp), PChar(FLang.GMS('mburn02')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(Temp, FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin
@@ -911,9 +910,7 @@ begin
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
-      i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                  PChar(FLang.GMS('mburn02')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin
@@ -1098,9 +1095,7 @@ begin
           FSettings.General.NoConfirm) then
   begin
     {Brennvorgang starten?}
-    i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                PChar(FLang.GMS('mburn02')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
   end else
   {$ENDIF}
   begin
@@ -1177,9 +1172,7 @@ begin
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
-      i := Application.MessageBox(PChar(FLang.GMS('mburn05')),
-                                  PChar(FLang.GMS('mburn06')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(FLang.GMS('mburn05'), FLang.GMS('mburn06'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin
@@ -1822,9 +1815,7 @@ var Compressed: Boolean;
               FSettings.General.NoConfirm) then
       begin
         {Brennvorgang starten?}
-        i := Application.MessageBox(PChar(FLang.GMS('mburn16')),
-                                    PChar(FLang.GMS('mburn02')),
-               MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+        i := ShowMsgDlg(FLang.GMS('mburn16'), FLang.GMS('mburn02'), MB_cdrtfe1);
       end else
       {_$ENDIF}
       begin
@@ -2040,9 +2031,7 @@ begin
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
-      i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                  PChar(FLang.GMS('mburn02')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin
@@ -2104,9 +2093,7 @@ begin
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
-      i := Application.MessageBox(PChar(FLang.GMS('mburn16')),
-                                  PChar(FLang.GMS('mburn02')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(FLang.GMS('mburn16'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
     {_$ENDIF}
     begin
@@ -2153,9 +2140,7 @@ begin
   if not FSettings.General.NoConfirm then
   begin
     {Fixieren starten?}
-    i := Application.MessageBox(PChar(FLang.GMS('mburn11')),
-                                PChar(FLang.GMS('mburn02')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    i := ShowMsgDlg(FLang.GMS('mburn11'), FLang.GMS('mburn02'), MB_cdrtfe1);
   end else
   {$ENDIF}
   begin
@@ -2357,9 +2342,7 @@ begin
           FSettings.General.NoConfirm) then
   begin
     {Brennvorgang starten?}
-    i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                PChar(FLang.GMS('mburn02')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
   end else
   {$ENDIF}
   begin
@@ -2518,9 +2501,7 @@ begin
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
-      i := Application.MessageBox(PChar(FLang.GMS('mburn01')),
-                                  PChar(FLang.GMS('mburn02')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin

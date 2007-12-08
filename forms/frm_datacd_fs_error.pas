@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_datacd_fs_error.pas: Dialog zum Korrigieren von zu langen Dateinamen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.05.2006
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -498,22 +498,17 @@ begin
          alten unterscheidet.}
         if Temp <> Item.Caption then
         begin
-          Application.MessageBox(PChar(Format(FLang.GMS('e111'), [Temp])),
-                                 PChar(FLang.GMS('g001')),
-                                 MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+          ShowMsgDlg(Format(FLang.GMS('e111'), [Temp]), FLang.GMS('g001'),
+                     MB_cdrtfe2);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e110')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e501')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
       end;
     end;
   end else                                             // Datei
@@ -549,22 +544,17 @@ begin
          alten unterscheidet.}
         if Temp <> Item.Caption then
         begin
-          Application.MessageBox(PChar(Format(FLang.GMS('e112'), [Temp])),
-                                 PChar(FLang.GMS('g001')),
-                                 MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+          ShowMsgDlg(Format(FLang.GMS('e112'), [Temp]), FLang.GMS('g001'),
+                     MB_cdrtfe2);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e110')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e501')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
       end;
     end;
   end;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.11.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -155,9 +155,8 @@ begin
   Result := True;
   if CheckBoxBoot.Checked and (EditBootImage.Text = '') then
   begin
-    // Fehlermeldung := 'Name für das Boot-Image fehlt!';
-    Application.MessageBox(PChar(FLang.GMS('e201')), PChar(FLang.GMS('g001')),
-      MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+    {Kein Boot-Image angegeben.}
+    ShowMsgDlg(FLang.GMS('e201'), FLang.GMS('g001'), MB_cdrtfe2);
     Result := False;
   end;
   {Wenn kein ISO-Level gewählt ist, macht es keinen Sinn, wenn ISOLevel = True

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.12.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -181,8 +181,24 @@ end;
   vorhanden sind.                                                              }
 
 function TFormSettings.InputOk: Boolean;
+var Text: string;
 begin
   Result := True;
+  if EditMplayerCmd.Text <> '' then
+  begin
+    if not FileExists(EditMPlayerCmd.Text) then
+    begin
+      Text := Format(FLang.GMS('e113'), [EditMPlayerCmd.Text]);
+      ShowMsgDlg(Text, FLang.GMS('g001'), MB_ICONSTOP or MB_OK);
+      Result := False;
+      FSettings.General.TabFrmSettings := cCDAudio;
+      ActivateTab;
+      EditMplayerCmd.SetFocus;
+    end;
+  end else
+  begin
+    FSettings.FileFlags.MPlayerOk := False;
+  end;
 end;
 
 
@@ -600,7 +616,7 @@ end;
 
 { OnExit -----------------------------------------------------------------------
 
-  Wir wollen Pfadangaben ohne Pfadtrenner am Ende.                             }
+  Wir wollen Pfadangaben ohne Pfadtrenner am Ende und existierende Dateinamen. }
 
 procedure TFormSettings.EditTempFolderExit(Sender: TObject);
 var Text: string;

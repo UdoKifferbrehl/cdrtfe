@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.03.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -92,6 +92,9 @@ type TTimeCount = class(TObject)
        property TimeAsInt: Longint read GetTimeAsInt;
        property TimeAsString: string read GetTimeAsString;
      end;
+
+const MB_cdrtfe1 = MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION;
+      MB_cdrtfe2 = MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL;
 
 implementation
 
@@ -369,7 +372,7 @@ end;
 
   zeigt einen Dialog an. Verwendet Application.MessageBox.
   
-  Flags: MB_ICONSTOP             MB_OK 
+  Flags: MB_ICONSTOP             MB_OK                    MB_cdrtfe1
          MB_ICONQUESTION         MB_OKCANCEL
          MB_ICONWARNING          MB_ABORTRETRYIGNORE
          MB_ICONINFORMATION      MB_YESNOCANCEL

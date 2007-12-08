@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.12.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -411,6 +411,7 @@ type
     FImageTabFirstWrite: Boolean;
     FCheckingControls  : Boolean;
     function GetActivePage: Byte;
+    function GetCurrentListView: TListView;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
     procedure AddToPathList(const Filename: string);
@@ -1624,10 +1625,8 @@ begin
       ErrorCode := FData.LastError;
       if ErrorCode = PD_FileNotUnique then
       begin
-        Application.MessageBox(PChar(Format(FLang.GMS('e112'),
-                                            [OpenDialog1.Files[i]])),
-                               PChar(Flang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(Format(FLang.GMS('e112'), [OpenDialog1.Files[i]]),
+                   FLang.GMS('g001'), MB_cdrtfe2);
       end;
     end;
     {Dateiliste sortieren}
@@ -1699,9 +1698,8 @@ begin
       {$ENDIF}
       if ErrorCode = PD_FolderNotUnique then
       begin
-        Application.MessageBox(PChar(Format(FLang.GMS('e111'), [Name])),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(Format(FLang.GMS('e111'), [Name]), FLang.GMS('g001'),
+                   MB_cdrtfe2);
       end else
       begin
         {Änderungen im GUI nachvollziehen}
@@ -1753,8 +1751,7 @@ begin
     {$IFDEF Confirm}
     if not FSettings.General.NoConfirm then
     begin
-      i := Application.MessageBox(PChar(Meldung), PChar(FLang.GMS('m110')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin
@@ -1834,8 +1831,7 @@ begin
     {$IFDEF Confirm}
     if not FSettings.General.NoConfirm then
     begin
-      i := Application.MessageBox(PChar(Meldung), PChar(FLang.GMS('m110')),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfe1);
     end else
     {$ENDIF}
     begin
@@ -1862,9 +1858,7 @@ begin
   {$IFDEF Confirm}
   if not FSettings.General.NoConfirm then
   begin
-    i := Application.MessageBox(
-           PChar(FLang.GMS('m114')), PChar(FLang.GMS('m110')),
-           MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+    i := ShowMsgDlg(FLang.GMS('m114'), FLang.GMS('m110'), MB_cdrtfe1);
   end else
   {$ENDIF}
   begin
@@ -1916,16 +1910,12 @@ begin
        ErrorCode := FData.LastError;
        if ErrorCode = PD_FileNotUnique then
        begin
-         Application.MessageBox(PChar(Format(FLang.GMS('e112'),
-                                             [View.Items[i].Caption])),
-                                PChar(FLang.GMS('e108')),
-                                MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+         ShowMsgDlg(Format(FLang.GMS('e112'), [View.Items[i].Caption]),
+                    FLang.GMS('e108'), MB_cdrtfe2);
        end else
        if ErrorCode = PD_PreviousSession then
        begin
-         Application.MessageBox(PChar(FLang.GMS('e117')),
-                                PChar(FLang.GMS('e108')),
-                                MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+         ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfe2);
        end else
        begin
          {geänderte Dateiliste sortieren}
@@ -1953,20 +1943,16 @@ begin
    ErrorCode := FData.LastError;
    if ErrorCode = PD_DestFolderIsSubFolder then
    begin
-     Application.MessageBox(PChar(FLang.GMS('e109')), PChar(FLang.GMS('e108')),
-                            MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+     ShowMsgDlg(FLang.GMS('e109'), FLang.GMS('e108'), MB_cdrtfe2);
    end else
    if ErrorCode = PD_FolderNotUnique then
    begin
-     Application.MessageBox(PChar(Format(FLang.GMS('e111'), [SourceNode.Text])),
-                            PChar(FLang.GMS('e108')),
-                            MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+     ShowMsgDlg(Format(FLang.GMS('e111'), [SourceNode.Text]), FLang.GMS('e108'),
+                MB_cdrtfe2);
    end else
    if ErrorCode = PD_PreviousSession then
    begin
-     Application.MessageBox(PChar(FLang.GMS('e117')),
-                            PChar(FLang.GMS('e108')),
-                            MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+     ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfe2);
    end else
    begin
      {Zielordner sortieren}
@@ -2532,6 +2518,20 @@ end;
 function TForm1.GetActivePage: Byte;
 begin
   Result := Form1.PageControl1.ActivePage.PageIndex + 1;
+end;
+
+{ GetcurrentListView -----------------------------------------------------------
+
+  GetCurrentListView gibt eine Referenz auf den aktuelle ListView zurück.      }
+
+function TForm1.GetCurrentListView: TListView;
+begin
+  case FSettings.General.Choice of
+    cAudioCD: Result := AudioListView;
+    cVideoCD: Result := VideoListView;
+  else
+    Result := nil
+  end;
 end;
 
 { UpateGauges ------------------------------------------------------------------
@@ -3315,12 +3315,10 @@ procedure TForm1.CheckExitCode;
 begin
   if FExitCode = 142 then
     {ProDVD-Lizenz-Fehler}
-    Application.MessageBox(PChar(FLang.GMS('e002')), PChar(FLang.GMS('g001')),
-      MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL) else
+    ShowMsgDlg(FLang.GMS('e002'), FLang.GMS('g001'), MB_cdrtfe2);
   if FExitCode <> 0 then
     {sonstiger Fehler}
-    Application.MessageBox(PChar(FLang.GMS('e001')), PChar(FLang.GMS('g001')),
-      MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+    ShowMsgDlg(FLang.GMS('e001'), FLang.GMS('g001'), MB_cdrtfe2);
   FExitCode := 0;
 end;
 {$ENDIF}
@@ -4994,28 +4992,21 @@ begin
          alten unterscheidet.}
         if Temp <> Node.Text then
         begin
-          Application.MessageBox(PChar(Format(FLang.GMS('e111'), [Temp])),
-                                 PChar(FLang.GMS('g001')),
-                                 MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+          ShowMsgDlg(Format(FLang.GMS('e111'), [Temp]), FLang.GMS('g001'),
+                     MB_cdrtfe2);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e110')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e501')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
       end else
       if ErrorCode = PD_PreviousSession then
       begin
-        Application.MessageBox(PChar(FLang.GMS('e117')),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfe2);
       end;
     end;
   end else {CD-Label}
@@ -5110,28 +5101,21 @@ begin
        alten unterscheidet.}
       if Temp <> Item.Caption then
       begin
-        Application.MessageBox(PChar(Format(FLang.GMS('e112'), [Temp])),
-                               PChar(FLang.GMS('g001')),
-                               MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+        ShowMsgDlg(Format(FLang.GMS('e112'), [Temp]), FLang.GMS('g001'),
+                   MB_cdrtfe2);
       end;
     end else
     if ErrorCode = PD_InvalidName then
     begin
-      Application.MessageBox(PChar(FLang.GMS('e110')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+      ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
     end else
     if ErrorCode = PD_NameTooLong then
     begin
-      Application.MessageBox(PChar(FLang.GMS('e501')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+      ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
     end else
     if ErrorCode = PD_PreviousSession then
     begin
-      Application.MessageBox(PChar(FLang.GMS('e117')),
-                             PChar(FLang.GMS('g001')),
-                             MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+      ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfe2);
     end;
   end;
 end;
@@ -5760,12 +5744,7 @@ end;
 procedure TForm1.AudioListViewPopupMenuPopup(Sender: TObject);
 var ListView: TListView;
 begin
-  case FSettings.General.Choice of
-    cAudioCD: ListView := AudioListView;
-    cVideoCD: ListView := VideoListView;
-  else
-    ListView := nil;
-  end;
+  ListView := GetCurrentListView;
   if ListView.SelCount = 0 then
   begin
     AudioListViewPopupAddTrack.Visible := True;
@@ -5794,8 +5773,8 @@ begin
       AudioListViewPopupMoveUp.Visible := True;
       AudioListViewPopupMoveDown.Visible := True;
     end;
-    AudioListViewPopupN2.Visible := True;
-    AudioListViewPopupPlay.Visible := True;
+    AudioListViewPopupN2.Visible := FSettings.FileFlags.MPlayerOk;
+    AudioListViewPopupPlay.Visible := FSettings.FileFlags.MPlayerOk;
   end;
 end;
 
@@ -5821,12 +5800,7 @@ end;
 procedure TForm1.AudioListViewPopupMoveUpClick(Sender: TObject);
 var ListView: TListView;
 begin
-  case FSettings.General.Choice of
-    cAudioCD: ListView := AudioListView;
-    cVideoCD: ListView := VideoListView;
-  else
-    ListView := nil;
-  end;
+  ListView := GetCurrentListView;
   if ListView.Items.Count > 0 then
   begin
     UserMoveTrack(ListView, dUp);
@@ -5838,12 +5812,7 @@ end;
 procedure TForm1.AudioListViewPopupMoveDownClick(Sender: TObject);
 var ListView: TListView;
 begin
-  case FSettings.General.Choice of
-    cAudioCD: ListView := AudioListView;
-    cVideoCD: ListView := VideoListView;
-  else
-    ListView := nil;
-  end;
+  ListView := GetCurrentListView;
   if ListView.Items.Count > 0 then
   begin
     UserMoveTrack(ListView, dDown);
@@ -5853,21 +5822,14 @@ end;
 { Audio-CD: Play track}
 
 procedure TForm1.AudioListViewPopupPlayClick(Sender: TObject);
-var Name    : string;
-    Cmd, Opt: string;
-    ListView: TListView;
+var ListView: TListView;
 begin
-  ListView := nil;
-  case FSettings.General.Choice of
-    cAudioCD: ListView := AudioListView;
-    cVideoCD: ListView := VideoListView;
-  end;
+  ListView := GetCurrentListView;
   if ListView <> nil then
   begin
-    Name := QuotePath(ListView.Selected.SubItems[2]);
-    Cmd := QuotePath(FSettings.General.MPlayerCmd);
-    Opt := ReplaceString(FSettings.General.MPlayerOpt, '%N', Name);
-    ShellExecute(Form1.Handle, nil, PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
+    ShlExecute(QuotePath(FSettings.General.MPlayerCmd),
+               ReplaceString(FSettings.General.MPlayerOpt, '%N',
+                             QuotePath(ListView.Selected.SubItems[2])));
   end;
 end;
 

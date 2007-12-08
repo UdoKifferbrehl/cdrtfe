@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.09.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -120,7 +120,7 @@ implementation
 
 uses {$IFDEF ShowVerifyTime} f_misc, {$ENDIF}
      cl_logwindow,
-     f_filesystem, f_strings, f_crc, f_helper, f_wininfo, user_messages,
+     f_filesystem, f_strings, f_misc, f_crc, f_helper, f_wininfo, user_messages,
      constant;
 
 type TM2F2FileHeader = packed record  // RIFF-Header der Mode2/Form2-Dateien
@@ -192,8 +192,8 @@ var REText, RECaption: string;
 begin
   REText := FLang.GMS('everify03');
   RECaption := FLang.GMS('everify04');
-  i := Application.MessageBox(PChar(REText), PChar(RECaption),
-                             MB_OKCANCEL or MB_APPLMODAL or MB_ICONEXCLAMATION);
+  i := ShowMsgDlg(REText, RECaption,
+                  MB_OKCANCEL or MB_APPLMODAL or MB_ICONEXCLAMATION);
   if i <> 1 then
   begin
     Terminate;

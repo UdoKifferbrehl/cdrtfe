@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.02.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -92,9 +92,8 @@ begin
   Result := True;
   if RadioButtonImage.Checked and (EditIsoPath.Text = '') then
   begin
-    // Fehlermeldung := 'Name für die Image-Datei fehlt!';
-    Application.MessageBox(PChar(FLang.GMS('e101')), PChar(FLang.GMS('g001')),
-      MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);
+    {Name für die Image-Datei fehlt}
+    ShowMsgDlg(FLang.GMS('e101'), FLang.GMS('g001'), MB_cdrtfe2);
     Result := False;
   end;
 end;

@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_audiocd_tracks.pas: Audio-CD: Track-Eigenschaften
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.09.2006
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -76,7 +76,7 @@ uses constant, f_cdtext, f_misc;
 
 { InputOk ----------------------------------------------------------------------
 
-  InputOk überprüft die eingaben auf Gültigkeit bzw. ob alle nötigen Infos
+  InputOk überprüft die Eingaben auf Gültigkeit bzw. ob alle nötigen Infos
   vorhanden sind.                                                              }
 
 function TFormAudioCDTracks.InputOk: Boolean;
@@ -85,8 +85,7 @@ begin
   {Eingabe für Pausenlänge überprüfen}
   if StrToIntDef(EditPause.Text, -1) = -1 then
   begin
-    Application.MessageBox(PChar(FLang.GMS('epause01')),
-      PChar(FLang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL);  
+    ShowMsgDlg(FLang.GMS('epause01'), FLang.GMS('g001'), MB_cdrtfe2);
     Result := False;
     EditPause.SetFocus;
     EditPause.SelectAll;

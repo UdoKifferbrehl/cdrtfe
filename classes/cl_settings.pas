@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.12.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -139,6 +139,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        MonkeyOk   : Boolean;
        RrencOk    : Boolean;
        RrdecOk    : Boolean;
+       MPlayerOk  : Boolean;
      end;
 
      TEnvironment = record
@@ -579,7 +580,7 @@ begin
     DetectSpeeds := False;
     AutoSaveOnExit := False;
     MPlayerCmd := '';
-    MPlayerOpt := '';
+    MPlayerOpt := '%N';
   end;
 
   with WinPos do
@@ -630,6 +631,7 @@ begin
     MonkeyOk    := True;
     RrencOk     := True;
     RrdecOk     := True;
+    MPlayerOk   := True;
   end;
 
   with Environment do
@@ -1538,7 +1540,8 @@ var PF     : TIniFile; // ProjectFile
       DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
       AutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
       MPlayerCmd := ReadString(Section, 'MPlayerCmd', '');
-      MPlayerOpt := ReadString(Section, 'MPlayerOpt', '');      
+      MPlayerOpt := ReadString(Section, 'MPlayerOpt', '');
+      FileFlags.MPlayerOk := FileExists(MPlayerCmd);      
     end;
     ProgressBarUpdate(1);
 

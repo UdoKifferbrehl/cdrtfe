@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.11.2007
+  letzte Änderung  08.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,6 +22,7 @@
     GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string
     GetProcessWindow(const TargetProcessID: Cardinal): HWnd
     IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean
+    ShlExecute(const Cmd, Opt: string)
 
 }
 
@@ -31,7 +32,7 @@ unit f_process;
 
 interface
 
-uses Windows, Classes, Forms, SysUtils, TlHelp32;
+uses Windows, Classes, Forms, SysUtils, ShellAPI, TlHelp32;
 
 function GetChildProcessByModuleName(const Name: string; const ParentID: DWORD): DWORD;
 function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string;
@@ -39,12 +40,13 @@ function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
 function IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean;
 function KillProcessSoftly(const hProcess: Cardinal; var uExitCode: Cardinal): Boolean;
 function KillChildProcessesByName(const Name: string; const ParentID: DWORD): Boolean;
+procedure ShlExecute(const Cmd, Opt: string);
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
-     cl_logwindow, f_wininfo, f_helper, constant;
+     cl_logwindow, f_wininfo, f_misc, f_helper, constant;
 
      {Typ-Deklarationen für die Callback-Funktion}
 type PProcessWindow = ^TProcessWindow;
@@ -712,8 +714,8 @@ begin
     begin
       Msg := 'Reload disk and press <Ok>';
       Cap := 'cdrecord';
-      i := Application.MessageBox(PChar(Msg), PChar(Cap),
-             MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
+      i := ShowMsgDlg(Msg, Cap,
+                      MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION);
       if i = 1 then
       begin
         {OK}
@@ -766,6 +768,16 @@ begin
   AddLogCode(1103);
   AddLog(Result, 12);
   {$ENDIF}
+end;
+
+{ ShlExecute -------------------------------------------------------------------
+
+  vereinfachter Zugriff auf ShellExecute.                                      }
+
+procedure ShlExecute(const Cmd, Opt: string);
+begin
+  ShellExecute(Application.MainForm.Handle, nil,
+               PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
 end;
 
 initialization
