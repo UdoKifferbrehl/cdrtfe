@@ -3,7 +3,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.10.2007
+  letzte Änderung  23.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,7 +39,8 @@
     GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte
     GetFileSize(const Filename: string): Longint
     GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word): Boolean
-    GetFileVersionString(const FileName: string): string;
+    GetFileVersionString(const FileName: string): string
+    GetFreeSpaceDisk(Drive: string): Int64
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
     GetVolumeInfo(var VolInfo: TVolumeInfo)
@@ -75,6 +76,11 @@ type {Datentype für Laufwerksinfos}
        MaxComponentLength: Integer;
      end;
 
+     PInt64 = ^Int64;
+     function _GetDiskFreeSpaceEx(lpPath: PChar; lpFreeBytesAvailableToCaller,
+                                  lpTotalNumberOfBytes,
+                                  lpTotalNumberOfFreeBytes: PInt64): BOOL; stdcall;
+
 function CDLabelIsValid(const VolID: string):Boolean;
 function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
 function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
@@ -91,6 +97,7 @@ function GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte;
 function GetFileSize(const FileName: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
 function GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word): Boolean;
 function GetFileVersionString(const FileName: string): string;
+function GetFreeSpaceDisk(Drive: string): Int64;
 function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function IsUNCPath(const Path: string): Boolean;
@@ -109,6 +116,8 @@ uses {$IFDEF MultipleFolderBrowsing}dlg_folderbrowse, SSBase,{$ENDIF}
 
     {'statische' Variablen}
 var ProgDataDirOverride: string;
+
+function _GetDiskFreeSpaceEx; external kernel32 name 'GetDiskFreeSpaceExA'; 
 
 { StartUpDir -------------------------------------------------------------------
 
@@ -248,6 +257,29 @@ begin
     False: if FileExists(DummyFileName) then DeleteFile(DummyFileName);
   end;
 
+end;
+
+{ GetFreeSpaceDisk -------------------------------------------------------------
+
+  ermittelt den auf dem Datenträger verfügbaren Speicherplatz in Bytes.        }
+
+function GetFreeSpaceDisk(Drive: string): Int64;
+var PFreeCaller,
+    PTotal,
+    PTotalFree : PInt64;
+begin
+  if Drive[Length(Drive)] <> '\' then Drive := Drive + '\';
+  New(PFreeCaller); 
+  New(PTotal); 
+  New(PTotalFree);
+  if _GetDiskFreeSpaceEx(PChar(Drive), PFreeCaller, PTotal, PTotalFree) then
+  begin
+    Result := PTotalFree^;
+  end else
+    Result := 0;
+  Dispose(PFreeCaller); 
+  Dispose(PTotal); 
+  Dispose(PTotalFree);     
 end;
 
 { GetFileSize ------------------------------------------------------------------

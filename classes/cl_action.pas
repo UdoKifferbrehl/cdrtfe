@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  23.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -81,6 +81,7 @@ type TCDAction = class(TObject)
        function MakePathConform(const Path: string): string;
        function MakePathEntryMkisofsConform(const Path: string): string;
        function GetSectorNumber(const MkisofsOptions: string): string;
+       procedure CheckSpaceForImage(var Ok: Boolean; const Path: string; const Sectors: Integer; Size: Int64);
        procedure CreateAudioCD;
        procedure CreateDataDisk;
        procedure CreateVideoCD;
@@ -129,7 +130,7 @@ type TCDAction = class(TObject)
 
 implementation
 
-uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}          f_logfile,
      f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,            
      f_misc, f_helper, cl_cueinfo, constant, user_messages;
 
@@ -369,6 +370,34 @@ begin
   end;
 end;
 
+{ CheckSpaceForImage -----------------------------------------------------------
+
+  prüft, ob genügen Platz für die Image-Datei vorhanden ist.                   } 
+
+procedure TCDAction.CheckSpaceForImage(var Ok: Boolean; const Path: string;
+                                       const Sectors: Integer; Size: Int64);
+var Temp, Drive: string;
+    Sectors64  : Int64;
+    SizeFree   : Int64;
+begin
+  if Ok then
+  begin
+    Drive := ExtractFileDrive(Path);
+    SizeFree := GetFreeSpaceDisk(Drive);
+    if Size = 0 then
+    begin
+      Sectors64 := Sectors;
+      Size := (Sectors64 * 2048);
+    end;
+    Ok := Size < SizeFree;
+    if not Ok then
+    begin
+      Temp := Format(FLang.GMS('eburn20'), [Drive]);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+    end;
+  end;
+end;
+
 { CreateDataDisk ---------------------------------------------------------------
 
   Daten-CDs, -DVDs erstellen und fortsetzen.                                   }
@@ -571,7 +600,10 @@ begin
       begin
         SimulDev := 'dvd';
       end;
-    end;    
+    end;
+    {Genügend Platz für Image?}
+    if not OnTheFly then
+      CheckSpaceForImage(Ok, IsoPath, CMArgs.SectorsNeededI, 0);
     {Bei ContinueCD = True ohne vorige Sessions, also bei ForcedContinue = True,
      dürfen diese Parameter nicht verwendet werden.}
     if Multi and not CMArgs.ForcedContinue then
@@ -939,14 +971,22 @@ var i              : Integer;
     CmdC           : string;
     Temp           : string;
     M2CDMOptions   : string;
+    Ok             : Boolean;
     BurnList       : TStringList;
+    Size           : Int64;
+    DummyE         : Extended;
+    DummyI         : Integer;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  Ok := True;
+  {Größe der Daten ermitteln}
+  FData.GetProjectInfo(DummyI, DummyI, Size, DummyE, DummyI, cXCD);
+  CheckSpaceForImage(Ok, FSettings.XCD.IsoPath, 0, Size);
   {Dateiliste übernehmen}
   BurnList := TStringList.Create;
   FData.CreateBurnList(BurnList, cXCD);
   {xcd.crc erzeugen}
-  if FSettings.XCD.CreateInfoFile then
+  if FSettings.XCD.CreateInfoFile  and Ok then
   begin
     FSettings.XCD.XCDInfoFile := ProgDataDir + cXCDInfoFile;
     if FVList.Count = 0 then
@@ -955,7 +995,7 @@ begin
       CreateXCDInfoFile(FVList);
       Burnlist.Free;
       {zurück zum Hauptthread}
-      exit;
+      Exit;
     end else
     begin
       FVList.Clear;
@@ -1090,16 +1130,22 @@ begin
     end;
   end;
   {Kommando ausführen}
-  {$IFDEF Confirm}
-  if not (FSettings.CmdLineFlags.ExecuteProject or
-          FSettings.General.NoConfirm) then
+  if not Ok then
   begin
-    {Brennvorgang starten?}
-    i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
+    i := 0;
   end else
-  {$ENDIF}
   begin
-    i := 1;
+    {$IFDEF Confirm}
+    if not (FSettings.CmdLineFlags.ExecuteProject or
+            FSettings.General.NoConfirm) then
+    begin
+      {Brennvorgang starten?}
+      i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
+    end else
+    {$ENDIF}
+    begin
+      i := 1;
+    end;
   end;
   if i = 1 then
   begin
@@ -2217,14 +2263,22 @@ end;
   Image für eine VideoCD erstellen oder VideoCD brennen.                       }
 
 procedure TCDAction.CreateVideoCD;
-var i: Integer;
+var i       : Integer;
     CmdVCDIm: string;
-    CmdC: string;
-    Temp: string;
-    CueFile: string;
+    CmdC    : string;
+    Temp    : string;
+    CueFile : string;
+    Ok      : Boolean;
     BurnList: TStringList;
+    Size    : Int64;
+    DummyE  : Extended;
+    DummyI  : Integer;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  Ok := True;
+  {Größe der Daten ermitteln}
+  FData.GetProjectInfo(DummyI, DummyI, Size, DummyE, DummyI, cVideoCD);
+  CheckSpaceForImage(Ok, FSettings.VideoCD.IsoPath, 0, Size);
   {Dateiliste übernehmen}
   BurnList := TStringList.Create;
   FData.CreateBurnList(BurnList, cVideoCD);
@@ -2337,16 +2391,22 @@ begin
     end;
   end;
   {Kommando ausführen}
-  {$IFDEF Confirm}
-  if not (FSettings.CmdLineFlags.ExecuteProject or
-          FSettings.General.NoConfirm) then
+  if not Ok then
   begin
-    {Brennvorgang starten?}
-    i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
+    i := 0;
   end else
-  {$ENDIF}
   begin
-    i := 1;
+    {$IFDEF Confirm}
+    if not (FSettings.CmdLineFlags.ExecuteProject or
+            FSettings.General.NoConfirm) then
+    begin
+      {Brennvorgang starten?}
+      i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
+    end else
+    {$ENDIF}
+    begin
+      i := 1;
+    end;
   end;
   if i = 1 then
   begin
@@ -2418,6 +2478,9 @@ begin
         SimulDev := 'dvd';
       end;
     end;
+    {Genügend Platz für Image?}
+    if not OnTheFly then
+      CheckSpaceForImage(Ok, IsoPath, CMArgs.SectorsNeededI, 0);
     {cdrecord}
     CmdC := ' gracetime=5 dev=' + SCSIIF(Device);
     if Erase       then CmdC := CmdC + ' blank=fast';    

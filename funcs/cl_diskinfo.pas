@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2007 Oliver Valencia
 
-  letzte Änderung  29.11.2007
+  letzte Änderung  23.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1025,7 +1025,8 @@ begin
       end;
     end;
     {Fehler: zu viele Daten}
-    if Result and not FSettings.DataCD.ImageOnly and
+    if Result and
+       (not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly) and
        not FSettings.DataCD.Overburn and not (FDiskType = DT_Unknown) and
        (((Args.CDSize / (1024 * 1024)) > FSizeFree) or
         ((Args.SectorsNeededI + Args.TaoEndSecCount) > FSecFree)) then
@@ -1639,7 +1640,8 @@ begin
       end;
     end;
     {Fehler: zu viele Daten}
-    if Result and not FSettings.DataCD.ImageOnly and
+    if Result and
+       (not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly) and
        not FSettings.DataCD.Overburn and not (FDiskType = DT_Unknown) and
        (((Args.CDSize / (1024 * 1024)) > FSizeFree) or
         ((Args.SectorsNeededI + Args.TaoEndSecCount) > FSecFree)) then
