@@ -76,8 +76,7 @@ cdrtfe - cdrtools/Mode2CDMaker/VCDImager Frontend
 
 Kontakt/Contact
 ---------------
-cdrtfe Homepage:         http://www.cdrtfe.de.vu
-                         (http://home.arcor.de/kerberos002)
+cdrtfe Homepage:         http://cdrtfe.sourceforge.net/
 
 eMail          :         kerberos002@arcor.de
 
