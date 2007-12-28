@@ -5,7 +5,7 @@
   Copyright (c) 2004-2007 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.10.2007
+  letzte Änderung  28.12.2007
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -71,13 +71,12 @@ implementation
 
 uses constant, f_misc, f_filesystem;
 
-const Cdrtfe_Version     = 'cdrtfe 1.3pre3'
+const Cdrtfe_Version     = 'cdrtfe 1.3'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2007  O. Valencia';
       Cdrtfe_Copyright2  = 'Copyright © 2002-2004  O. Valencia, O. Kutsche';
       Cdrtfe_Homepage    = 'http://cdrtfe.sourceforge.net';
-      // Cdrtfe_Homepage    = 'http://home.arcor.de/kerberos002';
       Cdrtfe_eMail       = 'kerberos002@arcor.de';
       {$IFDEF TestVersion}
       Cdrtfe_HintTest    = 'Achtung/Attention!' + CRLF + CRLF +
