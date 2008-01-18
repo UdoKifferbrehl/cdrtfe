@@ -2,9 +2,9 @@
 
   f_logstrings.pas: vordefinierte Strings
 
-  Copyright (c) 2007 Oliver Valencia
+  Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  02.12.2007
+  letzte Änderung  18.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -86,11 +86,15 @@ begin
     Add('1222=Rescanning SCSI bus');
     {f_init.pas}
     Add('1250=cygwin1.dll found in search path.');
-    Add('1251=cygwin1.dll not found in search path, using DLL from cdrtfe installation');
+    Add('1251=Using DLL from cdrtfe installation');
     Add('1252=Using file paths from cdrtfe_tools.ini.');
     Add('1253=Tool paths:');
     Add('1254=Using .mkisofsrc');
     Add('1255=Checking mkisofs imports');
+    Add('1256=tools\cygwin\cygwin.ini found.');
+    Add('1257=Ignore cygwin DLLs found in search path, use the included DLLs.');
+    Add('1258=Use cygwin DLLs found in search path if possible.');
+    Add('1259=cygwin1.dll not found in search path.');
     {cl_cueinfo.pas}
     Add('1270=Creating temporary cue file');
     {cl_settings.pas}

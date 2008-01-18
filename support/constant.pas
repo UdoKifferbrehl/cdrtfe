@@ -2,10 +2,10 @@
 
   constant.pas: Konstanten-Deklaration
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.11.2007
+  letzte Änderung  18.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -124,6 +124,7 @@ const {die GUID für cdrtfe}
       cRrencRRDFile    : string = '\protect.rrd';
       cIniFile         : string = '\cdrtfe.ini';
       cIniFileTools    : string = '\cdrtfe_tools.ini';
+      cIniCygwin       : string = '\cygwin.ini';
       cHelpFile        : string = '\cdrtfe.chm';
       cDefaultIsoName  : string = '\image';
       cDummyFile       : string = '\cdrtfe.del';

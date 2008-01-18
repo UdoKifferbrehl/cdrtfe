@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.11.2007
+  letzte Änderung  18.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -81,6 +81,36 @@ begin
 end;
 {$ENDIF}
 
+{ UseOwnDLLs -------------------------------------------------------------------
+
+  Wertet die Datei tools\cygwin\cygwin.ini aus.
+
+  True:  Die mitgelieferten DLLs sollen verwendet werden, unabhängig davon, ob
+         die cygwin1.dll im Suchpfad gefunden wurde.
+  False: Die mitgelieferten DLLs sollen nur verwendet werden, wenn die
+         cygwin1.dll nicht im Suchpfad gefunden wurde.                         }
+
+function UseOwnDLLs: Boolean;
+const cCygSec: string = 'CygwinDLL';
+var Ini : TIniFile;
+    Name: string;
+begin
+  Name := StartUpDir + cToolDir + cCygwinDir + cIniCygwin;
+  Result := False;
+  if FileExists(Name) then
+  begin
+    {$IFDEF WriteLogFile}
+    AddLogCode(1256);
+    {$ENDIF}
+    Ini := TIniFile.Create(Name);
+    Result := Ini.ReadBool(cCygSec, 'UseOwnDLLs', False);
+    Ini.Free;
+  end;
+  {$IFDEF WriteLogFile}
+  if Result then AddLogCode(1257) else AddLogCode(1258);
+  {$ENDIF}
+end;
+
 { GetToolNames -----------------------------------------------------------------
 
   Die Dateinamen der Tools aus der cdrtfe_tools.ini lesen, sofern diese vor-
@@ -92,9 +122,10 @@ end;
 procedure GetToolNames;
 const cTool: string = 'Tools';
       cPath: string = 'PATH';
-var Ini : TIniFile;
-    Path: string;
-    Temp: string;
+var Ini  : TIniFile;
+    Path : string;
+    Temp : string;
+    Found: Boolean;
 begin
   {standardmäßig sollen sich die Tools im Ordner \tools\ befinden}
   if DirectoryExists(StartUpDir + cToolDir) then
@@ -123,7 +154,8 @@ begin
     Temp := cCygwin1Dll;
     cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
     if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
-    if FindInSearchPath(Temp) <> '' then
+    Found := (FindInSearchPath(Temp) <> '');
+    if Found and not UseOwnDLLs then
     begin
       cCygwin1Dll := Temp;
       {$IFDEF WriteLogfile} AddLogCode(1250); {$ENDIF}
@@ -131,9 +163,10 @@ begin
     {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisitert.}
     if FileExists(StartUpDir + '\' + cCygwin1Dll) then
     begin
+      {$IFDEF WriteLogFile} if not Found then AddLogCode(1259); {$ENDIF}
       {$IFDEF WriteLogfile} AddLogCode(1251); {$ENDIF}
       Path := GetEnvVarValue(cPath);
-      Path := Path + ';' + StartUpDir + cToolDir + cCygwinDir;
+      Path := StartUpDir + cToolDir + cCygwinDir + ';' + Path;  
       SetEnvVarValue(cPath, Path);
     end;
   end;
