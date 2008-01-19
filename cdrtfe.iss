@@ -1,10 +1,10 @@
 ; cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 ;
-;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.1.6
+;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.2.2
 ;
-;  Copyright (c) 2006-2007 Oliver Valencia
+;  Copyright (c) 2006-2008 Oliver Valencia
 ;
-;  letzte Änderung  26.12.2007
+;  letzte Änderung  19.01.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,7 +16,7 @@
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
-#define MyAppCopyright "Copyright © 2002-2007  O. Valencia, O. Kutsche"
+#define MyAppCopyright "Copyright © 2002-2008  O. Valencia, O. Kutsche"
 
 [Setup]
 ; Installer
@@ -90,6 +90,7 @@ Source: I:\burn\tools\cygwin\sh.exe; DestDir: {app}\tools\cygwin; Flags: ignorev
 Source: I:\burn\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\burn\tools\cygwin\cygiconv-2.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\burn\tools\cygwin\cygintl-3.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\burn\tools\cygwin\cygwin.ini; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; Check: CygIniCheck; AfterInstall: CygIniSet
 ; Tools: mode2cdmaker
 Source: I:\burn\tools\xcd\Mode2CDMaker.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\m2cdm
 Source: I:\burn\tools\xcd\m2cdm.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\m2cdm\ex
@@ -178,6 +179,94 @@ Name: tools\vcd; Description: {cm:CompVCD}; Flags: dontinheritcheck; Types: cust
 ; source files
 Name: src; Description: {cm:CompSrc};
 
+[Code]
+var CygDLLPage: TInputOptionWizardPage;
+
+function IsInSearchPath(const Name: string): Boolean;
+var Path: string;
+begin
+  Path := GetEnv('PATH');
+  Result := FileSearch(Name, Path) <> '';
+end;
+
+function CygIniCheck(): Boolean;
+begin
+  Result := IsInSearchPath('cygwin1.dll');
+end;
+
+procedure CygIniSet();
+begin
+  case CygDLLPage.SelectedValueIndex of
+    0: SetIniBool('CygwinDLL', 'UseOwnDLLs', False, ExpandConstant(CurrentFileName));
+    1: SetIniBool('CygwinDLL', 'UseOwnDLLs', True, ExpandConstant(CurrentFileName));
+  end;
+end;
+
+procedure InitializeWizard;
+begin
+  { Create the page }
+  CygDLLPage := CreateInputOptionPage(wpSelectTasks,
+                  CustomMessage('CygwinHeader'),
+                  CustomMessage('CygwinHeader2'),
+                  CustomMessage('CygwinText'),
+                  True, False);
+  CygDLLPage.Add(CustomMessage('CygwinOpt1'));
+  CygDLLPage.Add(CustomMessage('CygwinOpt2'));
+  { set default or previous value }
+  case GetPreviousData('CygwinDLLMode', '') of
+    'installed': CygDLLPage.SelectedValueIndex := 0;
+    'included' : CygDLLPage.SelectedValueIndex := 1;
+  else
+    CygDLLPage.SelectedValueIndex := 0;
+  end;
+end;
+
+procedure RegisterPreviousData(PreviousDataKey: Integer);
+var CygwinDLLMode: string;
+begin
+  { Store the settings so we can restore them next time }
+  case CygDLLPage.SelectedValueIndex of
+    0: CygwinDLLMode := 'installed';
+    1: CygwinDLLMode := 'included';
+  end;
+  SetPreviousData(PreviousDataKey, 'CygwinDLLMode', CygwinDLLMode);
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  { Skip pages that shouldn't be shown }
+  if (PageID = CygDLLPage.ID) and not IsInSearchPath('cygwin1.dll') then
+    Result := True
+  else
+    Result := False;
+end;
+
+function UpdateReadyMemo(Space, NewLine, MemoUserInfoInfo, MemoDirInfo, MemoTypeInfo,
+                         MemoComponentsInfo, MemoGroupInfo, MemoTasksInfo: String): String;
+var S: string;
+begin
+  { Fill the 'Ready Memo' with the normal settings and the custom settings }
+  S := '';
+  if MemoUserInfoInfo <> ''   then S := S + MemoUserInfoInfo + NewLine + NewLine;
+  if MemoDirInfo <> ''        then S := S + MemoDirInfo + NewLine + NewLine;
+  if MemoTypeInfo <> ''       then S := S + MemoTypeInfo + NewLine + NewLine;
+  if MemoComponentsInfo <> '' then S := S + MemoComponentsInfo + NewLine + NewLine;
+  
+  if CygIniCheck then
+  begin
+    S := S + CustomMessage('CygwinReadyHeader') + NewLine;
+    case CygDLLPage.SelectedValueIndex of
+      0: S := S + Space + CustomMessage('CygwinReadyUsePrev');
+      1: S := S + Space + CustomMessage('CygwinReadyUseOwn');
+    end;
+    S := S + NewLine + NewLine;
+  end;
+  
+  if MemoGroupInfo <> ''      then S := S + MemoGroupInfo + NewLine + NewLine;
+  if MemoTasksInfo <> ''      then S := S + MemoTasksInfo + NewLine + NewLine;
+  Result := S;
+end;
+
 [CustomMessages]
 eng.CompProg={#MyAppVerName}
 ger.CompProg={#MyAppVerName}
@@ -202,4 +291,19 @@ eng.TaskAllUsers=For all users
 ger.TaskAllUsers=für alle Benutzer
 eng.TaskCurrentUser=For the current user only
 ger.TaskCurrentUser=für den aktuellen Benutzer
-
+eng.CygwinHeader=Cygwin
+ger.CygwinHeader=Cygwin
+eng.CygwinHeader2=A cygwin1.dll has been found on your system.
+ger.CygwinHeader2=Eine cygwin1.dll wurde auf Ihrem System gefunden.
+eng.CygwinText=Which cygwin dll do you want to use?
+ger.CygwinText=Welche cygwin-DLL soll verwendet werden?
+eng.CygwinOpt1=Use the already installed DLL to avoid version conflicts.
+ger.CygwinOpt1=Die bereits installierte DLL verwenden, um Versionskonflikte zu vermeiden.
+eng.CygwinOpt2=Use the included DLL.
+ger.CygwinOpt2=Die mitgelieferte DLL verwenden.
+eng.CygwinReadyHeader=Cygwin DLLs:
+ger.CygwinReadyHeader=Cygwin-DLLs:
+eng.CygwinReadyUsePrev=Using cygwin DLLs found in search path.
+ger.CygwinReadyUsePrev=Verwende cygwin-DLLs aus dem Suchpfad.
+eng.CygwinReadyUseOwn=Using included cygwin DLLs.
+ger.CygwinReadyUseOwn=Verwende mitgelieferte cygwin-DLLs.
