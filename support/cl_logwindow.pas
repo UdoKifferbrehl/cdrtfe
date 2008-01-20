@@ -2,9 +2,9 @@
 
   cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 
-  Copyright (c) 2006-2007 Oliver Valencia
+  Copyright (c) 2006-2008 Oliver Valencia
 
-  letzte Änderung  27.10.2007
+  letzte Änderung  20.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,6 +20,9 @@
 
     Properties   OutWindowHandle
                  OnUpdatePanels
+                 OnProgressBarHide
+                 OnProgressBarShow
+                 OnProgressBarUpdate
 
     Methoden     Add(s: string)
                  AddToLine(s: string)
@@ -46,12 +49,19 @@ uses Windows, Forms, Classes, SysUtils, StdCtrls, userevents;
 
 type TLogWin = class(TObject)
      private
-       FLog            : TStringList;
-       FMemo           : TMemo;
-       FMemo2          : TMemo;
-       FOutWindowHandle: THandle;
-       FOnUpdatePanels : TUpdatePanelsEvent;
+       FLog                : TStringList;
+       FMemo               : TMemo;
+       FMemo2              : TMemo;
+       FOutWindowHandle    : THandle;
+       FOnUpdatePanels     : TUpdatePanelsEvent;
+       FOnProgressBarHide  : TProgressBarHideEvent;
+       FOnProgressBarShow  : TProgressBarShowEvent;
+       FOnProgressBarUpdate: TProgressBarUpdateEvent;
+       FProgressBarShowing : Boolean;
        procedure UpdatePanels(const s1, s2: string);
+       procedure ProgressBarHide;
+       procedure ProgressBarShow(const Max: Integer);
+       procedure ProgressBarUpdate(const Position: Integer);
      protected
        constructor CreateInstance;
        class function AccessInstance(Request: Integer): TLogWin;
@@ -77,6 +87,9 @@ type TLogWin = class(TObject)
        {$ENDIF}
        property OutWindowHandle: THandle read FOutWindowHandle;
        property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
+       property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
+       property OnProgressBarShow: TProgressBarShowEvent read FOnProgressBarShow write FOnProgressBarShow;
+       property OnProgressBarUpdate: TProgressBarUpdateEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
      end;
 
 implementation
@@ -98,12 +111,42 @@ begin
   if Assigned(FOnUpdatePanels) then FOnUpdatePanels(s1, s2);
 end;
 
+{ ProgressBar[Hide|Show|Update] ------------------------------------------------
+
+  Löst die Event OnProgressBar[Hide|Show|Update] aus, die das Hauptfenster ver-
+  anlassen, die entsprechende Aktion im ProgressBar auszuführen.}
+
+procedure TLogWin.ProgressBarHide;
+begin
+  if Assigned(FOnProgressBarHide) and FProgressBarShowing then
+  begin
+    FOnProgressBarHide;
+    FProgressBarShowing := False;
+  end;
+end;
+
+procedure TLogWin.ProgressBarShow(const Max: Integer);
+begin
+  if Assigned(FOnProgressBarShow) and not FProgressbarShowing then
+  begin
+    FOnProgressBarShow(Max);
+    FProgressBarShowing := True;
+  end;
+end;
+
+procedure TLogWin.ProgressBarUpdate(const Position: Integer);
+begin
+  if Assigned(FOnProgressBarUpdate) and FProgressBarShowing then
+    FOnProgressBarUpdate(Position);
+end;
+
 { TLogWindow - protected }
 
 constructor TLogWin.CreateInstance;
 begin
   inherited Create;
   FLog := TStringList.Create;
+  FProgressBarShowing := False;
 end;
 
 class function TLogWin.AccessInstance(Request: Integer): TLogWin;
@@ -304,15 +347,20 @@ begin
   s := ProcessProgress(s);
   {$IFDEF TitleFirst}
   if s <> '' then
+  begin
     Application.Title := Copy(Application.Title, 1,
                               Pos('[', Application.Title) - 2) + ' [' + s + ']';
+    UpdatePanels('<>', s);
+  end;
   {$ELSE}
   if s <> '' then
+  begin
     Application.Title := '[' + s + '] ' +
       Copy(Application.Title, Pos(']', Application.Title) + 2,
         Length(Application.Title) - Pos(']', Application.Title) + 2);
+    UpdatePanels('<>', s);
+  end;
   {$ENDIF}
-  UpdatePanels('<>', s);
 end;
 
 { ShowProgressTaskBarString ----------------------------------------------------
@@ -341,15 +389,18 @@ end;
 function TLogWin.ProcessProgress(const s: string): string;
 {$J+}
 const TotalSectors: Integer = 0;
+      OldProgress: Extended = 0;
 {$J-}
 var Temp    : string;
     Progress: string;
     a, b    : string;
     ia, ib  : Integer;
+    ProgF   : Extended;
     p       : Integer;
 begin
   Progress := '';
   Temp := s;
+  ProgF := 0;
   {cdrecord: Track-Progress}
   if (Pos('Track', Temp) > 0) and (Pos('of', Temp) > 0) then
   begin
@@ -362,8 +413,17 @@ begin
     b := StringRight(Temp, 'f');
     a := Trim(a); b := Trim(b);
     ia := StrToIntDef(a, 0); ib := StrToIntDef(b, 1);
-    if ib > 0 then Progress := Progress + ' ' +
-                               FormatFloat('##0%', (ia / ib) *100);
+    if ib > 0 then
+    begin
+      ProgF := (ia / ib) * 100;
+      Progress := Progress + ' ' + FormatFloat('##0%', ProgF);
+    end;
+    if ProgF > OldProgress then
+    begin
+      ProgressBarUpdate(Round(ProgF));
+      OldProgress := ProgF;
+    end else
+      Progress := '';
   end else
   {cdrecord: Fixating ...}
   if s = 'Fixating...' then
@@ -395,6 +455,18 @@ begin
   begin
     ia := StrToIntDef(Trim(Copy(Temp, 6, Pos('cnt', Temp) - 6)), 0);
     Progress := 'R: ' + FormatFloat('##0%', (ia / TotalSectors) *100)
+  end else
+  {ProgressBar sichtbar machen}
+  if Pos('Starting new track', Temp) = 1 then
+  begin
+    ProgressBarHide;
+    ProgressBarShow(100);
+    OldProgress := 0;
+  end else
+  {ProgressBar unsichtbar machen}
+  if Pos('Writing  time', Temp) = 1 then
+  begin
+    ProgressBarHide;
   end;
   {cdrdao: wrote x of y ...} (*
   if Pos('Wrote', Temp > 0 then

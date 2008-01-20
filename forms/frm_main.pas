@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  20.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3271,7 +3271,7 @@ end;
 
   SetButtons wird benötig, um die Buttons zu deaktivieren, wenn cdrtfe die
   externen Programme ausführt.
-  Zusätzlich wird hier das Falg für laufende Prozesse gesetzt.                 }
+  Zusätzlich wird hier das Flag für laufende Prozesse gesetzt.                 }
 
 procedure TForm1.Setbuttons(const Status: TOnOff);
 {$J+}
@@ -3649,7 +3649,10 @@ begin
   TCdrtfeData.Instance.SetObjects(FLang, FSettings, FData);
   {Ausgabefenster global verfügbar machen.}
   TLogWin.Inst.SetMemo(Memo1);
-  TLogWin.Inst.OnUpdatePanels := UpdatePanels;  
+  TLogWin.Inst.OnUpdatePanels := UpdatePanels;
+  TLogWin.Inst.OnProgressBarHide := ProgressBarHide;
+  TLogWin.Inst.OnProgressBarShow := ProgressBarShow;
+  TLogWin.Inst.OnProgressBarUpdate := ProgressBarUpdate;
   {Kommandzeile auswerten}
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
