@@ -1,8 +1,8 @@
 { f_logfile.pas: Funktionen zum Debuggen, Anzeigen und Schreiben eines Log-Files
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  10.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -34,7 +34,7 @@ procedure AddLogCode(const Value: Integer);
 
 implementation
 
-uses f_filesystem;
+uses f_filesystem, f_misc;
 
 const cDebugDLL = 'cdrtfedbg.dll';
       cLogName  = 'cdrtfe_log.txt';
@@ -70,7 +70,7 @@ begin
     @ShowDebugForm := GetProcAddress(DebugDLLHandle, 'ShowDebugForm');
     @AddLogStr     := GetProcAddress(DebugDLLHandle, 'AddLogStr');
     @AddLogPreDef  := GetProcAddress(DebugDLLHandle, 'AddLogPreDef');
-    //@SetLogFile := GetProcAddress(DebugDLLHandle, 'SetLogFile');
+    @SetLogFile := GetProcAddress(DebugDLLHandle, 'SetLogFile');
     Result := True;
   end else
     Result := False;
@@ -105,14 +105,15 @@ begin
 end;
 
 initialization
+  DLLLoaded := False;
   DLLName := StartUpDir + '\' + cDebugDLL;
-  DLLLoaded := LoadDLL;
+  if CheckCommandLineSwitch('/debug') then DLLLoaded := LoadDLL;
   if DLLLoaded then
   begin
+    SetLogFile(PChar(ProgDataDir + '\' + cLogName));  
     InitDebugForm(Application.Handle);
     ShowDebugForm;
     AddLogCode(1010);
-    //SetLogFile(PChar(StartUpDir + '\' + cLogName));
   end;
 
 finalization

@@ -2,9 +2,9 @@
 
   cdrtfedbg.dpr: Debug-DLL
 
-  Copyright (c) 2007 Oliver Valencia
+  Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  22.06.2007
+  letzte Änderung  10.01.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -48,8 +48,8 @@ exports
   FreeDebugForm,
   ShowDebugForm,
   AddLogStr,
-  AddLogPreDef;
-  {SetLogFile;}
+  AddLogPreDef,
+  SetLogFile;
 
 begin
 end.

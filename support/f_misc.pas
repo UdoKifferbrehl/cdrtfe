@@ -1,9 +1,9 @@
 { f_misc.pas: unterstützende Funktionen (sonstiges)
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  10.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,11 +18,13 @@
     * Umgang mit Komponenten
     * Standard-Dialog
     * Eigenschaften von Formularen ändern (Stay-on-top)
+    * Startparameter
 
 
   exportierte Funktionen/Prozeduren:
 
     AddCRStringToList(s: string; List: TStringList)
+    CheckCommanLineSwitch(const Switch: string): Boolean
     ExportControls
     ExportFontList
     GetCompProp(Comp: TComponent; Name: string): string
@@ -59,6 +61,7 @@ interface
 uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, SysUtils,
      Windows, TypInfo;
 
+function CheckCommandLineSwitch(const Switch: string): Boolean;
 function GetPathFromNode(Root: TTreeNode): string;
 function GetNameByValue(List: TStringList; const Value: string): string;
 function GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode;
@@ -385,6 +388,21 @@ end;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
 begin
   Result := Application.MessageBox(PChar(Text), PChar(Caption), Flags);
+end;
+
+{ CheckCommandLineSwitch -------------------------------------------------------
+
+  True, wenn /Switch als Startparameter übergeben wurde.                       }
+
+function CheckCommandLineSwitch(const Switch: string): Boolean;
+var i: Integer;
+begin
+  i := 1;
+  Result := False;
+  repeat
+    Result := LowerCase(Switch) = LowerCase(ParamStr(i));
+    Inc(i);
+  until Result or (i > ParamCount)
 end;
                          
 { Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }

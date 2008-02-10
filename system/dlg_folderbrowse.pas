@@ -1,8 +1,8 @@
 { dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
-  Copyright (c) 2007 Oliver Valencia
+  Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  27.10.2007
+  letzte Änderung  10.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -392,6 +392,7 @@ begin
       HideSelection    := False;
       OnClick          := STVClick;
       OnKeyDown        := STVKeyDown;
+      Options          := [toExpandTopNode, toShowHidden, toShellMenu];
     end;
 
     {TabOrder}

@@ -2,9 +2,9 @@
 
   f_dllfuncs.pas: Exportierte Funktionen der Debug-DLL
 
-  Copyright (c) 2007 Oliver Valencia
+  Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  22.06.2007
+  letzte Änderung  10.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -30,13 +30,14 @@ unit f_dllfuncs;
 
 interface
 
-uses Windows, Forms;
+uses Windows, Forms, SysUtils;
 
 procedure InitDebugForm(const AppHandle: THandle); stdcall;
 procedure FreeDebugForm;
 procedure ShowDebugForm;
 procedure AddLogStr(Value: PChar; Mode: Byte); stdcall;
 procedure AddLogPreDef(Value: Integer); stdcall;
+procedure SetLogFile(Value: PChar); stdcall;
 
 implementation
 
@@ -44,6 +45,7 @@ uses frm_dbg, f_log;
 
 var FormDebug     : TFormDebug;
     OldHandle     : THandle;
+    LogFileName   : string;
 
 { exportierte DLL-Funktionen ------------------------------------------------- }
 
@@ -56,6 +58,7 @@ begin
   OldHandle := Application.Handle;
   Application.Handle := AppHandle;
   FormDebug := TFormDebug.Create(Application);
+  FormDebug.LogFileName := LogFileName;
 end;
 
 { FreeDebugForm ----------------------------------------------------------------
@@ -96,6 +99,18 @@ end;
 procedure AddLogPreDef(Value: Integer); stdcall;
 begin
   AddLogPreDefInt(Value, FormDebug.MemoLog.Lines);
+end;
+
+{ SetLogFile -------------------------------------------------------------------
+
+  SetLogFile legt den Namen fest, unter dem das Logfile gesoeicher werden soll.}
+
+procedure SetLogFile(Value: PChar); stdcall;
+var TempStr: PChar;
+begin
+  TempStr := StrNew(Value);
+  LogFileName := string(TempStr);
+  StrDispose(TempStr);
 end;
 
 end.
