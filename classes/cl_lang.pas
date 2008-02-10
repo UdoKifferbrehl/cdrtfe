@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.12.2007
+  letzte Änderung  10.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -79,6 +79,8 @@ type TFormSelectLang = class(TForm)
        ComboBox: TComboBox;
        ButtonOk: TButton;
        ButtonCancel: TButton;
+       LabelOk: TLabel;
+       LabelCancel: TLabel;
        procedure FormShow(Sender: TObject);
        procedure ButtonClick(Sender: TObject);
      private
@@ -904,6 +906,8 @@ begin
     Width := 203;
     Visible := True;
     Style := csDropDownList;
+    Hint := 'Select language';
+    ShowHint := True;
   end;
   {Ok-Button}
   ButtonOk := TButton.Create(Self);
@@ -915,6 +919,8 @@ begin
     Height := 25;
     Width := 75;
     Caption := FLang.GMS('mlang02');
+    Hint := '[Ok]';
+    ShowHint := True;
     OnClick := ButtonClick;
   end;
   {Cancel-Button}
@@ -927,6 +933,8 @@ begin
     Height := 25;
     Width := 75;
     Caption := FLang.GMS('mlang03');
+    Hint := '[Cancel]';
+    ShowHint := True;        
     ModalResult := mrCancel;
     Cancel := True;
   end;
