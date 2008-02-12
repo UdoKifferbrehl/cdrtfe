@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  10.01.2008
+  letzte Änderung  12.01.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -44,12 +44,13 @@ uses
 {$R *.RES}
 
 exports
+  SetLogFile,
+  SetAutoSave,
   InitDebugForm,
-  FreeDebugForm,
   ShowDebugForm,
+  FreeDebugForm,  
   AddLogStr,
-  AddLogPreDef,
-  SetLogFile;
+  AddLogPreDef;
 
 begin
 end.

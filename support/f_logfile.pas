@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  10.01.2008
+  letzte Änderung  12.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,7 +27,7 @@ unit f_logfile;
 
 interface
 
-uses Windows, Forms{, Classes, SysUtils};
+uses Windows, Forms;
 
 procedure AddLog(const Value: string; const Mode: Byte);
 procedure AddLogCode(const Value: Integer);
@@ -45,16 +45,33 @@ type TInitDebugForm = procedure(const AppHandle: THandle); stdcall;
      TAddLogStr     = procedure(Value: PChar; Mode: Byte); stdcall;
      TAddLogPreDef  = procedure(Value: Integer); stdcall;
      TSetLogFile    = procedure(Value: PChar); stdcall;
+     TSetAutoSave   = procedure(Value: Integer); stdcall;
 
 var DLLName       : string;
     DebugDLLHandle: THandle;
     DLLLoaded     : Boolean = False;
+    DoDebug       : Boolean = False;
+    DoAutoSave    : Boolean = False;
+    {Prozedurvariablen}
     InitDebugForm : TInitDebugForm = nil;
     FreeDebugForm : TFreeDebugForm = nil;
     ShowDebugForm : TShowDebugForm = nil;
     AddLogStr     : TAddLogStr     = nil;
     AddLogPreDef  : TAddLogPreDef  = nil;
     SetLogFile    : TSetLogFile    = nil;
+    SetAutoSave   : TSetAutoSave   = nil;
+
+{ InitDebugVars ----------------------------------------------------------------
+
+  InitDebuigVars initialisiert einige der Variablen.                           }
+
+procedure InitDebugVars;
+begin
+  DLLLoaded  := False;
+  DLLName    := StartUpDir + '\' + cDebugDLL;
+  DoAutoSave := CheckCommandLineSwitch('/debugAS');
+  DoDebug    := CheckCommandLineSwitch('/debug') or DoAutosave;
+end;
 
 { LoadDll ----------------------------------------------------------------------
 
@@ -70,7 +87,8 @@ begin
     @ShowDebugForm := GetProcAddress(DebugDLLHandle, 'ShowDebugForm');
     @AddLogStr     := GetProcAddress(DebugDLLHandle, 'AddLogStr');
     @AddLogPreDef  := GetProcAddress(DebugDLLHandle, 'AddLogPreDef');
-    @SetLogFile := GetProcAddress(DebugDLLHandle, 'SetLogFile');
+    @SetLogFile    := GetProcAddress(DebugDLLHandle, 'SetLogFile');
+    @SetAutoSave   := GetProcAddress(DebugDLLHandle, 'SetAutoSave');    
     Result := True;
   end else
     Result := False;
@@ -105,12 +123,12 @@ begin
 end;
 
 initialization
-  DLLLoaded := False;
-  DLLName := StartUpDir + '\' + cDebugDLL;
-  if CheckCommandLineSwitch('/debug') then DLLLoaded := LoadDLL;
+  InitDebugVars;
+  if DoDebug   then DLLLoaded := LoadDLL;
   if DLLLoaded then
   begin
-    SetLogFile(PChar(ProgDataDir + '\' + cLogName));  
+    if DoAutoSave then SetAutoSave(1);
+    SetLogFile(PChar(ProgDataDir + '\' + cLogName));
     InitDebugForm(Application.Handle);
     ShowDebugForm;
     AddLogCode(1010);

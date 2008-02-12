@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  10.01.2008
+  letzte Änderung  12.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -37,6 +37,7 @@ procedure FreeDebugForm;
 procedure ShowDebugForm;
 procedure AddLogStr(Value: PChar; Mode: Byte); stdcall;
 procedure AddLogPreDef(Value: Integer); stdcall;
+procedure SetAutoSave(Value: Integer); stdcall;
 procedure SetLogFile(Value: PChar); stdcall;
 
 implementation
@@ -46,6 +47,7 @@ uses frm_dbg, f_log;
 var FormDebug     : TFormDebug;
     OldHandle     : THandle;
     LogFileName   : string;
+    AutoSave      : Boolean;
 
 { exportierte DLL-Funktionen ------------------------------------------------- }
 
@@ -59,14 +61,16 @@ begin
   Application.Handle := AppHandle;
   FormDebug := TFormDebug.Create(Application);
   FormDebug.LogFileName := LogFileName;
+  FormDebug.AutoSave := AutoSave;
 end;
 
 { FreeDebugForm ----------------------------------------------------------------
 
-  Debug-Fenster freigeben und ursprünlgiches Handle wiederherstellen.          }
+  Debug-Fenster freigeben und ursprüngliches Handle wiederherstellen.          }
 
 procedure FreeDebugForm;
 begin
+  FormDebug.Close;
   FormDebug.Release;
   Application.Handle := OldHandle;
 end;
@@ -103,7 +107,8 @@ end;
 
 { SetLogFile -------------------------------------------------------------------
 
-  SetLogFile legt den Namen fest, unter dem das Logfile gesoeicher werden soll.}
+  SetLogFile legt den Namen fest, unter dem das Logfile gespeichert werden
+  soll.                                                                        }
 
 procedure SetLogFile(Value: PChar); stdcall;
 var TempStr: PChar;
@@ -111,6 +116,17 @@ begin
   TempStr := StrNew(Value);
   LogFileName := string(TempStr);
   StrDispose(TempStr);
+end;
+
+{ SetAutoSave ------------------------------------------------------------------
+
+  SetAutoSave legt fest, ob das Logfile automatisch beim Schließen des Fensters
+  gespeichert werden soll:  Value = 0 -> AutoSave := False;
+                            Value = 1 -> AutoSave := True;                     }
+
+procedure SetAutoSave(Value: Integer); stdcall;
+begin
+  AutoSave := Value = 1;
 end;
 
 end.

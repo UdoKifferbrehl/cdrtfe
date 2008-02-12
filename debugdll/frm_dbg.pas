@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  10.01.2008
+  letzte Änderung  12.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,14 +27,19 @@ type
     MemoLog     : TMemo;
     ButtonSaveLog: TButton;
     SaveDialog1: TSaveDialog;
+    CheckBoxAutoSave: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonSaveLogClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
     FLogFileName: string;
+    FAutoSave   : Boolean;
   public
     { Public declarations }
     property LogFileName: string read FLogFileName write FLogFileName;
+    property AutoSave: Boolean read FAutoSave write FAutoSave;
   end;
 
 implementation
@@ -51,6 +56,29 @@ begin
   Top  := 0;
   Left := 0;
   FLogFileName := '';
+  FAutoSave := False;
+end;
+
+{ FormShow ---------------------------------------------------------------------
+
+  Controls in Abhängigkeit der Initialisierungen aktulaisieren.                }
+
+procedure TFormDebug.FormShow(Sender: TObject);
+begin
+  CheckBoxAutoSave.Enabled := FLogFileName <> '';
+  CheckBoxAutoSave.Checked := CheckBoxAutoSave.Enabled and FAutoSave;
+end;
+
+{ FormClose --------------------------------------------------------------------
+
+  Aktionen beim Schließen des Fensters.                                        }
+
+procedure TFormDebug.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if CheckBoxAutoSave.Checked then
+  begin
+    MemoLog.Lines.SaveToFile(FLogFileName);
+  end;
 end;
 
 { ButtonSaveLogClick -----------------------------------------------------------
