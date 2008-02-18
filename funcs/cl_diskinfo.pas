@@ -2,9 +2,9 @@
 
   cl_diskinfo.pas: Zugriff auf Rohlingsinformationen und Medien-Überprüfung
 
-  Copyright (c) 2006-2007 Oliver Valencia
+  Copyright (c) 2006-2008 Oliver Valencia
 
-  letzte Änderung  23.12.2007
+  letzte Änderung  17.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1098,7 +1098,8 @@ begin
   if Args.Choice = cCDRW then
   begin
     {Fehler: DVD+RW kann nicht gelöscht werden. Wird überschrieben.}
-    if FDiskType = DT_DVD_PlusRW then
+    if (FDiskType = DT_DVD_PlusRW) and
+       not FSettings.Cdrecord.CanEraseDVDPlusRW then
     begin
       ShowMsgDlg(FLang.GMS('mburn15'), FLang.GMS('g004'),
                  MB_OK or MB_ICONINFORMATION);
@@ -1712,7 +1713,8 @@ begin
   if Args.Choice = cCDRW then
   begin
     {Fehler: DVD+RW kann nicht gelöscht werden. Wird überschrieben.}
-    if FDiskType = DT_DVD_PlusRW then
+    if (FDiskType = DT_DVD_PlusRW) and
+       not FSettings.Cdrecord.CanEraseDVDPlusRW then
     begin
       ShowMsgDlg(FLang.GMS('mburn15'), FLang.GMS('g004'),
                  MB_OK or MB_ICONINFORMATION);

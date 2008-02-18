@@ -3,7 +3,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2008
+  letzte Änderung  17.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -398,7 +398,6 @@ function CheckCommandLineSwitch(const Switch: string): Boolean;
 var i: Integer;
 begin
   i := 1;
-  Result := False;
   repeat
     Result := LowerCase(Switch) = LowerCase(ParamStr(i));
     Inc(i);

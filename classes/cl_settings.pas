@@ -2,10 +2,10 @@
 
   cl_settings.pas: Einstellungen von cdrtfe
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  17.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -121,6 +121,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        IniFileOk  : Boolean;
        CygwinOk   : Boolean;    // cygwin1.dll
        CdrtoolsOk : Boolean;    // cdrecord.exe, mkisofs.exe
+       VerInfoOk  : Boolean;    // cdrecord -version, mkisofs -version
        CdrdaoOk   : Boolean;
        Cdda2wavOk : Boolean;
        ReadcdOk   : Boolean;
@@ -190,6 +191,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        HaveMediaInfo      : Boolean;  // 2.01.01a21: -minfo
        HaveNLPathtables   : Boolean;  // 2.01.01a31: -no-limit-pathtables
        HaveHideUDF        : Boolean;  // 2.01.01a32: -hide-udf
+       CanEraseDVDPlusRW  : Boolean;  // 2.01.01a37: Löschen von DVD+RW
      end;
 
      {Einstellungen: cdrdao allgemein}
@@ -613,6 +615,7 @@ begin
     IniFileOk   := True;
     CygwinOk    := True;
     CdrtoolsOk  := True;
+    VerInfoOk   := True;
     CdrdaoOk    := True;
     Cdda2wavOk  := True;
     ReadcdOk    := True;
@@ -678,6 +681,7 @@ begin
     HaveMediaInfo       := False;
     HaveNLPathtables    := False;
     HaveHideUDF         := False;
+    CanEraseDVDPlusRW   := False;
   end;
 
   {allgemeine Einstellungen: cdrdao}

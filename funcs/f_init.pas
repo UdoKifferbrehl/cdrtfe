@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.01.2008
+  letzte Änderung  18.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,7 +40,7 @@ uses Windows, Classes, Forms, SysUtils, Dialogs, FileCtrl, IniFiles,
 function CheckFiles(Settings: TSettings; Lang: TLang): Boolean;
 function CheckMkisofsImports: Boolean;
 procedure CheckEnvironment(Settings: TSettings);
-procedure CheckVersion(Settings: TSettings);
+procedure CheckVersion(Settings: TSettings; Lang: TLang);
 
 implementation
 
@@ -410,7 +410,7 @@ begin
 //        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit12'));
       end; 
       {Version von cdrecord/mkisofs prüfen.}
-      CheckVersion(Settings);
+      CheckVersion(Settings, Lang);
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei
        denn, cdrecord ab Version 2.01a24 ist vorhanden.}
       CdrdaoOk := FileExists(StartUpDir + cCdrdaoBin + cExtExe);
@@ -432,12 +432,12 @@ end;
   Ermittelt die Version von cdrecord. Ab cdrecord 2.01a26 ist die Angabe des
   Schreibmodus verpflichtend.                                                  }
 
-procedure CheckVersion(Settings: TSettings);
-var Output: string;
+procedure CheckVersion(Settings: TSettings; Lang: TLang);
+var Output       : string;
+    OldOutput    : string;
     VersionString: string;
-    VersionValue: Integer;
-    Cmd: string;
-    //p: Integer;
+    VersionValue : Integer;
+    Cmd          : string;
 
   function GetVersionString(Source: string): string;
   var p: Integer;
@@ -475,11 +475,11 @@ var Output: string;
                -                          998 (wenn b__)                       }
 
   function GetVersionValue(const Source: string): Integer;
-  var Value: Integer;
-      Temp: string;
+  var Value    : Integer;
+      Temp     : string;
       VerNumStr: string;
       VerNumInt: Integer;
-      p: Integer;
+      p        : Integer;
   begin
     Value := 1000;
     Temp := Source;
@@ -540,7 +540,24 @@ var Output: string;
       Value := Value + VerNumInt * 10000;
     end;
     Result := Value;
-  end;  
+  end;
+
+  { CheckOutput ----------------------------------------------------------------
+
+    CheckOutput prüft, ob die Versionsinfos ermittelt werden konnten. Wenn
+    nicht, deutet dies auf Probleme mit den Binaries oder der cygwin-DLL hin.  }
+
+  procedure CheckOutput(const s: string);
+  begin
+    if (s = '') or
+       (Pos('[main]', s) > 0) or
+       (Pos('shared memory', s) > 0) or
+       (Pos('heap', s) > 0) then
+    begin
+      MessageBox(Application.Handle, PChar(Lang.GMS('einit04')),
+                 PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION);
+    end;
+  end;
 
 begin
   {cdrecord-Version}
@@ -564,8 +581,12 @@ begin
   {ab cdrecord 2.01.01a21 gibt es die Option -minfo}
   Settings.Cdrecord.HaveMediaInfo :=
     VersionValue >= GetVersionValue('2.01.01a21');
+  {ab cdrecord 2.01.01a37 können DVD+RWs gelöscht werden}
+  Settings.Cdrecord.CanEraseDVDPlusRW :=
+    VersionValue >= GetVersionValue('2.01.01a37');
   {haben wir es cdrecord-ProDVD zu tun?}
   Settings.FileFlags.ProDVD := Pos('-ProDVD-', Output) > 0;
+  OldOutput := Output;
 
   {mkisofs-Version}
   Cmd := StartUpDir + cMkisofsBin;
@@ -583,6 +604,9 @@ begin
   {ab mkisofs 2.01.01a32 gibt es -hide-udf}
   Settings.Cdrecord.HaveHideUDF :=
     VersionValue >= GetVersionValue('2.01.01a32');
+
+  {abschließende Prüfung}
+  CheckOutput(OldOutput + Output);
 end;
 
 { CheckEnvironment -------------------------------------------------------------

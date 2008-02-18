@@ -2,10 +2,10 @@
 
   cl_cd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.06.2007
+  letzte Änderung  17.01.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -717,7 +717,9 @@ end;
 
 { GetFileSize ------------------------------------------------------------------
 
-  GetFileSize extrahiert aus dem Filelisten-Eintrag die Dateigröße.            }
+  GetFileSize extrahiert aus dem Filelisten-Eintrag die Dateigröße. Die Größen
+  von Dateien, die aus vorigen Session stammen werden ignoriert, es werden nur
+  tatsächlich neu hinzugefügt Dateien mitgezählt.                              }
 
 function TCD.ExtractFileSizeFromEntry(const Entry: string):
                              {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
@@ -727,17 +729,20 @@ begin
   Temp := StringRight(Entry, '*');
   if Pos('>', Temp) > 0 then
   begin
-    Delete(Temp, Pos('>', Temp), 1);
+    // Delete(Temp, Pos('>', Temp), 1);
+    Result := 0;
+  end else
+  begin
+    {$IFDEF LargeFiles}
+    {$IFNDEF Delphi4Up}
+    Result := StrToFloatDef(Temp, 0);
+    {$ELSE}
+    Result := StrToInt64Def(Temp, 0);
+    {$ENDIF}
+    {$ELSE}
+    Result := StrToIntDef(Temp, 0);
+    {$ENDIF}
   end;
-  {$IFDEF LargeFiles}
-  {$IFNDEF Delphi4Up}
-  Result := StrToFloatDef(Temp, 0);
-  {$ELSE}
-  Result := StrToInt64Def(Temp, 0);
-  {$ENDIF}
-  {$ELSE}
-  Result := StrToIntDef(Temp, 0);
-  {$ENDIF}
 end;
 
 { GetLastFolderAdded -----------------------------------------------------------
