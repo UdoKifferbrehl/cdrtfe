@@ -47,7 +47,8 @@ implementation
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      cl_logwindow,
-     f_filesystem, f_process, f_wininfo, f_environment, f_strings, constant;
+     f_filesystem, f_process, f_wininfo, f_environment, f_strings, f_cygwin,
+     constant;
 
 { ShowToolPath -----------------------------------------------------------------
 
@@ -80,36 +81,6 @@ begin
   AddLog(' ', 3);
 end;
 {$ENDIF}
-
-{ UseOwnDLLs -------------------------------------------------------------------
-
-  Wertet die Datei tools\cygwin\cygwin.ini aus.
-
-  True:  Die mitgelieferten DLLs sollen verwendet werden, unabhängig davon, ob
-         die cygwin1.dll im Suchpfad gefunden wurde.
-  False: Die mitgelieferten DLLs sollen nur verwendet werden, wenn die
-         cygwin1.dll nicht im Suchpfad gefunden wurde.                         }
-
-function UseOwnDLLs: Boolean;
-const cCygSec: string = 'CygwinDLL';
-var Ini : TIniFile;
-    Name: string;
-begin
-  Name := StartUpDir + cToolDir + cCygwinDir + cIniCygwin;
-  Result := False;
-  if FileExists(Name) then
-  begin
-    {$IFDEF WriteLogFile}
-    AddLogCode(1256);
-    {$ENDIF}
-    Ini := TIniFile.Create(Name);
-    Result := Ini.ReadBool(cCygSec, 'UseOwnDLLs', False);
-    Ini.Free;
-  end;
-  {$IFDEF WriteLogFile}
-  if Result then AddLogCode(1257) else AddLogCode(1258);
-  {$ENDIF}
-end;
 
 { GetToolNames -----------------------------------------------------------------
 
@@ -155,7 +126,7 @@ begin
     cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
     if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
     Found := (FindInSearchPath(Temp) <> '');
-    if Found and not UseOwnDLLs then
+    if Found and not UseOwnCygwinDLLs then
     begin
       cCygwin1Dll := Temp;
       {$IFDEF WriteLogfile} AddLogCode(1250); {$ENDIF}

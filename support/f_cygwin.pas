@@ -1,8 +1,8 @@
 { f_cygwin.pas: cygwin-Funktionen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  21.08.2006
+  letzte Änderung  20.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,7 +19,9 @@
     GetCygwinPathPrefix: string
     MakePathCygwinConform(Path: string):string
     MakePathMkisofsConform(const Path: string):string
-    MakePathMingwMkisofsConform(const Path: string):string    
+    MakePathMingwMkisofsConform(const Path: string):string
+    SetUseOwnCygwinDLLs(Value: Boolean);
+    UseOwnCygwinDLLs: Boolean
     
 }
 
@@ -29,17 +31,20 @@ unit f_cygwin;
 
 interface
 
-uses Windows, Registry;
+uses Windows, SysUtils, Registry, IniFiles;
 
 function GetCygwinPathPrefix: string;
 function MakePathCygwinConform(Path: string):string;
 function MakePathMkisofsConform(const Path: string):string;
 function MakePathMingwMkisofsConform(const Path: string): string;
+function UseOwnCygwinDLLs: Boolean;
+procedure SetUseOwnCygwinDLLs(Value: Boolean);
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_strings, f_misc, f_filesystem;
+     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     cl_cdrtfedata, f_strings, f_misc, f_filesystem, constant;
 
 { 'statische' Variablen }
 var CygPathPrefix : string;           // Cygwin-Mountpoint
@@ -172,6 +177,55 @@ begin
   {* - > \=}
   Temp := ReplaceString(Temp, '*', '\=');
   Result := Temp;
+end;
+
+const cCygOwnDLLSec: string = 'CygwinDLL';
+      cCygOwnDLL   : string = 'UseOwnDLLs';
+
+{ UseOwnDLLs -------------------------------------------------------------------
+
+  Wertet die Datei tools\cygwin\cygwin.ini aus.
+
+  True:  Die mitgelieferten DLLs sollen verwendet werden, unabhängig davon, ob
+         die cygwin1.dll im Suchpfad gefunden wurde.
+  False: Die mitgelieferten DLLs sollen nur verwendet werden, wenn die
+         cygwin1.dll nicht im Suchpfad gefunden wurde.                         }
+
+function UseOwnCygwinDLLs: Boolean;
+var Ini : TIniFile;
+    Name: string;
+begin
+  Name := StartUpDir + cToolDir + cCygwinDir + cIniCygwin;
+  Result := False;
+  if FileExists(Name) then
+  begin
+    {$IFDEF WriteLogFile}
+    AddLogCode(1256);
+    {$ENDIF}
+    Ini := TIniFile.Create(Name);
+    Result := Ini.ReadBool(cCygOwnDLLSec, cCygOwnDLL, False);
+    Ini.Free;
+  end;
+  {$IFDEF WriteLogFile}
+  if Result then AddLogCode(1257) else AddLogCode(1258);
+  {$ENDIF}
+  {Wir benötigen den Wert in FSettings, daher hier Zugrif über Singleton. Sehr
+   unschöne Lösung. Demnächst mal ändern.}
+  TCdrtfeData.Instance.Settings.FileFlags.UseOwnDLLs := Result;
+end;
+
+{ SetUseOwnCygwinDLLs ----------------------------------------------------------
+
+  Setzt die Option [CygwinDLL], UseOwnDLLs in tools\cygwin\cygwin.ini.         }
+
+procedure SetUseOwnCygwinDLLs(Value: Boolean);
+var Ini : TIniFile;
+    Name: string;
+begin
+  Name := StartUpDir + cToolDir + cCygwinDir + cIniCygwin;
+  Ini := TIniFile.Create(Name);
+  Ini.WriteBool(cCygOwnDLLSec, cCygOwnDLL, Value);
+  Ini.Free;
 end;
 
 initialization

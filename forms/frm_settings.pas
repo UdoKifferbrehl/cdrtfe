@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  20.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -95,6 +95,11 @@ type
     EditMplayerOpt: TEdit;
     LabelMPlayerOpt: TLabel;
     LabelMPlayerCmd: TLabel;
+    TabSheetCygwin: TTabSheet;
+    GroupBoxCygwinDLL: TGroupBox;
+    RadioButtonUseOwnDLL: TRadioButton;
+    RadioButtonUseSearchPathDLL: TRadioButton;
+    LabelUseDLL: TLabel;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -109,12 +114,13 @@ type
   private
     { Private declarations }
     FOnMessageShow: TMessageShowEvent;
-    FSettings: TSettings;
-    FLang: TLang;
+    FSettings     : TSettings;
+    FLang         : TLang;
     FShellExtIsSet: Boolean;  // Die Variablen für die ShellExtensions spielen
     FShellExtToSet: Boolean;  // nur hier eine Rolle.
-    FSCSIOld: string;
-    FFormHandle: THandle;
+    FSCSIOld      : string;
+    FUseOwnDLLOld : Boolean;
+    FFormHandle   : THandle;
     function GetActivePage: Byte;
     function InputOk: Boolean;
     procedure ActivateTab;
@@ -138,7 +144,8 @@ implementation
 
 {$R *.DFM}
 
-uses f_shellext, f_wininfo, f_filesystem, f_misc, constant, user_messages;
+uses f_shellext, f_wininfo, f_filesystem, f_misc, f_cygwin, constant,
+     user_messages;
 
 {var}
 
@@ -255,6 +262,9 @@ begin
   FSCSIOld := FSettings.Drives.SCSIInterface;
   EditMPlayerCmd.Text := FSettings.General.MPlayerCmd;
   EditMPlayeropt.Text := FSettings.General.MPlayerOpt;
+  RadioButtonUseOwnDLL.Checked := FSettings.FileFlags.UseOwnDLLs;
+  RadioButtonUseSearchPathDLL.Checked := not FSettings.FileFlags.UseOwnDLLs;
+  FUseOwnDLLOld := FSettings.FileFlags.UseOwnDLLs;
   ActivateTab;
 end;
 
@@ -298,6 +308,7 @@ begin
   if RadioButtonSCSISPTI.Checked then FSettings.Drives.SCSIInterface := 'SPTI';
   FSettings.General.MPlayerCmd := EditMPlayerCmd.Text;
   FSettings.General.MPlayerOpt := EditMPlayerOpt.Text;
+  FSettings.FileFlags.UseOwnDLLs := RadioButtonUseOwnDLL.Checked;
 end;
 
 { CheckControls ----------------------------------------------------------------
@@ -442,6 +453,11 @@ begin
     if FSCSIOld <> FSettings.Drives.SCSIInterface then
     begin
       PostMessage(FFormHandle, WM_DriveSettings, wmwpDrvSetSCSIChange, 0);
+    end;
+    {cygwin1.dll}
+    if FUseOwnDLLOld <> FSettings.FileFlags.UseOwnDLLs then
+    begin
+      SetUseOwnCygwinDLLs(FSettings.FileFlags.UseOwnDLLs);
     end;
     ModalResult := mrOK;
   end;
