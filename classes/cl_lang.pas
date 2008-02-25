@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.01.2008
+  letzte Änderung  26.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -42,15 +42,20 @@ uses Classes, Forms, SysUtils, Inifiles, Controls, StdCtrls, ComCtrls;
 
 type TLang = class(TObject)
      private
-       FMessageStrings: TStringList;
+       FMessageStrings  : TStringList;
        FComponentStrings: TStringList;
-       FLangList: TStringList;
-       FLangFileFound: Boolean;
-       FIniFileFound: Boolean;
-       FIniFile: string;
-       FCurrentLang: string;
-       FDefaultLang: string;
+       FLangList        : TStringList;
+       FLangIniFileFound: Boolean;       // translation\cdrtfe_lang.ini
+       FLangFileFound   : Boolean;       // ausgewählte Übersetzung
+       FIniFileFound    : Boolean;       // cdrtfe.ini
+       FIniFile         : string;
+       FCurrentLang     : string;
+       FCurrentLangName : string;
+       FDefaultLang     : string;
+       FDefaultLangName : string;
        function GetIniPath: string;
+       function LangIniFileFound: Boolean;
+       function TranslationFileFound: Boolean;
        procedure GetDefaultLang;
        procedure GetLangList;
        procedure InitMessageStrings;
@@ -71,9 +76,7 @@ procedure ExportStringProperties;
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_filesystem, f_misc, f_strings, f_wininfo, constant;
-
-const LangFileName = '\cdrtfe_lang.ini';
+     f_logfile, f_filesystem, f_misc, f_strings, f_wininfo, constant;
 
 type TFormSelectLang = class(TForm)
        ComboBox: TComboBox;
@@ -84,8 +87,8 @@ type TFormSelectLang = class(TForm)
        procedure FormShow(Sender: TObject);
        procedure ButtonClick(Sender: TObject);
      private
-       FLang: TLang;
-       FLangList: TStringList;
+       FLang       : TLang;
+       FLangList   : TStringList;
        FCurrentLang: string;
        procedure Init(List: TStringList);
      public
@@ -375,6 +378,25 @@ begin
   {$ENDIF}
 end;
 
+{ LangIniFileFound -------------------------------------------------------------
+
+  True, wenn \translations\cdrtfe_lang.ini gefunden wurde.                     }
+
+function TLang.LangIniFileFound: Boolean;
+begin
+  Result := FileExists(StartUpDir + cLangDir + cLangFileName);
+end;
+
+{ TranslationFileFound ---------------------------------------------------------
+
+  True, wenn \translations\<lang>\cdrtfe_lang.ini gefunden wurde.              }
+
+function TLang.TranslationFileFound: Boolean;
+begin
+  Result := FileExists(StartUpDir + cLangDir + '\' +
+                       LowerCase(FCurrentLangName) + cLangFileName);
+end;
+
 { GetDefaultLang ---------------------------------------------------------------
 
   ermittelt die eingestelle Default-Sprache, genauer das entsprechende Suffix. }
@@ -395,14 +417,21 @@ begin
   {Nichts gefunden? Dann in cdrtfe_lang.ini suchen.}
   if FDefaultLang = '' then
   begin
-    LangFile := TIniFile.Create(StartUpDir + LangFileName);
+    LangFile := TIniFile.Create(StartUpDir + cLangDir + cLangFileName);
     FDefaultLang := LangFile.ReadString('Languages', 'Default', '');
     LangFile.Free;
     {$IFDEF DebugLang}
     Deb('cdrtfe_lang.ini: DefaultLang=' + FDefaultLang, 1);
     {$ENDIF}
   end;
+  FDefaultLangName := FLangList.Values[FDefaultLang];
   FCurrentLang := FDefaultLang;
+  FCurrentLangName := FDefaultLangName;
+  {$IFDEF DebugLang}
+  Deb('Translation name: ' + FDefaultLangName, 1);
+  Deb('File            : ' + StartUpDir + cLangDir + '\' +
+                             LowerCase(FCurrentLangName) + cLangFileName, 1);
+  {$ENDIF}
 end;
 
 { SetDefaultLang ---------------------------------------------------------------
@@ -410,30 +439,23 @@ end;
   setzt Suffix für die Default-Sprache.                                        }
 
 procedure TLang.SetDefaultLang;
-var LangFile: TStringList;
-    IniFile : TIniFile;
-    i: Integer;
+var IniFile : TIniFile;
 begin
   if FIniFileFound then
   begin
     IniFile := TIniFile.Create(FIniFile);
     IniFile.WriteString('General', 'DefaultLang', FCurrentLang);
-    INiFile.Free;
+    IniFile.Free;
     {$IFDEF DebugLang}
     Deb('cdrtfe.ini     : DefaultLang=' + FCurrentLang + ' saved.', 1);
     {$ENDIF}
   end else
   begin
-    { Da cdrtfe_lang.ini größer als 64 KiByte ist, können wir nicht mehr die
-      Funktionen für Ini-Dateien verwenden, wenn wir speichern wollen. }
-    LangFile := TStringList.Create;
-    LangFile.LoadFromFile(StartUpDir + LangFileName);
-    i := LangFile.IndexOf('Default=' + FDefaultLang);
-    LangFile[i] := 'Default=' + FCurrentLang;
-    LangFile.SaveToFile(StartUpDir + LangFileName);
-    LangFile.Free;
+    IniFile := TIniFile.Create(StartUpDir + cLangDir + cLangFileName);
+    IniFile.WriteString('Languages', 'Default', FCurrentLang);
+    IniFile.Free;
     {$IFDEF DebugLang}
-    Deb('cdrtfe_lang.ini: DefaultLang=' + FCurrentLang + ' saved.', 1);
+    Deb('cdrtfe_lang.ini: Default=' + FCurrentLang + ' saved.', 1);
     {$ENDIF}
   end;
   FDefaultLang := FCurrentLang;
@@ -447,7 +469,7 @@ procedure TLang.GetLangList;
 var LangFile: TIniFile;
     Temp    : string;
 begin
-  LangFile := TIniFile.Create(StartUpDir + LangFileName);
+  LangFile := TIniFile.Create(StartUpDir + cLangDir + cLangFileName);
   LangFile.ReadSectionValues('Languages', FLangList);
   LangFile.Free;
   {Defaulteintrag entfernen}
@@ -466,16 +488,17 @@ end;
 
 procedure TLang.LoadLanguage;
 var NewStrings: TStringList;
-    List: TStringList;
-    i: Integer;
-    Ok: Boolean;
+    List      : TStringList;
+    i         : Integer;
+    Ok        : Boolean;
 begin
   NewStrings := TSTringList.Create;
   List := TStringList.Create;
   {gesamte Sprachdatei laden}
-  List.LoadFromFile(StartUpDir + LangFileName);
+  List.LoadFromFile(StartUpDir + cLangDir + '\' + LowerCase(FCurrentLangName) +
+                    cLangFileName);
   {MessageStrings laden}
-  Ok := GetSection(List, NewStrings, '[Messages_' + FDefaultLang + ']', '');
+  Ok := GetSection(List, NewStrings, '[Messages]', '');
   if Ok then
   begin
     {falls in cdrtfe_lang.ini Einträge fehlen, die Original-Einträge nehmen}
@@ -491,7 +514,7 @@ begin
   end;
   NewStrings.Clear;
   {ComponentStrings laden}
-  Ok := GetSection(List, NewStrings, '[Components_' + FDefaultLang + ']', '');
+  Ok := GetSection(List, NewStrings, '[Components]', '');
   if Ok then
   begin
     FComponentStrings.Assign(NewStrings);
@@ -505,26 +528,32 @@ end;
 constructor TLang.Create;
 begin
   inherited Create;
-  FMessageStrings := TStringList.Create;
+  FLangFileFound    := False;
+  FMessageStrings   := TStringList.Create;
   FComponentStrings := TStringList.Create;
-  FLangList := TStringList.Create;
+  FLangList         := TStringList.Create;
   InitMessageStrings;
-  if FileExists(StartUpDir + LangFileName) then
+  {\translation\cdrtfe_lang.ini suchen}
+  FLangIniFileFound := LangIniFileFound;
+  if FLangIniFileFound then
   begin
-    {cdrtfe.ini suchen}
-    FIniFile := GetIniPath;
-    {es wurde eine Sprachdatei gefunden}
-    FLangFileFound := True;
-    {Defaultwert auslesen}
-    GetDefaultLang;
+    {$IFDEF WriteLogFile}
+    AddLogCode(1400);
+    {$ENDIF}
     {List der verfügbaren Sprachen einlesen}
     GetLangList;
-    {Sprachinformationen laden}
-    LoadLanguage;
-  end else
-  begin
-    {es wurde keine Sprachdatei gefunden}
-    FLangFileFound := False;
+    {cdrtfe.ini suchen}
+    FIniFile := GetIniPath;
+    {Defaultwert auslesen}
+    GetDefaultLang;
+    {\translation\<lang>\cdrtfe_lang.ini suchen}
+    FLangFileFound := TranslationFileFound;
+    if FLangFileFound then
+    begin
+      AddLogCode(1401);
+      {Sprachinformationen laden}
+      LoadLanguage;
+    end;
   end;
 end;
 
@@ -542,8 +571,7 @@ end;
   StringList MessageString über die zugehörige ID.                             }
 
 function TLang.GMS(const id: string): string;
-const //CR = #13;
-      CRLF = #13#10;
+const CRLF = #13#10;
 begin
   Result := FMessageStrings.Values[id];
   Result := ReplaceString(Result, '\n', CRLF);
@@ -556,11 +584,11 @@ end;
   diese Datei fehlen, bleiben die Stringproperties unverändert.                }
 
 procedure TLang.SetFormLang(Form: TForm);
-var j, k: Integer;
+var j, k    : Integer;
     FormName: string;
-    Name: string;
-    Value: string;
-    C: TComponent;
+    Name    : string;
+    Value   : string;
+    C       : TComponent;
 begin
   if FLangFileFound then
   begin
@@ -724,6 +752,7 @@ begin
     if FormSelectLang.CurrentLang <> FCurrentLang then
     begin
       FCurrentLang := FormSelectLang.CurrentLang;
+      FCurrentLangName := FLangList.Values[FCurrentLang];
       SetDefaultLang;
       LoadLanguage;
       Result := True;
@@ -756,12 +785,12 @@ var OutFile: TIniFile;
 
   {lokale Prozedur von ExportProperties}
   procedure SaveForm(Comp: TComponent);
-  var j, k: Integer;
-      Section: string;
+  var j, k    : Integer;
+      Section : string;
       FormName: string;
-      Name: string;
-      Value: string;
-      C: TComponent;
+      Name    : string;
+      Value   : string;
+      C       : TComponent;
   begin
     Section := 'Lang1';
     FormName := (Comp as TForm).Name;

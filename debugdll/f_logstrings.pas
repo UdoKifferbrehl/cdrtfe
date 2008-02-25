@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  18.01.2008
+  letzte Änderung  25.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -84,7 +84,7 @@ begin
     Add('1220=Entering TDevices.UpdateSpeedLists ***********                                     -------');
     Add('1221=Leaving TDevices.UpdateSpeedLists ************                                     -------');
     Add('1222=Rescanning SCSI bus');
-    {f_init.pas}
+    {f_init.pas, f_cygwin.pas}
     Add('1250=cygwin1.dll found in search path.');
     Add('1251=Using DLL from cdrtfe installation');
     Add('1252=Using file paths from cdrtfe_tools.ini.');
@@ -99,7 +99,10 @@ begin
     Add('1270=Creating temporary cue file');
     {cl_settings.pas}
     Add('1300=Path to cdrtfe.ini');
-    Add('1301=Portable Mode activated via cdrtfe.ini.')
+    Add('1301=Portable Mode activated via cdrtfe.ini.');
+    {cl_lang.pas}
+    Add('1400=\translation\cdrtfe_lang.ini found.');
+    Add('1401=\translation\<lang>\cdrtfe_lang.ini found.');
   end;
 end;
 
