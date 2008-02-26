@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.02.2008
+  letzte Änderung  26.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -532,6 +532,13 @@ begin
   FShellExtIsSet := ShellExtensionsRegistered;
   GetSettings;
   CheckControls(Sender);
+  {Sonderbehandlung cygwin1.dll-Optionen}
+  if not FSettings.FileFlags.CygInPath then
+  begin
+    LabelUseDll.Caption := FLang.GMS('m303');
+    RadioButtonUseOwnDLL.Enabled := False;
+    RadioButtonUseSearchPathDLL.Enabled := False;
+  end;
 end;
 
 

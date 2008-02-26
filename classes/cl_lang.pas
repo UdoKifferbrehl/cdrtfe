@@ -193,6 +193,7 @@ begin
     Add('e301=Es wurden keine Kommandozeilenoptionen eingegeben.');
     Add('m301=Die aktuellen Einstellungen (mit Ausnahme der Datei- Listen) können in der Registry gespeichert werden.');
     Add('m302=Die aktuellen Einstellungen (mit Ausnahme der Datei- Listen) können in der Datei cdrtfe.ini gespeichert werden.');
+    Add('m303=cdrtfe hat keine weiteren Versionen der cygwin1.dll gefunden. Es wird die mitgelieferte DLL verwendet.');
     {GUI - Filesystem check}
     Add('c501=Dateisystemüberprüfung: Dateinamen');
     Add('c502=Dateisystemüberprüfung: Ordner');
