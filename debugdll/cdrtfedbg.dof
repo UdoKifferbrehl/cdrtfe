@@ -40,7 +40,7 @@ ImageBase=4194304
 ExeDescription=
 
 [Directories]
-OutputDir=i:\burn
+OutputDir=i:\cdrtfe\proto
 UnitOutputDir=units
 SearchPath=import\jcl_mini;..\..\..\extcomp\vcl
 Packages=VCLX30;VCL30;VCLDB30;VCLDBX30;INETDB30;INET30;VCLSMP30;QRPT30;TEEUI30;TEEDB30;TEE30;DSS30;IBEVNT30
