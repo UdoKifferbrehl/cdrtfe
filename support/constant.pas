@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.02.2008
+  letzte Änderung  12.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -126,7 +126,7 @@ const {die GUID für cdrtfe}
       cIniFile         : string = '\cdrtfe.ini';
       cIniFileTools    : string = '\cdrtfe_tools.ini';
       cIniCygwin       : string = '\cygwin.ini';
-      cHelpFile        : string = '\cdrtfe.chm';
+      cHelpFile        : string = '\cdrtfe_';
       cDefaultIsoName  : string = '\image';
       cDummyFile       : string = '\cdrtfe.del';
       cMkisofsRCFile   : string = '.mkisofsrc';
@@ -146,6 +146,7 @@ const {die GUID für cdrtfe}
       cExtM3u          : string = '.m3u';
       cExtUm2          : string = '.um2';
       cExtBMP          : string = '.bmp';
+      cExtChm          : string = '.chm';
 
       {Ordnernamen}
       cDataDir         : string = '\cdrtfe';
@@ -160,6 +161,7 @@ const {die GUID für cdrtfe}
       cCdrdaoDir       : string = '\cdrdao';
       cSiconvDir       : string = '\siconv';
       cLangDir         : string = '\translations';
+      cHelpDir         : string = '\help';
 
       {Umgebungsvariablen}
       cCDRSEC          : string = 'CDR_SECURITY';

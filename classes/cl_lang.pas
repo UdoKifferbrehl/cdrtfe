@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.02.2008
+  letzte Änderung  12.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,6 +19,7 @@
          Methoden, um auf diese zuzugreifen.
 
     Properties   LangFileFound
+                 CurrentLangName
 
     Methoden     Create
                  ExportMessageStrings
@@ -69,6 +70,7 @@ type TLang = class(TObject)
        procedure ExportMessageStrings;
        procedure SetFormLang(Form: TForm);
        property LangFileFound: Boolean read FLangFileFound;
+       property CurrentLangName: string read FCurrentLangName;
      end;
 
 procedure ExportStringProperties;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.01.2008
+  letzte Änderung  12.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -431,6 +431,7 @@ type
     procedure LoadProject(const ListsOnly: Boolean);
     procedure SaveProject(const ListsOnly: Boolean);
     procedure SaveWinPos;
+    procedure SetHelpFile;
     procedure SetSettings;
     procedure SetWinPos;
     procedure SetButtons(const Status: TOnOff);
@@ -3628,6 +3629,8 @@ begin
     {Spracheinstellungen setzen}
     SetFormLang(Self);
   end;
+  {Hilfe-Datei setzten}
+  SetHelpFile;
   {Objekt mit den Laufwerksinfos}
   FDevices := TDevices.Create;
   {Objekt für Einstellungen}
@@ -4729,6 +4732,7 @@ begin
     FLang.SetFormLang(Self);
     UpdateGauges;
     FormResize(Self);
+    SetHelpFile;
   end;
 end;
 
@@ -6276,14 +6280,36 @@ begin
   end;
 end;
 
+{ SetHelpFile ------------------------------------------------------------------
+
+  Pfad zur Hilfe-Datei abhängig von der gewählten Sprache setzen.              }
+
+procedure TForm1.SetHelpFile;
+{$IFDEF Delphi2005Up}
+var HelpFileName: string;
+    HelpPath    : string;
+{$ENDIF}
+begin
+  {Helpsystem - chm-support erst ab Delphi 2005?}
+  {$IFDEF Delphi2005Up}
+  HelpPath := StartUpDir + cHelpDir;
+  if FLang.CurrentLangName <> '' then
+  begin
+    HelpFileName := cHelpFile + LowerCase(FLang.CurrentLangName) + cExtChm;
+    if not FileExists(HelpPath + HelpFileName) then
+      HelpFileName := cHelpFile + 'english' + cExtChm;
+  end else
+  begin
+    HelpFileName := cHelpFile + 'german' + cExtChm;
+  end;
+  Application.HelpFile := HelpPath + HelpFileName;
+  {$ENDIF}
+end;
+
 initialization
   DeviceChangeNotifier := TDeviceChangeNotifier.Create(nil);
   DeviceChangeNotifier.OnDiskInserted := Form1.DeviceArrival;
   DeviceChangeNotifier.OnDiskRemoved := Form1.DeviceRemoval;
-  {Helpsystem - chm-support erst ab Delphi 2005?}
-  {$IFDEF Delphi2005Up}
-  Application.HelpFile := StartUpDir + cHelpFile;
-  {$ENDIF}
   {$IFDEF ShowDebugWindow}
   FormDebug := TFormDebug.Create(nil);
   FormDebug.Top := 0;
