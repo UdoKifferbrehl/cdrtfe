@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.03.2008
+  letzte Änderung  22.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1133,7 +1133,8 @@ var i: Integer;
         end;
       end;
       Index := FSettings.General.TabSheetDrive[Choice];
-      Result := DeviceList.Values[DeviceList.Names[Index]];
+      // Result := DeviceList.Values[DeviceList.Names[Index]];
+      Result := GetValueFromString(DeviceList[Index]);
     end;
   end;
 
@@ -5621,7 +5622,8 @@ var Index   : Integer;
     VolInfo : TVolumeInfo;
 begin
   Index := FSettings.General.TabSheetDrive[FSettings.General.Choice];
-  DeviceID := FDevices.CDWriter.Values[FDevices.CDWriter.Names[Index]];
+  // DeviceID := FDevices.CDWriter.Values[FDevices.CDWriter.Names[Index]];
+  DeviceID := GetValueFromString(FDevices.CDWriter[Index]);
   Drive := FDevices.GetDriveLetter(DeviceID);
   if Drive = '' then
   begin

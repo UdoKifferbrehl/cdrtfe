@@ -1,8 +1,8 @@
 { f_strings.pas: String-Funktionen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  22.07.2007
+  letzte Änderung  22.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,6 +15,7 @@
 
     EnumToStr(ArgType: PTypeInfo; var Arg): string
     FormatTime(const Time: Extended): string
+    GetValueFromString(const s: string): string
     IsQuoted(const S: string): Boolean
     QuotePath(const S: string): string
     ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string
@@ -47,6 +48,7 @@ var UnitByte  : string = 'Byte';    // für SizeToString, damit eine Übersetzung
 
 function EnumToStr(ArgType: PTypeInfo; var Arg): string;
 function FormatTime(const Time: Extended): string;
+function GetValueFromString(const s: string): string;
 function IsQuoted(const S: string): Boolean;
 function QuotePath(const S: string): string;
 function ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string;
@@ -291,6 +293,16 @@ begin
       otSWord, otUWord: Result := GetEnumName(ArgType, Word(Arg));
       otSLong         : Result := GetEnumName(ArgType, Longint(Arg));
    end;
+end;
+
+{ GetValueFromString -----------------------------------------------------------
+
+  GetValaueFromString liefert bei Strings der Form 'Name=Wert' 'Wert' als
+  Ergebnis.                                                                    }
+
+function GetValueFromString(const s: string): string;
+begin
+  Result := Copy(s, Pos('=', s) + 1, MaxInt);
 end;
 
 end.

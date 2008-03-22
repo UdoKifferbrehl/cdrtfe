@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2008 Oliver Valencia
 ;
-;  letzte Änderung  02.03.2008
+;  letzte Änderung  18.03.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,8 +50,8 @@ WindowVisible=no
 AppCopyright={#MyAppCopyright}
 
 [Languages]
-Name: eng; MessagesFile: compiler:Default.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\dvd_en.rtf
-Name: ger; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_de.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\dvd_de.rtf
+Name: eng; MessagesFile: compiler:Default.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_en.rtf
+Name: ger; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_de.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_de.rtf
 
 [Tasks]
 ; Desktop icon

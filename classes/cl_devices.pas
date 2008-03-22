@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005-2007 Oliver Valencia
+  Copyright (c) 2005-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.12.2007
+  letzte Änderung  22.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -526,12 +526,14 @@ begin
   CDDevices.Add('dummyr 0=' + Dev + '2,0,3');
   CDDevices.Add('dummyr 1=' + Dev + '2,0,4');
   CDDevices.Add('dummyr 2=' + Dev + '2,0,5');
+  CDDevices.Add('dummyw 2=' + Dev + '2,0,6');
   CDWriter.Add('dummyw 0=' + Dev + '2,0,0');
   CDWriter.Add('dummyw 1=' + Dev + '2,0,1');
   CDWriter.Add('dummyw 2=' + Dev + '2,0,2');
   CDReader.Add('dummyr 0=' + Dev + '2,0,3');
   CDReader.Add('dummyr 1=' + Dev + '2,0,4');
   CDReader.Add('dummyr 2=' + Dev + '2,0,5');
+  CDWriter.Add('dummyw 2=' + Dev + '2,0,6');
   {$ENDIF}
 end;
 
