@@ -35,7 +35,7 @@ PrivilegesRequired=admin
 ; Compiler
 VersionInfoVersion=1.3.1
 VersionInfoCopyright={#MyAppCopyright}
-OutputDir=i:\
+OutputDir=i:\cdrtfe\proto2
 OutputBaseFilename=cdrtfe-1.3.1
 ; Compression
 ;Compression=none
@@ -73,7 +73,8 @@ Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.ex
 ; Icons/Glyphs
 Source: I:\cdrtfe\proto\icons\*; DestDir: {app}\icons; Flags: ignoreversion; Components: prog
 ; Language files
-Source: I:\cdrtfe\proto\translations\*; DestDir: {app}\translations; Flags: ignoreversion recursesubdirs; Components: prog\langsupport
+Source: I:\cdrtfe\proto\translations\*; Excludes: _cdrtfe_lang.ini; DestDir: {app}\translations; Flags: ignoreversion recursesubdirs; Components: prog\langsupport
+Source: I:\cdrtfe\proto\translations\_cdrtfe_lang.ini; DestDir: {app}\translations; DestName: cdrtfe_lang.ini; Flags: ignoreversion; Components: prog\langsupport
 ; Help files
 Source: I:\cdrtfe\cdrtfe\doc\help_de\cdrtfe.chm; DestDir: {app}; Flags: ignoreversion; Languages: ger
 Source: I:\cdrtfe\cdrtfe\doc\help_en\cdrtfe.chm; DestDir: {app}; Flags: ignoreversion; Languages: eng
