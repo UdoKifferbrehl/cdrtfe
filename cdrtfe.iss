@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2008 Oliver Valencia
 ;
-;  letzte Änderung  18.03.2008
+;  letzte Änderung  24.03.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -202,12 +202,22 @@ begin
 end;
 
 procedure InitializeWizard;
+var CygTextMsg      : string;
+    MkisofsDLLsFound: Boolean;
 begin
-  { Create the page }
+  { Create the page - Cygwin options}
+  MkisofsDLLsFound := IsInSearchPath('cygiconv-2.dll') and IsInSearchPath('cygintl-3.dll');
+  if MkisofsDLLsFound then
+  begin
+    CygTextMsg := CustomMessage('CygwinText');
+  end else
+  begin
+    CygTextMsg := CustomMessage('CygwinText') + #13#10 + #13#10 + CustomMessage('CygwinText2');
+  end;
   CygDLLPage := CreateInputOptionPage(wpSelectTasks,
                   CustomMessage('CygwinHeader'),
                   CustomMessage('CygwinHeader2'),
-                  CustomMessage('CygwinText'),
+                  CygTextMsg,
                   True, False);
   CygDLLPage.Add(CustomMessage('CygwinOpt1'));
   CygDLLPage.Add(CustomMessage('CygwinOpt2'));
@@ -216,7 +226,10 @@ begin
     'installed': CygDLLPage.SelectedValueIndex := 0;
     'included' : CygDLLPage.SelectedValueIndex := 1;
   else
-    CygDLLPage.SelectedValueIndex := 0;
+    case MkisofsDLLsFound of
+      True : CygDLLPage.SelectedValueIndex := 0;
+      False: CygDLLPage.SelectedValueIndex := 1;
+    end;
   end;
 end;
 
@@ -296,6 +309,8 @@ eng.CygwinHeader2=A cygwin1.dll has been found on your system.
 ger.CygwinHeader2=Eine cygwin1.dll wurde auf Ihrem System gefunden.
 eng.CygwinText=Which cygwin dll do you want to use?
 ger.CygwinText=Welche cygwin-DLL soll verwendet werden?
+eng.CygwinText2=Note: The files cygiconv-2.dll and cygintl-3.dll could not be found in the search path.
+ger.CygwinText2=Hinweis: Die Dateien cygiconv-2.dll und cygintl-3.dll wurden nicht im Suchpfad gefunden.
 eng.CygwinOpt1=Use the already installed DLL to avoid version conflicts.
 ger.CygwinOpt1=Die bereits installierte DLL verwenden, um Versionskonflikte zu vermeiden.
 eng.CygwinOpt2=Use the included DLL.
