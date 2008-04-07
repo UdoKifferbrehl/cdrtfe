@@ -2,10 +2,10 @@
  
   cl_action.pas: die im GUI gewählte Aktion ausführen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.12.2007
+  letzte Änderung  07.04.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -131,7 +131,7 @@ type TCDAction = class(TObject)
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}          f_logfile,
-     f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,            
+     f_filesystem, f_process, f_environment, f_cygwin, f_strings, f_init,
      f_misc, f_helper, cl_cueinfo, constant, user_messages;
 
 { TCDAction ------------------------------------------------------------------ }
@@ -578,7 +578,7 @@ begin
       CmdM := CmdM + ' -copyright ' + QuotePath(IDCopyright);
       CmdM := CmdM + ' -sysid ' + QuotePath(IDSystem);
     end;
-    if MkisofsUseCustOpts then
+    if MkisofsUseCustOpts and (MkisofsCustOptsIndex > -1) then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
     CmdM := CmdM + ' -path-list '
                  + QuotePath(MakePathConform(PathListName));
@@ -621,7 +621,7 @@ begin
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then CmdC := CmdC + ' driver=' + SimulDev + '_simul';
     if Burnfree    then CmdC := CmdC + ' driveropts=burnfree';
-    if CdrecordUseCustOpts then
+    if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       CmdC := CmdC + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then CmdC := CmdC + ' -v';
     if Dummy       then CmdC := CmdC + ' -dummy';
@@ -884,7 +884,7 @@ begin
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
     if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
-    if CdrecordUseCustOpts then
+    if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then Cmd := Cmd + ' -v';
     if Dummy       then Cmd := Cmd + ' -dummy';
@@ -1119,7 +1119,7 @@ begin
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then CmdC := CmdC + ' driver=cdr_simul';
       if Burnfree    then CmdC := CmdC + ' driveropts=burnfree';
-      if CdrecordUseCustOpts then
+      if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         CmdC := CmdC + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
       if Verbose     then CmdC := CmdC + ' -v';
       if Dummy       then CmdC := CmdC + ' -dummy';
@@ -1201,7 +1201,7 @@ begin
   end;
   with FSettings.Cdrecord do
   begin
-    if CdrecordUseCustOpts then
+    if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
     if Verbose     then Cmd := Cmd + ' -v';
@@ -1841,7 +1841,7 @@ var Compressed: Boolean;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
       if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
-      if CdrecordUseCustOpts then
+      if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
       if Verbose     then Cmd := Cmd + ' -v';
       if Dummy       then Cmd := Cmd + ' -dummy';
@@ -1964,7 +1964,7 @@ begin
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
       if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
-      if CdrecordUseCustOpts then
+      if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
       if Verbose     then Cmd := Cmd + ' -v';
       if Dummy       then Cmd := Cmd + ' -dummy';
@@ -2042,7 +2042,7 @@ begin
         if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
         if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
         if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
-        if CdrecordUseCustOpts then
+        if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
           Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
         if Verbose     then Cmd := Cmd + ' -v';
         if Dummy       then Cmd := Cmd + ' -dummy';
@@ -2118,7 +2118,7 @@ begin
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
     if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
-    if CdrecordUseCustOpts then
+    if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then Cmd := Cmd + ' -v';
     if Dummy       then Cmd := Cmd + ' -dummy';
@@ -2175,7 +2175,7 @@ begin
   begin
     Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(FixDevice);
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
-    if CdrecordUseCustOpts then
+    if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then Cmd := Cmd + ' -v';
     if Dummy       then Cmd := Cmd + ' -dummy';
@@ -2380,7 +2380,7 @@ begin
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then CmdC := CmdC + ' driver=cdr_simul';
       if Burnfree    then CmdC := CmdC + ' driveropts=burnfree';
-      if CdrecordUseCustOpts then
+      if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         CmdC := CmdC + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
       if Verbose     then CmdC := CmdC + ' -v';
       if Dummy       then CmdC := CmdC + ' -dummy';
@@ -2458,7 +2458,7 @@ begin
   with FSettings.DVDVideo, FSettings.General, FSettings.Cdrecord do
   begin
     {mkisofs}
-    if MkisofsUseCustOpts then
+    if MkisofsUseCustOpts and (MkisofsCustOptsIndex > -1) then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
     if VolID <> '' then CmdM := CmdM + ' -volid "' + VolID + '"';
     SourceArg := ' ' + QuotePath(MakePathConform(SourcePath));
@@ -2488,7 +2488,7 @@ begin
     if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then CmdC := CmdC + ' driver=' + SimulDev + '_simul';
     if Burnfree    then CmdC := CmdC + ' driveropts=burnfree';
-    if CdrecordUseCustOpts then
+    if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       CmdC := CmdC + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then CmdC := CmdC + ' -v';
     if Dummy       then CmdC := CmdC + ' -dummy';
