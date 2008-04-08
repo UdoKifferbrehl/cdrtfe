@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  22.03.2008
+  letzte Änderung  08.04.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -17,6 +17,7 @@
     FormatTime(const Time: Extended): string
     GetValueFromString(const s: string): string
     IsQuoted(const S: string): Boolean
+    Quote(const S: string): string
     QuotePath(const S: string): string
     ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string
     ReplaceCharFirst(s: string; const SearchChar, ReplaceChar: Char): string
@@ -50,6 +51,7 @@ function EnumToStr(ArgType: PTypeInfo; var Arg): string;
 function FormatTime(const Time: Extended): string;
 function GetValueFromString(const s: string): string;
 function IsQuoted(const S: string): Boolean;
+function Quote(const S: string): string;
 function QuotePath(const S: string): string;
 function ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string;
 function ReplaceCharFirst(s: string; const SearchChar, ReplaceChar: Char): string;
@@ -191,11 +193,20 @@ function QuotePath(const S: string): string;
 begin
   if (Pos(' ', S) > 0) or (Pos('''', S) > 0) then
   begin
-    Result := '"' + S + '"';
+    Result := Quote (S); // '"' + S + '"';
   end else
   begin
     Result := S;
   end;
+end;
+
+{ Quote ------------------------------------------------------------------------
+
+  Quote setzt einen String S in doppelte Anführungszeichen (").                }
+
+function Quote(const S: string): string;
+begin
+  Result := '"' + S + '"';
 end;
 
 { IsQuoted ---------------------------------------------------------------------

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.04.2008
+  letzte Änderung  08.04.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1537,6 +1537,7 @@ var Compressed: Boolean;
       OutName  : string;
       CustExt  : string;
       CustOpt  : string;
+      Ext      : string;
       Name,
       Title,
       Performer: string;
@@ -1546,11 +1547,36 @@ var Compressed: Boolean;
       OutName := FSettings.DAE.Prefix + Format('_%.2d', [Index + 1])
     else
       OutName := GetCustomName(Info, Index, Title, Performer, Name);
-    if FSettings.DAE.MP3    then Cmd := StartUpDir + cLameBin;
-    if FSettings.DAE.Ogg    then Cmd := StartUpDir + cOggencBin;
-    if FSettings.DAE.FLAC   then Cmd := StartUpDir + cFLACBin;
-    if FSettings.DAE.Custom then Cmd := FSettings.DAE.CustomCmd;
-    if FSettings.FileFlags.UseSh then Cmd := MakePathConform(Cmd);
+    if FSettings.DAE.MP3 then
+    begin
+      Cmd := StartUpDir + cLameBin;
+      Ext := cExtMP3;
+    end;
+    if FSettings.DAE.Ogg then
+    begin
+      Cmd := StartUpDir + cOggencBin;
+      Ext := cExtOgg;
+    end;
+    if FSettings.DAE.FLAC then
+    begin
+      Cmd := StartUpDir + cFLACBin;
+      Ext := cExtFLAC;
+      end;
+    if FSettings.DAE.Custom then
+    begin
+      Cmd := FSettings.DAE.CustomCmd;
+      SplitString(FSettings.DAE.CustomOpt, '|', CustOpt, CustExt);
+      Ext := CustExt;
+    end;
+    OutName := FSettings.DAE.Path + OutName + Ext;
+    if FSettings.FileFlags.UseSh then
+    begin
+      Cmd := MakePathConform(Cmd);
+      OutName := Quote(OutName);
+    end else
+    begin
+      OutName := QuotePath(OutName);
+    end;
     {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
     {$ENDIF}
@@ -1564,7 +1590,7 @@ var Compressed: Boolean;
         if Title <> '' then Cmd := Cmd + ' --tt "' + Title +'"';
         if Performer <> '' then Cmd := Cmd + ' --ta "' + Performer + '"';
       end;
-      Cmd := Cmd + ' - ' + QuotePath(FSettings.DAE.Path + OutName + cExtMp3);
+      Cmd := Cmd + ' - ' + OutName;
     end;
     if FSettings.DAE.Ogg then
     begin
@@ -1574,8 +1600,7 @@ var Compressed: Boolean;
         if Title <> '' then Cmd := Cmd + ' -t "' + Title +'"';
         if Performer <> '' then Cmd := Cmd + ' -a "' + Performer + '"';
       end;
-      Cmd := Cmd + ' -o ' + QuotePath(FSettings.DAE.Path + OutName + cExtOgg)
-                 + ' -';
+      Cmd := Cmd + ' -o ' + OutName + ' -';
     end;
     if FSettings.DAE.FLAC then
     begin
@@ -1585,15 +1610,12 @@ var Compressed: Boolean;
         if Title <> '' then Cmd := Cmd + ' -T "TITLE=' + Title +'"';
         if Performer <> '' then Cmd := Cmd + ' -T "ARTIST=' + Performer + '"';
       end;
-      Cmd := Cmd + ' -o ' + QuotePath(FSettings.DAE.Path + OutName + cExtFLAC)
-                 + ' -';
+      Cmd := Cmd + ' -o ' + OutName + ' -';
     end;
     if FSettings.DAE.Custom then
     begin
       {Platzhalter: %F - Dateiname, %T - Titel, %P - Performer}
-      SplitString(FSettings.DAE.CustomOpt, '|', CustOpt, CustExt);
-      CustOpt := ReplaceString(CustOpt, '%F',
-                   QuotePath(FSettings.DAE.Path + OutName + CustExt));
+      CustOpt := ReplaceString(CustOpt, '%F', OutName);
       CustOpt := ReplaceString(CustOpt, '%T', Title);
       CustOpt := ReplaceString(CustOpt, '%P', Performer);
       Cmd := Cmd + ' ' + CustOpt;
