@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.04.2008
+  letzte Änderung  13.04.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1511,14 +1511,19 @@ var Compressed: Boolean;
     erzeugt die unveränderlichen Bestandteile der Kommandozeile.               }
 
   function Cdda2wavStdCmdLine: string;
-  var CommandLine: string;
+  var CommandLine : string;
+      VerboseLEvel: string;
   begin
+    case FSettings.DAE.DoCopy of
+      True : VerboseLevel := 'all';
+      False: VerboseLevel := 'summary';
+    end;
     {unveränderlichen Teil der Kommandozeile zusammenstellen}
     with FSettings.DAE do
     begin
       CommandLine := ' dev=' + SCSIIF(Device);
       if Speed <> ''    then CommandLine := CommandLine + ' speed=' + Speed;
-      CommandLine := CommandLine + ' verbose-level=all'; //'summary';
+      CommandLine := CommandLine + ' verbose-level=' + VerboseLevel; //'summary'
       CommandLine := CommandLine + ' -gui';
       if Paranoia       then CommandLine := CommandLine + ' -paranoia';
       if Bulk or DoCopy then CommandLine := CommandLine + ' -bulk';
