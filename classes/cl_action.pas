@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.04.2008
+  letzte Änderung  01.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2079,7 +2079,7 @@ begin
         if CueFile.IsAudio then
         begin
           Cmd := Cmd + ' -pad';
-          if FSettings.AudioCD.CDText then Cmd := Cmd + ' -text';
+          if FSettings.Image.CDText then Cmd := Cmd + ' -text';
         end;
         Cmd := Cmd + ' -dao cuefile=';
         if CueFile.CompressedFilesPresent then

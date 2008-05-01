@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.03.2008
+  letzte Änderung  01.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -262,6 +262,7 @@ type
     LabelDAECopy: TLabel;
     AudioListViewPopupN2: TMenuItem;
     AudioListViewPopupPlay: TMenuItem;
+    CheckBoxImageCDText: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -1089,6 +1090,7 @@ begin
     end;
     CheckBoxImageOverburn.Checked := Overburn;
     CheckBoxImageClone.Checked := Clone;
+    CheckBoxImageCDText.Checked := CDText;
   end;
   {DVD-Video}
   with FSettings.DVDVideo do
@@ -1250,6 +1252,7 @@ begin
     end;
     OverBurn := CheckBoxImageOverburn.Checked;
     Clone    := CheckBoxImageClone.Checked;
+    CDText   := CheckBoxImageCDText.Checked;
     Device   := GetDevice(cCDImage);
     Speed    := GetSpeed(cCDImage);
   end;
