@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2008
+  letzte Änderung  04.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -244,6 +244,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        BootLoadSize: string;
        VolId       : string;
        MsInfo      : string;
+       SelectSess  : Boolean;
        FindDups    : Boolean;
        TransTBL    : Boolean;
        HideTransTBL: Boolean;
@@ -739,6 +740,7 @@ begin
     BootLoadSize := '';
     VolId        := '';
     MsInfo       := '';
+    SelectSess   := False;
     FindDups     := False;
     TransTBL     := False;
     HideTransTBL := True;
@@ -1280,6 +1282,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'HideTransTBL', HideTransTBL);
       WriteBool(Section, 'NLPathTBL', NLPathTBL);
       WriteBool(Section, 'HideRRMoved', HideRRMoved);
+      WriteBool(Section, 'SelectSess', SelectSess);
       {Meta-Daten}
       WriteBool(Section, 'UseMeta', UseMeta);
       WriteString(Section, 'Publisher', IDPublisher);
@@ -1416,6 +1419,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'Clone', Clone);
       WriteBool(Section, 'RAW', RAW);
       WriteString(Section, 'RAWMode', RAWMode);
+      WriteBool(Section, 'CDText', CDText);
     end;
 
     {Image einlesen}
@@ -1703,6 +1707,7 @@ var PF     : TIniFile; // ProjectFile
       HideTransTBL := ReadBool(Section, 'HideTransTBL', True);
       NLPathTBL := ReadBool(Section, 'NLPathTBL', False);
       HideRRMoved := ReadBool(Section, 'HideRRMoved', False);
+      SelectSess := ReadBool(Section, 'SelectSess', False);
       {Meta-Daten}
       UseMeta := ReadBool(Section, 'UseMeta', False);
       IDPublisher := ReadString(Section, 'Publisher', '');
@@ -1848,6 +1853,7 @@ var PF     : TIniFile; // ProjectFile
       Clone := ReadBool(Section, 'Clone', Clone);
       RAW := ReadBool(Section, 'RAW', False);
       RAWMode := ReadString(Section, 'RAWMode', 'raw96r');
+      CDText := ReadBool(Section, 'CDText', False);
     end;
     ProgressBarUpdate(10);
 

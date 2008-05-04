@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2008 Oliver Valencia
 
-  letzte Änderung  17.02.2008
+  letzte Änderung  04.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,6 +26,8 @@
                  MsInfo
                  IsDVD
                  DiskType
+                 SelectSess
+                 SessOverride
 
     Methoden     Create
                  CheckMedium(var Args: TCheckMediumArgs): Boolean
@@ -92,6 +94,8 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        FUseProfiles  : Boolean;
        FForcedFormat : Boolean;
        FFormatCommand: string;
+       FSelectSess   : Boolean;
+       FSessOverride : string;
        function DiskInserted(const CDInfo: string): Boolean;
        function GetCDType(const CDInfo: string): TDiskType;
        function GetDVDType(const DVDInfo: string): TDiskType; virtual;
@@ -116,6 +120,8 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        property DiskType     : TDiskType read FDiskType;
        property ForcedFormat : Boolean   read FForcedFormat; // für neue DVD+RWs
        property FormatCommand: string    read FFormatCommand;
+       property SelectSess   : Boolean   write FSelectSess;
+       property SessOverride : string    write FSessOverride;
      end;
 
      TDiskInfoA = class(TDiskInfo)
@@ -159,7 +165,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     cl_cdrtfedata,
+     cl_cdrtfedata, cl_sessionimport,
      f_filesystem, f_strings, f_process, f_misc, f_helper, constant;
 
 type TFormSelectDVD = class(TForm)
@@ -1228,11 +1234,12 @@ end;
   CDs (Größe, Speicherplatz, Zeit, ...).                                       }
 
 procedure TDiskInfoM.GetCDInfo;
-var Temp    : string;
-    StartSec: string;
-    LastSec : string;
-    LastSecI: Integer;
-    ATIPSec: Integer;
+var Temp           : string;
+    StartSec       : string;
+    LastSec        : string;
+    LastSecI       : Integer;
+    ATIPSec        : Integer;
+    SessionImporter: TSessionImportHelper;
 begin
   FDiskType := GetCDType(FMediumInfo);
   {max. Anzahl von Sektoren}
@@ -1251,7 +1258,17 @@ begin
   Temp := ExtractInfo(FMediumInfo, 'session status', ':', LF);
   FSessionEmpty := Temp = 'empty';
   {Multisessioninfo ermitteln}
-  StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);
+  if FSelectSess then
+  begin
+    SessionImporter := TSessionImportHelper.Create;
+    SessionImporter.MediumInfo := FMediumInfo;
+    SessionImporter.GetSession;
+    StartSec := SessionImporter.StartSector;
+    SessionImporter.Free;
+  end else
+  begin
+    StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);
+  end;
   LastSec  := ExtractInfo(FMediumInfo, 'Next writable address', ':', LF);
   LastSecI := StrToIntDef(LastSec, 0);
   if FDiskEmpty then
@@ -1487,7 +1504,7 @@ begin
       GetCDInfo;
     end else
     begin
-      {Es ist eine DVD.}                               
+      {Es ist eine DVD.}
       // if not DVDSizeInfoFound then
       //  FMediumInfo := GetAtipInfo(True);
       GetDVDInfo;
@@ -1507,6 +1524,10 @@ begin
   {$IFDEF DebugReadCDInfo}
   DebugShowDiskInfo;
   {$ENDIF}
+
+  {Variablen löschen für den nächsten Aufruf.}
+  FSelectSess    := False;
+  FSessOverride  := '';
 end;
 
 { CheckMedium ------------------------------------------------------------------

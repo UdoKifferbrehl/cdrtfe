@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.03.2008
+  letzte Änderung  04.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -331,6 +331,10 @@ begin
     Add('evcd01=Keine MPEG-Dateien ausgewählt!');
     {Messages - DVD Video}
     Add('edvdv01=Bitte Quellverzeichnis angeben!');
+    {Messages - Import Session}
+    Add('msess01=Session auswählen');
+    Add('msess02=Fortzusetzende Session:');
+    Add('msess03=Session');
   end;
 end;
 

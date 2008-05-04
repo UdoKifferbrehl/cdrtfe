@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2008
+  letzte Änderung  04.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -460,6 +460,9 @@ begin
   if not FSettings.DataCD.ImageOnly or FSettings.DataCD.OnTheFly then
   begin
     SetPanels('<>', FLang.GMS('mburn13'));
+    FDisk.SelectSess := FSettings.DataCD.ContinueCD and
+                        FSettings.DataCD.SelectSess;
+    FDisk.SessOverride := FSettings.DataCD.MsInfo;
     FDisk.GetDiskInfo(FSettings.DataCD.Device, False);
     SetPanels('<>', '');
   end;

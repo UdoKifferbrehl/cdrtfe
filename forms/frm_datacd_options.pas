@@ -2,10 +2,10 @@
 
   frm_datacd_options.pas: Daten-CD: Optionen, DVD-Video: Image-Optionen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  04.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,6 +50,7 @@ type
     SaveDialog1: TSaveDialog;
     CheckBoxOverburn: TCheckBox;
     CheckBoxLastSession: TCheckBox;
+    CheckBoxSelectSess: TCheckBox;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -116,6 +117,7 @@ begin
     begin
       CheckBoxMulti.Checked       := Multi;
       CheckBoxLastSession.Checked := LastSession;
+      CheckBoxSelectSess.Checked  := SelectSess;
       CheckBoxContinue.Checked    := ContinueCD;
       CheckBoxImageOnly.Checked   := ImageOnly;
       CheckBoxImageKeep.Checked   := KeepImage;
@@ -180,6 +182,7 @@ begin
       Multi       := CheckBoxMulti.Checked;
       LastSession := CheckBoxLastSession.Checked;
       ContinueCD  := CheckBoxContinue.Checked;
+      SelectSess  := CheckBoxSelectSess.Checked;
       ImageOnly   := CheckBoxImageOnly.Checked;
       KeepImage   := CheckBoxImageKeep.Checked;
       IsoPath     := EditIsoPath.Text;
@@ -230,10 +233,12 @@ begin
   begin
     CheckBoxContinue.Enabled := True;
     CheckBoxLastSession.Enabled := True;
+    CheckBoxSelectSess.Enabled := CheckBoxContinue.Checked;
   end else
   begin
     CheckBoxContinue.Enabled := False;
-    CheckBoxLastSession.Enabled := False;    
+    CheckBoxLastSession.Enabled := False;
+    CheckBoxSelectSess.Enabled := False;    
   end;
   {Image oder otf}
   if RadioButtonImage.Checked then
