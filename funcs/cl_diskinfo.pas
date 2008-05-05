@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2008 Oliver Valencia
 
-  letzte Änderung  04.05.2008
+  letzte Änderung  05.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1258,7 +1258,7 @@ begin
   Temp := ExtractInfo(FMediumInfo, 'session status', ':', LF);
   FSessionEmpty := Temp = 'empty';
   {Multisessioninfo ermitteln}
-  if FSelectSess then
+  if FSelectSess and not FDiskComplete then
   begin
     SessionImporter := TSessionImportHelper.Create;
     SessionImporter.MediumInfo := FMediumInfo;

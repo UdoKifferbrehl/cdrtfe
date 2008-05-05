@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  04.05.2008
+  letzte Änderung  05.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -183,7 +183,7 @@ end;
 procedure TSessionImportHelper.ExtractSessionData;
 var MInfo  : TStringList;
     SecList: TStringList;
-    i      : Integer;
+    i, p   : Integer;
     Addr   : string;
 begin
   MInfo := TStringList.Create;
@@ -191,7 +191,9 @@ begin
   {unnötiges wegwerfen}
   Delete(FMediumInfo, 1, Pos('Track  Sess Type', FMediumInfo));
   Delete(FMediumInfo, 1, Pos('    1', FMediumInfo) - 1);
-  FMediumInfo := Copy(FMediumInfo, 1, Pos('Last session', FMediumInfo) - 1);
+  p := Pos('Last session', FMediumInfo);
+  if p = 0 then p := Pos('Next', FMediumInfo);
+  FMediumInfo := Copy(FMediumInfo, 1, p - 1);
   MInfo.Text := FMediumInfo;
   {leere Disk?}
   if Pos('BLANK', MInfo[0]) > 0 then
