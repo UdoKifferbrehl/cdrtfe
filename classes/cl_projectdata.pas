@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_projectdata.pas:
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.06.2007
+  letzte Änderung  21.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,6 +47,7 @@
                  InvalidSrcFiles                      unzulässige Quelldateien
 
     Methoden     AddToPathlist(const AddName, DestPath: string; const Choice: Byte)
+                 BigFilesPresent: Boolean;
                  CDTextLength: Integer
                  CDTextPresent: Boolean
                  ChangeForm2Status(const Name, Path: string)
@@ -177,6 +178,7 @@ type TProjectData = class(TObject)
        IgnoreNameLengthErrors: Boolean;
        constructor Create;
        destructor Destroy; override;
+       function BigFilesPresent: Boolean;
        function CDTextLength: Integer;
        function CDTextPresent: Boolean;
        function GetCDLabel(const Choice: Byte): string;
@@ -1435,6 +1437,16 @@ begin
     cXCD     : FXCD.CreateVerifyList(List);
     cDVDVideo: FDVDVideo.CreateBurnList(List);
   end;
+end;
+
+{ BigFilesPrresent -------------------------------------------------------------
+
+  BigFilesPresent ist True, wenn mindestens eine der zu schreibenden Dateien
+  aus dem Projekt Daten-CD größer ist als 4 Gib - 2 Byte.                      }
+
+function TProjectData.BigFilesPresent: Boolean;
+begin
+  Result := FDataCD.BigFilesPresent;
 end;
 
 { SetText ----------------------------------------------------------------------

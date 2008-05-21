@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.05.2008
+  letzte Änderung  21.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -165,6 +165,7 @@ begin
     Add('e116=Kein Ordner für die temporären Dateien angegeben!');
     Add('e117=Dateien oder Ordner aus vorigen Sessions können nicht\nverschoben oder umbenannt werden.');
     Add('e118=Keine neuen Dateien/Ordner.\nKeine Veränderungen.');
+    Add('e119=Um Dateien ab 4 GiB zu schreiben, muß\nzusätzlich ISO Level 3 oder 4 verwendet werden.');
     Add('m101=Image auswählen');
     Add('m102=Image speichern unter');
     Add('m103=Dateien auswählen');

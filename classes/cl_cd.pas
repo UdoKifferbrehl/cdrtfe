@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.01.2008
+  letzte Änderung  21.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,6 +27,7 @@
                  LastError
                  LastFolderAdded
                  MaxLevel
+                 BigFilesPresent
 
     Methoden     AddFile(const AddName, DestPath: string)
                  ChangeForm2Status(const Name, Path: string)    // nur TXCD
@@ -193,6 +194,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function FileIsUnique(const Name: string; const Node: TNode): Boolean;
        function FolderIsUnique(const Name: string; const Node: TNode): Boolean;
        function GetPathFromFolder(const Root: TNode): string;
+       function GetBigFilesPresent: Boolean;
        function GetCDLabel: string;
        function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetFilesToDelete: Boolean;       
@@ -241,6 +243,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure SortFileList(const Path: string);
        procedure SortFolder(const Path: string);
        // property Root: TNode read FRoot;
+       property BigFilesPresent: Boolean read GetBigFilesPresent;
        property CDImportSession: Boolean read FCDImportSession write SetCDImportSession;
        property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
        property FileCount: Integer read GetFileCount;
@@ -1038,6 +1041,52 @@ begin
   end;
   Result := Path;
 end;
+
+{ GetBigFilesPresent -----------------------------------------------------------
+
+  True, wenn die Dateiauswahl Dateien enthält, die größer als 4 GiB - Byte
+  sind.                                                                        }
+
+function TCD.GetBigFilesPresent: Boolean;
+{$IFDEF LargeProject}
+var MaxSize: Int64;
+
+  function GetBigFilesPresentRek(Root: TNode): Boolean;
+  var Node: TNode;
+      Size: Int64;
+      i   : Integer;
+  begin
+    Result := False;
+    if (Root <> nil) and (Root.Data <> nil) then
+    begin
+      for i := 0 to TPList(Root.Data)^.Count - 1 do
+      begin
+        Size := ExtractFileSizeFromEntry(TPList(Root.Data)^[i]);
+        Result := Result or (Size > MaxSize);
+      end;
+    end else
+    begin
+      Result := False;
+    end;
+    {nächster Knoten}
+    Node := Root.GetFirstChild;
+    while (Node <> nil) and not Result do
+    begin
+      Result := Result or GetBigFilesPresentRek(Node);
+      Node := Root.GetNextChild(Node);
+    end;
+  end;
+
+begin
+  MaxSize := 2147483647; // 4294967294 too big as Integer constant for Delphi 3
+  MaxSize := MaxSize * 2;
+  Result := GetBigFilesPresentRek(FRoot);
+end;
+{$ELSE}
+begin
+  Result := False;
+end;
+{$ENDIF}
 
 { GetCDLabel -------------------------------------------------------------------
 

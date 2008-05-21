@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_checkproject.pas: Einstellungen und Daten prüfen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.11.2007
+  letzte Änderung  21.05.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -77,6 +77,13 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
         {Keine Veränderung}
         ShowMsgDlg(GMS('e118'), GMS('g001'), MB_OK or MB_ICONWARNING or
                    MB_SYSTEMMODAL);
+      end;
+      if BigFilesPresent and not (ISOLevel and (ISOLevelNr > 2)) then
+      begin
+        Result := False;
+        {Datei mit mehr als 4 GiB - 2 Byte -> ISO level 3 oder 4}
+        ShowMsgDlg(GMS('e119'), GMS('g001'), MB_OK or MB_ICONWARNING or
+                   MB_SYSTEMMODAL);        
       end;
     end;
   end;
