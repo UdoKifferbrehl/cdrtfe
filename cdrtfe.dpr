@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.05.2008
+  letzte Änderung  10.06.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -93,6 +93,10 @@ uses
   cl_diskinfo in 'funcs\cl_diskinfo.pas',
   cl_cueinfo in 'funcs\cl_cueinfo.pas',
   cl_sessionimport in 'funcs\cl_sessionimport.pas',  
+  c_spacemeter in 'import\spacemeter\c_spacemeter.pas',
+  {$IFDEF Delphi6Up}
+  QProgBar in 'import\spacemeter\QProgBar.pas',
+  {$ENDIF}
   {$IFDEF MultipleFolderBrowsing}
   dlg_folderbrowse in 'system\dlg_folderbrowse.pas',
   {$ENDIF}
@@ -114,6 +118,7 @@ uses
   DropTarget.pas,
   DropSource.pas   : © 1997-2005 Angus Johnson & Anders Melander
   JCL              : Project JEDI, http://jvcl.sourceforge.net/
+  QProgBar.pas     : Copyright © 2004 by Olivier Touzot "QnnO"
 }
 
 {$R *.RES}

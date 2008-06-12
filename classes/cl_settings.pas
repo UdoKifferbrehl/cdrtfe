@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.05.2008
+  letzte Änderung  10.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,8 +68,9 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Choice        : Byte;
        ImageRead     : Boolean;
        CDCopy        : Boolean;                     // True: 1:1-Kopie schreiben
-       TabSheetDrive : array [1..TabSheetCount] of Byte;
-       TabSheetSpeed : array [1..TabSheetCount] of Integer;
+       TabSheetDrive : array[1..TabSheetCount] of Byte;
+       TabSheetSpeed : array[1..TabSheetCount] of Integer;
+       TabSheetSMType: array[1..TabSheetCount] of Integer;
        CharSets      : TStringList;
        Mp3Qualities  : TStringList;
        XCDAddMovie   : Boolean;
@@ -564,8 +565,9 @@ begin
     {aktuelles Laufwerk für jedes TabSheet}
     for i := 1 to TabSheetCount do
     begin
-      TabSheetDrive[i] := 0;
-      TabSheetSpeed[i] := -1;
+      TabSheetDrive[i]  := 0;
+      TabSheetSpeed[i]  := -1;
+      TabSheetSMType[i] := 0;
     end;
     ImageRead := True;
     CDCopy := False;

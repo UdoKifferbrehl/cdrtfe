@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.05.2008
+  letzte Änderung  08.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,7 +33,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      {$ENDIF}
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
-     cl_action, cl_cmdlineparser, cl_devices, cl_logwindow,
+     cl_action, cl_cmdlineparser, cl_devices, cl_logwindow, c_spacemeter,
      user_messages, constant;
 
 type
@@ -398,6 +398,7 @@ type
     DropFileTargetCDETreeView: TDropFileTarget;
     DropFileTargetXCDETreeView: TDropFileTarget;
     {$ENDIF}
+    SpaceMeter: TSpaceMeter;
     StayOnTopState: Boolean;
     {$IFDEF Delphi7Up}
     ActionList: TActionList;
@@ -427,6 +428,7 @@ type
     procedure ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
     procedure GetSettings;
     procedure InitMainform;
+    procedure InitSpaceMeter;
     procedure InitTreeView(Tree: TTreeView; const Choice: Byte);
     procedure InitTreeViews;
     procedure LoadProject(const ListsOnly: Boolean);
@@ -444,6 +446,7 @@ type
     {$ENDIF}
     procedure ToggleStayOnTopState;
     procedure UpdateGauges;
+    procedure UpdateSpaceMeter(Size, Time: Integer);
     procedure UpdateOptionPanel;
     procedure UserAddFile(Tree: TTreeView);
     procedure UserAddFolder(Tree: TTreeView);
@@ -492,6 +495,7 @@ type
     procedure ProgressBarHide;
     procedure ProgressBarShow(const Max: Integer);
     procedure ProgressBarUpdate(const Position: Integer);
+    procedure SpaceMeterTypeChange;
     procedure UpdatePanels(const s1, s2: string);
     {Ole-Drop-Target-Funktionen}
     {$IFDEF UseOLEDragDrop}
@@ -2571,6 +2575,10 @@ begin
     Temp := '';
   end;
   StatusBar.Panels[0].Text := Temp;
+
+  {SpaceMeter}
+  UpdateSpaceMeter(Round(CDSize/(1024*1024)), Round(CDTime));
+
   {$IFDEF DebugUpdateGauges}
   with FormDebug.Memo3.Lines do
   begin
@@ -2596,6 +2604,33 @@ begin
     Add('');
   end;
   {$ENDIF}
+end;
+
+{ UpdateSpaceMeter -------------------------------------------------------------
+
+  SpaceMeter aktualisieren.                                                    }
+
+procedure TForm1.UpdateSpaceMeter(Size, Time: Integer);
+begin
+  SpaceMeter.DiskType := TSpaceMeterDiskType(
+                    FSettings.General.TabSheetSMType[FSettings.General.Choice]);
+  case FSettings.General.Choice of
+    cDataCD : begin
+                SpaceMeter.SpaceMeterMode := SMM_DataCD;
+                SpaceMeter.DiskSize := Size;
+              end;
+    cAudioCD: begin
+                SpaceMeter.SpaceMeterMode := SMM_AudioCD;
+                SpaceMeter.DiskSize := Time;
+              end;
+    cXCD    : begin
+                SpaceMeter.SpaceMeterMode := SMM_XCD;
+                SpaceMeter.DiskSize := Size;
+              end;
+  else
+    SpaceMeter.SpaceMeterMode := SMM_NoDisk;
+    SpaceMeter.DiskSize := 0;
+  end;
 end;
 
 { UpdateOptionPanel ------------------------------------------------------------
@@ -3419,12 +3454,12 @@ begin
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
   DragAcceptFiles(Form1.Handle, true);
-  {Sonderbehandlung, falls große Schriftarten verwendet werden}
+  {Sonderbehandlung, falls große Schriftarten verwendet werden}         (*
   if Screen.PixelsPerInch > 96 then
   begin
     Form1.Width := 923;
     Form1.Height := 610;
-  end;
+  end;                                                                   *)
   {Das schöne der beiden großen Icons für cdrtfe. Anscheinend übergibt GetIcon
    nur ein Handle, daher muß in FormDestroy Application.Icon.ReleaseHandle aus-
    geführt werden, da sonst das Icon sowohl durch das TApplication als auch
@@ -3451,6 +3486,18 @@ begin
   {$IFDEF AllowToggle}
   RegisterLabelEvents;
   {$ENDIF}
+end;
+
+{ InitSpaceMeter ---------------------------------------------------------------
+
+  initialiert die Anzeige für den genutzten Speicher auf einer Disk.           }
+
+procedure TForm1.InitSpaceMeter;
+begin
+  SpaceMeter := TSpaceMeter.Create(Self);
+  SpaceMeter.Font := Self.Font;
+  SpaceMeter.Init(Form1, StatusBar.Top - 34, 8, 545, 30);
+  SpaceMeter.OnSpaceMeterTypeChange := SpaceMeterTypeChange;
 end;
 
 { InitTreeView -----------------------------------------------------------------
@@ -3600,6 +3647,16 @@ begin
   ProgressBar.Position := Position;
 end;
 
+{ SpaceMeterTypeChange ---------------------------------------------------------
+
+  Speichert den neues Disk-Type des SpaceMeters.                               }
+
+procedure TForm1.SpaceMeterTypeChange;
+begin
+  FSettings.General.TabSheetSMType[FSettings.General.Choice] :=
+                                                   Integer(SpaceMeter.DiskType);
+end;
+
 
 { Form-Events ---------------------------------------------------------------- }
 
@@ -3679,6 +3736,8 @@ begin
     {OLE-Drop-Target initialisieren}
     InitDropTargets;
     {$ENDIF}
+    {SpaceMeter initialisieren}
+    InitSpaceMeter;
     {FileTypeInfo: Cache für Dateiinfos}
     FFileTypeInfo := TFileTypeInfo.Create;
     {prüfen, ob alle Dateien da sind}
@@ -3798,6 +3857,7 @@ begin
   DAEListView.Free;
   VideoListView.Free;
   {$ENDIF}
+  SpaceMeter.Free;
   {Verhindern, daß das Icon doppelt freigegeben wird. Freigabe erfolgte bereits
    mit FImageLists.Free.
    Wenn jedoch abgebrochen wird, weil eine weitere Instanz gefunden wurde, dann
@@ -3918,7 +3978,10 @@ begin
     StatusBar.Top := ClientHeight - StatusBar.Height;
     {Ausgabefenster}
     Memo1.Width := StatusBar.Width;
-    Memo1.Top := StatusBar.Top - 109;
+    Memo1.Top := StatusBar.Top - 147; //109;
+    {CDSizer}
+    SpaceMeter.Top := StatusBar.Top - 34;
+    SpaceMeter.Width := StatusBar.Width;
     {V-Button}
     ButtonShowOutput.Left := Memo1.Left + Memo1.Width -
                                           ButtonShowOutput.Width - 2;
@@ -4034,7 +4097,10 @@ begin
     StatusBar.Top := ClientHeight - StatusBar.Height;
     {Ausgabefenster}
     Memo1.Width := StatusBar.Width;
-    Memo1.Top := StatusBar.Top - 139;
+    Memo1.Top := StatusBar.Top - 177; //139;
+    {CDSizer}
+    SpaceMeter.Top := StatusBar.Top - 34;
+    SpaceMeter.Width := StatusBar.Width;    
     {V-Button}
     ButtonShowOutput.Left := Memo1.Left + Memo1.Width -
                                           ButtonShowOutput.Width - 2;
