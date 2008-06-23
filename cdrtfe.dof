@@ -40,7 +40,7 @@ ExeDescription=
 [Directories]
 OutputDir=i:\cdrtfe\proto
 UnitOutputDir=units
-SearchPath=import\scsi;import\jcl_mini;import\tpshellshock_mini;..\..\extcomp\vcl;..\..\extcomp\jcl_mini;..\..\extcomp\tpshellshock;
+SearchPath=import\scsi;import\jcl_mini;import\tpshellshock_mini;import\imaginglib_mini;..\..\extcomp\vcl;..\..\extcomp\jcl_mini;..\..\extcomp\tpshellshock;..\..\extcomp\imaginglib;
 Packages=VCLX30;VCL30;VCLDB30;VCLDBX30;INETDB30;INET30;VCLSMP30;QRPT30;TEEUI30;TEEDB30;TEE30;DSS30;IBEVNT30
 Conditionals=
 DebugSourceDirs=

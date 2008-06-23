@@ -2,9 +2,9 @@
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  22.11.2007
+  letzte Änderung  13.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,6 +39,24 @@
 {$DEFINE xTestVersion}
          // kennzeichnet cdrtfe als Testversion
          //    - betrifft: frm_about.pas
+
+
+(* ------------------------------------------------------------- SplashScreen *)
+
+{$DEFINE SplashScreen}
+         // Beim Programmstart wird ein Splash-Screen gezeigt
+         //    - betrifft: cdrtfe.dpr
+
+
+(* --------------------------------------------------------------- ImagingLib *)
+
+{$IFDEF Delphi6Up}
+  {$DEFINE UseImagingLib}
+{$ENDIF}
+
+         // Für die Darstellung von jpeg-Dateien nicht Borlands jpeg.pas ver-
+         // wenden, sondern die Routinen von ImagingLib
+         //    - betrifft: frm_splash_screen.pas, frm_about.pas
 
 
 (* -------------------------------------------- Fortschritt in Taskbar zeigen *)

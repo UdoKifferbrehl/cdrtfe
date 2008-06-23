@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.06.2008
+  letzte Änderung  16.06.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -51,6 +51,9 @@ uses
   frm_audiocd_tracks in 'forms\frm_audiocd_tracks.pas' {FormAudioCDTracks},
   frm_videocd_options in 'forms\frm_videocd_options.pas' {FormVideoCDOptions},
   frm_dae_options in 'forms\frm_dae_options.pas' {FormDAEOptions},
+  {$IFDEF SplashScreen}
+  frm_splash_screen in 'forms\frm_splash_screen.pas' {FormSplashScreen},  
+  {$ENDIF} 
   cl_lang in 'classes\cl_lang.pas',
   cl_settings in 'classes\cl_settings.pas',
   cl_cd in 'classes\cl_cd.pas',
@@ -113,21 +116,33 @@ uses
 
 { verwendete externe Komponenten/Units:
   -------------------------------------
-  W32Waves         : by Ulli Conrad
-  atl_oggvorbis.pas: Copyright (c) 2001 by Jurgen Faul.
+  W32Waves           : by Ulli Conrad
+  atl_oggvorbis.pas  : Copyright (c) 2001 by Jurgen Faul.
   DropTarget.pas,
-  DropSource.pas   : © 1997-2005 Angus Johnson & Anders Melander
-  JCL              : Project JEDI, http://jvcl.sourceforge.net/
-  QProgBar.pas     : Copyright © 2004 by Olivier Touzot "QnnO"
+  DropSource.pas     : © 1997-2005 Angus Johnson & Anders Melander
+  JCL                : Project JEDI, http://jvcl.sourceforge.net/
+  QProgBar.pas       : Copyright © 2004 by Olivier Touzot "QnnO"
+  Vampyre Imaging Lib: © 2004-2007 Marek Mauder
 }
 
 {$R *.RES}
 
 begin
   {$IFDEF WriteLogfile} AddLog('Application.Initialize', 0); {$ENDIF}
+  {$IFDEF SplashScreen}
+  FormSplashScreen := TFormSplashScreen.Create(Application) ;
+  if not IsAlreadyRunning then FormSplashScreen.Show;
+  {$ENDIF}
   Application.Initialize;
+  {$IFDEF SplashScreen}
+  FormSplashScreen.Update;
+  {$ENDIF}
   {$IFDEF WriteLogfile} AddLog('Application.CreateForm1' + CRLF, 0); {$ENDIF}
   Application.CreateForm(TForm1, Form1);
+  {$IFDEF SplashScreen}
+  FormSplashScreen.Hide;
+  FormSplashScreen.Free;
+  {$ENDIF}  
   {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}
   Application.Run;
 end.

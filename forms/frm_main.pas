@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.06.2008
+  letzte Änderung  14.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -527,6 +527,7 @@ implementation
 {$R *.DFM}
 {$R ../resource/icons.res}
 {$R ../resource/buttons.res}
+{$R ../resource/logo.res}
 
 uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,

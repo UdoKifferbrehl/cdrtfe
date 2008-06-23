@@ -2,10 +2,10 @@
 
   f_process.pas: Prozesse, Fenster, ...
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  16.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,6 +21,7 @@
 
     GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string
     GetProcessWindow(const TargetProcessID: Cardinal): HWnd
+    IsAlreadyRunning: Boolean
     IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean
     ShlExecute(const Cmd, Opt: string)
 
@@ -37,6 +38,7 @@ uses Windows, Classes, Forms, SysUtils, ShellAPI, TlHelp32;
 function GetChildProcessByModuleName(const Name: string; const ParentID: DWORD): DWORD;
 function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string;
 function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
+function IsAlreadyRunning: Boolean;
 function IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean;
 function KillProcessSoftly(const hProcess: Cardinal; var uExitCode: Cardinal): Boolean;
 function KillChildProcessesByName(const Name: string; const ParentID: DWORD): Boolean;
@@ -215,6 +217,15 @@ begin
       CloseHandle(PHandle);
     end;
   until (PID = 0) or (Count > MaxRetry);
+end;
+
+{ IsAlreadRunning --------------------------------------------------------------
+
+  True, wenn bereits eine Instanz läuft.                                       }
+
+function IsAlreadyRunning: Boolean;
+begin
+  Result := AlreadyRunning;
 end;
 
 { IsFirstInstance --------------------------------------------------------------

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.02.2008
+  letzte Änderung  13.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,6 +21,7 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ExtCtrls, ShellAPI, ComCtrls,
+     {$IFDEF UseImagingLib}ImagingComponents,{$ELSE}jpeg,{$ENDIF}
      cl_lang;
 
 type
@@ -88,6 +89,7 @@ const Cdrtfe_Version     = 'cdrtfe 1.3.1'
 
 procedure TFormAbout.FormCreate(Sender: TObject);
 var TempStream : TResourceStream;
+    JPEGImage  : {$IFDEF UseImagingLib}TImagingJpeg{$ELSE}TJPEGImage{$ENDIF};
 begin
   SetFont(Self);
   StaticText1.Caption := Cdrtfe_Version;
@@ -114,6 +116,18 @@ begin
     RichEdit1.Lines.LoadFromStream(TempStream);
   finally
     TempStream.Free;
+  end;
+
+  TempStream := TResourceStream.Create(hInstance, 'logo2', 'JPEG');
+  JPEGImage := {$IFDEF UseImagingLib}TImagingJPEG.Create{$ELSE}
+                                     TJPEGImage.Create{$ENDIF};
+  try
+    TempStream.Position := 0;
+    JPEGImage.LoadFromStream(TempStream);
+    Image1.Picture.Assign(JPEGImage);
+  finally
+    TempStream.Free;
+    JPEGImage.Free;
   end;
 
   {$IFDEF TestVersion}
