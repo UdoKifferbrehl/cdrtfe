@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.06.2008
+  letzte Änderung  24.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -787,8 +787,15 @@ end;
 
 procedure ShlExecute(const Cmd, Opt: string);
 begin
-  ShellExecute(Application.MainForm.Handle, nil,
-               PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
+  if Cmd = '' then
+  begin
+    ShellExecute(Application.MainForm.Handle, 'open',
+                 PChar(Opt), nil, nil, SW_SHOWNORMAL);
+  end else
+  begin
+    ShellExecute(Application.MainForm.Handle, nil,
+                 PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
+  end;
 end;
 
 initialization

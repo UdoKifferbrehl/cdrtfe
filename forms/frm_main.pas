@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.06.2008
+  letzte Änderung  29.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -263,6 +263,8 @@ type
     AudioListViewPopupN2: TMenuItem;
     AudioListViewPopupPlay: TMenuItem;
     CheckBoxImageCDText: TCheckBox;
+    CDEListViewPopupN5: TMenuItem;
+    CDEListViewPopupOpen: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -380,6 +382,8 @@ type
     procedure MainMenuHelpClick(Sender: TObject);
     procedure CDETreeViewPopupImportClick(Sender: TObject);
     procedure AudioListViewPopupPlayClick(Sender: TObject);
+    procedure ListViewDblClick(Sender: TObject);
+    procedure CDEListViewPopupOpenClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -413,7 +417,7 @@ type
     FImageTabFirstWrite: Boolean;
     FCheckingControls  : Boolean;
     function GetActivePage: Byte;
-    function GetCurrentListView: TListView;
+    function GetCurrentListView(Sender: TObject): TListView;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
     procedure AddToPathList(const Filename: string);
@@ -459,6 +463,7 @@ type
     procedure UserMoveFolder(SourceNode, DestNode: TTreeNode);
     procedure UserMoveTrack(List: TListView; const Direction: TDirection);
     procedure UserNewFolder(Tree: TTreeView);
+    procedure UserOpenFile(List: TListView);
     procedure UserRenameFile(View: TListView);
     procedure UserRenameFolder(Tree: TTreeView);
     procedure UserRenameFolderByKey(Tree: TTreeView);
@@ -2220,6 +2225,33 @@ begin
   end;
 end;
 
+{ UserOpenFile -----------------------------------------------------------------
+
+  UserOpenFile öffnet eine Datei oder einen Track.                             }
+
+procedure TForm1.UserOpenFile(List: TListView);
+var Item: TListItem;
+begin
+  if FSettings.General.AllowFileOpen and (List <> nil) then
+  begin
+    Item := List.Selected;
+    if Item <> nil then
+    begin
+      if ((List = AudioListView) or (List = VideoListView)) and
+         FSettings.General.UseMPlayer then
+      begin
+        if FSettings.FileFlags.MPlayerOk then
+          ShlExecute(QuotePath(FSettings.General.MPlayerCmd),
+                     ReplaceString(FSettings.General.MPlayerOpt, '%N',
+                                   QuotePath(List.Selected.SubItems[2])));
+      end else
+      begin
+        ShlExecute('', QuotePath(List.Selected.SubItems[2]));
+      end;
+    end;
+  end;
+end;
+
 
 { Anzeige der Dateilisten ---------------------------------------------------- }
 
@@ -2530,13 +2562,15 @@ begin
   Result := Form1.PageControl1.ActivePage.PageIndex + 1;
 end;
 
-{ GetcurrentListView -----------------------------------------------------------
+{ GetCurrentListView -----------------------------------------------------------
 
   GetCurrentListView gibt eine Referenz auf den aktuelle ListView zurück.      }
 
-function TForm1.GetCurrentListView: TListView;
+function TForm1.GetCurrentListView(Sender: TObject): TListView;
 begin
   case FSettings.General.Choice of
+    cDataCD : Result := CDEListView;
+    cXCD    : Result := (Sender as TListView);
     cAudioCD: Result := AudioListView;
     cVideoCD: Result := VideoListView;
   else
@@ -5109,6 +5143,16 @@ end;
 
 { ListView-Events ------------------------------------------------------------ }
 
+{ ListView: DoubleClick --------------------------------------------------------
+
+  Maus-Event: Doppelklick öffnet Track.                                        }
+
+procedure TForm1.ListViewDblClick(Sender: TObject);
+begin
+  if FSettings.General.AllowDblClick then
+    UserOpenFile(GetCurrentListView(Sender));
+end;
+
 { ListView: OnKeyDown ----------------------------------------------------------
 
   Tastatur-Events.                                                             }
@@ -5729,7 +5773,8 @@ end;
   Menü-Einträge ein- bzw. ausgeblendet.                                        }
 
 procedure TForm1.CDEListViewPopupMenuPopup(Sender: TObject);
-var ListView: TListView;
+var ListView   : TListView;
+    OpenVisible: Boolean;
 begin
   ListView := (Sender as TPopupMenu).PopupComponent as TListView;
   if ListView.SelCount = 0 then
@@ -5765,6 +5810,10 @@ begin
   begin
     CDEListViewPopupAddMovie.Visible := False;
   end;
+  OpenVisible := (ListView.SelCount > 0) and FSettings.General.AllowFileOpen;
+  CDEListViewPopupN5.Visible := OpenVisible;
+  CDEListViewPopupOpen.Visible := OpenVisible;
+  CDEListViewPopupOpen.Default := FSettings.General.AllowDblClick;
 end;
 
 { Data-CD, XCD: Add file }
@@ -5815,15 +5864,23 @@ begin
   end;
 end;
 
+{ Data-CD, XCD: Open file }
+
+procedure TForm1.CDEListViewPopupOpenClick(Sender: TObject);
+begin 
+  UserOpenFile(GetCurrentListView(CDEListViewPopupMenu.PopupComponent));
+end;
+
 { OnPopup ----------------------------------------------------------------------
 
   in Abhängigkeit der Anzahl der Tracks werden die Menü-Einträge ein- bzw.
   ausgeblendet.                                                                }
 
 procedure TForm1.AudioListViewPopupMenuPopup(Sender: TObject);
-var ListView: TListView;
+var ListView   : TListView;
+    PlayVisible: Boolean;
 begin
-  ListView := GetCurrentListView;
+  ListView := GetCurrentListView(Sender);
   if ListView.SelCount = 0 then
   begin
     AudioListViewPopupAddTrack.Visible := True;
@@ -5852,8 +5909,13 @@ begin
       AudioListViewPopupMoveUp.Visible := True;
       AudioListViewPopupMoveDown.Visible := True;
     end;
-    AudioListViewPopupN2.Visible := FSettings.FileFlags.MPlayerOk;
-    AudioListViewPopupPlay.Visible := FSettings.FileFlags.MPlayerOk;
+    with FSettings do
+      PlayVisible := General.AllowFileOpen and
+                     ((General.UseMPlayer and FileFlags.MPlayerOk) or
+                      not General.UseMPlayer);
+    AudioListViewPopupN2.Visible := PlayVisible;
+    AudioListViewPopupPlay.Visible := PlayVisible;
+    AudioListViewPopupPlay.Default := FSettings.General.AllowDblClick;
   end;
 end;
 
@@ -5879,7 +5941,7 @@ end;
 procedure TForm1.AudioListViewPopupMoveUpClick(Sender: TObject);
 var ListView: TListView;
 begin
-  ListView := GetCurrentListView;
+  ListView := GetCurrentListView(Sender);
   if ListView.Items.Count > 0 then
   begin
     UserMoveTrack(ListView, dUp);
@@ -5891,7 +5953,7 @@ end;
 procedure TForm1.AudioListViewPopupMoveDownClick(Sender: TObject);
 var ListView: TListView;
 begin
-  ListView := GetCurrentListView;
+  ListView := GetCurrentListView(Sender);
   if ListView.Items.Count > 0 then
   begin
     UserMoveTrack(ListView, dDown);
@@ -5901,15 +5963,8 @@ end;
 { Audio-CD: Play track}
 
 procedure TForm1.AudioListViewPopupPlayClick(Sender: TObject);
-var ListView: TListView;
 begin
-  ListView := GetCurrentListView;
-  if ListView <> nil then
-  begin
-    ShlExecute(QuotePath(FSettings.General.MPlayerCmd),
-               ReplaceString(FSettings.General.MPlayerOpt, '%N',
-                             QuotePath(ListView.Selected.SubItems[2])));
-  end;
+  UserOpenFile(GetCurrentListView(AudioListViewPopupMenu.PopupComponent));
 end;
 
 

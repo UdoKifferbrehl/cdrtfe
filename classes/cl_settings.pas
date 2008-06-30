@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.06.2008
+  letzte Änderung  29.06.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -91,6 +91,9 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        PortableMode  : Boolean;
        DetectSpeeds  : Boolean;
        AutoSaveOnExit: Boolean;
+       AllowFileOpen : Boolean;
+       AllowDblClick : Boolean;
+       UseMPlayer    : Boolean;
        MPlayerCmd    : string;
        MPlayerOpt    : string;
      end;
@@ -587,6 +590,9 @@ begin
     PortableMode := False;
     DetectSpeeds := False;
     AutoSaveOnExit := False;
+    AllowFileOpen := True;
+    AllowDblClick := True;
+    UseMPlayer := False;
     MPlayerCmd := '';
     MPlayerOpt := '%N';
   end;
@@ -1162,6 +1168,9 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'CDTextTP', CDTextTP);
       WriteBool(Section, 'DetectSpeeds', DetectSpeeds);
       WriteBool(Section, 'AutoSaveOnExit', AutoSaveOnExit);
+      WriteBool(Section, 'AllowFileOpen', AllowFileOpen);
+      WriteBool(Section, 'AllowDblClick', AllowDblClick);
+      WriteBool(Section, 'UseMPlayer', UseMPlayer);
       WriteString(Section, 'MPlayerCmd', MPlayerCmd);
       WriteString(Section, 'MPlayerOpt', MPlayerOpt);
     end;
@@ -1555,6 +1564,9 @@ var PF     : TIniFile; // ProjectFile
       CDTextTP := ReadBool(Section, 'CDTextTP', False);
       DetectSpeeds := ReadBool(Section, 'DetectSpeeds', DetectSpeeds);
       AutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
+      AllowFileOpen := ReadBool(Section, 'AllowFileOpen', True);
+      UseMplayer := ReadBool(Section, 'UseMPlayer', False);
+      AllowDblClick := ReadBool(section, 'AllowDblClick', True);
       MPlayerCmd := ReadString(Section, 'MPlayerCmd', '');
       MPlayerOpt := ReadString(Section, 'MPlayerOpt', '');
       FileFlags.MPlayerOk := FileExists(MPlayerCmd);      
