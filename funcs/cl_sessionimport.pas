@@ -4,19 +4,20 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  05.05.2008
+  letzte Änderung  06.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
   Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
   cl_sessionimport.pas implementiert Objekte und Funktionen, die beim Auswählen
-  und Importieren von vereits vorhandenen Sessione helfen.
+  und Importieren von vereits vorhandenen Sessions helfen.
 
 
   TSessionImportHelper
 
     Properties   Device
+                 Drive
                  MediumInfo
                  StartSector
 
@@ -34,26 +35,49 @@ interface
 
 uses Forms, Classes, SysUtils, StdCtrls, Controls;
 
-type TSessionImportHelper = class(TObject)
+type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
+
+     TSessionImportHelper = class(TObject)
      private
        FDevice     : string;
+       FDrive      : string;
+       FHasJoliet  : Boolean;
+       FHasRR      : Boolean;
        FMediumInfo : string;
        FStartSector: string;
        FSectorList : string;
+       FVolID      : string;
+       procedure CheckSession;
+       procedure ConvertPathlistToTreeStructure(List, Structure: TStringList);
        procedure ExtractSessionData;
+       procedure GetDiskInfo;           // -minfo
+       procedure GetFileSysInfo(const Mode: TGetFileSysMode);
+       procedure GetSessionContent;
+       procedure ParseFolder;
+       procedure ParseFiles;
        procedure SelectSession;
      public
        constructor Create;
        destructor Destroy; override;
        procedure GetSession;
+       procedure GetSessionUser;
        property Device     : string write FDevice;
+       property Drive      : string write FDrive;
        property MediumInfo : string read FMediumInfo write FMediumInfo;
        property StartSector: string read FStartSector;
      end;
 
 implementation
 
-uses f_logfile, cl_cdrtfedata, cl_lang, f_misc, constant;
+uses f_logfile, cl_cdrtfedata, cl_lang, f_misc, f_process, f_helper, f_strings,
+     f_filesystem, constant, cl_cd;
+
+const SearchDir    : string = 'Directory listing of ';
+      SearchDirID  : string = 'd---------';
+      SearchDirIDRR: string = ' dr-';
+      SearchVolID  : string = 'Volume id: ';
+      SearchJoliet : string = 'Joliet with';
+      SearchRR     : string = 'Rock Ridge signatures version';
 
 type TFormSelectSession = class(TForm)
        FLang       : TLang;
@@ -180,6 +204,122 @@ end;
 
 { TSessionImportHelper - private }
 
+procedure TSessionImportHelper.ConvertPathlistToTreeStructure(List, Structure:
+                                                                   TStringList);
+var FolderTree: TCD;
+
+  procedure Init;
+  begin
+    FolderTree := TCD.Create;
+  end;
+
+  procedure Free;
+  begin
+    FolderTree.Free;
+  end;
+
+  procedure PrepareList(List: TStringList);
+  var i, c: Integer;
+      Temp: string;
+  begin
+    {für jeden Eintrag die Slashes zählen und Anzahl am Anfang einfügen}
+    for i := 0 to List.Count - 1 do
+    begin
+      Temp := List[i];
+      Delete(Temp, 1, 1);
+      c := CountChar(Temp, '/');
+      List[i] := Format('%.2d', [c]) + Temp;
+    end;
+    {Liste sortieren}
+    List.Sort;
+  end;
+
+  procedure ConvertListToTree(List: TStringList);
+  var i, p        : Integer;
+      Path, Folder: string;
+  begin
+    for i := 0 to List.Count - 1 do
+    begin
+      Path := List[i];
+      {Zahl und letzten Slash entfernen}
+      Delete(Path, 1, 2);
+      Delete(Path, Length(Path), 1);
+      {Wurzelverzeichnis oder normaler Ordner?}
+      if Path = '' then
+      begin
+        {Wurzel}
+        FolderTree.SetCDLabel(FVolID);
+      end else
+      begin
+        p := LastDelimiter('/', Path);
+        if p = 0 then
+        begin
+          {Ordner 1.Ebene}
+          Folder := Path;
+          Path := '';
+        end else
+        begin
+          {tiefere Ebene}
+          Folder := Copy(Path, p + 1, Length(Path) - p);
+          Path := Copy(Path, 1, p - 1);
+        end;
+        FolderTree.NewFolder(Path, Folder);
+      end;      
+    end;
+  end;
+
+begin
+  Init;
+  {Slashes zählen und List sortieren.}
+  PrepareList(List);
+  {Liste konvertieren}
+  ConvertListToTree(List);
+  {konvertierte List exportieren}
+  FolderTree.ExportStructureToStringList(Structure);
+  Free;
+end;
+
+{ GetDiskInfo ------------------------------------------------------------------
+
+  GetDiskInfo ruft cdrecord -minfo auf.                                        }
+
+procedure TSessionImportHelper.GetDiskInfo;
+var Temp: string;
+begin
+  Temp := StartUpDir + cCdrecordBin;
+  {$IFDEF QuoteCommandlinePath}
+  Temp := QuotePath(Temp);
+  {$ENDIF}
+  Temp := Temp + ' dev=' + SCSIIF(FDevice) + ' -minfo -v';
+  FMediumInfo := GetDosOutput(PChar(Temp), True, False);
+end;
+
+{ GetFileSysInfo ---------------------------------------------------------------
+
+  GetFileSysInfo ruft isoinfo auf.                                             }
+
+procedure TSessionImportHelper.GetFileSysInfo(const Mode: TGetFileSysMode);
+var Temp: string;
+begin
+  Temp := StartUpDir + cISOInfoBin;
+  {$IFDEF QuoteCommandlinePath}
+  Temp := QuotePath(Temp);
+  {$ENDIF}
+  Temp := Temp + ' dev=' + SCSIIF(FDevice) + ' -T ' + FStartSector;
+  case Mode of
+    gfsmPVD   : Temp := Temp + ' -d';
+    gfsmISO   : Temp := Temp + ' -l';
+    gfsmRR    : Temp := Temp + ' -l -R';
+    gfsmJoliet: Temp := Temp + ' -l -J';
+  end;
+  FMediumInfo := GetDosOutput(PChar(Temp), True, True);
+end;
+
+{ ExtractSessionData -----------------------------------------------------------
+
+  ExtractSessionData ermittelt aus der Ausgabe von cdrecord -minfo die Start-
+  adressen der bereits vorhandenen Sessions.                                   }
+
 procedure TSessionImportHelper.ExtractSessionData;
 var MInfo  : TStringList;
     SecList: TStringList;
@@ -219,6 +359,11 @@ begin
   SecList.Free;
 end;
 
+{ SelectSession ----------------------------------------------------------------
+
+  SelectSession erzeugt einen Auswahldialog, über den eine der vorhandenen
+  Sessions selektiert werden kann.                                             }
+
 procedure TSessionImportHelper.SelectSession;
 var FormSelectSession: TFormSelectSession;
     Temp             : string;
@@ -247,6 +392,107 @@ begin
   end;
 end;
 
+{ CheckSession -----------------------------------------------------------------
+
+  CheckSession  prüft, welche Dateisysteme vorhanden sind und ermittelt die
+  VolID.                                                                       }
+
+procedure TSessionImportHelper.CheckSession;
+var Temp: string;
+    p   : Integer;
+begin
+  {Get Primary VOlume Descriptor}
+  GetFileSysInfo(gfsmPVD);
+  {Extract Volume ID}
+  Temp := FMediumInfo;
+  p := Pos(SearchVolID, Temp);
+  Delete(Temp, 1, p + 10);
+  p := Pos(LF, Temp);
+  FVolID := Copy(Temp, 1, p - 1);
+  {vorhandene Dateisysteme}
+  FHasJoliet := Pos(SearchJoliet, FMediumInfo) > 0;
+  FHasRR     := Pos(SearchRR, FMediumInfo) > 0;
+end;
+
+{ GetSessionContent ------------------------------------------------------------
+
+  GetSessionContent liet den Inhalt (die Ordnerstruktur und Dateinamen) ein.   }
+
+procedure TSessionImportHelper.GetSessionContent;
+var Mode: TGetFileSysMode;
+begin
+  if FHasJoliet then Mode := gfsmJoliet else
+  if FHasRR     then Mode := gfsmRR else
+                     Mode := gfsmISO;
+  {Inhalt der Session einlesen}
+  GetFileSysInfo(Mode);
+end;
+
+{ ParseFolder ------------------------------------------------------------------
+
+  ParseFolder ermittelt die Ordnerstruktur der ausgewählten Session un überträgt
+  sie in die Projektansicht.                                                   }
+
+procedure TSessionImportHelper.ParseFolder;
+var i              : Integer;
+    List           : TStringList;
+    FolderList     : TStringList;
+    FolderStructure: TStringList;
+begin
+  List := TStringList.Create;
+  FolderList := TStringList.Create;
+  FolderStructure := TStringList.Create;
+  List.Text := FMediumInfo;
+  for i := 0 to List.Count - 1 do
+  begin
+    if Pos(SearchDir, List[i]) > 0 then
+      FolderList.Add(Trim(Copy(List[i], 22, Length(List[i]) - 21)));
+  end;
+  ConvertPathListToTreeStructure(FolderList, FolderStructure);                                      
+  TCdrtfeData.Instance.Data.MultisessionCDImportFolder(FolderStructure);
+  List.Free;
+  FolderList.Free;
+  FolderStructure.Free;
+end;
+
+{ ParseFiles -------------------------------------------------------------------
+
+  ParseFiles trägt die in der Session vorhandenen Dateien in das Projekt ein.  }
+
+procedure TSessionImportHelper.ParseFiles;
+var i, p            : Integer;
+    List            : TStringList;
+    Path, Size, Name: string;
+begin
+  List := TStringList.Create;
+  List.Text := FMediumInfo;
+  Path := '';
+  for i := 0 to List.Count - 1 do
+  begin
+    if Pos(SearchDir, List[i]) > 0 then
+    begin
+      Path := Trim(Copy(List[i], 22, Length(List[i]) - 21));
+      if Path[1] = '/' then Delete(Path, 1, 1);
+    end else
+    if (Pos(SearchDirID, List[i]) = 0) and
+       (Pos(SearchDirIDRR, List[i]) = 0) and (List[i] <> '') then
+    begin
+      if not FHasJoliet and FHasRR then
+      begin
+        Size := Trim(Copy(List[i], 37, 10));
+      end else
+      begin
+        Size := Trim(Copy(List[i], 26, 10));
+      end;
+      p := Pos(']', List[i]);
+      Name := Trim(Copy(List[i], p + 1, Length(List[i]) - p));
+      TCdrtfeData.Instance.Data.MultisessionCDImportFile(Path, Name, Size,
+                                                                        FDrive);
+    end;
+  end;
+  List.Free;
+end;
+
 { TSessionImportHelper - public }
 
 constructor TSessionImportHelper.Create;
@@ -256,6 +502,8 @@ begin
   FSectorList  := '';
   FDevice      := '';
   FStartSector := '';
+  FHasJoliet   := True;
+  FHasRR       := True;
 end;
 
 destructor TSessionImportHelper.Destroy;
@@ -263,11 +511,36 @@ begin
   inherited Destroy;
 end;
 
+{ GetSession -------------------------------------------------------------------
+
+  GetSession wird aus TDiskInfoM.GetCDInfo heraus aufgerufen, wenn der User noch
+  keine Session ausgewählt hat, aber SelectSession = True ist. In diesem Falle,
+  muß die gesamte Ausgabe von cdrecord -minfo mit übergeben werden. Die ausge-
+  wählte Session wird mittels StartSector zurückgegeben (genauer: die Start-
+  adresse.                                                                     }
+
 procedure TSessionImportHelper.GetSession;
 begin
-  if FMediumInfo = '' then ;
   ExtractSessionData;
   SelectSession;
+end;
+
+{ GetSessionUser ---------------------------------------------------------------
+
+  GetSessionUser wird direkt vom Benutzer ausgelöst, wenn er eine Multisession-
+  CD importieren möchte (per Rechtsklick vom Hauptfenster aus). Im Gegensatz zu
+  GetSession wird nicht nur der Startsektor der zu importierenden Session er-
+  mittelt, es wird auch das entsprechende Inhaltsverzeichnis eingelesen und dar-
+  gestellt.                                                                    }
+
+procedure TSessionImportHelper.GetSessionUser;
+begin
+  GetDiskInfo;
+  GetSession;
+  CheckSession;
+  GetSessionContent;
+  ParseFolder;
+  ParseFiles;
 end;
 
 end.

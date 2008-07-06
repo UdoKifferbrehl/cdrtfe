@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.02.2008
+  letzte Änderung  06.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -62,6 +62,7 @@ begin
   AddLog('cMkisofsBin       ' + cMkisofsBin, 3);
   AddLog('cCdda2wavBin      ' + cCdda2wavBin, 3);
   AddLog('cReadcdBin        ' + cReadcdBin, 3);
+  AddLog('cISOInfoBin       ' + cISOInfoBin, 3);
   AddLog('cShBin            ' + cShBin, 3);
   AddLog('cMode2CDMakerBin  ' + cMode2CDMakerBin, 3);
   AddLog('cVCDImagerBin     ' + cVCDImagerBin, 3);
@@ -106,6 +107,7 @@ begin
     cMkisofsBin      := Path + cCdrtoolsDir  + cMkisofsBin;
     cCdda2wavBin     := Path + cCdrtoolsDir  + cCdda2wavBin;
     cReadcdBin       := Path + cCdrtoolsDir  + cReadcdBin;
+    cISOInfoBin      := Path + cCdrtoolsDir  + cISOInfoBin;
     cShBin           := Path + cCygwinDir    + cShBin;
     cMode2CDMakerBin := Path + cXCDDir       + cMode2CDMakerBin;
     cVCDImagerBin    := Path + cVCDImagerDir + cVCDImagerBin;
@@ -158,6 +160,9 @@ begin
 
       Temp := ReadString(cTool, 'ReadcdBin', '');
       if Temp <> '' then cReadcdBin := Temp;
+
+      Temp := ReadString(cTool, 'ISOInfoBin', '');
+      if Temp <> '' then cISOInfoBin := Temp;
 
       Temp := ReadString(cTool, 'ShBin', '');
       if Temp <> '' then cShBin := Temp;
@@ -324,6 +329,8 @@ begin
       begin
         TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit06'));
       end;
+      {Ist isoinfo.exe da? Wenn nicht, kein erweiterter Multisession-Import.}
+      ISOInfoOk := FileExists(StartUpDir + cISOInfoBin + cExtExe);
       {Ist sh.exe da? Wenn nicht, dann kein DAO, es sei denn sh.exe wird nicht
        benötig (Win2k/WinXP).}
       ShNeeded := not PlatformWin2kXP;

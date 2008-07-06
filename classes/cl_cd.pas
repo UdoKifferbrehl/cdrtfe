@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.05.2008
+  letzte Änderung  06.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,6 +47,7 @@
                  MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string)
                  MoveFileByName(const Name, SourcePath, DestPath: string)
                  MoveFolder(const SourcePath, DestPath: string)
+                 MultisessionCDImportFile(const Path, Name, Size, Drive: string)
                  NewFolder(const Path, Name: string)
                  RenameFileByIndex(const Index: Integer; const Path, Name: string; MaxLength: Byte)
                  RenameFileByName(const Path, OldName, Name: string; const MaxLength: Byte)
@@ -235,6 +236,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string);
        procedure MoveFileByName(const Name, SourcePath, DestPath: string);
        procedure MoveFolder(const SourcePath, DestPath: string);
+       procedure MultisessionCDImportFile(const Path, Name, Size, Drive: string);
        procedure NewFolder(const Path, Name: string);
        procedure RenameFileByIndex(const Index: Integer; const Path, Name: string; MaxLength: Byte);
        procedure RenameFileByName(const Path, OldName, Name: string; const MaxLength: Byte);
@@ -1665,6 +1667,21 @@ begin
   Dispose(PList);
   FFolderAdded := {Path + '/' +} NewName;
   InvalidateCounters;  
+end;
+
+{ MultisessionCDImportFile -----------------------------------------------------
+
+  fügt eine bereits vorhandene Datei in die Dateilisten ein.                   }
+
+procedure TCD.MultisessionCDImportFile(const Path, Name, Size, Drive: string);
+var DestFolder: TNode;
+    Temp      : string;
+begin
+  DestFolder := GetFolderFromPath(Path);
+  Temp := Name + ':' + Drive + Path + Name + '*' + Size + '>';
+  Temp := ReplaceChar(Temp, '/', '\');
+  FHasImportedSessions := True;
+  TPList(DestFolder.Data)^.Add(Temp);
 end;
 
 { CheckFS ----------------------------------------------------------------------

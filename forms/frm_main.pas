@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.06.2008
+  letzte Änderung  01.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -459,6 +459,7 @@ type
     procedure UserDeleteAll(Tree: TTreeView);
     procedure UserDeleteFile(Tree: TTreeView; View: TListView);
     procedure UserDeleteFolder(Tree: TTreeView);
+    procedure UserImportCD;
     procedure UserMoveFile(SourceNode, DestNode: TTreeNode; View: TListView);
     procedure UserMoveFolder(SourceNode, DestNode: TTreeNode);
     procedure UserMoveTrack(List: TListView; const Direction: TDirection);
@@ -538,7 +539,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
      frm_xcd_options, frm_settings, frm_about, frm_output,
      frm_videocd_options, frm_dae_options,
-     cl_cdrtfedata, cl_devicechange,
+     cl_cdrtfedata, cl_devicechange, cl_sessionimport,
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
@@ -2250,6 +2251,57 @@ begin
       end;
     end;
   end;
+end;
+
+{ UserImportCD -----------------------------------------------------------------
+
+  UserImp0rtCD importiert die vorhandenen Sessions einer eingelegten CD.       }
+
+procedure TForm1.UserImportCD;
+var Index          : Integer;
+    DeviceID       : string;
+    Drive          : string;
+    VolInfo        : TVolumeInfo;
+    SessionImporter: TSessionImportHelper;
+begin
+  Index := FSettings.General.TabSheetDrive[FSettings.General.Choice];
+  DeviceID := GetValueFromString(FDevices.CDWriter[Index]);
+  Drive := FDevices.GetDriveLetter(DeviceID);
+  if Drive = '' then
+  begin
+    TLogWin.Inst.Add('No drive letter ...');
+    Exit;
+  end;
+  TLogWin.Inst.Add(Format(FLang.GMS('g011'), [Drive, DeviceID]));
+  {Welche Session importieren?}
+  if not FSettings.DataCD.SelectSess then
+  begin
+    {einfach die letzte Session importieren}
+    VolInfo.Drive := Drive;
+    FData.CDImportSession := True;
+    AddToPathlist(Drive);
+    FData.CDImportSession := False;
+    CheckDataCDFS(False);
+    UserAddFolderUpdateTree(CDETreeView);
+    GetVolumeInfo(VolInfo);
+    if VolInfo.Name <> '' then
+    begin
+      FData.SetCDLabel(VolInfo.Name, FSettings.General.Choice);
+      CDETreeView.Items[0].Text := VolInfo.Name;
+    end;
+  end else
+  begin
+    {User wählt Session aus.}
+    SessionImporter := TSessionImportHelper.Create;
+    SessionImporter.Device := DeviceID;
+    SessionImporter.Drive := Drive;
+    SessionImporter.GetSessionUser;
+    FSettings.DataCD.MsInfo := SessionImporter.StartSector;
+    InitTreeView(CDETreeView, cDataCD);
+    CDETreeView.Items[0].Expand(False);
+    SessionImporter.Free;
+  end;
+  UpdateGauges;
 end;
 
 
@@ -5424,7 +5476,8 @@ begin
   UserDeleteAll(CDETreeView);
   {mit einem neuen Projekt sollen auch die alten Ausnahmen gelöscht werden}
   FData.IgnoreNameLengthErrors := False;
-  FData.ErrorListIgnore.Clear;  
+  FData.ErrorListIgnore.Clear;
+  FSettings.DataCD.MsInfo := '';  
 end;
 
 { Data-CD: Check filesystem }
@@ -5730,34 +5783,8 @@ end;
 { Data-CD: Multisession-CD importieren}
 
 procedure TForm1.CDETreeViewPopupImportClick(Sender: TObject);
-var Index   : Integer;
-    DeviceID: string;
-    Drive   : string;
-    VolInfo : TVolumeInfo;
 begin
-  Index := FSettings.General.TabSheetDrive[FSettings.General.Choice];
-  // DeviceID := FDevices.CDWriter.Values[FDevices.CDWriter.Names[Index]];
-  DeviceID := GetValueFromString(FDevices.CDWriter[Index]);
-  Drive := FDevices.GetDriveLetter(DeviceID);
-  if Drive = '' then
-  begin
-    TLogWin.Inst.Add('No drive letter ...');
-    Exit;
-  end;
-  VolInfo.Drive := Drive;
-  TLogWin.Inst.Add(Format(FLang.GMS('g011'), [Drive, DeviceID]));
-  FData.CDImportSession := True;
-  AddToPathlist(Drive);
-  FData.CDImportSession := False;
-  CheckDataCDFS(False);
-  UserAddFolderUpdateTree(CDETreeView);
-  GetVolumeInfo(VolInfo);
-  if VolInfo.Name <> '' then
-  begin
-    FData.SetCDLabel(VolInfo.Name, FSettings.General.Choice);
-    CDETreeView.Items[0].Text := VolInfo.Name;
-  end;
-  UpdateGauges;
+  UserImportCD;
 end;
 
 { Kontextmenü der List-Views ---------------------------------------------------

@@ -1260,11 +1260,18 @@ begin
   {Multisessioninfo ermitteln}
   if FSelectSess and not FDiskComplete then
   begin
-    SessionImporter := TSessionImportHelper.Create;
-    SessionImporter.MediumInfo := FMediumInfo;
-    SessionImporter.GetSession;
-    StartSec := SessionImporter.StartSector;
-    SessionImporter.Free;
+    if FSessOverride <> '' then
+    begin
+      {Der User hat schon eine Session importiert.}
+      StartSec := FSessOverride;
+    end else
+    begin
+      SessionImporter := TSessionImportHelper.Create;
+      SessionImporter.MediumInfo := FMediumInfo;
+      SessionImporter.GetSession;
+      StartSec := SessionImporter.StartSector;
+      SessionImporter.Free;
+    end;
   end else
   begin
     StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.06.2008
+  letzte Änderung  06.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -129,6 +129,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        CdrdaoOk   : Boolean;
        Cdda2wavOk : Boolean;
        ReadcdOk   : Boolean;
+       ISOInfoOk  : BOolean;
        ShOk       : Boolean;
        ShNeeded   : Boolean;
        UseSh      : Boolean;
@@ -247,7 +248,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        BootSegAdr  : string;
        BootLoadSize: string;
        VolId       : string;
-       MsInfo      : string;
+       MsInfo      : string;    // MS-Info, wenn vom User gewählt!
        SelectSess  : Boolean;
        FindDups    : Boolean;
        TransTBL    : Boolean;
@@ -631,6 +632,7 @@ begin
     CdrdaoOk    := True;
     Cdda2wavOk  := True;
     ReadcdOk    := True;
+    ISOInfoOk   := True;
     ShOk        := True;
     ShNeeded    := True;
     UseSh       := True;

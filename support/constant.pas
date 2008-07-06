@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.06.2008
+  letzte Änderung  06.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -89,6 +89,7 @@ const {die GUID für cdrtfe}
       cMkisofsBin      : string = '\mkisofs';
       cCdda2wavBin     : string = '\cdda2wav';
       cReadcdBin       : string = '\readcd';
+      cISOInfoBin      : string = '\isoinfo';
       cShBin           : string = '\sh';
       cMode2CDMakerBin : string = '\mode2cdmaker';
       cVCDImagerBin    : string = '\vcdimager';

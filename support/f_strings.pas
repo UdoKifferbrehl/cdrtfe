@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  08.04.2008
+  letzte Änderung  04.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -13,6 +13,7 @@
 
   exportierte Funktionen/Prozeduren:
 
+    CountChar(const s: string; const c: Char): Integer
     EnumToStr(ArgType: PTypeInfo; var Arg): string
     FormatTime(const Time: Extended): string
     GetValueFromString(const s: string): string
@@ -47,6 +48,7 @@ var UnitByte  : string = 'Byte';    // für SizeToString, damit eine Übersetzung
     UnitMiByte: string = 'MiByte';
     UnitGiByte: string = 'GiByte';
 
+function CountChar(const s: string; const c: Char): Integer;
 function EnumToStr(ArgType: PTypeInfo; var Arg): string;
 function FormatTime(const Time: Extended): string;
 function GetValueFromString(const s: string): string;
@@ -314,6 +316,17 @@ end;
 function GetValueFromString(const s: string): string;
 begin
   Result := Copy(s, Pos('=', s) + 1, MaxInt);
+end;
+
+{ CountChar --------------------------------------------------------------------
+
+  CountChar liefert als Ergebis, wie of c in s vorkommt.                       }
+
+function CountChar(const s: string; const c: Char): Integer;
+var i: Integer;
+begin
+  Result := 0;
+  for i := 1 to Length(s) do if s[i] = c then Inc(Result);
 end;
 
 end.

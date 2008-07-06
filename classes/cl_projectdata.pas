@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.05.2008
+  letzte Änderung  06.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -74,6 +74,8 @@
                  MoveFolder(const SourcePath, DestPath: string; const Choice: Byte)
                  MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte)
                  MP3FilesPresent: Boolean;
+                 MultisessionCDImportFolder(List: TStringList)
+                 MultisessionCDImportFile(const Path, Name, Size, Drive: string)
                  OggFilesPresent: Boolean;
                  ProjectIsEmpty(const Choice: Byte): Boolean
                  NewFolder(const Path, Name: string; const Choice: Byte)
@@ -208,6 +210,8 @@ type TProjectData = class(TObject)
        procedure MoveFileByName(const Name, SourcePath, DestPath: string; const Choice: Byte);
        procedure MoveFolder(const SourcePath, DestPath: string; const Choice: Byte);
        procedure MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte);
+       procedure MultisessionCDImportFolder(List: TStringList);
+       procedure MultisessionCDImportFile(const Path, Name, Size, Drive: string);
        procedure NewFolder(const Path, Name: string; const Choice: Byte);
        procedure RenameFileByIndex(const Index: Integer; const Path, Name: string; const MaxLength, Choice: Byte);
        procedure RenameFileByName(const Path, OldName, Name: string; const MaxLength, Choice: Byte);
@@ -1549,6 +1553,25 @@ begin
   end;
 end;
 
+{ MultiSessionImportFolder -----------------------------------------------------
+
+  erzeugt die Ordnerstruktur aus der übergebenen Liste.                        }
+
+procedure TProjectData.MultisessionCDImportFolder(List: TStringList);
+begin
+  FDataCD.ImportStructureFromStringList(List);
+  FDataCD.CreateFileLists;
+end;
+
+{ MultisessionCDImportFile -----------------------------------------------------
+
+  fügt eine bereits vorhandene Datei in die entsprechende Dateilist ein.       }
+
+procedure TProjectData.MultisessionCDImportFile(const Path, Name, Size, Drive:
+                                                                        string);
+begin
+  FDataCD.MultisessionCDImportFile(Path, Name, Size, Drive);
+end;
 
 { sonstige Funktionen/Prozeduren --------------------------------------------- }
 
