@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  06.07.2008
+  letzte Änderung  07.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,6 +47,7 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
        FStartSector: string;
        FSectorList : string;
        FVolID      : string;
+       function DiskPresent: Boolean;
        procedure CheckSession;
        procedure ConvertPathlistToTreeStructure(List, Structure: TStringList);
        procedure ExtractSessionData;
@@ -203,6 +204,19 @@ end;
 { TSessionImportHelper ------------------------------------------------------- }
 
 { TSessionImportHelper - private }
+
+{ DiskPresent ------------------------------------------------------------------
+
+  True, wenn eine Disk eingelegt ist, False sonst.                             }
+
+function TSessionImportHelper.DiskPresent: Boolean;
+begin
+  Result := Pos('Track  Sess Type', FMediumInfo) > 0;
+end;
+
+{ ConvertPathlistToTreeStructure -----------------------------------------------
+
+  Wandelt die Liste aus Orndereinträgen in eine in TCD importierbare Liste.    }
 
 procedure TSessionImportHelper.ConvertPathlistToTreeStructure(List, Structure:
                                                                    TStringList);
@@ -521,8 +535,11 @@ end;
 
 procedure TSessionImportHelper.GetSession;
 begin
-  ExtractSessionData;
-  SelectSession;
+  if DiskPresent then
+  begin
+    ExtractSessionData;
+    SelectSession;
+  end;
 end;
 
 { GetSessionUser ---------------------------------------------------------------
@@ -536,11 +553,14 @@ end;
 procedure TSessionImportHelper.GetSessionUser;
 begin
   GetDiskInfo;
-  GetSession;
-  CheckSession;
-  GetSessionContent;
-  ParseFolder;
-  ParseFiles;
+  if DiskPresent then
+  begin
+    GetSession;
+    CheckSession;
+    GetSessionContent;
+    ParseFolder;
+    ParseFiles;
+  end;
 end;
 
 end.

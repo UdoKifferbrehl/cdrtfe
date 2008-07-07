@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2008 Oliver Valencia
 
-  letzte Änderung  05.05.2008
+  letzte Änderung  07.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -362,7 +362,8 @@ end;
 
 function TDiskInfo.DiskInserted(const CDInfo: string): Boolean;
 begin
-  Result := Pos('No disk', CDInfo) = 0;
+  Result := (Pos('No disk', CDInfo) = 0) and
+            (Pos('Cannot load media with this drive!', CDInfo) = 0);
   {$IFDEF DebugReadCDInfo}
   if not Result then Deb('No disc inserted.' + CRLF, 1);
   {$ENDIF}
