@@ -3583,6 +3583,7 @@ procedure TForm1.InitSpaceMeter;
 begin
   SpaceMeter := TSpaceMeter.Create(Self);
   SpaceMeter.Font := Self.Font;
+  SpaceMeter.Captions := FLang.GMS('g014');
   SpaceMeter.Init(Form1, StatusBar.Top - 34, 8, 545, 30);
   SpaceMeter.OnSpaceMeterTypeChange := SpaceMeterTypeChange;
 end;

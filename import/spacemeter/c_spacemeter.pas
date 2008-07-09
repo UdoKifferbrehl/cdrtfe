@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  10.06.2008
+  letzte Änderung  07.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,6 +52,10 @@ const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
                             'DVD 4.38 GiB',
                             'DVD/DL 7.96 GiB');
 
+      cUnitMiB: string = 'MiB';
+
+      cUnitMin: string = 'min';
+
 type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
                             SMDT_DVD, SMDT_DVD_DL);
 
@@ -78,6 +82,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
 
      TSpaceMeter = class(TPanel)
      private
+       FCaptions      : string;
        FSpaceMeterMode: TSpaceMeterMode;
        FDiskType      : TSpaceMeterDiskType;
        FDiskSizeMax   : Integer;
@@ -89,6 +94,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        procedure AutoDestroy;
        procedure AutoInit;
        procedure InitPopupMenu;
+       procedure SetCaptions(Value: string);
        procedure SetDiskSize(Value: Integer);
        procedure SetDiskSizeMax(Value: Integer);
        procedure SetDiskType(Value: TSpaceMeterDiskType);
@@ -105,6 +111,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        destructor Destroy; override;
        procedure Init(CParent: TWinControl; PTop, PLeft, SWidth, SHeight: Integer);
      published
+       property Captions: string read FCaptions write SetCaptions;
        property DiskSize: Integer read FDiskSize write SetDiskSize;
        property DiskSizeMax: Integer read FDiskSizeMax write SetDiskSizeMax;
        property DiskType: TSpaceMeterDiskType read FDiskType write SetDiskType;
@@ -194,8 +201,8 @@ end;
 constructor TScale.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FUnitMib := 'MiB';
-  FUnitMin := 'min';
+  FUnitMib := cUnitMiB;
+  FUnitMin := cUnitMin;
   Self.ParentFont := False;
 end;
 
@@ -203,6 +210,26 @@ end;
 { TSpaceMeter ---------------------------------------------------------------- }
 
 { TSpaceMeter - private }
+
+{ SetCaptions ------------------------------------------------------------------
+
+  SetCaptions setzt die Strings für die Menü-Einträge und die Einheiten.       }
+
+procedure TSpaceMeter.SetCaptions(Value: string);
+var List: TStringList;
+    i   : Integer;
+begin
+ List := TStringList.Create;
+ List.Text := Value;
+ for i := 0 to cDiskTypeCount do
+ begin
+   cPopupMenuStrings[i] := List[i];
+   FPopupMenu.Items[i].Caption := List[i];
+  end;
+ FScale.UnitMiB := List[cDiskTypeCount + 1];
+ FScale.UnitMin := List[cDiskTypeCount + 2];
+ List.Free;
+end;
 
 { InitPopupMenu ----------------------------------------------------------------
 
@@ -376,7 +403,6 @@ begin
     SMM_NoDisk : Size := 100;                    // Dummy size
   end;
   SetDiskSizeMax(Size);
-  FPopupMenu.Items[Integer(Value)].Checked := True;
   SpaceMeterTypeChange;
 end;
 
