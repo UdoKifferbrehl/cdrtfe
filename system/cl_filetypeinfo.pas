@@ -1,9 +1,9 @@
 { cl_filetypeinfo.pas: Dateityp und IconIndex cachen
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.07.2004
+  letzte Änderung  10.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,7 +29,7 @@ unit cl_filetypeinfo;
 
 interface
 
-uses Classes, ShellAPI, SysUtils;
+uses Classes, ShellAPI, SysUtils, Windows;
 
 type TFileTypeInfo = class(TObject)
      private
@@ -42,9 +42,9 @@ type TFileTypeInfo = class(TObject)
 
 implementation
 
-{$IFDEF ShowDebugWindow}
-uses frm_debug;
-{$ENDIF}
+
+uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF} constant;
+
 
 { TFileTypeInfo -------------------------------------------------------------- }
 
@@ -84,9 +84,15 @@ begin
   {Wenn nicht, dann Infos ermitteln}
   if Infos = '' then
   begin
-    SHGetFileInfo(PChar(Name), 0, Info,
-                  SizeOf(TSHFileInfo),
-                  SHGFI_SYSIconIndex or SHGFI_TYPENAME);
+    if Extension = cExtExe then
+      SHGetFileInfo(PChar(Name), 0, Info,
+                    SizeOf(TSHFileInfo),
+                    SHGFI_SYSIconIndex or SHGFI_TYPENAME)
+    else
+      SHGetFileInfo(PChar(ExtractFileExt(Name)), FILE_ATTRIBUTE_NORMAL, Info,
+                    SizeOf(TSHFileInfo),
+                    SHGFI_SYSIconIndex or SHGFI_TYPENAME or
+                    SHGFI_USEFILEATTRIBUTES);
     IconIndex := Info.IIcon;
     FileType := Info.szTypeName;
     {Infos in die Liste schreiben, außer es ist eine Verknüpfung, oder eine

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.07.2008
+  letzte Änderung  10.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2643,6 +2643,9 @@ var FileCount, FolderCount, TrackCount: Integer;
 begin
   FData.GetProjectInfo(FileCount, FolderCount, CDSize, CDTime, TrackCount,
                        FSettings.General.Choice);
+
+  if FSettings.General.Choice = cDataCD then
+    CDSize := CDSize + FData.GetProjectPrevSessSize;
 
   case FSettings.General.Choice of
     cDataCD,

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.07.2008
+  letzte Änderung  10.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -66,6 +66,7 @@
                  GetForm2FileCount: Integer
                  GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: Longint; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte)
                  GetProjectMaxLevel(const Choice: Byte): Integer
+                 GetProjectPrevSessSize: Int64
                  GetSmallForm2FileCount: Integer
                  GetTrackPause(const Index: Integer): string
                  LoadFromFile(const Name: string)
@@ -76,6 +77,7 @@
                  MP3FilesPresent: Boolean;
                  MultisessionCDImportFolder(List: TStringList)
                  MultisessionCDImportFile(const Path, Name, Size, Drive: string)
+                 MultisessionCDImportSetSizeUsed(const Size: Int64);
                  OggFilesPresent: Boolean;
                  ProjectIsEmpty(const Choice: Byte): Boolean
                  NewFolder(const Path, Name: string; const Choice: Byte)
@@ -188,6 +190,7 @@ type TProjectData = class(TObject)
        function GetFileList(const Path: string; const Choice: Byte): TStringList;
        function GetForm2FileCount: Integer;
        function GetProjectMaxLevel(const Choice: Byte): Integer;
+       function GetProjectPrevSessSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function GetSmallForm2FileCount: Integer;
        function GetTrackPause(const Index: Integer): string;
        function ProjectIsEmpty(const Choice: Byte): Boolean;
@@ -212,6 +215,7 @@ type TProjectData = class(TObject)
        procedure MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte);
        procedure MultisessionCDImportFolder(List: TStringList);
        procedure MultisessionCDImportFile(const Path, Name, Size, Drive: string);
+       procedure MultisessionCDImportSetSizeUsed(const Size: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
        procedure NewFolder(const Path, Name: string; const Choice: Byte);
        procedure RenameFileByIndex(const Index: Integer; const Path, Name: string; const MaxLength, Choice: Byte);
        procedure RenameFileByName(const Path, OldName, Name: string; const MaxLength, Choice: Byte);
@@ -921,6 +925,16 @@ begin
   end;
 end;
 
+{ GetProjectPrevSessSize -------------------------------------------------------
+
+  liefert die Größe des belegten Speichers bei Multisession-CDs.               }
+
+function TProjectData.GetProjectPrevSessSize:
+                           {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+begin
+  Result := FDataCD.PrevSessSize;
+end;
+
 { GetForm2FileCount ------------------------------------------------------------
 
   liefert die Anzahl der Fomr2-Dateien. Da dies nur für XCDs relevant ist,
@@ -1571,6 +1585,12 @@ procedure TProjectData.MultisessionCDImportFile(const Path, Name, Size, Drive:
                                                                         string);
 begin
   FDataCD.MultisessionCDImportFile(Path, Name, Size, Drive);
+end;
+
+procedure TProjectData.MultisessionCDImportSetSizeUsed(const Size:
+                          {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
+begin
+  FDataCD.MultisessionCDImportSetSizeUsed(Size);
 end;
 
 { sonstige Funktionen/Prozeduren --------------------------------------------- }

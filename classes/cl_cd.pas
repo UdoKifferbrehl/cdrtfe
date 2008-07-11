@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.07.2008
+  letzte Änderung  10.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -28,6 +28,7 @@
                  LastFolderAdded
                  MaxLevel
                  BigFilesPresent
+                 PrevSessSize
 
     Methoden     AddFile(const AddName, DestPath: string)
                  ChangeForm2Status(const Name, Path: string)    // nur TXCD
@@ -48,6 +49,7 @@
                  MoveFileByName(const Name, SourcePath, DestPath: string)
                  MoveFolder(const SourcePath, DestPath: string)
                  MultisessionCDImportFile(const Path, Name, Size, Drive: string)
+                 MultisessionCDImportSetSizeUsed(const Size: Int64);
                  NewFolder(const Path, Name: string)
                  RenameFileByIndex(const Index: Integer; const Path, Name: string; MaxLength: Byte)
                  RenameFileByName(const Path, OldName, Name: string; const MaxLength: Byte)
@@ -185,6 +187,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FMaxLevel: Integer;
        FMaxLevelChanged: Boolean;
        FPrevSessDelList: TStringList;
+       FPrevSessSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        FHasImportedSessions: Boolean;
        FRoot: TNode;
        function CountFiles(Root: TNode): Integer;
@@ -237,6 +240,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure MoveFileByName(const Name, SourcePath, DestPath: string);
        procedure MoveFolder(const SourcePath, DestPath: string);
        procedure MultisessionCDImportFile(const Path, Name, Size, Drive: string);
+       procedure MultisessionCDImportSetSizeUsed(const Size:{$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
        procedure NewFolder(const Path, Name: string);
        procedure RenameFileByIndex(const Index: Integer; const Path, Name: string; MaxLength: Byte);
        procedure RenameFileByName(const Path, OldName, Name: string; const MaxLength: Byte);
@@ -256,6 +260,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property LastFolderAdded: string read GetLastFolderAdded;
        property MaxLevel: Integer read GetMaxLevel;
        property FilesToDelete: Boolean read GetFilesToDelete;
+       property PrevSessSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read FPrevSessSize;
      end;
 
      TXCD = class(TCD)
@@ -1118,6 +1123,7 @@ begin
   FMaxLevelChanged := False;
   FPrevSessDelList := TStringList.Create;
   FHasImportedSessions := False;
+  FPrevSessSize := 0;
   {Wurzel erzeugen}
   FRoot := TNode.Create(nil);
   FRoot.Text := 'CD';
@@ -1435,7 +1441,8 @@ begin
   end;
   InvalidateCounters;
   FPrevSessDelList.Clear;
-  FHasImportedSessions := False;  
+  FHasImportedSessions := False;
+  FPrevSessSize := 0;  
 end;
 
 { MoveFileByIndex --------------------------------------------------------------
@@ -1682,6 +1689,16 @@ begin
   Temp := ReplaceChar(Temp, '/', '\');
   FHasImportedSessions := True;
   TPList(DestFolder.Data)^.Add(Temp);
+end;
+
+{ MultisessionCDImportSetSizeUsed ----------------------------------------------
+
+  setzt den bereits belegten Speicher.                                         }
+
+procedure TCD.MultisessionCDImportSetSizeUsed(const Size:
+                          {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
+begin
+  FPrevSessSize := Size;
 end;
 
 { CheckFS ----------------------------------------------------------------------

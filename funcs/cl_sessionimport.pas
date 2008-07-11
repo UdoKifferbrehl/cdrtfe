@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  07.07.2008
+  letzte Änderung  10.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,7 +33,7 @@ unit cl_sessionimport;
 
 interface
 
-uses Forms, Classes, SysUtils, StdCtrls, Controls;
+uses Forms, Classes, SysUtils, StdCtrls, Controls, f_largeint;
 
 type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
 
@@ -47,6 +47,7 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
        FStartSector: string;
        FSectorList : string;
        FVolID      : string;
+       FSpaceUsed  : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
        function DiskPresent: Boolean;
        procedure CheckSession;
        procedure ConvertPathlistToTreeStructure(List, Structure: TStringList);
@@ -54,6 +55,7 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
        procedure GetDiskInfo;           // -minfo
        procedure GetFileSysInfo(const Mode: TGetFileSysMode);
        procedure GetSessionContent;
+       procedure GetSpaceUsed;
        procedure ParseFolder;
        procedure ParseFiles;
        procedure SelectSession;
@@ -293,6 +295,21 @@ begin
   Free;
 end;
 
+{ GetSpaceUsed -----------------------------------------------------------------
+
+  GetSpaceUsed ermitelt den belegten Speicherplatz.                            }
+
+procedure TSessionImportHelper.GetSpaceUsed;
+var Temp: string;
+    Adr : string;
+begin
+  Temp := FMediumInfo;
+  Delete(Temp, 1, Pos('Next writable address', Temp));
+  Delete(Temp, 1, Pos(':', Temp));
+  Adr := Trim(Copy(Temp, 1, Pos(LF, Temp)));
+  FSpaceUsed := (StrToIntDef(Adr, 0) - 1) * 2048;
+end;
+
 { GetDiskInfo ------------------------------------------------------------------
 
   GetDiskInfo ruft cdrecord -minfo auf.                                        }
@@ -505,6 +522,8 @@ begin
     end;
   end;
   List.Free;
+  {belegter Speicherplatz}
+  TCdrtfeData.Instance.Data.MultisessionCDImportSetSizeUsed(FSpaceUsed);
 end;
 
 { TSessionImportHelper - public }
@@ -518,6 +537,7 @@ begin
   FStartSector := '';
   FHasJoliet   := True;
   FHasRR       := True;
+  FSpaceUsed   := 0;
 end;
 
 destructor TSessionImportHelper.Destroy;
@@ -555,6 +575,7 @@ begin
   GetDiskInfo;
   if DiskPresent then
   begin
+    GetSpaceUsed;
     GetSession;
     CheckSession;
     GetSessionContent;
