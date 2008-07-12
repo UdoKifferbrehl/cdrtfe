@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.07.2008
+  letzte Änderung  12.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1736,6 +1736,7 @@ var Folder: TNode;
       i              : Integer;
       Node           : TNode;
   begin
+    Application.ProcessMessages;
     IndexList := TStringList.Create;
     {Pfadangabe für den aktuellen Knoten bestimmen}
     Path := GetPathFromFolder(Root);
@@ -1753,31 +1754,35 @@ var Folder: TNode;
     for i := 0 to FileList.Count - 1 do
     begin
       Temp := FileList[i];
-      {Dateinamen extrahieren}
-      SplitString(Temp, ':', CDName, SrcName);
-      SrcName := StringLeft(SrcName, '*');
-      {Kann auf die Quelldatei zugegriffen werden?}
-      if Args.CheckAccess then
+      {Dateien aus früheren Sessions nicht prüfen.}
+      if not IsPreviousSessionFile(Temp) then
       begin
-        if not FileAccess(SrcName, fmOpenRead, fmShareDenyNone) then
+        {Dateinamen extrahieren}
+        SplitString(Temp, ':', CDName, SrcName);
+        SrcName := StringLeft(SrcName, '*');
+        {Kann auf die Quelldatei zugegriffen werden?}
+        if Args.CheckAccess then
         begin
-          Args.NoAccessFiles.Add(SrcName);
-          IndexList.Add(IntToStr(i));
+          if not FileAccess(SrcName, fmOpenRead, fmShareDenyNone) then
+          begin
+            Args.NoAccessFiles.Add(SrcName);
+            IndexList.Add(IntToStr(i));
+          end;
         end;
-      end;
-      {Namen der Quelldatei überprüfen}
-      if not SourceFileIsValid(SrcName) then
-      begin
-        Args.InvalidSrcFiles.Add(SrcName);
-        IndexList.Add(IntToStr(i));
-      end else
-      {Wenn Dateiname zu lang, dann in ErrorList eintragen}
-      if Length(CDName) > Args.MaxLength then
-      begin
-        {nur eintragen, wenn nicht schon in Ignore-List enthalten}
-        if Args.ErrorListIgnore.IndexOf(Path + Temp) = -1 then
+        {Namen der Quelldatei überprüfen}
+        if not SourceFileIsValid(SrcName) then
         begin
-          Args.ErrorListFiles.Add(Path + Temp);
+          Args.InvalidSrcFiles.Add(SrcName);
+          IndexList.Add(IntToStr(i));
+        end else
+        {Wenn Dateiname zu lang, dann in ErrorList eintragen}
+        if Length(CDName) > Args.MaxLength then
+        begin
+          {nur eintragen, wenn nicht schon in Ignore-List enthalten}
+          if Args.ErrorListIgnore.IndexOf(Path + Temp) = -1 then
+          begin
+            Args.ErrorListFiles.Add(Path + Temp);
+          end;
         end;
       end;
     end;
