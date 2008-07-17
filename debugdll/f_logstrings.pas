@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  25.02.2008
+  letzte Änderung  17.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -86,7 +86,7 @@ begin
     Add('1222=Rescanning SCSI bus');
     {f_init.pas, f_cygwin.pas}
     Add('1250=cygwin1.dll found in search path.');
-    Add('1251=Using DLL from cdrtfe installation');
+    Add('1251=Using DLL from cdrtfe installation, setting PATH variable ...');
     Add('1252=Using file paths from cdrtfe_tools.ini.');
     Add('1253=Tool paths:');
     Add('1254=Using .mkisofsrc');
@@ -95,6 +95,7 @@ begin
     Add('1257=Ignore cygwin DLLs found in search path, use the included DLLs.');
     Add('1258=Use cygwin DLLs found in search path if possible.');
     Add('1259=cygwin1.dll not found in search path.');
+    Add('1260=cygwin1.dll path:');
     {cl_cueinfo.pas}
     Add('1270=Creating temporary cue file');
     {cl_settings.pas}

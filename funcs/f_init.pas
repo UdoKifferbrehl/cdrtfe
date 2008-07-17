@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.07.2008
+  letzte Änderung  17.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -128,6 +128,10 @@ begin
     cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
     if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
     Found := (FindInSearchPath(Temp) <> '');
+    {$IFDEF WriteLogFile}
+    AddLogCode(1260);
+    AddLog(FindInSearchPath(Temp) + CRLF + ' ', 3);
+    {$ENDIF}
     if Found and not UseOwnCygwinDLLs then
     begin
       cCygwin1Dll := Temp;
@@ -139,8 +143,10 @@ begin
       {$IFDEF WriteLogFile} if not Found then AddLogCode(1259); {$ENDIF}
       {$IFDEF WriteLogfile} AddLogCode(1251); {$ENDIF}
       Path := GetEnvVarValue(cPath);
+      {$IFDEF WriteLogFile} AddLog(Path + CRLF + ' ', 3); {$ENDIF}
       Path := StartUpDir + cToolDir + cCygwinDir + ';' + Path;  
       SetEnvVarValue(cPath, Path);
+      {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
     end;
   end;
   {Angaben aus der cdrtfe_tools.ini haben jedoch Vorrang.}
