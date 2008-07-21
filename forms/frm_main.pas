@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.07.2008
+  letzte Änderung  21.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -265,6 +265,7 @@ type
     CheckBoxImageCDText: TCheckBox;
     CDEListViewPopupN5: TMenuItem;
     CDEListViewPopupOpen: TMenuItem;
+    MainMenuLang: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -497,6 +498,7 @@ type
     procedure DeviceRemoval(Drive: string);
     procedure HandleError(const ErrorCode: Byte; const Name: string);
     procedure HandleKeyboardShortcut(const Key: Word);
+    procedure LangChange;
     procedure MessageShow(const s: string);
     procedure ProgressBarHide;
     procedure ProgressBarShow(const Max: Integer);
@@ -3682,6 +3684,18 @@ begin
   // TLogWin.Inst.Add('Removal: ' + Drive);
 end;
 
+{ LangChange -------------------------------------------------------------------
+
+  Reaktionen auf das LangChange-Event.                                         }
+
+procedure TForm1.LangChange;
+begin
+  FLang.SetFormLang(Self);
+  UpdateGauges;
+  FormResize(Self);
+  SetHelpFile;
+end;
+
 { MessageShow ------------------------------------------------------------------
 
   MessageShow zeigt den übergebenen String an. 
@@ -3775,9 +3789,12 @@ begin
   FLang := TLang.Create;
   with FLang do
   begin
+    OnLangChange := LangChange;
     {Einheiten übersetzen}
     SizeToStringSetUnits(GMS('g005'), GMS('g006'), GMS('g007'), GMS('g008'));
     MainMenuSetLang.Enabled := LangFileFound;
+    MainMenuLang.Enabled := LangFileFound;
+    CreateLangSubMenu(MainMenuLang);
     {Spracheinstellungen setzen}
     SetFormLang(Self);
   end;
@@ -4888,13 +4905,7 @@ end;
 
 procedure TForm1.MainMenuSetLangClick(Sender: TObject);
 begin
-  if FLang.SelectLanguage then
-  begin
-    FLang.SetFormLang(Self);
-    UpdateGauges;
-    FormResize(Self);
-    SetHelpFile;
-  end;
+  FLang.SelectLanguage;
 end;
 
 { ?/Info }

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.07.2008
+  letzte Änderung  21.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,8 +20,10 @@
 
     Properties   LangFileFound
                  CurrentLangName
+                 OnLangChange
 
     Methoden     Create
+                 CreateLangSubMenu(MenuItem: TMenuItem)
                  ExportMessageStrings
                  GMS(const id: string): string
                  SelectLanguage: Boolean
@@ -39,9 +41,11 @@ unit cl_lang;
 
 interface
 
-uses Classes, Forms, SysUtils, Inifiles, Controls, StdCtrls, ComCtrls;
+uses Classes, Forms, SysUtils, Inifiles, Controls, StdCtrls, ComCtrls, Menus;
 
-type TLang = class(TObject)
+type TLangChangeEvent = procedure of object;
+
+     TLang = class(TObject)
      private
        FMessageStrings  : TStringList;
        FComponentStrings: TStringList;
@@ -54,23 +58,29 @@ type TLang = class(TObject)
        FCurrentLangName : string;
        FDefaultLang     : string;
        FDefaultLangName : string;
+       FOnLangChange    : TLangChangeEvent;
        function GetIniPath: string;
        function LangIniFileFound: Boolean;
        function TranslationFileFound: Boolean;
        procedure GetDefaultLang;
        procedure GetLangList;
        procedure InitMessageStrings;
+       procedure LangChange;
+       procedure LangListSort;
+       procedure LangMenuItemClick(Sender: TObject);
        procedure LoadLanguage;
        procedure SetDefaultLang;
      public
        constructor Create;
        destructor Destroy; override;
        function GMS(const id: string): string;
-       function SelectLanguage: Boolean;       
+       function SelectLanguage: Boolean;
+       procedure CreateLangSubMenu(MenuItem: TMenuItem);
        procedure ExportMessageStrings;
        procedure SetFormLang(Form: TForm);
        property LangFileFound: Boolean read FLangFileFound;
        property CurrentLangName: string read FCurrentLangName;
+       property OnLangChange: TLangChangeEvent read FOnLangChange write FOnLangChange;
      end;
 
 procedure ExportStringProperties;
@@ -340,6 +350,15 @@ begin
   end;
 end;
 
+{ LangChange -------------------------------------------------------------------
+
+  löst das OnLangChangeEvent aus.                                              }
+
+procedure TLang.LangChange;
+begin
+  if Assigned(FOnLangChange) then FOnLangChange;
+end;
+
 { GetIniPath -------------------------------------------------------------------
 
   GetIniPath bestimmt den Pfad zur cdrtfe.ini. Die identische Funktion aus
@@ -404,6 +423,15 @@ function TLang.TranslationFileFound: Boolean;
 begin
   Result := FileExists(StartUpDir + cLangDir + '\' +
                        LowerCase(FCurrentLangName) + cLangFileName);
+end;
+
+{ LangListSort -----------------------------------------------------------------
+
+  sortiert die Liste nach den Namen der Sprachen.                              }
+
+procedure TLang.LangListSort;
+begin
+  SortListByValue(FLangList);
 end;
 
 { GetDefaultLang ---------------------------------------------------------------
@@ -484,6 +512,7 @@ begin
   {Defaulteintrag entfernen}
   Temp := FLangList.Values['Default'];
   FLangList.Delete(FLangList.IndexOf('Default=' + Temp));
+  LangListSort;
   {$IFDEF DebugLang}
   FormDebug.Memo3.Lines.Assign(FLangList);
   {$ENDIF}
@@ -764,6 +793,7 @@ begin
       FCurrentLangName := FLangList.Values[FCurrentLang];
       SetDefaultLang;
       LoadLanguage;
+      LangChange;
       Result := True;
     end;
   finally
@@ -779,6 +809,45 @@ end;
 procedure TLang.ExportMessageStrings;
 begin
   FMessageStrings.SaveToFile(StartUpDir + '\MessageStrings.txt');
+end;
+
+{ CreateLangSubMenue -----------------------------------------------------------
+
+  baut unterhalb von MenuItem ein Menü auf.                                    }
+
+procedure TLang.CreateLangSubMenu(MenuItem: TMenuItem);
+var NewItem: TMenuItem;
+    i      : Integer;
+begin
+  for i := 0 to FLangList.Count - 1 do
+  begin
+    NewItem := TMenuItem.Create(MenuItem);
+    NewItem.Caption := FLangList.Values[FLangList.Names[i]];
+    NewItem.OnClick := LangMenuItemClick;
+    NewItem.Tag := i;
+    NewItem.RadioItem := True;
+    if FLangList.Names[i] = FCurrentLang then NewItem.Checked :=True;
+    MenuItem.Add(NewItem);
+  end;
+end;
+
+{ LangMenuItemClick ------------------------------------------------------------
+
+  Sprache abhängig von Menüauswahl setzen.                                     }
+
+procedure TLang.LangMenuItemClick(Sender: TObject);
+var NewLang: string;
+begin
+  (Sender as TMenuItem).Checked := True;
+  NewLang := FLangList.Names[(Sender as TMenuItem).Tag];
+  if NewLang <> FCurrentLang then
+  begin
+    FCurrentLang := NewLang;
+    FCurrentLangName := FLangList.Values[NewLang];
+    SetDefaultLang;
+    LoadLanguage;
+    LangChange;
+  end;
 end;
 
 { weitere Prozeduren --------------------------------------------------------- }

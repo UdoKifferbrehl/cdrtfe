@@ -3,7 +3,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.01.2008
+  letzte Änderung  21.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,6 +38,7 @@
     SelectRootIfNoneSelected(Tree: TTreeView)
     SetCompProp(Comp: TComponent; const Name, Value: string)
     SetFont(Form: TForm)
+    SortListByValue(List: TStringList)
     ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
     WindowStayOnTop(Handle: THandle; Value: Boolean)
     WaveIsValid(const Name: string): Boolean
@@ -78,6 +79,7 @@ procedure ListViewSelectAll(ListView: TListView);
 procedure SelectRootIfNoneSelected(Tree: TTreeView);
 procedure SetCompProp(Comp: TComponent; const Name, Value: string);
 procedure SetFont(Form: TForm);
+procedure SortListByValue(List: TStringList);
 procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 
 type TTimeCount = class(TObject)
@@ -403,7 +405,21 @@ begin
     Inc(i);
   until Result or (i > ParamCount)
 end;
-                         
+
+{ SortListByValue --------------------------------------------------------------
+
+  sortiert eine String-Liste nach den Werter.                                  }
+
+procedure SortListByValue(List: TStringList);
+var i: Integer;
+begin
+  for i := 0 to List.Count - 1 do
+    List[i] := Format('%-15s', [List.Values[List.Names[i]]]) + '=' + List[i];
+  List.Sort;
+  for i := 0 to List.Count - 1 do
+    List[i] := List.Values[List.Names[i]];
+end;
+
 { Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }
 
 { GetCompProp ------------------------------------------------------------------
