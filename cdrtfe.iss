@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2008 Oliver Valencia
 ;
-;  letzte Änderung  24.03.2008
+;  letzte Änderung  24.07.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVerName "cdrtfe 1.3.1"
+#define MyAppVerName "cdrtfe 1.3.2"
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
@@ -33,10 +33,10 @@ UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
 ; Compiler
-VersionInfoVersion=1.3.1
+VersionInfoVersion=1.3.2
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
-OutputBaseFilename=cdrtfe-1.3.1
+OutputBaseFilename=cdrtfe-1.3.2
 ; Compression
 ;Compression=none
 Compression=lzma
@@ -280,6 +280,22 @@ begin
   Result := S;
 end;
 
+procedure CurStepChanged(CurStep: TSetupStep);
+var OldInstall: Boolean;
+begin
+  if CurStep = ssInstall then
+  begin
+    {Prüfen, ob eine ältere Version vorhanden ist, die erst deinstalliert werden muß.
+     Dies ist bei allen Versionen der Fall, die noch die alte Ordnerstruktur haben.}
+    OldInstall := FileExists(WizardDirValue + '\cdrecord.exe');
+    if OldInstall then
+    begin
+      MsgBox(CustomMessage('OldVersionError'), mbCriticalError, MB_OK);
+      Abort;
+    end;
+  end;
+end;
+
 [CustomMessages]
 eng.CompProg={#MyAppVerName}
 ger.CompProg={#MyAppVerName}
@@ -322,3 +338,5 @@ eng.CygwinReadyUsePrev=Using cygwin DLLs found in search path.
 ger.CygwinReadyUsePrev=Verwende cygwin-DLLs aus dem Suchpfad.
 eng.CygwinReadyUseOwn=Using included cygwin DLLs.
 ger.CygwinReadyUseOwn=Verwende mitgelieferte cygwin-DLLs.
+eng.OldVersionError=An older version has been found. Please uninstall first.
+ger.OldVersionError=Eine ältere Version wurde gefunden. Bitte zuerst deinstallieren.
