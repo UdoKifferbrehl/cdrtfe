@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2008 Oliver Valencia
 ;
-;  letzte Änderung  24.07.2008
+;  letzte Änderung  27.07.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -76,13 +76,13 @@ Source: I:\cdrtfe\proto\icons\*; DestDir: {app}\icons; Flags: ignoreversion; Com
 Source: I:\cdrtfe\proto\translations\*; Excludes: _cdrtfe_lang.ini; DestDir: {app}\translations; Flags: ignoreversion recursesubdirs; Components: prog\langsupport
 Source: I:\cdrtfe\proto\translations\_cdrtfe_lang.ini; DestDir: {app}\translations; DestName: cdrtfe_lang.ini; Flags: ignoreversion; Components: prog\langsupport
 ; Help files
-Source: I:\cdrtfe\cdrtfe\doc\help_de\cdrtfe.chm; DestDir: {app}; Flags: ignoreversion; Languages: ger
-Source: I:\cdrtfe\cdrtfe\doc\help_en\cdrtfe.chm; DestDir: {app}; Flags: ignoreversion; Languages: eng
+Source: I:\cdrtfe\proto\help\*; DestDir: {app}\help; Flags: ignoreversion;
 ; Tools: cdrtools
 Source: I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\.mkisofsrc; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\siconv\*.*; DestDir: {app}\tools\cdrtools\siconv; Flags: ignoreversion; Components: tools\cdrt
 ; Tools cygwin
@@ -189,6 +189,12 @@ begin
   Result := FileSearch(Name, Path) <> '';
 end;
 
+function IsInSysDir(const Name: string): Boolean;
+begin
+  Result := FileExists(ExpandConstant('{sys}') + '\' + Name) or
+            FileExists(ExpandConstant('{win}') + '\' + Name);
+end;
+
 function CygIniCheck(): Boolean;
 begin
   Result := IsInSearchPath('cygwin1.dll');
@@ -205,15 +211,21 @@ end;
 procedure InitializeWizard;
 var CygTextMsg      : string;
     MkisofsDLLsFound: Boolean;
+    CygFoundInSysDir: Boolean;
 begin
   { Create the page - Cygwin options}
   MkisofsDLLsFound := IsInSearchPath('cygiconv-2.dll') and IsInSearchPath('cygintl-3.dll');
+  CygFoundInSysDir := IsInSysDir('cygwin1.dll');
   if MkisofsDLLsFound then
   begin
     CygTextMsg := CustomMessage('CygwinText');
   end else
   begin
     CygTextMsg := CustomMessage('CygwinText') + #13#10 + #13#10 + CustomMessage('CygwinText2');
+  end;
+  if IsInSysDir('cygwin1.dll') then
+  begin
+    CygTextMsg := CygTextMsg + #13#10 + #13#10 + CustomMessage('CygwinText3');
   end;
   CygDLLPage := CreateInputOptionPage(wpSelectTasks,
                   CustomMessage('CygwinHeader'),
@@ -328,6 +340,8 @@ eng.CygwinText=Which cygwin dll do you want to use?
 ger.CygwinText=Welche cygwin-DLL soll verwendet werden?
 eng.CygwinText2=Note: The files cygiconv-2.dll and cygintl-3.dll could not be found in the search path.
 ger.CygwinText2=Hinweis: Die Dateien cygiconv-2.dll und cygintl-3.dll wurden nicht im Suchpfad gefunden.
+eng.CygwinText3=Warning: The file cygwin1.dll has been found in a Windows system folder. The use of the included DLL cannot be forced.
+ger.CygwinText3=Warnung: Die Datei cygwin1.dll wurde in einem Windows-System-Ordner gefunden. Daher kann die Nutzung der mitgelieferten DLL nicht erzwungen werden.
 eng.CygwinOpt1=Use the already installed DLL to avoid version conflicts.
 ger.CygwinOpt1=Die bereits installierte DLL verwenden, um Versionskonflikte zu vermeiden.
 eng.CygwinOpt2=Use the included DLL.
