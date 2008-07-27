@@ -1,9 +1,9 @@
 { f_filesystem.pas: Dateisystemfunktionen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.12.2007
+  letzte Änderung  27.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -66,6 +66,8 @@ const {IDs für spezielle Ordner}
       CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
       CSIDL_LOCAL_APPDATA        = $001C; {user\Local Settings\Application Data}
       CSIDL_COMMON_APPDATA       = $0023; {All Users\Application Data}
+      CSIDL_SYSTEM               = $0025;
+      CSIDL_WINDOWS              = $0024;
 
 type {Datentype für Laufwerksinfos}
      TVolumeInfo = record

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.07.2008
+  letzte Änderung  27.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,6 +50,8 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_filesystem, f_process, f_wininfo, f_environment, f_strings, f_cygwin,
      constant;
 
+var FLang: TLang;
+
 { ShowToolPath -----------------------------------------------------------------
 
   zeigt die Pfade aller Tools.                                                 }
@@ -82,6 +84,21 @@ begin
   AddLog(' ', 3);
 end;
 {$ENDIF}
+
+{ CheckSysFolderCygwin ---------------------------------------------------------
+
+  prüft, ob sich in den Windows-System-Ordnern cygwin1.dll befinden. Wenn ja,
+  wird eine Warnung ausgegeben, daß die eigenen DLLs nicht benutzt werden
+  können.                                                                      }
+
+procedure CheckSysFolderCygwin;
+var Temp: string;
+begin
+  Temp := LowerCase(FindInSearchPath('cygwin1.dll'));
+  if (Pos(LowerCase(GetShellFolder(CSIDL_SYSTEM)), Temp) > 0) or
+     (Pos(LowerCase(GetShellFOlder(CSIDL_WINDOWS)), Temp) > 0) then
+    TLogWin.Inst.Add(FLang.GMS('einit05'));
+end;
 
 { GetToolNames -----------------------------------------------------------------
 
@@ -147,6 +164,8 @@ begin
       Path := StartUpDir + cToolDir + cCygwinDir + ';' + Path;  
       SetEnvVarValue(cPath, Path);
       {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
+      {Prüfen, ob cygwin1.dll in Systemordnern ist. Falls ja, warnen}
+      if UseOwnCygwinDLLs then CheckSysFolderCygwin;
     end;
   end;
   {Angaben aus der cdrtfe_tools.ini haben jedoch Vorrang.}
@@ -286,6 +305,7 @@ function CheckFiles(Settings: TSettings; Lang:TLang): Boolean;
 var Ok       : Boolean;
     MkisofsOk: Boolean;
 begin
+  FLang := Lang;
   Settings.FileFlags.CygInPath := (FindInSearchPath(cCygwin1Dll) <> '');
   GetToolNames;
   with Settings.FileFlags do
