@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.07.2008
+  letzte Änderung  31.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1158,6 +1158,7 @@ var PF     : TIniFile; // ProjectFile
       begin
         WriteInteger(Section, 'TabSheetDrive' + IntToStr(i), TabSheetDrive[i]);
         WriteInteger(Section, 'TabSheetSpeed' + IntToStr(i), TabSheetSpeed[i]);
+        WriteInteger(Section, 'TabSheetSMType' + IntToStr(i), TabSheetSMType[i]);
       end;
       WriteBool(Section, 'ImageRead', ImageRead);
       WriteBool(Section, 'NoConfirm', NoConfirm);
@@ -1554,6 +1555,8 @@ var PF     : TIniFile; // ProjectFile
                                         'TabSheetDrive' + IntToStr(i), 0);
         TabSheetSpeed[i] := ReadInteger(Section,
                                         'TabSheetSpeed' + IntToStr(i), -1);
+        TabSheetSMType[i] := ReadInteger(Section,
+                                         'TabSheetSMType' + IntToStr(i), 0);
       end;
       ImageRead := ReadBool(Section, 'ImageRead', True);
       NoConfirm := ReadBool(Section, 'NoConfirm', False);

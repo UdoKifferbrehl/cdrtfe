@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  07.07.2008
+  letzte Änderung  31.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -404,6 +404,7 @@ begin
   end;
   SetDiskSizeMax(Size);
   SpaceMeterTypeChange;
+  FPopUpMenu.Items[Integer(Value)].Checked := True;
 end;
 
 { UpdateProgressBar ------------------------------------------------------------
