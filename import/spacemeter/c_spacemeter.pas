@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  31.07.2008
+  letzte Änderung  03.08.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,7 +53,6 @@ const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
                             'DVD/DL 7.96 GiB');
 
       cUnitMiB: string = 'MiB';
-
       cUnitMin: string = 'min';
 
 type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
@@ -90,6 +89,10 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        FProgressBar   : {$IFDEF UseQProgBar}TQProgressBar{$ELSE}TProgressBar{$ENDIF};
        FScale         : TScale;
        FPopupMenu     : TPopupMenu;
+       FColorOkStart  : TColor;
+       FColorOkFinal  : TColor;
+       FColorWarnStart: TColor;
+       FColorWarnFinal: TColor;
        FOnSpaceMeterTypeChange: TSMTypeChangeEvent;
        procedure AutoDestroy;
        procedure AutoInit;
@@ -295,15 +298,19 @@ begin
   Color      := clBtnFace;
   OnResize   := SpaceMeterResize;
   {ProgressBar}
+  FColorOkStart   := RGB(0, 184, 0);   // $00004000;
+  FColorOkFinal   := RGB(255, 255, 0); // $0000FFFF;
+  FColorWarnStart := RGB(64, 0, 0);
+  FColorWarnFinal := RGB(255, 0, 0);
   {$IFDEF UseQProgBar}
-  FProgressBar := TQProgressBar.Create(Self);
+  FProgressBar := TQProgressBar.Create(Self);     // $0000FFFF;
   FProgressBar.Parent := Self;
   FProgressBar.Top := 0;
   FProgressBar.Left := 0;
   FProgressBar.Height := 11;
   FProgressBar.Width := Self.Width;
-  FprogressBar.StartColor := RGB (0, 184, 0);   // $00004000;
-  FProgressBar.FinalColor := RGB (255, 255, 0); // $0000FFFF;
+  FprogressBar.StartColor := FColorOkStart;
+  FProgressBar.FinalColor := FColorOkFinal;
   FProgressBar.ShowInactivePos := True;
   FProgressBar.InactivePosColor := RGB(240, 240, 240);
   FProgressBar.BarKind := bkCylinder;
@@ -412,8 +419,21 @@ end;
   ProgressBar aktualisieren.                                                   }
 
 procedure TSpaceMeter.UpdateProgressBar;
+var Position: Extended;
 begin
-  FProgressBar.Position := Round((FDiskSize / FDiskSizeMax) * 100);
+  Position := (FDiskSize / FDiskSizeMax) * 100;
+  {$IFDEF UseQProgBar}
+  if Position > 100 then
+  begin
+    FProgressBar.StartColor := FColorWarnStart;
+    FProgressBar.FinalColor := FColorWarnFinal;
+  end else
+  begin
+    FProgressBar.StartColor := FColorOkStart;
+    FProgressBar.FinalColor := FColorOkFinal;
+  end;
+  {$ENDIF}
+  FProgressBar.Position := Round(Position);
 end;
 
 { SpaceMeterResize -------------------------------------------------------------
