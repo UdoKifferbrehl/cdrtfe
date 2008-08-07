@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  10.07.2008
+  letzte Änderung  07.08.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -64,6 +64,7 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
        destructor Destroy; override;
        procedure GetSession;
        procedure GetSessionUser;
+       procedure GetSpaceUsedUser;
        property Device     : string write FDevice;
        property Drive      : string write FDrive;
        property MediumInfo : string read FMediumInfo write FMediumInfo;
@@ -581,6 +582,22 @@ begin
     GetSessionContent;
     ParseFolder;
     ParseFiles;
+  end;
+end;
+
+{ GetSpaceUsedUser -------------------------------------------------------------
+
+  GetSpaceUsedUser wird dazu genutzt, die Größe des bereits belegten Speichers
+  zu setzten, wenn der einfache Session-Import (nur letzte Session) genutzt
+  wird.                                                                        }
+
+procedure TSEssionImportHelper.GetSpaceUsedUser;
+begin
+  GetDiskInfo;
+  if DiskPresent then
+  begin
+    GetSpaceUsed;
+    TCdrtfeData.Instance.Data.MultisessionCDImportSetSizeUsed(FSpaceUsed);
   end;
 end;
 
