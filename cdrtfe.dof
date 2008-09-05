@@ -73,14 +73,13 @@ OriginalFilename=cdrtfe.exe
 ProductName=cdrtools Frontend
 ProductVersion=1.3
 Comments=getestet mit:
-  cdrtools 2.0 - 2.01.01a38
-  cdrtools 2.01 (mingw)
+  cdrtools 2.0 - 2.01.01a48
   mode2cdmaker 1.5.1
   vcdimager 0.6.2
   madplay 0.15.2
-  lame 3.96
+  lame 3.98
   oggdec, oggenc 1.0.1
-  flac 1.1.2
+  flac 1.2.1
   rrenc/rrdec 1.29
   cdrdao 1.1.5/1.1.7
 http://cdrtfe.sourceforge.net

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.07.2008
+  letzte Änderung  31.08.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -554,13 +554,15 @@ begin
   {allgemeine Einstellungen/Statusvaraiblen}
   with General do
   begin
-    CharSets.CommaText := ',cp437,cp737,cp775,cp850,cp852,cp855,cp857,' +
-                          'cp860,cp861,cp862,cp863,cp864,cp865,cp866,' +
-                          'cp869,cp874,cp1250,cp1251,cp10081,cp10079,' +
-                          'cp10029,cp10007,cp10006,cp10000,iso8859-1,' +
-                          'iso8859-2,iso8859-3,iso8859-4,iso8859-5,'   +
-                          'iso8859-6,iso8859-7,iso8859-8,iso8859-9,'   +
-                          'iso8859-14,iso8859-15,koi8-u,koi8-r,default';
+    CharSets.CommaText := ',cp437,cp737,cp775,cp850,cp852,cp855,cp857,'       +
+                          'cp860,cp861,cp862,cp863,cp864,cp865,cp866,'        +
+                          'cp869,cp874,cp1250,cp1251,cp10081,cp10079,'        +
+                          'cp10029,cp10007,cp10006,cp10000,iso8859-1,'        +
+                          'iso8859-2,iso8859-3,iso8859-4,iso8859-5,'          +
+                          'iso8859-6,iso8859-7,iso8859-8,iso8859-9,'          +
+                          'iso8859-14,iso8859-15,koi8-u,koi8-r,'              +
+                          'cp1252,cp1253,cp1254,cp1255,cp1256,cp1257,cp1258,' +
+                          'iso8859-10,iso8859-11,iso8859-13,iso8859-16,default';
     Mp3Qualities.CommaText := 'medium,standard,extreme,insane,' +
                               '320,256,224,192,160,128,112,96,80';
     General.Choice := 0;
