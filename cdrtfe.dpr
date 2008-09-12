@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.06.2008
+  letzte Änderung  10.09.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -131,16 +131,16 @@ begin
   {$IFDEF WriteLogfile} AddLog('Application.Initialize', 0); {$ENDIF}
   {$IFDEF SplashScreen}
   FormSplashScreen := TFormSplashScreen.Create(Application) ;
-  if not IsAlreadyRunning then FormSplashScreen.Show;
+  if not IsAlreadyRunning then FormSplashScreen.ShowEx;
   {$ENDIF}
   Application.Initialize;
   {$IFDEF SplashScreen}
-  FormSplashScreen.Update;
+  FormSplashScreen.UpdateEx;
   {$ENDIF}
   {$IFDEF WriteLogfile} AddLog('Application.CreateForm1' + CRLF, 0); {$ENDIF}
   Application.CreateForm(TForm1, Form1);
   {$IFDEF SplashScreen}
-  FormSplashScreen.Hide;
+  FormSplashScreen.HideEx;
   FormSplashScreen.Free;
   {$ENDIF}  
   {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}
