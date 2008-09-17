@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  03.08.2008
+  letzte Änderung  17.09.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -93,6 +93,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        FColorOkFinal  : TColor;
        FColorWarnStart: TColor;
        FColorWarnFinal: TColor;
+       FRemainingSpaceString: string;
        FOnSpaceMeterTypeChange: TSMTypeChangeEvent;
        procedure AutoDestroy;
        procedure AutoInit;
@@ -103,6 +104,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        procedure SetDiskType(Value: TSpaceMeterDiskType);
        procedure SetSpaceMeterMode(Value: TSpaceMeterMode);
        procedure UpdateProgressBar;
+       procedure UpdateRemainingSpace;
        procedure SpaceMeterTypeChange;
        {interne Eventhandler}
        procedure SpaceMeterResize(Sender: TObject);
@@ -118,11 +120,14 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        property DiskSize: Integer read FDiskSize write SetDiskSize;
        property DiskSizeMax: Integer read FDiskSizeMax write SetDiskSizeMax;
        property DiskType: TSpaceMeterDiskType read FDiskType write SetDiskType;
+       property RemainingSpaceString: string read FRemainingSpaceString;
        property SpaceMeterMode: TSpaceMeterMode read FSpaceMeterMode write SetSpaceMeterMode;
        property OnSpaceMeterTypeChange: TSMTypeChangeEvent read FOnSpaceMeterTypeChange write FOnSpaceMeterTypeChange;
      end;
 
 implementation
+
+uses f_strings, f_largeint;
 
 { TScale --------------------------------------------------------------------- }
 
@@ -290,7 +295,7 @@ end;
 procedure TSpaceMeter.AutoInit;
 begin
   FDiskSizeMax    := 650;
-  FDiskSIze       := 0;
+  FDiskSize       := 0;
   FSpaceMeterMode := SMM_DataCD;
   {Panel}
   BevelInner := bvNone;
@@ -362,6 +367,7 @@ begin
   FDiskSizeMax := Value;
   FScale.Capacity := Value;
   UpdateProgressBar;
+  UpdateRemainingSpace;
   FScale.Invalidate;
 end;
 
@@ -384,6 +390,7 @@ procedure TSpaceMeter.SetDiskSize(Value: Integer);
 begin
   FDiskSize := Value;
   UpdateProgressBar;
+  UpdateRemainingSpace;
 end;
 
 { SetDiskType ------------------------------------------------------------------
@@ -436,6 +443,26 @@ begin
   FProgressBar.Position := Round(Position);
 end;
 
+{ UpdateRemainingSpace ---------------------------------------------------------
+
+  FRemainingSpaceString aktualisieren.                                         }
+
+procedure TSpaceMeter.UpdateRemainingSpace;
+var RemainingSpace: Int64;
+begin
+  RemainingSpace := FDiskSizeMax - FDiskSize;
+  if RemainingSpace < 0 then RemainingSpace := 0;
+  if FSpaceMeterMode in [SMM_DataCD, SMM_XCD] then
+  begin
+    FRemainingSpaceString := SizeToString(RemainingSpace * 1024 *1024);
+  end else
+  if FSpaceMeterMode = SMM_AudioCD then
+  begin
+    FRemainingSpaceString := FormatTime(RemainingSpace);
+  end else
+    FRemainingSpaceString := '';
+end;
+    
 { SpaceMeterResize -------------------------------------------------------------
 
   Wenn ein Resize-Event auftritt.                                              }
