@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2008 Oliver Valencia
 
-  letzte Änderung  07.07.2008
+  letzte Änderung  27.09.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -150,6 +150,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        function DVDSizeInfoFound: Boolean;
        function GetDVDType(const DVDInfo: string): TDiskType; override;
        function GetMediumInfo(const vv: Boolean): string;
+       function GetSessionStartSec: string;
        procedure GetAudioCDTimeFree;
        procedure GetCDInfo;
        procedure GetDVDInfo;
@@ -1194,6 +1195,33 @@ begin
   FSessionEmpty  := True;
 end;
 
+{ GetSessionData ---------------------------------------------------------------
+
+  GetSessionData ermöglicht die Auswahl der zu importierenden Session.         }
+
+function TDiskInfoM.GetSessionStartSec: string;
+var SessionImporter: TSessionImportHelper;
+begin
+  if FSelectSess and not FDiskComplete then
+  begin
+    if FSessOverride <> '' then
+    begin
+      {Der User hat schon eine Session importiert.}
+      Result := FSessOverride;
+    end else
+    begin
+      SessionImporter := TSessionImportHelper.Create;
+      SessionImporter.MediumInfo := FMediumInfo;
+      SessionImporter.GetSession;
+      Result := SessionImporter.StartSector;
+      SessionImporter.Free;
+    end;
+  end else
+  begin
+    Result := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);
+  end;
+end;
+
 { GetMediumInfo ----------------------------------------------------------------
 
   GetMediumInfo liefert als Ergebins die Ausgabe von cdrecord -minfo. Da auch
@@ -1235,12 +1263,11 @@ end;
   CDs (Größe, Speicherplatz, Zeit, ...).                                       }
 
 procedure TDiskInfoM.GetCDInfo;
-var Temp           : string;
-    StartSec       : string;
-    LastSec        : string;
-    LastSecI       : Integer;
-    ATIPSec        : Integer;
-    SessionImporter: TSessionImportHelper;
+var Temp    : string;
+    StartSec: string;
+    LastSec : string;
+    LastSecI: Integer;
+    ATIPSec : Integer;
 begin
   FDiskType := GetCDType(FMediumInfo);
   {max. Anzahl von Sektoren}
@@ -1259,6 +1286,8 @@ begin
   Temp := ExtractInfo(FMediumInfo, 'session status', ':', LF);
   FSessionEmpty := Temp = 'empty';
   {Multisessioninfo ermitteln}
+  StartSec := GetSessionStartSec;
+  (*
   if FSelectSess and not FDiskComplete then
   begin
     if FSessOverride <> '' then
@@ -1277,6 +1306,7 @@ begin
   begin
     StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);
   end;
+  *)
   LastSec  := ExtractInfo(FMediumInfo, 'Next writable address', ':', LF);
   LastSecI := StrToIntDef(LastSec, 0);
   if FDiskEmpty then
@@ -1411,7 +1441,8 @@ begin
   end;
   FSecFree := StrToIntDef(Temp, 0);
   {Multiborderinfo ermitteln}
-  StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);
+  // StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);  
+  StartSec := GetSessionStartSec;
   LastSec  := ExtractInfo(FMediumInfo, 'Next writable address', ':', LF);
   LastSecI := StrToIntDef(LastSec, 0);
   if FDiskEmpty then
@@ -1696,7 +1727,9 @@ begin
       Result := False;
     end;
     {Fehler: DVD und Multisession}
-    if Result and FIsDVD and FSettings.DataCD.Multi then
+    if Result and FSettings.DataCD.Multi and FIsDVD and
+       (not FSettings.Cdrecord.HasMultiborder or
+        (FDiskType in [DT_DVD_PlusR, DT_DVD_PlusRW])) then
     begin
       Result := False;
       ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);

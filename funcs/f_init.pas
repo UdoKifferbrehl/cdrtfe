@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.07.2008
+  letzte Änderung  27.09.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -589,6 +589,9 @@ begin
   {ab cdrecord 2.01.01a37 können DVD+RWs gelöscht werden}
   Settings.Cdrecord.CanEraseDVDPlusRW :=
     VersionValue >= GetVersionValue('2.01.01a37');
+  {ab cdrecord 2.01.01a50 können Multiborder-DVDs (-R, -RW) geschieben werden.}
+  Settings.Cdrecord.HasMultiborder :=
+    VersionValue >= GetVersionValue('2.01.01a50');
   {haben wir es cdrecord-ProDVD zu tun?}
   Settings.FileFlags.ProDVD := Pos('-ProDVD-', Output) > 0;
   OldOutput := Output;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.08.2008
+  letzte Änderung  27.09.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -199,6 +199,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        HaveNLPathtables   : Boolean;  // 2.01.01a31: -no-limit-pathtables
        HaveHideUDF        : Boolean;  // 2.01.01a32: -hide-udf
        CanEraseDVDPlusRW  : Boolean;  // 2.01.01a37: Löschen von DVD+RW
+       HasMultiborder     : Boolean;  // 2.01.01a50: DVD-R(W) Multiborder
      end;
 
      {Einstellungen: cdrdao allgemein}
@@ -700,6 +701,7 @@ begin
     HaveNLPathtables    := False;
     HaveHideUDF         := False;
     CanEraseDVDPlusRW   := False;
+    HasMultiborder      := False;
   end;
 
   {allgemeine Einstellungen: cdrdao}
