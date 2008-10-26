@@ -29,6 +29,8 @@ type
     LabelVersion: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormHide(Sender: TObject);
   private
     { Déclarations privées }
     FShowSplash: Boolean;
@@ -94,6 +96,25 @@ begin
   LabelVersion.Left := LabelLeft;
   LabelVersion.Width := LabelWidth;
   LabelVersion.Transparent := True;
+end;
+
+{ FormClose --------------------------------------------------------------------
+
+  Animation.                                                                   }
+
+procedure TFormSplashScreen.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  {$IFDEF Delphi7Up}
+  AnimateWindow(Handle, 400, AW_HIDE or AW_BLEND);
+  {$ENDIF}
+end;
+
+procedure TFormSplashScreen.FormHide(Sender: TObject);
+begin
+  {$IFDEF Delphi7Up}
+  AnimateWindow(Handle, 400, AW_HIDE or AW_BLEND);
+  {$ENDIF}
 end;
 
 { TFormSplashScreen - private }
