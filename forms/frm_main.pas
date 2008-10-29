@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.09.2008
+  letzte Änderung  29.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1756,13 +1756,18 @@ end;
   und der Dateiliste des TreeViews.                                            }
 
 procedure TForm1.UserDeleteFile(Tree: TTreeView; View: TListView);
-var i: Integer;
-    Meldung: string;
-    Path: string;
+var i       : Integer;
+    Offset  : Integer;
+    Meldung : string;
+    Path    : string;
+    DelPath : string;
+    IsFolder: Boolean;
+    Node    : TTreeNode;
     {$IFDEF DebugFileLists}
     FileList: TStringList;
     {$ENDIF}
 begin
+  Offset := View.Tag;
   if View.SelCount > 0 then
   begin
     Meldung := FLang.GMS('m115');
@@ -1787,16 +1792,33 @@ begin
         begin
           if View.Items[i].Selected then
           begin
+            IsFolder := ItemIsFolder(View.Items[i]);
             with FSettings.General do
             begin
               if Choice = cDataCD then
               begin
-                FData.DeleteFromPathlistByIndex(i, Path, Choice);
+                if not IsFolder then
+                  FData.DeleteFromPathlistByIndex(i - Offset, Path, Choice)
+                else
+                begin
+                  DelPath := Path + View.Items[i].Caption + '/';
+                  FData.DeleteFolder(DelPath, Choice);
+                  Node := GetNodeFromPath(CDETreeView.Items[0], DelPath);
+                  Node.Delete;
+                end;
               end else
               if Choice = cXCD then
               begin
-                FData.DeleteFromPathlistByName(View.Items[i].Caption,
-                                               Path, Choice);
+                if not IsFolder then
+                  FData.DeleteFromPathlistByName(View.Items[i].Caption,
+                                                 Path, Choice)
+                else
+                begin
+                  DelPath := Path + View.Items[i].Caption + '/';
+                  FData.DeleteFolder(DelPath, Choice);
+                  Node := GetNodeFromPath(XCDETreeView.Items[0], DelPath);
+                  Node.Delete;
+                end;
               end else
               if Choice = cAudioCD then
               begin
@@ -1910,20 +1932,37 @@ end;
 
 procedure TForm1.UserMoveFile(SourceNode, DestNode: TTreeNode; View: TListView);
 var i          : Integer;
+    Offset     : Integer;
     ErrorCode  : Byte;
     SourcePath,
     DestPath   : string;
+    Node       : TTreeNode;
 begin
+   Offset := View.Tag;
    SourcePath := GetPathFromNode(SourceNode);
    DestPath := GetPathFromNode(DestNode);
    for i := View.Items.Count - 1 downto 0 do
    begin
      if View.Items[i].Selected then
      begin
-       case FSettings.General.Choice of
-         cDataCD: FData.MoveFileByIndex(i, SourcePath, DestPath, cDataCD);
-         cXCD   : FData.MoveFileByName(View.Items[i].Caption, SourcePath,
-                                       DestPath, cXCD);
+       if not ItemIsFolder(View.Items[i]) then
+       begin
+         case FSettings.General.Choice of
+           cDataCD: FData.MoveFileByIndex(i - Offset, SourcePath, DestPath,
+                                          cDataCD);
+           cXCD   : FData.MoveFileByName(View.Items[i].Caption, SourcePath,
+                                         DestPath, cXCD);
+         end;
+       end else
+       begin
+         Node := nil;
+         case FSettings.General.Choice of
+           cDataCD: Node := GetNodeFromPath(CDETreeView.Items[0],
+                                      SourcePath + View.Items[i].Caption + '/');
+           cXCD   : Node := GetNodeFromPath(XCDETreeView.Items[0],
+                                      SourcePath + View.Items[i].Caption + '/');
+         end;
+         if Node <> DestNode then UserMoveFolder(Node, DestNode);
        end;
        ErrorCode := FData.LastError;
        if ErrorCode = PD_FileNotUnique then
@@ -1936,14 +1975,21 @@ begin
          ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfe2);
        end else
        begin
-         {geänderte Dateiliste sortieren}
-         FData.SortFileList(DestPath, FSettings.General.Choice);
-         {Änderungen auch im GUI  nachvollziehen}
-         View.Items.BeginUpdate;
-         View.Items[i].Delete;
-         View.Items.EndUpdate;
+         if not ItemIsFolder(View.Items[i]) then
+         begin
+           {geänderte Dateiliste sortieren}
+           FData.SortFileList(DestPath, FSettings.General.Choice);
+           {Änderungen auch im GUI  nachvollziehen}
+           View.Items.BeginUpdate;
+           View.Items[i].Delete;
+           View.Items.EndUpdate;
+         end;
        end;
      end;
+   end;
+   case FSettings.General.Choice of
+     cDataCD: ShowFolderContent(CDETreeView, CDELIstView);
+     cXCD   : ShowFolderContent(XCDETreeView, XCDEListView1);
    end;
 end;
 
@@ -2234,7 +2280,11 @@ end;
 
 procedure TForm1.UserOpenFile(List: TListView);
 var Item: TListItem;
+    Tree: TTreeView;
+    Path: string;
+    Node: TTreeNode;
 begin
+  Tree := nil;
   if FSettings.General.AllowFileOpen and (List <> nil) then
   begin
     Item := List.Selected;
@@ -2249,7 +2299,19 @@ begin
                                    QuotePath(List.Selected.SubItems[2])));
       end else
       begin
-        ShlExecute('', QuotePath(List.Selected.SubItems[2]));
+        if not ItemIsFolder(Item) then
+        begin
+          ShlExecute('', QuotePath(List.Selected.SubItems[2]));
+        end else
+        begin
+          case FSettings.General.Choice of
+            cDataCD: Tree := CDETreeView;
+            cXCD   : Tree := XCDETreeView;
+          end;
+          Path := GetPathFromNode(Tree.Selected) + Item.Caption + '/';
+          Node := GetNodeFromPath(Tree.Items[0], Path);
+          Node.Selected := True;
+        end;
       end;
     end;
   end;
@@ -2329,13 +2391,22 @@ var NewItem    : TListItem;
     Name       : string;
     Caption    : string;
     Filetype   : string;
+    SizeString : string;
+    IsFolder   : Boolean;
     TrackLength: Extended;
 begin
   if (FSettings.General.Choice = cDataCD) or
      (FSettings.General.Choice = cXCD) then
   begin
-    ExtractFileInfoFromEntry(Item, Caption, Name, Size);
-    NewItem := ListView.Items.Add;
+    IsFolder := Pos(';', Item) = 1;
+    if IsFolder then
+    begin
+      Size := 0;
+      Caption := Copy(Item, 2, Length(Item) - 1);
+      Name := StartUpDir;
+    end else
+      ExtractFileInfoFromEntry(Item, Caption, Name, Size);
+    NewItem := ListView.Items.Add;             
     NewItem.Caption := Caption;
     FFileTypeInfo.GetFileInfo(Name, IconIndex, Filetype);
     NewItem.ImageIndex := IconIndex;
@@ -2345,7 +2416,13 @@ begin
      werden.}
     if (Size > 0) and (Size <= 512) then Size := Size + 512;
     Size := Round(Size / 1024);
-    NewItem.SubItems.Add(FormatFloat('#,###,##0 ' + UnitKiByte, Size));
+    SizeString := FormatFloat('#,###,##0 ' + UnitKiByte, Size);
+    if IsFolder then
+    begin
+      SizeString := '';
+      Name := '';
+    end;
+    NewItem.SubItems.Add(SizeString);
     NewItem.SubItems.Add(Filetype);
     NewItem.SubItems.Add(Name);
   end else
@@ -2368,15 +2445,19 @@ end;
 
   zeigt den Inhalt des selektierten Knotens im TreeView an:
   Tree: TreeView
-  ListView: ListView, der den Inhalt darstellen soll                           }
+  ListView: ListView, der den Inhalt darstellen soll
+  Wichtig: ListView.Tag enthält die Anzahl der Unterordner. Nötig zur Bestimmung
+           des korrekten Indexes bei selektierten Dateien.                     }
 
 procedure TForm1.ShowFolderContent(const Tree: TTreeView; ListView: TListView);
-var i: Integer;
-    Temp: string;
-    Path: string;
-    FileList: TStringList;
+var i         : Integer;
+    Temp      : string;
+    Path      : string;
+    FileList  : TStringList;
+    SubFolders: TStringList;
 begin                              
   FileList := nil;
+  SubFolders := TStringList.Create;
   {Pfad des gewählten Knotens feststellen}
   Path := GetPathFromNode(Tree.Selected);
   {Referenz auf Dateiliste holen, da die Tree-Views auch aktualisiert werden,
@@ -2386,10 +2467,12 @@ begin
   if (Tree = CDETreeView) then
   begin
     FileList := FData.GetFileList(Path, cDataCD);
+    FData.GetSubFolders(cDataCD, Path, SubFolders);
   end else
   if (Tree = XCDETreeView) then
   begin
     FileList := FData.GetFileList(Path, cXCD);
+    FData.GetSubFolders(cXCD, Path, SubFolders);
   end;
   {Debugging: interne Pfadliste anzeigen}
   {$IFDEF DebugFileLists}
@@ -2420,6 +2503,13 @@ begin
     begin
       ListView.Items.BeginUpdate;
       ListView.Items.Clear;
+      {Folders}
+      for i := 0 to SubFolders.Count - 1 do
+      begin
+        AddItemToListView(';' + SubFolders[i], ListView);
+      end;
+      ListView.Tag := SubFolders.Count;
+      {Files}
       for i := 0 to FileList.Count - 1 do
       begin
         AddItemToListView(FileList[i], ListView);
@@ -2432,6 +2522,13 @@ begin
       ListView.Items.Clear;
       XCDEListView2.Items.BeginUpdate;
       XCDEListView2.Items.Clear;
+      {Folders}
+      for i := 0 to SubFolders.Count - 1 do
+      begin
+        AddItemToListView(';' + SubFolders[i], ListView);
+      end;
+      ListView.Tag := SubFolders.Count;
+      {Files}
       for i := 0 to FileList.Count - 1 do
       begin
         Temp := FileList[i];
@@ -2447,6 +2544,7 @@ begin
       XCDEListView2.Items.EndUpdate;
     end;
   end;
+  SubFolders.Free;
 end;
 
 { ShowTracks -------------------------------------------------------------------
@@ -5223,7 +5321,8 @@ end;
 
 procedure TForm1.ListViewDblClick(Sender: TObject);
 begin
-  if FSettings.General.AllowDblClick then
+  if FSettings.General.AllowDblClick or
+     ItemIsFolder((Sender as TListView).Selected) then
     UserOpenFile(GetCurrentListView(Sender));
 end;
 
@@ -5233,9 +5332,11 @@ end;
 
 procedure TForm1.ListViewKeyDown(Sender: TObject; var Key: Word;
                                  Shift: TShiftState);
-var List: TListview;
+var List: TListView;
+    Tree: TTreeView;
 begin
   List := Sender as TListView;
+  Tree := nil;
   case Key of
     VK_DELETE : if not List.IsEditing then
                 begin
@@ -5243,6 +5344,15 @@ begin
                     cDataCD: UserDeleteFile(CDETreeView, CDEListView);
                     cXCD   : UserDeleteFile(XCDETreeView, List);
                   end;
+                end;
+    VK_BACK   : if not List.IsEditing then
+                begin
+                  case FSettings.General.Choice of
+                    cDataCD: Tree := CDETreeView;
+                    cXCD   : Tree := XCDETreeView;
+                  end;
+                  if Tree.Selected.Parent <> nil then
+                    Tree.Selected.Parent.Selected := True;
                 end;
     Ord('A')  : if Shift = [ssCtrl] then
                 begin
@@ -5263,56 +5373,69 @@ end;
 
 procedure TForm1.ListViewEdited(Sender: TObject; Item: TListItem;
                                 var S: String);
-var Temp: string;
-    Path: string;
+var Temp     : string;
+    Path     : string;
+    Offset   : Integer;
+    Node     : TTreeNode;
     ErrorCode: Byte;
 begin
-  Path := GetPathFromNode(CDETreeView.Selected);
-  FData.RenameFileByIndex(Item.Index, Path, S, FSettings.GetMaxFileNameLength,
-                          FSettings.General.Choice);
-  ErrorCode := FData.LastError;
-  if ErrorCode = PD_NoError then
+  Offset := (Sender as TListView).Tag;
+  {File or folder entry?}
+  if not ItemIsFolder(Item) then
   begin
-    {Änderungen im GUI nachvollziehen}
-    Item.Caption := S;
-    {Flags für die spätere Sortierng (onChange oder F5) setzen}
-    with FData do
+    Path := GetPathFromNode(CDETreeView.Selected);
+    FData.RenameFileByIndex(Item.Index - Offset, Path, S,
+                            FSettings.GetMaxFileNameLength,
+                            FSettings.General.Choice);
+    ErrorCode := FData.LastError;
+    if ErrorCode = PD_NoError then
     begin
-      case FSettings.General.Choice of
-        cDataCD: begin
-                   DataCDFilesToSort := True;
-                   DataCDFilesToSortFolder := Path;
-                 end;
-        cXCD   : ;
+      {Änderungen im GUI nachvollziehen}
+      Item.Caption := S;
+      {Flags für die spätere Sortierng (onChange oder F5) setzen}
+      with FData do
+      begin
+        case FSettings.General.Choice of
+          cDataCD: begin
+                     DataCDFilesToSort := True;
+                     DataCDFilesToSortFolder := Path;
+                   end;
+          cXCD   : ;
+        end;
+      end;
+    end else
+    begin
+      Temp := S;
+      S := Item.Caption;
+      Item.Caption := S;
+      if ErrorCode = PD_FileNotUnique then
+      begin
+        {Fehlermeldung nur ausgeben, wenn der neue Name sich wirklich vom
+         alten unterscheidet.}
+        if Temp <> Item.Caption then
+        begin
+          ShowMsgDlg(Format(FLang.GMS('e112'), [Temp]), FLang.GMS('g001'),
+                     MB_cdrtfe2);
+        end;
+      end else
+      if ErrorCode = PD_InvalidName then
+      begin
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
+      end else
+      if ErrorCode = PD_NameTooLong then
+      begin
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
+      end else
+      if ErrorCode = PD_PreviousSession then
+      begin
+        ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfe2);
       end;
     end;
   end else
   begin
-    Temp := S;
-    S := Item.Caption;
-    Item.Caption := S;
-    if ErrorCode = PD_FileNotUnique then
-    begin
-      {Fehlermeldung nur ausgeben, wenn der neue Name sich wirklich vom
-       alten unterscheidet.}
-      if Temp <> Item.Caption then
-      begin
-        ShowMsgDlg(Format(FLang.GMS('e112'), [Temp]), FLang.GMS('g001'),
-                   MB_cdrtfe2);
-      end;
-    end else
-    if ErrorCode = PD_InvalidName then
-    begin
-      ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
-    end else
-    if ErrorCode = PD_NameTooLong then
-    begin
-      ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
-    end else
-    if ErrorCode = PD_PreviousSession then
-    begin
-      ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfe2);
-    end;
+    Path := GetPathFromNode(CDETreeView.Selected) + Item.Caption + '/';
+    Node := GetNodeFromPath(CDETreeView.Items[0], Path);
+    TreeViewEdited(CDETreeView, Node, S);
   end;
 end;
 

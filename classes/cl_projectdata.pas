@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.07.2008
+  letzte Änderung  28.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,6 +68,7 @@
                  GetProjectMaxLevel(const Choice: Byte): Integer
                  GetProjectPrevSessSize: Int64
                  GetSmallForm2FileCount: Integer
+                 GetSubFolders(const Choice: Byte; FolderList: TStringList)
                  GetTrackPause(const Index: Integer): string
                  LoadFromFile(const Name: string)
                  MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string; const Choice: Byte)
@@ -207,6 +208,7 @@ type TProjectData = class(TObject)
        procedure DeleteFromPathlistByName(const Name, Path: string; const Choice: Byte);
        procedure GetCDText(const Index: Integer; var TextData: TCDTextTrackData);
        procedure GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF}; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte);
+       procedure GetSubFolders(const Choice: Byte; const Path: string; FolderList: TStringList);
        procedure ExportStructureToTreeView(const Choice: Byte; Tree: TTreeView);
        procedure LoadFromFile(const Name: string);
        procedure MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string; const Choice: Byte);
@@ -1591,6 +1593,20 @@ procedure TProjectData.MultisessionCDImportSetSizeUsed(const Size:
                           {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
 begin
   FDataCD.MultisessionCDImportSetSizeUsed(Size);
+end;
+
+{ GetSubFolders ----------------------------------------------------------------
+
+  liefert die Unterordner von Path in der Liste zurück.                        }
+
+procedure TProjectData.GetSubFolders(const Choice: Byte; const Path: string;
+                                                       FolderList: TStringList);
+begin
+  FolderList.Clear;
+  case Choice of
+    cDataCD: FDataCD.GetSubFolders(Path, FolderList);
+    cXCD   : FXCD.GetSubFolders(Path, FolderList);
+  end;
 end;
 
 { sonstige Funktionen/Prozeduren --------------------------------------------- }

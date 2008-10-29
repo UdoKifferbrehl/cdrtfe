@@ -3,7 +3,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.07.2008
+  letzte Änderung  29.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,6 +33,7 @@
     GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode
     GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean
     GetWaveLength(const Name: string): Extended
+    ItemIsFolder(Item: TListItem): Boolean
     ListViewSelectAll(ListView: TListView)
     PropertyExists(Comp: TComponent; Name: string): Boolean
     SelectRootIfNoneSelected(Tree: TTreeView)
@@ -69,6 +70,7 @@ function GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode;
 function GetWaveLength(const Name: string): Extended;
 function GetSection(Source, Target: TSTringList; const StartTag, EndTag: string): Boolean;
 function GetCompProp(Comp: TComponent; Name: string): string;
+function ItemIsFolder(Item: TListItem): Boolean;
 function PropertyExists(Comp: TComponent; Name: string): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
 function WaveIsValid(const Name: string): Boolean;
@@ -172,6 +174,15 @@ begin
     List.Free;
   end;
   Result := Root;
+end;
+
+{ ItemIsFolder -----------------------------------------------------------------
+
+  ergibt True, wenn Item im ListView für einen Dateiordner steht.              }
+
+function ItemIsFolder(Item: TListItem): Boolean;
+begin
+  Result := (Item.SubItems[0] = '') and (Item.SubItems[2] = '');
 end;
 
 { ListViewSelectAll ------------------------------------------------------------

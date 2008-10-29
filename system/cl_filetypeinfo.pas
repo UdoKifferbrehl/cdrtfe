@@ -3,7 +3,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.07.2008
+  letzte Änderung  28.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,7 +29,7 @@ unit cl_filetypeinfo;
 
 interface
 
-uses Classes, ShellAPI, SysUtils, Windows;
+uses Classes, ShellAPI, SysUtils, FileCtrl, Windows;
 
 type TFileTypeInfo = class(TObject)
      private
@@ -72,19 +72,23 @@ end;
   
 procedure TFileTypeInfo.GetFileInfo(const Name: string; var IconIndex: Integer;
                                     var FileType: string);
-var Info: TSHFileInfo;
+var Info     : TSHFileInfo;
     Extension: string;
-    Infos: string;
-    p: Integer;
+    Infos    : string;
+    IsFolder : Boolean;
+    p        : Integer;
 begin
+  {Ein Ordner?}
+  IsFolder := DirectoryExists(Name);
   {Dateiendung bestimmen}
   Extension := ExtractFileExt(Name);
+  if IsFolder then Extension := ';';
   {Ist dieser Dateityp schon mal behandelt worden?}
   Infos := FFileTypeInfoList.Values[Extension];
   {Wenn nicht, dann Infos ermitteln}
   if Infos = '' then
   begin
-    if Extension = cExtExe then
+    if (Extension = cExtExe) or IsFolder then
       SHGetFileInfo(PChar(Name), 0, Info,
                     SizeOf(TSHFileInfo),
                     SHGFI_SYSIconIndex or SHGFI_TYPENAME)

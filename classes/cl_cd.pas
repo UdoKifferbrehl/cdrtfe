@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.07.2008
+  letzte Änderung  28.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,7 @@
                  ExportStructureToTreeView(Tree: TTreeView)
                  ImportStructureFromStringList(List: TStringList)
                  GetFolderFromPath(Path: string): TNode
+                 GetSubFolders(const Choice: Byte; const Path: string; FolderList: TStringList)
                  MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string)
                  MoveFileByName(const Name, SourcePath, DestPath: string)
                  MoveFolder(const SourcePath, DestPath: string)
@@ -235,6 +236,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure ExportDataToFile(Root: TNode; var F: TextFile); virtual;
        procedure ExportStructureToStringList(List: TStringList);
        procedure ExportStructureToTreeView(Tree: TTreeView);
+       procedure GetSubFolders(const Path: string; FolderList: TStringList);
        procedure ImportStructureFromStringList(List: TStringList);
        procedure MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string);
        procedure MoveFileByName(const Name, SourcePath, DestPath: string);
@@ -1264,6 +1266,21 @@ begin
     List.Free;
   end;
   Result := Root;
+end;
+
+{ GetSubFolders ----------------------------------------------------------------
+
+  liefert in FolderList die vorhandenen Unterordner von Path zurück.           }
+
+procedure TCD.GetSubFolders(const Path: string; FolderList: TStringList);
+var Folder: TNode;
+    i     : Integer;
+begin
+  Folder := GetFolderFromPath(Path);
+  if Folder <> nil then
+  begin
+    for i := 0 to Folder.ChildCount - 1 do FolderList.Add(Folder.Items[i].Text);
+  end;
 end;
 
 { AddFile ----------------------------------------------------------------------
