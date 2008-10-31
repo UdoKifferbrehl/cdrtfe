@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.10.2008
+  letzte Änderung  31.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5458,7 +5458,8 @@ begin
   begin
     for i := (Source as TListView).Items.Count - 1 downto 0 do
     begin
-      if (Source as TListView).Items[i].Selected then
+      if (Source as TListView).Items[i].Selected and
+         not (ItemIsFolder((Source as TListView).Items[i])) then
       begin
         FData.ChangeForm2Status((Source as TListView).Items[i].Caption, Path);
       end;

@@ -3,7 +3,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.10.2008
+  letzte Änderung  31.10.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -182,7 +182,9 @@ end;
 
 function ItemIsFolder(Item: TListItem): Boolean;
 begin
-  Result := (Item.SubItems[0] = '') and (Item.SubItems[2] = '');
+  Result := False;
+  if (Item <> nil) and (Item.SubItems.Count > 2) then
+    Result := (Item.SubItems[0] = '') and (Item.SubItems[2] = '');
 end;
 
 { ListViewSelectAll ------------------------------------------------------------
