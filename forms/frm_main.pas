@@ -75,8 +75,6 @@ type
     ButtonShowOutput: TButton;
     TabSheet6: TTabSheet;
     RadioButtonCapacity: TRadioButton;
-    CDETreeView: TTreeView;
-    CDEListView: TListView;
     CDETreeViewPopupMenu: TPopupMenu;
     CDETreeViewPopupSetCDLabel: TMenuItem;
     CDETreeViewPopupN1: TMenuItem;
@@ -109,9 +107,6 @@ type
     AudioListViewPopupN1: TMenuItem;
     AudioListViewPopupMoveUp: TMenuItem;
     AudioListViewPopupMoveDown: TMenuItem;
-    XCDETreeView: TTreeView;
-    XCDEListView1: TListView;
-    XCDEListView2: TListView;
     CDEListViewPopupAddMovie: TMenuItem;
     XCDESpeedButton1: TSpeedButton;
     XCDESpeedButton2: TSpeedButton;
@@ -266,6 +261,18 @@ type
     CDEListViewPopupN5: TMenuItem;
     CDEListViewPopupOpen: TMenuItem;
     MainMenuLang: TMenuItem;
+    PanelDataCDView: TPanel;
+    CDETreeView: TTreeView;
+    SplitterDataCD: TSplitter;
+    CDEListView: TListView;
+    PanelXCDView: TPanel;
+    PanelXCDViewLeft: TPanel;
+    SplitterXCDVertical: TSplitter;
+    PanelXCDViewRight: TPanel;
+    XCDEListView1: TListView;
+    SplitterXCDHorizontal: TSplitter;
+    XCDEListView2: TListView;
+    XCDETreeView: TTreeView;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -4228,9 +4235,8 @@ begin
     CDESpeedButton3.Left := CDESpeedButton1.Left;
     CDESpeedButton4.Left := CDESpeedButton1.Left;
     CDESpeedButton5.Left := CDESpeedButton1.Left;
-    CDETreeView.Height := PanelDataCD.Top - 15;
-    CDEListView.Height := CDETreeView.Height;
-    CDEListView.Width := TabSheet1.Width - 241;
+    PanelDataCDView.Height := PanelDataCD.Top - 15;
+    PanelDataCDView.Width := CDESpeedButton1.Left - 15;
 
     {TabSheet2}
     PanelAudioCD.Top := TSHeight - 69;
@@ -4243,22 +4249,21 @@ begin
 
     {TabSheet3}
     PanelXCD.Top := TSHeight - 101;
-    XCDETreeView.Height := PanelXCD.Top - 15;
-    XCDEListView1.Width := TabSheet3.Width - 241;
-    XCDEListView1.Height := (TSHeight - 34 - 13) div 2;
-    XCDEListView2.Width := TabSheet3.Width - 241;
-    XCDEListView2.Top := XCDEListView1.Top + XCDEListView1.Height + 5;
-    XCDEListView2.Height := XCDEListView1.Height;
     XCDESpeedButton1.Left := TabSheet3.Width - 26;
     XCDESpeedButton2.Left := XCDESpeedButton1.Left;
     XCDESpeedButton3.Left := XCDESpeedButton1.Left;
     XCDESpeedButton4.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton4.Top := XCDEListView2.Top + 24;
     XCDESpeedButton5.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton5.Top := XCDEListView2.Top + 56;
     XCDESpeedButton6.Left := XCDESpeedButton1.Left - 32;
-    XCDESpeedButton6.Top  := TSHeight - 29;
     XCDESpeedButton7.Left := XCDESpeedButton1.Left;
+    PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
+    PanelXCDView.Width := XCDESpeedButton1.Left - 15;
+    XCDETreeView.Height := PanelXCD.Top - 15;
+    XCDEListView1.Height := (PanelXCDViewRight.Height -
+                             SplitterXCDHorizontal.Height) div 2;
+    XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
+    XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
+    XCDESpeedButton6.Top  := TSHeight - 29;                       
     XCDESpeedButton7.Top  := TSHeight - 29;
 
     {TabSheet4}
@@ -4347,10 +4352,8 @@ begin
     CDESpeedButton3.Left := CDESpeedButton1.Left;
     CDESpeedButton4.Left := CDESpeedButton1.Left;
     CDESpeedButton5.Left := CDESpeedButton1.Left;
-    CDETreeView.Height := PanelDataCD.Top - 19;
-    CDEListView.Height := CDETreeView.Height;
-    CDEListView.Width := TabSheet1.Width - 298;
-    CDEListView.Left := 256;
+    PanelDataCDView.Height := PanelDataCD.Top - 19;
+    PanelDataCDView.Width := CDESpeedButton1.Left - 15;
 
     {TabSheet2}
     PanelAudioCD.Top := TSHeight - 88;
@@ -4363,24 +4366,21 @@ begin
 
     {TabSheet3}
     PanelXCD.Top := TSHeight - 127;
-    XCDETreeView.Height := PanelXCD.Top - 15;
-    XCDEListView1.Left := 256;
-    XCDEListView1.Width := TabSheet3.Width - 298;
-    XCDEListView1.Height := (TSHeight - 62) div 2;
-    XCDEListView2.Left := 256;
-    XCDEListView2.Width := TabSheet3.Width - 298;
-    XCDEListView2.Top := XCDEListView1.Top + XCDEListView1.Height + 5;
-    XCDEListView2.Height := XCDEListView1.Height;
     XCDESpeedButton1.Left := TabSheet3.Width - 34;
     XCDESpeedButton2.Left := XCDESpeedButton1.Left;
     XCDESpeedButton3.Left := XCDESpeedButton1.Left;
     XCDESpeedButton4.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton4.Top := XCDEListView2.Top + 24;
     XCDESpeedButton5.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton5.Top := XCDEListView2.Top + 56;
     XCDESpeedButton6.Left := XCDESpeedButton1.Left - 32;
-    XCDESpeedButton6.Top  := TSHeight - 39;
     XCDESpeedButton7.Left := XCDESpeedButton1.Left;
+    PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
+    PanelXCDView.Width := XCDESpeedButton1.Left - 15;
+    XCDETreeView.Height := PanelXCD.Top - 15;
+    XCDEListView1.Height := (PanelXCDViewRight.Height -
+                             SplitterXCDHorizontal.Height) div 2;
+    XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
+    XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
+    XCDESpeedButton6.Top  := TSHeight - 39;
     XCDESpeedButton7.Top  := TSHeight - 39;
 
     {TabSheet4}
