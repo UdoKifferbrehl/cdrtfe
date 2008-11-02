@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.10.2008
+  letzte Änderung  02.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3802,6 +3802,7 @@ end;
 procedure TForm1.LangChange;
 begin
   FLang.SetFormLang(Self);
+  CheckControls;
   UpdateGauges;
   FormResize(Self);
   SetHelpFile;
