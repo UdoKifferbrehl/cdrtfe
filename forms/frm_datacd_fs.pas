@@ -2,10 +2,10 @@
 
   frm_datacd_fs.pas: mkisfos-Optionen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  09.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -118,7 +118,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant, f_misc;
+uses constant, f_misc, f_foldernamecache;
 
 {uses ;}
 
@@ -387,14 +387,18 @@ end;
 { Boot-CD: Select image }
 
 procedure TFormDataCDFS.ButtonBootImageSelectClick(Sender: TObject);
+var DialogID: TDialogID;
 begin
+  DialogID := DIDBootImage;
   OpenDialog1 := TOpenDialog.Create(self);
+  OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
   OpenDialog1.Title := FLang.GMS('m202');
   OpenDialog1.Filter := FLang.GMS('f007');
   OpenDialog1.Options := [ofFileMustExist];
   if OpenDialog1.Execute then
   begin
     EditBootImage.Text := OpenDialog1.Files[0];
+    CacheFolderName(DialogID, OpenDialog1.FileName);
   end;
   OpenDialog1.Free;
 end;

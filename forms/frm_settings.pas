@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.02.2008
+  letzte Änderung  09.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -144,8 +144,8 @@ implementation
 
 {$R *.DFM}
 
-uses f_shellext, f_wininfo, f_filesystem, f_misc, f_cygwin, constant,
-     user_messages;
+uses f_shellext, f_wininfo, f_filesystem, f_misc, f_cygwin, f_foldernamecache,
+     constant, user_messages;
 
 {var}
 
@@ -511,8 +511,10 @@ end;
 procedure TFormSettings.ButtonTempFolderBrowseClick(Sender: TObject);
 var Dir: string;
 begin
-  Dir := ChooseDir(FLang.GMS('g002'), Self.Handle);
+  Dir := ChooseDir(FLang.GMS('g002'), GetCachedFolderName(DIDTempFolder),
+                   Self.Handle);
   EditTempFolder.Text := Dir;
+  CacheFolderName(DIDTempFolder, Dir);
   EditTempFolderExit(EditTempFolder)
 end;
 

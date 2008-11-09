@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.05.2008
+  letzte Änderung  09.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -79,7 +79,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant, f_misc;
+uses constant, f_misc, f_foldernamecache;
 
 {var}
 
@@ -310,15 +310,20 @@ end;
 { Select image }
 
 procedure TFormDataCDOptions.ButtonImageSelectClick(Sender: TObject);
+var DialogID: TDialogID;
 begin
+  DialogID := DIDDataCDImage;
+  if FDVDOptions then DialogID := DIDVideoDVDImage;
   SaveDialog1 := TSaveDialog.Create(self);
   SaveDialog1.Title := FLang.GMS('m102');
   SaveDialog1.DefaultExt := 'iso';
   SaveDialog1.Filter := FLang.GMS('f002');
+  SaveDialog1.InitialDir := GetCachedFolderName(DialogID);
   SaveDialog1.Options := [ofOverwritePrompt, ofHideReadOnly];
   if SaveDialog1.Execute then
   begin
     EditIsoPath.Text := SaveDialog1.FileName;
+    CacheFolderName(DialogID, SaveDialog1.FileName);
   end;
   SaveDialog1.Free;
 end;

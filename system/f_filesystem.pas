@@ -3,7 +3,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.07.2008
+  letzte Änderung  09.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,8 +26,8 @@
   exportierte Funktionen/Prozeduren:
 
     CDLabelIsValid(const VolID: string):Boolean
-    ChooseDir(const Caption: string; const OwnerHandle: HWnd): string
-    function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string
+    ChooseDir(const Caption, StartFolder: string; const OwnerHandle: HWnd): string
+    ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList; const StartFolder: string): string
     DismountVolume(Drive: string): Boolean
     DriveEmpty(const Drive: Integer): Boolean
     DummyDir(Mode: Boolean)
@@ -84,8 +84,8 @@ type {Datentype für Laufwerksinfos}
                                   lpTotalNumberOfFreeBytes: PInt64): BOOL; stdcall;
 
 function CDLabelIsValid(const VolID: string):Boolean;
-function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
-function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList): string;
+function ChooseDir(const Caption, StartFolder: string; const OwnerHandle: HWnd): string;
+function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption, CancelCaption: string; const OwnerHandle: HWnd; PathList: TStringList; const StartFolder: string): string;
 function DismountVolume(const Drive: string): Boolean; 
 function DriveEmpty(const Drive: Integer): Boolean;
 function DummyDirName: string;
@@ -208,7 +208,7 @@ begin
     Dir := '';
     while Dir = '' do
     begin
-      Dir := ChooseDir('', Application.Handle);
+      Dir := ChooseDir('', '', Application.Handle);
       if DirectoryExists(Dir) then ProgDataDirOverride := Dir;
     end;
   end;
@@ -390,7 +390,18 @@ end;
 
   zeigt einen Auswahldialog für Verzeichnisse an.                              }
 
-function ChooseDir(const Caption: string; const OwnerHandle: HWnd): string;
+var ChooseDir_StartFolder: string;
+
+function ChooseDirCallBack(Wnd: HWND; uMsg: UINT;
+                           lParam, lpData: LPARAM): Integer stdcall;
+begin
+  if uMsg = BFFM_INITIALIZED then
+    SendMessage(Wnd, BFFM_SETSELECTION, 1, Integer(@ChooseDir_StartFolder[1]));
+  Result := 0;
+end;
+
+function ChooseDir(const Caption, StartFolder: string;
+                   const OwnerHandle: HWnd): string;
 var lpItemID   : PItemIDList;
     Malloc     : IMalloc;
     BrowseInfo : TBrowseInfo;
@@ -407,6 +418,11 @@ begin
     pszDisplayName := @DisplayName;
     lpszTitle      := PChar(Caption);
     ulFlags        := 0;
+    if StartFolder <> '' then
+    begin
+      ChooseDir_StartFolder := StartFolder;
+      lpfn := ChooseDirCallBack;
+    end;
   end;
   lpItemID := SHBrowseForFolder(BrowseInfo);
   if lpItemId <> nil then
@@ -425,10 +441,10 @@ end;
 function ChooseMultipleFolders(const Caption, Title, ColCaption, OkCaption,
                                      CancelCaption: string;
                                const OwnerHandle: HWnd;
-                               PathList: TStringList): string;
+                               PathList: TStringList;
+                               const StartFolder: string): string;
 {$IFDEF MultipleFolderBrowsing}
 var FolderBrowser: TFolderBrowser;
-    Dir          : string;
 begin
   FolderBrowser := TFolderBrowser.Create(nil);
   FolderBrowser.Height        := 365;
@@ -441,6 +457,7 @@ begin
   FolderBrowser.SpecialRoot   := sfDesktop;
   FolderBrowser.Multiselect   := True;
   FolderBrowser.OwnerHandle   := OwnerHandle;
+  FolderBrowser.InitialDir    := StartFolder;
   if FolderBrowser.Execute then
   begin
     PathList.Assign(FolderBrowser.PathList);

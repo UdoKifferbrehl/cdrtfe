@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.09.2008
+  letzte Änderung  09.11.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -69,6 +69,7 @@ uses
   f_init in 'funcs\f_init.pas',
   f_shellext in 'funcs\f_shellext.pas',
   f_helper in 'funcs\f_helper.pas',
+  f_foldernamecache in 'funcs\f_foldernamecache.pas',
   cl_tree in 'support\cl_tree.pas',
   cl_mpeginfo in 'support\cl_mpeginfo.pas',
   cl_mpegvinfo in 'support\cl_mpegvinfo.pas',

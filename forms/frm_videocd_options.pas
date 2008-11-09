@@ -2,9 +2,9 @@
 
   frm_videocd_options.pas: Video-CD: Optionen
 
-  Copyright (c) 2005-2007 Oliver Valencia
+  Copyright (c) 2005-2008 Oliver Valencia
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  09.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -67,7 +67,7 @@ implementation
 
 {$R *.DFM}
 
-uses f_misc, constant;
+uses f_misc, f_foldernamecache, constant;
 
 { InputOk ----------------------------------------------------------------------
 
@@ -191,15 +191,19 @@ end;
 { SelectImage }
 
 procedure TFormVideoCDOptions.ButtonImageSelectClick(Sender: TObject);
+var DialogID: TDialogID;
 begin
+  DialogID := DIDVideoCDImage;
   SaveDialog1 := TSaveDialog.Create(self);
   SaveDialog1.Title := FLang.GMS('m102');
   SaveDialog1.DefaultExt := '';
   SaveDialog1.Filter := FLang.GMS('f003');
+  SaveDialog1.InitialDir := GetCachedFolderName(DialogID);
   SaveDialog1.Options := [ofOverwritePrompt, ofHideReadOnly];
   if SaveDialog1.Execute then
   begin
     EditIsoPath.Text := SaveDialog1.FileName;
+    CacheFolderName(DialogID, SaveDialog1.FileName);
   end;
   SaveDialog1.Free;
 end;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.11.2008
+  letzte Änderung  09.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -554,7 +554,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
      f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init, f_helper,
-     f_checkproject;
+     f_checkproject, f_foldernamecache;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
     {$IFDEF ShowTime}
@@ -1309,20 +1309,24 @@ end;
   Dateilisten, wenn ListsOnly = True. Aufruf erfolgt vom Hauptmenü aus.        }
 
 procedure TForm1.SaveProject(const ListsOnly: Boolean);
+var DialogID: TDialogID;
 begin
   if not ListsOnly then SetSettings;
   SaveDialog1 := TSaveDialog.Create(Form1);
   if not ListsOnly then
   begin
+    DialogID := DIDLoadProject;
     SaveDialog1.Title := FLang.GMS('m107');
     SaveDialog1.DefaultExt := 'cfp';
     SaveDialog1.Filter := FLang.GMS('f006');
   end else
   begin
+    DialogID := DIDLoadList;
     SaveDialog1.Title := FLang.GMS('m121');
     SaveDialog1.DefaultExt := 'cfp.files';
     SaveDialog1.Filter := FLang.GMS('f008');
   end;
+  SaveDialog1.InitialDir := GetCachedFolderName(DialogID);
   SaveDialog1.Options := [ofOverwritePrompt,ofHideReadOnly];
   if SaveDialog1.Execute then
   begin
@@ -1334,6 +1338,7 @@ begin
     begin
       FData.SaveToFile(SaveDialog1.FileName);
     end;
+    CacheFolderName(DialogID, SaveDialog1.FileName);
   end;
   SaveDialog1.Free;
 end;
@@ -1344,18 +1349,22 @@ end;
   ListsOnly = True. Aufruf erfolgt vom Hauptmenü aus.                          }
 
 procedure TForm1.LoadProject(const ListsOnly: Boolean);
-var i: Byte;
+var i       : Byte;
+    DialogID: TDialogID;
 begin
   OpenDialog1 := TOpenDialog.Create(Form1);
   if not ListsOnly then
   begin
+    DialogID := DIDLoadProject;
     OpenDialog1.Title := FLang.GMS('m106');
     OpenDialog1.Filter := FLang.GMS('f006');
   end else
   begin
+    DialogID := DIDLoadList;
     OpenDialog1.Title := FLang.GMS('m120');
     OpenDialog1.Filter := FLang.GMS('f008');
   end;
+  OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
   if OpenDialog1.Execute then
   begin
     CDETreeView.Selected := CDETreeView.Items[0];
@@ -1368,6 +1377,7 @@ begin
     begin
       FData.LoadFromFile(OpenDialog1.FileName);
     end;
+    CacheFolderName(DialogID, OpenDialog1.FileName);
   end;
   OpenDialog1.Free;
   if not ListsOnly then
@@ -1613,26 +1623,34 @@ end;
   wurde.                                                                       }
 
 procedure TForm1.UserAddFile(Tree: TTreeView);
-var i: integer;
-    Path: string;
+var i        : Integer;
+    Path     : string;
     ErrorCode: Byte;
+    DialogID : TDialogID;
 begin
+  DialogID := DIDDummy;
   {sicherstellen, daß ein Knoten im Tree-View selektiert ist}
   SelectRootIfNoneSelected(Tree);
   Form1.OpenDialog1 := TOpenDialog.Create(Form1);
   case FSettings.General.Choice of
-    cDataCD: Form1.OpenDialog1.Title := FLang.GMS('m103');
+    cDataCD: begin
+               Form1.OpenDialog1.Title := FLang.GMS('m103');
+               DialogID := DIDDataCDFile;
+             end;
     cXCD   : begin
                if FSettings.General.XCDAddMovie then
                begin
                  Form1.OpenDialog1.Title := FLang.GMS('m105');
                  Form1.OpenDialog1.Filter := FLang.GMS('f005');
+                 DialogID := DIDXCDFile2;
                end else
                begin
                  Form1.OpenDialog1.Title := FLang.GMS('m103');
+                 DialogID := DIDXCDFile;
                end;
              end;
   end;
+  Form1.OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
   Form1.OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
   if Form1.OpenDialog1.Execute then
   begin
@@ -1654,6 +1672,7 @@ begin
                    FLang.GMS('g001'), MB_cdrtfe2);
       end;
     end;
+    CacheFolderName(DialogID, OpenDialog1.FileName);
     {Dateiliste sortieren}
     FData.SortFileList(Path, Fsettings.General.Choice);
     if FSettings.General.Choice = cDataCD then
@@ -1677,25 +1696,36 @@ end;
   gelöst wurde.                                                                }
 
 procedure TForm1.UserAddFolder(Tree: TTreeView);
-var Dir      : string;
-    Name     : string;
-    Path     : string;
-    PathList : TStringList;
-    ErrorCode: Byte;
-    Count, i : Integer;
+var Dir        : string;
+    Name       : string;
+    Path       : string;
+    PathList   : TStringList;
+    ErrorCode  : Byte;
+    Count, i   : Integer;
+    DialogID   : TDialogID;
+    StartFolder: string;
 begin
+  case FSettings.General.Choice of
+    cDataCD: DialogID := DIDDataCDFolder;
+    cXCD   : DialogID := DIDXCDFolder;
+  else
+    DialogID := DIDDummy;
+  end;
+  StartFolder := GetCachedFolderName(DialogID);
   {sicherstellen, daß ein Knoten selektiert ist}
   SelectRootIfNoneSelected(Tree);
   PathList := TStringList.Create;
   {$IFDEF MultipleFolderBrowsing}
   Dir := ChooseMultipleFolders(FLang.GMS('g002'), FLang.GMS('g013'),
                                FLang.GMS('g012'), FLang.GMS('mlang02'),
-                               FLang.GMS('mlang03'), Form1.Handle, PathList);
+                               FLang.GMS('mlang03'), Form1.Handle, PathList,
+                               StartFolder);
   Count := PathList.Count;
   {$ELSE}
-  Dir := ChooseDir(FLang.GMS('g002'), Form1.Handle);
+  Dir := ChooseDir(FLang.GMS('g002'), StartFolder, Form1.Handle);
   Count := 1;
   {$ENDIF}
+  CacheFolderName(DialogID, Dir);
   for i := 0 to Count - 1 do
   begin
     {$IFDEF MultipleFolderBrowsing}
@@ -2185,23 +2215,28 @@ end;
   Ausgelöst über GUI.                                                          }
 
 procedure TForm1.UserAddTrack;
-var i: Integer;
+var i       : Integer;
+    DialogID: TDialogID;
 begin
+  DialogID := DIDDummy;
   with Form1 do
   begin
     OpenDialog1 := TOpenDialog.Create(Form1);
     case FSettings.General.Choice of
       cAudioCD: begin
+                  DialogID := DIDAudioCDTrack;
                   OpenDialog1.Title := FLang.GMS('m104');
                   OpenDialog1.DefaultExt := 'wav';
                   OpenDialog1.Filter := FLang.GMS('f004');
                 end;
       cVideoCD: begin
+                  DialogID := DIDVideoCDTrack;
                   OpenDialog1.Title := FLang.GMS('m105');
                   OpenDialog1.DefaultExt := 'mpg';
                   OpenDialog1.Filter := FLang.GMS('f009');
                 end;
     end;
+    OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
     OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
     if OpenDialog1.Execute then
     begin
@@ -2214,6 +2249,7 @@ begin
         end;
         HandleError(FData.LastError, OpenDialog1.Files[i]);
       end;
+      CacheFolderName(DialogID, OpenDialog1.FileName);
     end;
     OpenDialog1.Free;
     ShowTracks;
@@ -4748,7 +4784,7 @@ end;
 procedure TForm1.ButtonDAESelectPathClick(Sender: TObject);
 var dir: string;
 begin
-  dir := ChooseDir(Flang.GMS('g002'), Self.Handle);
+  dir := ChooseDir(Flang.GMS('g002'), '', Self.Handle);
   if dir <> '' then
   begin
     EditDAEPath.Text := dir;
@@ -4784,15 +4820,19 @@ end;
 { Image: Select path }
 
 procedure TForm1.ButtonReadCDSelectPathClick(Sender: TObject);
+var DialogID: TDialogID;
 begin
+  DialogID := DIDSaveImage;
   SaveDialog1 := TSaveDialog.Create(Form1);
   SaveDialog1.Title := FLang.GMS('m102');
   SaveDialog1.DefaultExt := 'iso';
   SaveDialog1.Filter := FLang.GMS('f002');
   SaveDialog1.Options := [ofOverwritePrompt,ofHideReadOnly];
+  SaveDialog1.InitialDir := GetCachedFolderName(DialogID);
   if SaveDialog1.Execute then
   begin
     EditReadCDIsoPath.Text := SaveDialog1.FileName;
+    CacheFolderName(DialogID, SaveDialog1.FileName);
   end;
   SaveDialog1.Free;
 end;
@@ -4800,9 +4840,12 @@ end;
 { Image: Select ISO-/CUE-Image }
 
 procedure TForm1.ButtonImageSelectPathClick(Sender: TObject);
+var DialogID: TDialogID;
 begin
+  DialogID := DIDCDImage;
   OpenDialog1 := TOpenDialog.Create(Form1);
   OpenDialog1.Title := FLang.GMS('m101');
+  OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
   if (FSettings.FileFlags.CdrdaoOk or FSettings.Cdrecord.CanWriteCueImage) then
   begin
     OpenDialog1.Filter := FLang.GMS('f001');
@@ -4813,6 +4856,7 @@ begin
   if OpenDialog1.Execute then
   begin
     EditImageIsoPath.Text := (OpenDialog1.Files[0]);
+    CacheFolderName(DialogID, OpenDialog1.FileName);
   end;
   OpenDialog1.Free;
   CheckControls;
@@ -4821,13 +4865,15 @@ end;
 { DVD Video: Select source dir }
 
 procedure TForm1.ButtonDVDVideoSelectPathClick(Sender: TObject);
-var dir: string;
+var Dir: string;
 begin
-  dir := ChooseDir(Flang.GMS('g002'), Self.Handle);
-  if dir <> '' then
+  Dir := ChooseDir(Flang.GMS('g002'), GetCachedFolderName(DIDVideoDVDFolder),
+                   Self.Handle);
+  if Dir <> '' then
   begin
-    if IsValidDVDSource(dir) then                  // temporary Hack
-      EditDVDVideoSourcePath.Text := dir;
+    if IsValidDVDSource(Dir) then                  // temporary Hack
+      EditDVDVideoSourcePath.Text := Dir;
+    CacheFolderName(DIDVideoDVDFolder, Dir);
   end;
 end;
 
@@ -6235,14 +6281,18 @@ end;
 { Save log }
 
 procedure TForm1.MiscPopupSaveOutputClick(Sender: TObject);
+var DialogID: TDialogID;
 begin
+  DialogID := DIDSaveLog;
   SaveDialog1 := TSaveDialog.Create(Form1);
   SaveDialog1.DefaultExt := 'txt';
-  SaveDialog1.Filter := '(*.txt)|*.txt'; 
+  SaveDialog1.Filter := '(*.txt)|*.txt';
+  SaveDialog1.InitialDir := GetCachedFolderName(DialogID);
   SaveDialog1.Options := [ofOverwritePrompt,ofHideReadOnly];
   if SaveDialog1.Execute then
   begin
     TLogWin.Inst.SaveLog(SaveDialog1.FileName);
+    CacheFolderName(DialogID, SaveDialog1.FileName);
   end;
   SaveDialog1.Free;
 end;
