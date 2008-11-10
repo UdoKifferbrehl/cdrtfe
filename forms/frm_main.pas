@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  10.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -426,6 +426,7 @@ type
     FCheckingControls  : Boolean;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
+    function GetCurrentTreeView: TTreeView;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
     procedure AddToPathList(const Filename: string);
@@ -2327,7 +2328,6 @@ var Item: TListItem;
     Path: string;
     Node: TTreeNode;
 begin
-  Tree := nil;
   if FSettings.General.AllowFileOpen and (List <> nil) then
   begin
     Item := List.Selected;
@@ -2347,10 +2347,7 @@ begin
           ShlExecute('', QuotePath(List.Selected.SubItems[2]));
         end else
         begin
-          case FSettings.General.Choice of
-            cDataCD: Tree := CDETreeView;
-            cXCD   : Tree := XCDETreeView;
-          end;
+          Tree := GetCurrentTreeView;
           Path := GetPathFromNode(Tree.Selected) + Item.Caption + '/';
           Node := GetNodeFromPath(Tree.Items[0], Path);
           Node.Selected := True;
@@ -2775,6 +2772,20 @@ begin
     cVideoCD: Result := VideoListView;
   else
     Result := nil
+  end;
+end;
+
+{ GetCurrentTreeView -----------------------------------------------------------
+
+  GetCurrentTreeView gibt eine Referent auf den aktuellen TreeView zurück.     }
+
+function TForm1.GetCurrentTreeView: TTreeView;
+begin
+  case FSettings.General.Choice of
+    cDataCD: Result := CDETreeView;
+    cXCD   : Result := XCDETreeView;
+  else
+    Result := nil;
   end;
 end;
 
@@ -5383,7 +5394,6 @@ var List: TListView;
     Tree: TTreeView;
 begin
   List := Sender as TListView;
-  Tree := nil;
   case Key of
     VK_DELETE : if not List.IsEditing then
                 begin
@@ -5394,10 +5404,7 @@ begin
                 end;
     VK_BACK   : if not List.IsEditing then
                 begin
-                  case FSettings.General.Choice of
-                    cDataCD: Tree := CDETreeView;
-                    cXCD   : Tree := XCDETreeView;
-                  end;
+                  Tree := GetCurrentTreeView;
                   if Tree.Selected.Parent <> nil then
                     Tree.Selected.Parent.Selected := True;
                 end;
@@ -5967,10 +5974,7 @@ end;
 
 procedure TForm1.CDETreeViewPopupNewFolderClick(Sender: TObject);
 begin
-  case FSettings.General.Choice of
-    cDataCD: UserNewFolder(CDETreeView);
-    cXCD   : UserNewFolder(XCDETreeView);
-  end;
+  UserNewFolder(GetCurrentTreeView);
 end;
 
 { Data-CD: Multisession-CD importieren}
