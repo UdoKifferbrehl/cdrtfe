@@ -4,7 +4,7 @@
 
   Copyright (c) 2008 Oliver Valencia
 
-  letzte Änderung  07.08.2008
+  letzte Änderung  28.11.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -308,7 +308,8 @@ begin
   Delete(Temp, 1, Pos('Next writable address', Temp));
   Delete(Temp, 1, Pos(':', Temp));
   Adr := Trim(Copy(Temp, 1, Pos(LF, Temp)));
-  FSpaceUsed := (StrToIntDef(Adr, 0) - 1) * 2048;
+  FSpaceUsed := (StrToIntDef(Adr, 0) - 1);
+  FSpaceUsed := FSpaceUsed * 2048;
 end;
 
 { GetDiskInfo ------------------------------------------------------------------
