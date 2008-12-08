@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.09.2008
+  letzte Änderung  06.12.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -681,7 +681,7 @@ begin
     FixDevice   := '';
     Dummy       := False;
     Eject       := False;
-    Verbose     := False;
+    Verbose     := True;
     Burnfree    := True;
     SimulDrv    := False;
     FIFO        := False;
