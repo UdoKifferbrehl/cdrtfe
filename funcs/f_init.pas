@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.09.2008
+  letzte Änderung  14.12.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -205,10 +205,10 @@ begin
       if Temp <> '' then cMadplayBin := Temp;
 
       Temp := ReadString(cTool, 'LameBin', '');
-      if Temp <> '' then cReadcdBin := Temp;
+      if Temp <> '' then cLameBin := Temp;
 
       Temp := ReadString(cTool, 'OggdecBin', '');
-      if Temp <> '' then CLameBin := Temp;
+      if Temp <> '' then cOggdecBin := Temp;
 
       Temp := ReadString(cTool, 'OggencBin', '');
       if Temp <> '' then cOggencBin := Temp;
