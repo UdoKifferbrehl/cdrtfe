@@ -2,9 +2,9 @@
 
   f_helper.pas: Hilfsfunktionen
 
-  Copyright (c) 2005-2007 Oliver Valencia
+  Copyright (c) 2005-2008 Oliver Valencia
 
-  letzte Änderung  02.12.2007
+  letzte Änderung 18.12.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -216,18 +216,17 @@ begin
   Temp := '';
   {Workaround for mkisofs 2.01.01a28 and above: Zeichensatztabellen werden im
    aktuellen Verzeicnis gesucht, wenn cygwin nicht komplett installiert ist.}
-  if Pos(cMkisofsBin, CommandLine) > 0 then
+  if (Pos(cMkisofsBin, CommandLine) > 0) or
+      FileExists(ProgDataDir + cShCmdFile) then
   begin
-    Temp := ExtractFilePath(CommandLine);
-    Delete(Temp, Length(Temp), 1);
-    Temp := Temp + cSiconvDir;
+    Temp := StartupDir + cToolDir + cCdrtoolsDir + cSIconvDir;
   end;
-  if not DirectoryExists(Temp) then Temp := '';  
+  if not DirectoryExists(Temp) then Temp := '';
   Result := Temp;
-  {$IFDEF WriteLogfile}
-  // AddLogCode(1104);
-  // AddLog(Result + CRLF, 2);
-  {$ENDIF}
+//  {$IFDEF WriteLogfile}
+//  AddLogCode(1104);
+//  AddLog(Result + CRLF, 2);
+//  {$ENDIF}
 end;
 
 end.
