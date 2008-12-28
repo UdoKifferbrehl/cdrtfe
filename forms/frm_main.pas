@@ -5408,6 +5408,7 @@ begin
                   if Tree.Selected.Parent <> nil then
                     Tree.Selected.Parent.Selected := True;
                 end;
+    VK_RETURN : ListViewDblCLick(Sender);
     Ord('A')  : if Shift = [ssCtrl] then
                 begin
                   ListViewSelectAll(List);

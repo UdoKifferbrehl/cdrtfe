@@ -2,7 +2,7 @@
 
   Copyright (c) 2007-2008 Oliver Valencia
 
-  letzte Änderung  10.01.2008
+  letzte Änderung  28.12.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -242,12 +242,17 @@ end;
 procedure TFolderBrowser.STVKeyDown(Sender: TObject; var Key: Word;
                                     Shift: TShiftState);
 begin
+  (*
   if  ssAlt in Shift then
   begin
     case Key of
       VK_INSERT: InsertFolder(FBShellTreeView.SelectedFolder.Path);
     end;
   end;
+  *)
+  if ((ssAlt in Shift) and (Key = VK_INSERT)) or
+     (Key = VK_F11) then
+    InsertFolder(FBShellTreeView.SelectedFolder.Path);
 end;
 
 { Listview - OnKeyDown ---------------------------------------------------------

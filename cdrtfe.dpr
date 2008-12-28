@@ -5,7 +5,7 @@
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  20.12.2008
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -51,9 +51,7 @@ uses
   frm_audiocd_tracks in 'forms\frm_audiocd_tracks.pas' {FormAudioCDTracks},
   frm_videocd_options in 'forms\frm_videocd_options.pas' {FormVideoCDOptions},
   frm_dae_options in 'forms\frm_dae_options.pas' {FormDAEOptions},
-  {$IFDEF SplashScreen}
   frm_splash_screen in 'forms\frm_splash_screen.pas' {FormSplashScreen},  
-  {$ENDIF} 
   cl_lang in 'classes\cl_lang.pas',
   cl_settings in 'classes\cl_settings.pas',
   cl_cd in 'classes\cl_cd.pas',
@@ -130,20 +128,14 @@ uses
 
 begin
   {$IFDEF WriteLogfile} AddLog('Application.Initialize', 0); {$ENDIF}
-  {$IFDEF SplashScreen}
   FormSplashScreen := TFormSplashScreen.Create(Application) ;
   if not IsAlreadyRunning then FormSplashScreen.ShowEx;
-  {$ENDIF}
   Application.Initialize;
-  {$IFDEF SplashScreen}
   FormSplashScreen.UpdateEx;
-  {$ENDIF}
   {$IFDEF WriteLogfile} AddLog('Application.CreateForm1' + CRLF, 0); {$ENDIF}
   Application.CreateForm(TForm1, Form1);
-  {$IFDEF SplashScreen}
   FormSplashScreen.HideEx;
   FormSplashScreen.Free;
-  {$ENDIF}  
   {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}
   Application.Run;
 end.

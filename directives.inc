@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  13.06.2008
+  letzte Änderung  20.12.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,13 +39,6 @@
 {$DEFINE xTestVersion}
          // kennzeichnet cdrtfe als Testversion
          //    - betrifft: frm_about.pas
-
-
-(* ------------------------------------------------------------- SplashScreen *)
-
-{$DEFINE SplashScreen}
-         // Beim Programmstart wird ein Splash-Screen gezeigt
-         //    - betrifft: cdrtfe.dpr
 
 
 (* --------------------------------------------------------------- ImagingLib *)
