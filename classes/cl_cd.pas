@@ -2,10 +2,10 @@
 
   cl_cd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.10.2008
+  letzte Änderung  02.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -98,6 +98,7 @@
                  MoveTrack(const Index: Integer; const Direction: TDirection)
                  SetCDText(const Index: Integer; const Title, Performer: string)
                  SetTrackPause(const Index: Integer; const Pause: string)
+                 SortTracks
 
 
   TDAE
@@ -335,6 +336,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure MoveTrack(const Index: Integer; const Direction: TDirection);
        procedure SetCDText(const Index: Integer; TextData: TCDTextTrackData);
        procedure SetTrackPause(const Index: Integer; const Pause: string);
+       procedure SortTracks;
        property AcceptMP3: Boolean read FAcceptMP3 write FAcceptMP3;
        property AcceptOgg: Boolean read FAcceptOgg write FAcceptOgg;
        property AcceptFLAC: Boolean read FAcceptFLAC write FAcceptFLAC;
@@ -2985,6 +2987,16 @@ begin
   FCDTime := 0;
 end;
 
+{ SortTracks -------------------------------------------------------------------
+
+  sortiert die Trackliste nach den Dateinamen.                                 }
+
+procedure TAudioCD.SortTracks;
+//var i: Integer;
+begin
+  { noch zu implementieren }
+end;
+
 
 { TDAE ----------------------------------------------------------------------- }
 
@@ -2996,7 +3008,7 @@ end;
 
 function TDAE.GetTrackCount: Integer;
 begin
-    Result := FTrackList.Count;
+  Result := FTrackList.Count;
 end;
 
 { TDAE - public }

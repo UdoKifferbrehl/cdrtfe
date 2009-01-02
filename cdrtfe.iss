@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2008 Oliver Valencia
 ;
-;  letzte Änderung  30.11.2008
+;  letzte Änderung  30.12.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVerName "cdrtfe 1.3.3"
+#define MyAppVerName "cdrtfe 1.3.4"
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
@@ -33,11 +33,11 @@ UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
 ; Compiler
-VersionInfoVersion=1.3.3
+VersionInfoVersion=1.3.4
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
 ;OutputDir=J:\shared\cdrtfe
-OutputBaseFilename=cdrtfe-1.3.3
+OutputBaseFilename=cdrtfe-1.3.4
 ; Compression
 ;Compression=none
 Compression=lzma
@@ -137,8 +137,9 @@ Source: I:\cdrtfe\cdrtfe\shellex\cdrtfeShlEx\*; DestDir: {app}\source\cdrtfeShlE
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}
 ; Help file
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_german.chm; Languages: de
-Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en it pl
+Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_french.chm; Languages: fr
+Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_italian.chm; Languages: it
 ; Readme files
 Name: {group}\Readme; Filename: {app}\doc\readme_de.txt; Languages: de
 Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_de.txt; Languages: de

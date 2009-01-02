@@ -2,10 +2,10 @@
 
   cl_projectdata.pas:
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.10.2008
+  letzte Änderung  02.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -92,6 +92,7 @@
                  SetTrackPause(const Index: Integer; const Pause: string)
                  SortFileList(const Path: string; const Choice: Byte)
                  SortFolder(const Path: string; const Choice: Byte)
+                 SortTracks(const Choice: Byte)
                  TrackPausePresen: Boolean
 
     exportierte Funktionen/Prozeduren:
@@ -229,6 +230,7 @@ type TProjectData = class(TObject)
        procedure SetTrackPause(const Index: Integer; const Pause: string);
        procedure SortFileList(const Path: string; const Choice: Byte);
        procedure SortFolder(const Path: string; const Choice: Byte);
+       procedure SortTracks(const Choice: Byte);
        {$IFDEF DebugFileLists}
        function GetFolderName(const Path:string; const Choice: Byte): string;
        {$ENDIF}
@@ -1606,6 +1608,17 @@ begin
   case Choice of
     cDataCD: FDataCD.GetSubFolders(Path, FolderList);
     cXCD   : FXCD.GetSubFolders(Path, FolderList);
+  end;
+end;
+
+{ SortTracks -------------------------------------------------------------------
+
+  sortiert im Audio-CD-Projekt die Tracks nach den Dateinamen.                 }
+
+procedure TProjectData.SortTracks(const Choice: Byte);
+begin
+  case Choice of
+    cAudioCD: FAudioCD.SortTracks;
   end;
 end;
 
