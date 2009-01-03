@@ -2,9 +2,9 @@
 ;
 ;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.2.2
 ;
-;  Copyright (c) 2006-2008 Oliver Valencia
+;  Copyright (c) 2006-2009 Oliver Valencia
 ;
-;  letzte Änderung  30.12.2008
+;  letzte Änderung  02.01.2008
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,7 +16,7 @@
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
-#define MyAppCopyright "Copyright © 2002-2008  O. Valencia, O. Kutsche"
+#define MyAppCopyright "Copyright © 2002-2009  O. Valencia, O. Kutsche"
 
 [Setup]
 ; Installer
@@ -120,6 +120,7 @@ Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignorever
 Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl
 Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
 Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl
+Source: I:\cdrtfe\cdrtfe\doc\changes\changes.txt; DestDir: {app}\doc; Flags: ignoreversion;
 ; Licenses
 Source: I:\cdrtfe\cdrtfe\doc\license\COPYING.txt; DestDir: {app}\doc\license; Flags: ignoreversion
 Source: I:\cdrtfe\cdrtfe\doc\license\CDDL.Schily.txt; DestDir: {app}\doc\license; Flags: ignoreversion
@@ -141,6 +142,7 @@ Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Langua
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_french.chm; Languages: fr
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_italian.chm; Languages: it
 ; Readme files
+Name: {group}\Changes; Filename: {app}\doc\changes.txt;
 Name: {group}\Readme; Filename: {app}\doc\readme_de.txt; Languages: de
 Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_de.txt; Languages: de
 Name: {group}\Readme; Filename: {app}\doc\readme_en.txt; Languages: en fr it pl
@@ -163,6 +165,7 @@ Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl; Flags: shellexec po
 Filename: "{app}\doc\readme_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_dvd_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
+Filename: "{app}\doc\changes.txt"; Flags: shellexec postinstall skipifsilent unchecked
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
 
 [Types]
