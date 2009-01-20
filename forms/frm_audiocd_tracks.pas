@@ -2,10 +2,10 @@
 
   frm_audiocd_tracks.pas: Audio-CD: Track-Eigenschaften
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  20.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -354,21 +354,49 @@ end;
 
 { OnKeyDown --------------------------------------------------------------------
 
-  bei F3 sollen die Zelleninhalte Titel und Interpret vertauscht werden.       }
+  bei F3 sollen die Zelleninhalte Titel und Interpret vertauscht werden. Zu-
+  sätzllich Tab-Navigation aus dem StringGrid heraus ermöglichen.              }
 
 procedure TFormAudioCDTracks.GridTextDataKeyDown(Sender: TObject; var Key: Word;
                                                  Shift: TShiftState);
-var Title, Performer: string;
-    Row             : Integer;
+var Title,
+    Performer: string;
+    Row      : Integer;
+    Grid     : TStringGrid;
 begin
   case Key of
-    VK_F3: begin
-             Row := GridTextData.Row;
-             Title := GridTextData.Cells[1, Row];
-             Performer := GridTextData.Cells[2, Row];
-             GridTextData.Cells[1, Row] := Performer;
-             GridTextData.Cells[2, Row] := Title;
-           end;
+    VK_F3 : begin
+              Row := GridTextData.Row;
+              Title := GridTextData.Cells[1, Row];
+              Performer := GridTextData.Cells[2, Row];
+              GridTextData.Cells[1, Row] := Performer;
+              GridTextData.Cells[2, Row] := Title;
+            end;
+    VK_TAB: begin
+              Grid := Sender as TStringGrid;
+              if not (ssShift in Shift) then
+              begin
+                if (Grid.Col = Grid.ColCount - 1) and
+                   (Grid.Row = Grid.RowCount - 1) then
+                begin
+                  if RadioButtonNoPause.Checked then
+                    RadioButtonNoPause.SetFocus;
+                  if RadioButtonPause.Checked then
+                    RadioButtonPause.SetFocus;
+                  if RadioButtonUserDefinedPause.Checked then
+                    RadioButtonUserDefinedPause.SetFocus;
+                  Key := 0;
+                end;
+              end else
+              begin
+                if (Grid.Col = 1) and
+                   (Grid.Row = 1) then
+                begin
+                  CheckBoxSampler.SetFocus;
+                  Key := 0;
+                end;
+              end;
+            end;
   end;
 end;
 
