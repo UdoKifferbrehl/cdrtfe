@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.01.2009
+  letzte Änderung  22.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2565,16 +2565,35 @@ procedure TAudioCD.AddPlaylist(const Name: string);
 var List     : TStringList;
     i        : Integer;
     ErrorCode: Byte;
+    Path     : string;
+    Drive    : string;
+    TrackName: string;
 begin
+  Path := ExtractFilePath(Name);
+  Drive := ExtractFileDrive(Name);
   List := TStringList.Create;
   List.LoadFromFile(Name);
   for i := 0 to List.Count - 1 do
   begin
     if Pos('#', List[i]) <> 1 then
     begin
-      AddTrack(List[i]);
+      TrackName := List[i];
+      {relativer Pfad?}
+      if ExtractFileDrive(TrackName) = '' then
+      begin
+        if TrackName[1] = '\' then
+        begin
+          {Pfad relativ zum Laufwerk der Playliste}
+          TrackName := Drive + TrackName;
+        end else
+        begin
+          {Pfad relativ zur Playliste}
+          TrackName := Path + TrackName;
+        end;
+      end;
+      AddTrack(TrackName);
       ErrorCode := GetLastError;
-      if ErrorCode <> CD_NoError then ProjectError(ErrorCode, List[i]);
+      if ErrorCode <> CD_NoError then ProjectError(ErrorCode, TrackName);
     end;
   end;
   List.Free
