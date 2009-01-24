@@ -1,11 +1,11 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_output.pas: Darstellung der Ausgabe der Konsolenprogramme
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.06.2007
+  letzte Änderung  24.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -137,6 +137,7 @@ procedure TFormOutput.Memo1KeyDown(Sender: TObject; var Key: Word;
 begin
   case Key of
     VK_ESCAPE: Close;
+    Ord('A') : if ssCtrl in Shift then (Sender as TMemo).SelectAll;
   end;
 end;
 
