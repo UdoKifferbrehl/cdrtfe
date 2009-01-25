@@ -393,10 +393,11 @@ begin
                    (Grid.Row = 1) then
                 begin
                   Key := 0;
-                  Self.Perform(WM_NEXTDLGCTL, 1, 0); 
+                  Self.Perform(WM_NEXTDLGCTL, 1, 0);
                 end;
               end;
             end;
+    VK_ESCAPE: Close;            
   end;
 end;
 
