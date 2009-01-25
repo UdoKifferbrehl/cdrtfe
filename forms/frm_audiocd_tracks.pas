@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.01.2009
+  letzte Änderung  25.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,8 +45,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
     procedure EditKeyPress(Sender: TObject; var Key: Char);
-    procedure GridTextDataKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure GridTextDataKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ExitTabSpecial(Sender: TObject);
+    procedure GridTextDataEnter(Sender: TObject);
   private
     { Private declarations }
     FData: TProjectData;
@@ -73,6 +74,8 @@ implementation
 {$R *.DFM}
 
 uses constant, f_cdtext, f_misc;
+
+var PreviousControl: TObject;
 
 { InputOk ----------------------------------------------------------------------
 
@@ -352,6 +355,8 @@ begin
   end;
 end;
 
+{ StringGrid-Events ---------------------------------------------------------- }
+
 { OnKeyDown --------------------------------------------------------------------
 
   bei F3 sollen die Zelleninhalte Titel und Interpret vertauscht werden. Zu-
@@ -379,24 +384,63 @@ begin
                 if (Grid.Col = Grid.ColCount - 1) and
                    (Grid.Row = Grid.RowCount - 1) then
                 begin
-                  if RadioButtonNoPause.Checked then
-                    RadioButtonNoPause.SetFocus;
-                  if RadioButtonPause.Checked then
-                    RadioButtonPause.SetFocus;
-                  if RadioButtonUserDefinedPause.Checked then
-                    RadioButtonUserDefinedPause.SetFocus;
                   Key := 0;
+                  Self.Perform(WM_NEXTDLGCTL, 0, 0);
                 end;
               end else
               begin
                 if (Grid.Col = 1) and
                    (Grid.Row = 1) then
                 begin
-                  CheckBoxSampler.SetFocus;
                   Key := 0;
+                  Self.Perform(WM_NEXTDLGCTL, 1, 0); 
                 end;
               end;
             end;
+  end;
+end;
+
+{ Workaround für eine bessere Keyboard-Navigation ---------------------------- }
+
+{ OnExit -----------------------------------------------------------------------
+
+  merkt sich die letzte Komponente.                                            }
+
+procedure TFormAudioCDTracks.ExitTabSpecial(Sender: TObject);
+begin
+  PreviousControl := Sender;
+end;
+
+{ OnEnter ----------------------------------------------------------------------
+
+  markiert die erste bzw. letze Zelle des StringGrids.                         }
+
+procedure TFormAudioCDTracks.GridTextDataEnter(Sender: TObject);
+var Sel: TGridRect;
+begin
+  if PreviousControl is TCheckBox then
+  begin
+    if ((PreviousControl as TCheckBox) = CheckBoxSampler) then
+    begin
+      Sel.Left := 1;
+      Sel.Top := 1;
+      Sel.Right := 1;
+      Sel.Bottom := 1;
+      GridTextData.Selection := Sel;
+    end;
+  end else
+  if PreviousControl is TRadioButton then
+  begin
+    if ((PreviousControl as TRadioButton) = RadioButtonNoPause) or
+       ((PreviousControl as TRadioButton) = RadioButtonPause) or
+       ((PreviousControl as TRadioButton) = RadioButtonUserdefinedPause) then
+    begin
+      Sel.Left := GridTextData.ColCount - 1;
+      Sel.Top := GridTextData.RowCount - 1;
+      Sel.Right := GridTextData.ColCount - 1;
+      Sel.Bottom := GridTextData.RowCount - 1;
+      GridTextData.Selection := Sel;
+    end;
   end;
 end;
 
