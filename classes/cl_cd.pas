@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.01.2009
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -177,7 +177,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
      TCD = class(TObject)
      private
        FCDImportSession: Boolean;
-       FCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       FCDSize: Int64;
        FCDSizeChanged: Boolean;
        FError: Byte;
        FFileCount: Integer;
@@ -189,25 +189,25 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FMaxLevel: Integer;
        FMaxLevelChanged: Boolean;
        FPrevSessDelList: TStringList;
-       FPrevSessSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       FPrevSessSize: Int64;
        FHasImportedSessions: Boolean;
        FRoot: TNode;
        function CountFiles(Root: TNode): Integer;
        function CountFilesPrevSess(Root: TNode): Integer;
        function CountFolders(Root: TNode): Integer;
        function ExtractFileNameFromEntry(const Entry: string): string;
-       function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+       function ExtractFileSizeFromEntry(const Entry: string): Int64;
        function FileIsUnique(const Name: string; const Node: TNode): Boolean;
        function FolderIsUnique(const Name: string; const Node: TNode): Boolean;
        function GetPathFromFolder(const Root: TNode): string;
        function GetBigFilesPresent: Boolean;
        function GetCDLabel: string;
-       function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       function GetCDSize: Int64;
        function GetFilesToDelete: Boolean;       
        function GetFileCount: Integer;
        function GetFileCountPrevSess: Integer;
        function GetFolderCount: Integer;
-       function GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       function GetFolderSize(Root: TNode): Int64;
        function GetIndexOfFile(Name, Path: string): Integer;
        function GetLastError: Byte;
        function GetLastFolderAdded: string;
@@ -243,7 +243,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure MoveFileByName(const Name, SourcePath, DestPath: string);
        procedure MoveFolder(const SourcePath, DestPath: string);
        procedure MultisessionCDImportFile(const Path, Name, Size, Drive: string);
-       procedure MultisessionCDImportSetSizeUsed(const Size:{$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
+       procedure MultisessionCDImportSetSizeUsed(const Size: Int64);
        procedure NewFolder(const Path, Name: string);
        procedure RenameFileByIndex(const Index: Integer; const Path, Name: string; MaxLength: Byte);
        procedure RenameFileByName(const Path, OldName, Name: string; const MaxLength: Byte);
@@ -254,7 +254,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        // property Root: TNode read FRoot;
        property BigFilesPresent: Boolean read GetBigFilesPresent;
        property CDImportSession: Boolean read FCDImportSession write SetCDImportSession;
-       property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
+       property CDSize: Int64 read GetCDSize;
        property FileCount: Integer read GetFileCount;
        property FileCountPrevSess: Integer read GetFileCountPrevSess;
        property FolderCount: Integer read GetFolderCount;
@@ -263,7 +263,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        property LastFolderAdded: string read GetLastFolderAdded;
        property MaxLevel: Integer read GetMaxLevel;
        property FilesToDelete: Boolean read GetFilesToDelete;
-       property PrevSessSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read FPrevSessSize;
+       property PrevSessSize: Int64 read FPrevSessSize;
      end;
 
      TXCD = class(TCD)
@@ -365,7 +365,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
 
      TVideoCD = class(TObject)
      private
-       FCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       FCDSize: Int64;
        FCDSizeChanged: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
@@ -373,11 +373,11 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FTrackCount: Integer;
        FTrackCountChanged: Boolean;
        FTrackList: TStringList;
-       function ExtractFileSizeFromEntry(const Entry: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};       
+       function ExtractFileSizeFromEntry(const Entry: string): Int64;       
        function ExtractTimeFromEntry(const Entry: string): Extended;
        function GetLastError: Byte;
        function GetCDTime: Extended;
-       function GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       function GetCDSize: Int64;
        function GetTrackCount: Integer;
      public
        constructor Create;
@@ -389,7 +389,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        procedure DeleteTrack(const Index: Integer);
        procedure MoveTrack(const Index: Integer; const Direction: TDirection);
        property CDTime: Extended read GetCDTime;
-       property CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF} read GetCDSize;
+       property CDSize: Int64 read GetCDSize;
        property LastError: Byte read GetLastError;
        property TrackCount: Integer read GetTrackCount;
      end;
@@ -573,16 +573,11 @@ end;
   '>' ist Flag für importierte Dateien aus letzter Session.                    }
 
 procedure TCD.NodeAddFile(const Name: string; const Node: TNode);
-var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Integer {$ENDIF};
+var Size: Int64;
     Temp: string;
 begin
   Size := GetFileSize(Name);
-  Temp := ExtractFileName(Name) + ':' + Name + '*' +
-                         {$IFDEF LargeFiles}
-                         FloatToStr(Size)
-                         {$ELSE}
-                         IntToStr(Size)
-                         {$ENDIF};
+  Temp := ExtractFileName(Name) + ':' + Name + '*' + FloatToStr(Size);
   if FCDImportSession then
   begin
     Temp := Temp + '>';
@@ -591,11 +586,7 @@ begin
   TPList(Node.Data)^.Add(Temp);
 (*
   TPList(Node.Data)^.Add(ExtractFileName(Name) + ':' + Name + '*' +
-                         {$IFDEF LargeFiles}
-                         FloatToStr(Size{GetFileSize(Name)})
-                         {$ELSE}
-                         IntToStr(Size{GetFileSize(Name)})
-                         {$ENDIF})                                            *)  
+                         FloatToStr(Size{GetFileSize(Name)}))               *)
 end;
 
 { NodeAddFolder ----------------------------------------------------------------
@@ -735,8 +726,7 @@ end;
   von Dateien, die aus vorigen Session stammen werden ignoriert, es werden nur
   tatsächlich neu hinzugefügt Dateien mitgezählt.                              }
 
-function TCD.ExtractFileSizeFromEntry(const Entry: string):
-                             {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+function TCD.ExtractFileSizeFromEntry(const Entry: string): Int64;
 var Temp: string;
 begin
   Temp := Entry;
@@ -747,14 +737,10 @@ begin
     Result := 0;
   end else
   begin
-    {$IFDEF LargeFiles}
     {$IFNDEF Delphi4Up}
     Result := StrToFloatDef(Temp, 0);
     {$ELSE}
     Result := StrToInt64Def(Temp, 0);
-    {$ENDIF}
-    {$ELSE}
-    Result := StrToIntDef(Temp, 0);
     {$ENDIF}
   end;
 end;
@@ -913,7 +899,7 @@ end;
 
   GetCDSize liefert die Größe aller Datein in Bytes.                           }
 
-function TCD.GetCDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+function TCD.GetCDSize: Int64;
 begin
   if FCDSizeChanged then
   begin
@@ -933,11 +919,10 @@ end;
 
   GetFolderSize summiert die Größe aller Dateien ausgehen vom Ordner Root auf. }
 
-function TCD.GetFolderSize(Root: TNode): {$IFDEF LargeProject} Int64
-                                                       {$ELSE} Longint {$ENDIF};
+function TCD.GetFolderSize(Root: TNode): Int64;
 var Node: TNode;
     i   : Integer;
-    s   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+    s   : Int64;
 begin
   {$IFDEF DebugGetFolderSize}
   FormDebug.Memo1.Lines.Add('GetFolderSize: ' + Root.Text);
@@ -951,11 +936,7 @@ begin
     end;
     Result := s;
     {$IFDEF DebugGetFolderSize}
-    {$IFDEF LargeProject}
     FormDebug.Memo3.Lines.Add('Size of ' + Root.Text + ' is ' + FloatToStr(s));
-    {$ELSE}
-    FormDebug.Memo3.Lines.Add('Size of ' + Root.Text + ' is ' + IntToStr(s));
-    {$ENDIF}
     {$ENDIF}
   end else
   begin
@@ -1059,7 +1040,6 @@ end;
   sind.                                                                        }
 
 function TCD.GetBigFilesPresent: Boolean;
-{$IFDEF LargeProject}
 var MaxSize: Int64;
 
   function GetBigFilesPresentRek(Root: TNode): Boolean;
@@ -1093,11 +1073,6 @@ begin
   MaxSize := MaxSize * 2;
   Result := GetBigFilesPresentRek(FRoot);
 end;
-{$ELSE}
-begin
-  Result := False;
-end;
-{$ENDIF}
 
 { GetCDLabel -------------------------------------------------------------------
 
@@ -1714,8 +1689,7 @@ end;
 
   setzt den bereits belegten Speicher.                                         }
 
-procedure TCD.MultisessionCDImportSetSizeUsed(const Size:
-                          {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
+procedure TCD.MultisessionCDImportSetSizeUsed(const Size: Int64);
 begin
   FPrevSessSize := Size;
 end;
@@ -1991,11 +1965,7 @@ end;
 procedure TXCD.NodeAddMovie(const Name: string; const Node: TNode);
 begin
   TPList(Node.Data)^.Add(ExtractFileName(Name) + ':' + Name + '*' +
-                         {$IFDEF LargeFiles}
-                         FloatToStr(GetFileSize(Name))
-                         {$ELSE}
-                         IntToStr(GetFileSize(Name))
-                         {$ENDIF} + '>');
+                         FloatToStr(GetFileSize(Name)) + '>');
 end;
 
 { CountForm2Files --------------------------------------------------------------
@@ -2063,11 +2033,7 @@ begin
         Temp := TPList(Root.Data)^[i];
         Delete(Temp, 1, Pos('*', Temp));
         Delete(Temp, Pos('>', Temp), 1);
-        {$IFDEF LargeFiles}
         if StrToFloatDef(Temp, 0) < 348601 then
-        {$ELSE}
-        if StrToIntDef(Temp, 0) < 348601 then
-        {$ENDIF}
         begin
           c := c + 1;
         end;
@@ -2664,7 +2630,7 @@ end;
   Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TAudioCD.AddTrack(const Name: string);
-var Size              : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+var Size              : Int64;
     TrackLength       : Extended;
     Temp, CDText      : string;
     CDTextArgs        : TAutoCDText;
@@ -2811,10 +2777,7 @@ begin
     end;
     if Ok then
     begin
-      Temp := Name + '|' +
-              {$IFDEF LargeFiles}FloatToStr(Size)
-              {$ELSE}            IntToStr(Size) {$ENDIF} +
-              '*' +  FloatToStr(TrackLength);
+      Temp := Name + '|' + FloatToStr(Size) + '*' +  FloatToStr(TrackLength);
       FTrackList.Add(Temp);
       FTextInfo.Add(CDText);                  // Eintrag für CD-Text
       FPauseInfo.Add('');                 // leerer Eintrag für Pausen-Info
@@ -3074,19 +3037,14 @@ end;
 
   GetFileSize extrahiert aus dem Filelisten-Eintrag die Dateigröße.            }
 
-function TVideoCD.ExtractFileSizeFromEntry(const Entry: string):
-                             {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+function TVideoCD.ExtractFileSizeFromEntry(const Entry: string): Int64;
 var Temp: string;
 begin
   Temp := StringLeft(StringRight(Entry, '|'), '*');
-  {$IFDEF LargeFiles}
   {$IFNDEF Delphi4Up}
   Result := StrToFloatDef(Temp, 0);
   {$ELSE}
   Result := StrToInt64Def(Temp, 0);
-  {$ENDIF}
-  {$ELSE}
-  Result := StrToIntDef(Temp, 0);
   {$ENDIF}
 end;
 
@@ -3121,8 +3079,7 @@ end;
 
   GetCDSize liefert die Größe aller Datein in Bytes.                           }
 
-function TVideoCD.GetCDSize: {$IFDEF LargeProject} Int64
-                             {$ELSE} Longint {$ENDIF};
+function TVideoCD.GetCDSize: Int64;
 var i: Integer;
 begin
   if FCDSizeChanged then
@@ -3200,7 +3157,7 @@ end;
   Pfadlisten-Eintrag: <Quellpfad>|<Größe in Bytes>*<Länge in Sekunden>         }
 
 procedure TVideoCD.AddTrack(const Name: string);
-var Size       : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+var Size       : Int64;
     TrackLength: Extended;
     Temp       : string;
     MPEGFile   : TMPEGVideoFile;
@@ -3215,10 +3172,7 @@ begin
         MPEGFile.GetInfo;
         Size := GetFileSize(Name);
         TrackLength := MPEGFile.Length; //0;
-        Temp := Name + '|' +
-                {$IFDEF LargeFiles}FloatToStr(Size)
-                {$ELSE}            IntToStr(Size) {$ENDIF} +
-                '*' +  FloatToStr(TrackLength);
+        Temp := Name + '|' + FloatToStr(Size) + '*' +  FloatToStr(TrackLength);
         FTrackList.Add(Temp);
         FTrackCountChanged := True;
         FCDTimeChanged := True;

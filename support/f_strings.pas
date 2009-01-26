@@ -1,8 +1,8 @@
 { f_strings.pas: String-Funktionen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  04.07.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -58,7 +58,7 @@ function QuotePath(const S: string): string;
 function ReplaceChar(s: string; const SearchChar, ReplaceChar: Char): string;
 function ReplaceCharFirst(s: string; const SearchChar, ReplaceChar: Char): string;
 function ReplaceString(s: string; const SearchString, ReplaceString: string): string;
-function SizeToString(const Size: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF}): string;
+function SizeToString(const Size: Int64): string;
 function StringLeft(const Source, Delimiter: string): string;
 function StringRight(const Source, Delimiter: string): string;
 function StrToFloatDef(const S: string; Default: Extended): Extended;
@@ -76,8 +76,7 @@ implementation
   MiByte oder GiByte ungerechneten und in einen String umgewandelten Wert inkl.
   Einheit.                                                                     }
 
-function SizeToString(const Size: {$IFDEF LargeProject} Int64
-                                  {$ELSE} Longint {$ENDIF}): string;
+function SizeToString(const Size: Int64): string;
 var SizeKB: Double;
     SizeMB: Double;
     SizeGB: Double;
@@ -87,11 +86,7 @@ begin
   SizeGB := SizeMB / 1024;
   if SizeKB < 1 then
   begin
-    {$IFDEF LargeProject}
     Result := FloatToStr(Size) + ' ' + UnitByte; //' Byte';
-    {$ELSE}
-    Result := IntToStr(Size) + ' ' + UnitByte; //' Byte';
-    {$ENDIF}
   end else
   if SizeMB < 1 then
   begin

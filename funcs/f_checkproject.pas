@@ -2,10 +2,10 @@
 
   f_checkproject.pas: Einstellungen und Daten prüfen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.05.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -48,7 +48,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   var FileCount        : Integer;
       FileCountPrevSess: Integer;
       DummyI           : Integer;
-      DummyL           : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+      DummyL           : Int64;
       DummyE           : Extended;
   begin
     with FData, FSettings.DataCD, FLang do
@@ -91,7 +91,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectAudioCD: Boolean;
   var TrackCount: Integer;
       DummyI   : Integer;
-      DummyL   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+      DummyL   : Int64;
       DummyE   : Extended;
   begin
     with FData, FSettings.AudioCD, FLang do
@@ -168,7 +168,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectDAE: Boolean;
   var TrackCount: Integer;
       DummyI   : Integer;
-      DummyL   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+      DummyL   : Int64;
       DummyE   : Extended;
   begin
     with FData, FSettings.DAE, FLang do
@@ -223,7 +223,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
   function CheckProjectVideoCD: Boolean;
   var TrackCount: Integer;
       DummyI   : Integer;
-      DummyL   : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+      DummyL   : Int64;
       DummyE   : Extended;
   begin
     with FData, FSettings.VideoCD, FLang do

@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.12.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -567,9 +567,7 @@ var Output       : string;
 begin
   {cdrecord-Version}
   Cmd := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Cmd := QuotePath(Cmd);
-  {$ENDIF}
   Cmd := Cmd + ' -version';
   Output := GetDosOutput(PChar(Cmd), True, True);
   VersionString := GetVersionString(Output);
@@ -598,9 +596,7 @@ begin
 
   {mkisofs-Version}
   Cmd := StartUpDir + cMkisofsBin;
-  {$IFDEF QuoteCommandlinePath}
   Cmd := QuotePath(Cmd);
-  {$ENDIF}
   Cmd := Cmd + ' -version';
   Output := GetDosOutput(PChar(Cmd), True, True);
   if Output <> '' then

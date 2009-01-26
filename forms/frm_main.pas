@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.12.2009
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -28,9 +28,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
-     {$IFDEF UseOLEDragDrop}
      DropTarget, DropSource,
-     {$ENDIF}
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
      cl_action, cl_cmdlineparser, cl_devices, cl_logwindow, c_spacemeter,
@@ -407,10 +405,8 @@ type
     {$IFDEF ShowCmdError}
     FExitCode: Integer;
     {$ENDIF}
-    {$IFDEF UseOLEDragDrop}
     DropFileTargetCDETreeView: TDropFileTarget;
     DropFileTargetXCDETreeView: TDropFileTarget;
-    {$ENDIF}
     SpaceMeter: TSpaceMeter;
     StayOnTopState: Boolean;
     {$IFDEF Delphi7Up}
@@ -515,13 +511,11 @@ type
     procedure SpaceMeterTypeChange;
     procedure UpdatePanels(const s1, s2: string);
     {Ole-Drop-Target-Funktionen}
-    {$IFDEF UseOLEDragDrop}
     procedure InitDropTargets;
     procedure FreeDropTargets;
     procedure DropFileTargetTreeViewDragOver(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewLeave(Sender: TObject);
-    {$ENDIF}
     {ActionList/Actions}
     {$IFDEF Delphi7Up}
     procedure InitActions;
@@ -648,16 +642,11 @@ begin
     SendMessage(Handle, WM_VTerminated, 0, 0);
   end else
   begin
-    {$IFDEF LargeFiles}
     {WParam: high order longword, LParam: low order longword von FDupSize}
     // Memo1.Lines.Add(SizeToString(Msg.WParam));
     // Memo1.Lines.Add(SizeToString(Msg.LParam));
     // Memo1.Lines.Add(SizeToString(IntToComp(Msg.LParam, Msg.WParam)));
     FAction.DuplicateFileSize := IntToComp(Msg.LParam, Msg.WParam);
-    {$ELSE}
-    // Memo1.Lines.Add(SizeToString(Msg.LParam));
-    FAction.DuplicateFileSize := Msg.LParam;
-    {$ENDIF}
     StatusBar.Panels[1].Text := '';
     UpdateGauges;
     FAction.Action := FSettings.General.Choice;
@@ -903,7 +892,6 @@ begin
 end;
 
 
-{$IFDEF UseOLEDragDrop}
 { Drop-Target-Funktionen ----------------------------------------------------- }
 
 { InitDropTargets --------------------------------------------------------------
@@ -1028,7 +1016,6 @@ begin
   CDETreeView.DropTarget := nil;
   XCDETreeView.DropTarget := nil;
 end;
-{$ENDIF}
 
 
 { Lesen/Speichern der Einstellungen ------------------------------------------ }
@@ -1810,12 +1797,10 @@ begin
   if View.SelCount > 0 then
   begin
     Meldung := FLang.GMS('m115');
-    {$IFDEF Confirm}
     if not FSettings.General.NoConfirm then
     begin
       i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -1907,12 +1892,10 @@ begin
   if Path <> '' then
   begin
     Meldung := Format(FLang.GMS('m108'), [Tree.Selected.Text]);
-    {$IFDEF Confirm}
     if not FSettings.General.NoConfirm then
     begin
       i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -1934,12 +1917,10 @@ end;
 procedure TForm1.UserDeleteAll(Tree: TTreeView);
 var i: Integer;
 begin
-  {$IFDEF Confirm}
   if not FSettings.General.NoConfirm then
   begin
     i := ShowMsgDlg(FLang.GMS('m114'), FLang.GMS('m110'), MB_cdrtfe1);
   end else
-  {$ENDIF}
   begin
     i := 1;
   end;
@@ -2428,7 +2409,7 @@ end;
 procedure TForm1.AddItemToListView(const Item: string; ListView: TListView);
 var NewItem    : TListItem;
     IconIndex  : Integer;
-    Size       : {$IFDEF LargeFiles} Int64 {$ELSE} Integer {$ENDIF};
+    Size       : Int64;
     Name       : string;
     Caption    : string;
     Filetype   : string;
@@ -2797,7 +2778,7 @@ end;
 
 procedure TForm1.UpdateGauges;
 var FileCount, FolderCount, TrackCount: Integer;
-    CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+    CDSize: Int64;
     CDTime: Extended;
     Temp: string;
 begin
@@ -4001,10 +3982,8 @@ begin
     InitMainForm;
     {Tree-Views initialisieren}
     InitTreeViews;
-    {$IFDEF UseOLEDragDrop}
     {OLE-Drop-Target initialisieren}
     InitDropTargets;
-    {$ENDIF}
     {SpaceMeter initialisieren}
     InitSpaceMeter;
     {FileTypeInfo: Cache für Dateiinfos}
@@ -4102,9 +4081,7 @@ end;
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   {$IFDEF WriteLogfile} AddLogCode(1052); {$ENDIF}
-  {$IFDEF UseOLEDragDrop}
   if not FInstanceTermination then FreeDropTargets;
-  {$ENDIF}
   FLang.Free;
   FImageLists.Free;
   FSettings.Free;
@@ -6635,15 +6612,11 @@ begin
       if Node = NodeToExpand then
       begin
         NodeToExpand.Expand(False);
-        {$IFDEF UseOLEDragDrop}
         DropFileTargetCDETreeView.ShowImage := False;
         DropFileTargetXCDETreeView.ShowImage := False;
-        {$ENDIF}
         NodeToExpand.TreeView.Repaint;
-        {$IFDEF UseOLEDragDrop}
         DropFileTargetCDETreeView.ShowImage := True;
         DropFileTargetXCDETreeView.ShowImage := True;
-        {$ENDIF}
       end;
     end;
     NodeToExpand := nil;

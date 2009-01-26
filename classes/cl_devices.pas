@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005-2008 Oliver Valencia
+  Copyright (c) 2005-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.03.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -415,9 +415,7 @@ begin
   SearchString := 'CD-ROM';
   Output := TStringList.Create;
   CommandLine := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   CommandLine := QuotePath(CommandLine);
-  {$ENDIF}
   if FUseRSCSI then CommandLine := CommandLine + ' dev=' + FRSCSIHost;
   if SCSIIF('') <> '' then CommandLine := CommandLine + ' dev=' + SCSIIF('');
   CommandLine := CommandLine + ' -scanbus';
@@ -449,9 +447,7 @@ begin
     Dev := Copy(DeviceList.Strings[i], 0, 5);
     if FUseRSCSI  then Dev := FRSCSIHost + Dev;
     CommandLine := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     CommandLine := QuotePath(CommandLine);
-    {$ENDIF}
     CommandLine := CommandLine + ' dev=' + SCSIIF(Dev) + ' -prcap';
     Output.Clear;
     Output.Text := GetDOSOutput(PChar(CommandLine), True, True);
@@ -628,9 +624,7 @@ var DriveName: string;
   var CommandLine: string;
   begin
     CommandLine := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     CommandLine := QuotePath(CommandLine);
-    {$ENDIF}
     CommandLine := CommandLine + ' dev=' + SCSIIF(Dev) + ' -prcap';
     Output.Clear;
     Output.Text := GetDOSOutput(PChar(CommandLine), True, True);

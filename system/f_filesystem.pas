@@ -1,9 +1,9 @@
 { f_filesystem.pas: Dateisystemfunktionen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -96,7 +96,7 @@ function FileSystemIsFAT(const Path: string): Boolean;
 function FindInSearchPath(const Name: string): string;
 function GetDirSize(Verzeichnis: string): Longint;
 function GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte;
-function GetFileSize(const FileName: string): {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+function GetFileSize(const FileName: string): Int64;
 function GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word): Boolean;
 function GetFileVersionString(const FileName: string): string;
 function GetFreeSpaceDisk(Drive: string): Int64;
@@ -288,23 +288,16 @@ end;
 
   GeFileSize liefert die Größe einer Datei in Byte.                            }
 
-function GetFileSize(const Filename: string): {$IFDEF LargeFiles} Int64
-                                              {$ELSE} Longint {$ENDIF};
-var SR: TSearchRec;
-    {$IFDEF LargeFiles}
+function GetFileSize(const Filename: string): Int64;
+var SR      : TSearchRec;
     SizeHigh: Integer;
     SizeLow : Integer;
-    {$ENDIF}
 begin
   if FindFirst(Filename, faAnyFile, SR) = 0 then
   begin
-    {$IFDEF LargeFiles}
     SizeHigh := SR.FindData.nFileSizeHigh;
     SizeLow  := SR.FindData.nFileSizeLow;
     Result := IntToComp(SizeLow, SizeHigh);
-    {$ELSE}
-    Result := SR.Size;
-    {$ENDIF}
     FindClose(SR);
   end else
   begin

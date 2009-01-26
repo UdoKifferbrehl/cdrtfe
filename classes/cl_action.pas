@@ -2,10 +2,10 @@
  
   cl_action.pas: die im GUI gewählte Aktion ausführen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.12.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -66,7 +66,7 @@ type TCDAction = class(TObject)
        FReload: Boolean;
        FLang: TLang;
        // FTempBurnList: TStringList;
-       FDupSize: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+       FDupSize: Int64;
        FSplitOutput: Boolean;
        FEjectDevice: string;
        {Variablen zur Ausgabe}
@@ -122,7 +122,7 @@ type TCDAction = class(TObject)
        property ProgressBar: TProgressBar read FProgressBar write FProgressBar;
        property Reload: Boolean read FReload write FReload;
        property Settings: TSettings write SetFSettings;
-       property DuplicateFileSize: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF} read FDupSize write FDupSize;
+       property DuplicateFileSize: Int64 read FDupSize write FDupSize;
        {Events}
        property OnMessageShow: TMessageShowEvent read FOnMessageShow write FOnMessageShow;
        property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
@@ -326,9 +326,7 @@ begin
   Result := '';
   Output := TStringList.Create;
   CmdGetsize := StartUpDir + cMkisofsBin;
-  {$IFDEF QuoteCommandlinePath}
   CmdGetSize := QuotePath(CmdGetSize);
-  {$ENDIF}
   CmdGetsize := CmdGetSize + ' -print-size -quiet' + MkisofsOptions;
   Output.Text := GetDosOutput(PChar(CmdGetsize), True, True);
   Sectors := Trim(Output.Text);
@@ -696,14 +694,10 @@ begin
       end;
       {Pfad zu den Programmen erstellen}
       Temp := StartUpDir + cMkisofsBin;
-      {$IFDEF QuoteCommandlinePath}
       Temp := QuotePath(Temp);
-      {$ENDIF}
       CmdM := Temp + CmdM;
       Temp := StartUpDir + cCdrecordBin;
-      {$IFDEF QuoteCommandlinePath}
       Temp := QuotePath(Temp);
-      {$ENDIF}
       CmdC := Temp + CmdC;
     end;
   end;
@@ -716,7 +710,6 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
@@ -731,7 +724,6 @@ begin
                 + Temp;
       i := ShowMsgDlg(Temp, FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -748,9 +740,7 @@ begin
         MessageShow(CmdOnTheFly);
         Temp := QuotePath(MakePathConform(ProgDataDir + cShCmdFile));
         CmdOnTheFly := StartUpDir + cShBin;
-        {$IFDEF QuoteCommandlinePath}
         CmdOnTheFly := QuotePath(CmdOnTheFly);
-        {$ENDIF}
         CmdOnTheFly := CmdOnTheFly + ' ' + Temp;
         DisplayDOSOutput(CmdFormat + CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);
@@ -789,7 +779,7 @@ var i         : Integer;
     Ok        : Boolean;
     CMArgs    : TCheckMediumArgs;
     DummyI    : Integer;
-    DummyL    : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+    DummyL    : Int64;
     Temp      : string;
     Cmd, CmdMP: string;
     BurnList  : TStringList;
@@ -878,9 +868,7 @@ begin
   with FSettings.AudioCD, FSettings.Cdrecord do
   begin
     Cmd := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
-    {$ENDIF}
     Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
     if Erase       then Cmd := Cmd + ' blank=fast';
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
@@ -940,14 +928,12 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -1014,9 +1000,7 @@ begin
     XCDRrencRRTFile := ProgDataDir + cRrencRRTFile;
     XCDRrencRRDFile := ProgDataDir + cRrencRRDFile;
     CmdMode2CDMaker := StartUpDir + cMode2CDMakerBin;
-    {$IFDEF QuoteCommandlinePath}
     CmdMode2CDMaker := QuotePath(CmdMode2CDMaker);
-    {$ENDIF}
     CmdMode2CDMaker := CmdMode2CDMaker + ' -paramfile ';
     if (UseErrorProtection and FSettings.FileFlags.RrencOk) then
       { El-Gi: mode2cdmaker's input from rrenc }
@@ -1087,18 +1071,14 @@ begin
     {Dateinamen bearbeiten}
     Temp := IsoPath + cExtCue;
     Temp := MakePathConform(Temp);
-    {$IFDEF QuoteCommandlinePath}
     Temp := QuotePath(Temp);
-    {$ENDIF}
     CmdC := '';
     if (FSettings.FileFlags.CdrdaoOk and WriteCueImages) or
        (FSettings.FileFlags.CdrdaoOk and not CanWriteCueImage)  then
     begin                                        
       {Kommandozeile für cdrdao}
       CmdC := StartUpDir + cCdrdaoBin;
-      {$IFDEF QuoteCommandlinePath}
       CmdC := QuotePath(CmdC);
-      {$ENDIF}
       CmdC := CmdC + ' write --device ' + Device;
       if ForceGenericMmc    then CmdC := CmdC +
                                               ' --driver generic-mmc';
@@ -1114,9 +1094,7 @@ begin
     begin
       {Kommandozeile für cdrecord}
       CmdC := StartUpDir + cCdrecordBin;
-      {$IFDEF QuoteCommandlinePath}
       CmdC := QuotePath(CmdC);
-      {$ENDIF}
       CmdC := CmdC + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -1138,14 +1116,12 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -1192,9 +1168,7 @@ begin
   with FSettings.CDRW do
   begin
     Cmd := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
-    {$ENDIF}
     Cmd := Cmd + ' gracetime=9 dev=' + SCSIIF(Device);
     if All          then Cmd := Cmd + ' blank=all'     else
     if Fast         then Cmd := Cmd + ' blank=fast'    else
@@ -1216,14 +1190,12 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn05'), FLang.GMS('mburn06'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -1252,9 +1224,7 @@ begin
   if not FSettings.CDInfo.CapInfo then
   begin
     Cmd := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
-    {$ENDIF}
     with FSettings.CDInfo do
     begin
       if Scanbus then
@@ -1430,9 +1400,7 @@ begin
   {feststellen, ob CD eingelegt ist, sonst würde cdda2wav auf Benutzereingabe
    warten}
   CommandLine := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   CommandLine := QuotePath(CommandLine);
-  {$ENDIF}
   CommandLine := CommandLine + ' dev=' + SCSIIF(FSettings.DAE.Device) + ' -toc';
   Output.Text := GetDOSOutput(PChar(CommandLine), True, False);
   if Pos('No disk / Wrong disk!', Output.text) = 0 then
@@ -1441,9 +1409,7 @@ begin
   end;
   {Toc auslesen}
   CommandLine := StartUpDir + cCdda2wavBin;
-  {$IFDEF QuoteCommandlinePath}
   CommandLine := QuotePath(CommandLine);
-  {$ENDIF}
   CommandLine := CommandLine + ' dev=' + SCSIIF(FSettings.DAE.Device) +
                  ' verbose-level=toc -gui -info-only -no-infofile';
   if FSettings.DAE.UseCDDB then
@@ -1586,9 +1552,7 @@ var Compressed: Boolean;
     begin
       OutName := QuotePath(OutName);
     end;
-    {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
-    {$ENDIF}
     {Jetzt die Optionen anhängen.}
     if FSettings.DAE.MP3 then
     begin
@@ -1698,9 +1662,7 @@ var Compressed: Boolean;
     with FSettings.DAE do
     begin
       CommandLine := StartUpDir + cCdda2wavBin;
-      {$IFDEF QuoteCommandlinePath}
       CommandLine := QuotePath(CommandLine);
-      {$ENDIF}
       CommandLine := CommandLine + Cdda2wavStdCmdLine;
       if Path[Length(Path)] <> '\' then Path := Path + '\';
       OutPath := MakePathConform(Path + Prefix);
@@ -1751,9 +1713,7 @@ var Compressed: Boolean;
     TrackList := TStringList.Create;
     TrackList.CommaText := FSettings.DAE.Tracks;
     CmdDAE := StartUpDir + cCdda2wavBin;
-    {$IFDEF QuoteCommandlinePath}
     CmdDAE := QuotePath(CmdDAE);
-    {$ENDIF}
     if Compressed then
     begin
       MessageShow(FLang.GMS('mburn03'));
@@ -1802,9 +1762,7 @@ var Compressed: Boolean;
             CloseFile(FHShCmd);
             {Shell-Aufruf}
             ShCmd := StartUpDir + cShBin;
-            {$IFDEF QuoteCommandlinePath}
             ShCmd := QuotePath(ShCmd);
-            {$ENDIF}
             Cmd := Cmd + ShCmd + ' ' +
                    QuotePath(MakePathConform(ShCmdFile)) + CR;
             MessageShow(PipedCmd);
@@ -1835,9 +1793,7 @@ var Compressed: Boolean;
     with FSettings.DAE do
     begin
       CommandLine := StartUpDir + cCdda2wavBin;
-      {$IFDEF QuoteCommandlinePath}
       CommandLine := QuotePath(CommandLine);
-      {$ENDIF}
       CommandLine := CommandLine + Cdda2wavStdCmdLine;
       if Path[Length(Path)] <> '\' then Path := Path + '\';
       OutPath := MakePathConform(Path + Prefix);
@@ -1864,9 +1820,7 @@ var Compressed: Boolean;
       if Path[Length(Path)] <> '\' then Path := Path + '\';
       OutPath := MakePathConform(Path + Prefix + '*.wav');
       Cmd := StartUpDir + cCdrecordBin;
-      {$IFDEF QuoteCommandlinePath}
       Cmd := QuotePath(Cmd);
-      {$ENDIF}
       Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -1887,14 +1841,12 @@ var Compressed: Boolean;
       i := 0;
     end else
     begin
-      {_$IFDEF Confirm - Diese Abfrage ist zwingend nötig!}
       if not (FSettings.CmdLineFlags.ExecuteProject or
               FSettings.General.NoConfirm) then
       begin
         {Brennvorgang starten?}
         i := ShowMsgDlg(FLang.GMS('mburn16'), FLang.GMS('mburn02'), MB_cdrtfe1);
       end else
-      {_$ENDIF}
       begin
         i := 1;
       end;
@@ -1950,9 +1902,7 @@ begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   {Kommandozeile zusammenstellen}
   Cmd := StartUpDir + cReadcdBin;
-  {$IFDEF QuoteCommandlinePath}
   Cmd := QuotePath(Cmd);
-  {$ENDIF}
   with FSettings.Readcd do
   begin
     FSettings.General.CDCopy := DoCopy;
@@ -1987,9 +1937,7 @@ begin
     with FSettings.Cdrecord, FSettings.Image do
     begin
       Cmd := StartUpDir + cCdrecordBin;
-      {$IFDEF QuoteCommandlinePath}
       Cmd := QuotePath(Cmd);
-      {$ENDIF}
       Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -2045,9 +1993,7 @@ begin
          (FSettings.FileFlags.CdrdaoOk and not CanWriteCueImage) then
       begin
         Cmd := StartUpDir + cCdrdaoBin;
-        {$IFDEF QuoteCommandlinePath}
         Cmd := QuotePath(Cmd);
-        {$ENDIF}
         Cmd := Cmd + ' write --device ' + Device;
         if ForceGenericMmc          then Cmd := Cmd + ' --driver generic-mmc' else
         if ForceGenericMmcRaw       then Cmd := Cmd + ' --driver generic-mmc-raw';
@@ -2065,9 +2011,7 @@ begin
       begin
         {Kommandozeile für cdrecord}
         Cmd := StartUpDir + cCdrecordBin;
-        {$IFDEF QuoteCommandlinePath}
         Cmd := QuotePath(Cmd);
-        {$ENDIF}
         Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
         if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
         if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -2103,14 +2047,12 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -2141,9 +2083,7 @@ begin
   with FSettings.Cdrecord, FSettings.ReadCD do
   begin
     Cmd := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     Cmd := QuotePath(Cmd);
-    {$ENDIF}
     Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -2165,14 +2105,12 @@ begin
     i := 0;
   end else
   begin
-    {_$IFDEF Confirm - Diese Abfrage ist zwingend nötig!}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn16'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {_$ENDIF}
     begin
       i := 1;
     end;
@@ -2199,9 +2137,7 @@ begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   {Kommandozeile zusammenstellen}
   Cmd := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Cmd := QuotePath(Cmd);
-  {$ENDIF}
   with FSettings.Cdrecord do
   begin
     Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(FixDevice);
@@ -2213,13 +2149,11 @@ begin
     Cmd := Cmd + ' -fix';
   end;
   {Kommando ausführen}
-  {$IFDEF Confirm}
   if not FSettings.General.NoConfirm then
   begin
     {Fixieren starten?}
     i := ShowMsgDlg(FLang.GMS('mburn11'), FLang.GMS('mburn02'), MB_cdrtfe1);
   end else
-  {$ENDIF}
   begin
     i := 1;
   end;
@@ -2320,9 +2254,7 @@ begin
   begin
     {Kommandozeile für VCDImager zusammenstellen.}
     CmdVCDIm := StartUpDir + cVCDImagerBin;
-    {$IFDEF QuoteCommandlinePath}
     CmdVCDIm := QuotePath(CmdVCDIm);
-    {$ENDIF}
     CmdVCDIm := CmdVCDIm + ' -p';
     if FSettings.VideoCD.Verbose then
     begin
@@ -2344,15 +2276,11 @@ begin
     {Dateinamen bearbeiten}
     CueFile := IsoPath + cExtCue;
     CueFile := MakePathConform(CueFile);
-    {$IFDEF QuoteCommandlinePath}
     CueFile := QuotePath(CueFile);
-    {$ENDIF}
     CmdVCDIm := CmdVCDIm + ' --cue-file=' + CueFile;
     Temp := IsoPath + cExtBin;
     Temp := MakePathConform(Temp);
-    {$IFDEF QuoteCommandlinePath}
     Temp := QuotePath(Temp);
-    {$ENDIF}
     CmdVCDIm := CmdVCDIm + ' --bin-file=' + Temp;
     if VolID <> '' then
     begin
@@ -2372,9 +2300,7 @@ begin
     begin
       {_alle_ Pfadangaben Cygwin-konform machen!}
       BurnList[i] := MakePathConform(BurnList[i]);
-      {$IFDEF QuoteCommandlinePath}
       Temp := QuotePath(BurnList[i]);
-      {$ENDIF}
       CmdVCDIm := CmdVCDIm + ' ' + Temp;
     end;
     BurnList.Free;
@@ -2385,9 +2311,7 @@ begin
     begin
       {Kommandozeile für cdrdao}
       CmdC := StartUpDir + cCdrdaoBin;
-      {$IFDEF QuoteCommandlinePath}
       CmdC := QuotePath(CmdC);
-      {$ENDIF}
       CmdC := CmdC + ' write --device ' + Device;
       if ForceGenericMmc    then CmdC := CmdC +
                                               ' --driver generic-mmc';
@@ -2403,9 +2327,7 @@ begin
     begin
       {Kommandozeile für cdrecord}
       CmdC := StartUpDir + cCdrecordBin;
-      {$IFDEF QuoteCommandlinePath}
       CmdC := QuotePath(CmdC);
-      {$ENDIF}
       CmdC := CmdC + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
@@ -2427,14 +2349,12 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -2570,14 +2490,10 @@ begin
       CmdM := CmdM + ' ' + QuotePath(MakePathConform(SourcePath));
       {Pfad zu den Programmen erstellen}
       Temp := StartUpDir + cMkisofsBin;
-      {$IFDEF QuoteCommandlinePath}
       Temp := QuotePath(Temp);
-      {$ENDIF}
       CmdM := Temp + CmdM;
       Temp := StartUpDir + cCdrecordBin;
-      {$IFDEF QuoteCommandlinePath}
       Temp := QuotePath(Temp);
-      {$ENDIF}
       CmdC := Temp + CmdC;
     end;
   end;
@@ -2590,14 +2506,12 @@ begin
     i := 0;
   end else
   begin
-    {$IFDEF Confirm}
     if not (FSettings.CmdLineFlags.ExecuteProject or
             FSettings.General.NoConfirm) then
     begin
       {Brennvorgang starten?}
       i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'), MB_cdrtfe1);
     end else
-    {$ENDIF}
     begin
       i := 1;
     end;
@@ -2614,9 +2528,7 @@ begin
         MessageShow(CmdOnTheFly);
         Temp := QuotePath(MakePathConform(ProgDataDir + cShCmdFile));
         CmdOnTheFly := StartUpDir + cShBin;
-        {$IFDEF QuoteCommandlinePath}
         CmdOnTheFly := QuotePath(CmdOnTheFly);
-        {$ENDIF}
         CmdOnTheFly := CmdOnTheFly + ' ' + Temp;
         DisplayDOSOutput(CmdFormat + CmdOnTheFly, FActionThread, FLang,
                          FSettings.Environment.EnvironmentBlock);

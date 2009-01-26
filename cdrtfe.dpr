@@ -2,10 +2,10 @@
 
   cdrtfe.dpr: Hauptprogramm
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.12.2008
+  letzte Änderung  26.01.2009
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -102,10 +102,8 @@ uses
   {$IFDEF MultipleFolderBrowsing}
   dlg_folderbrowse in 'system\dlg_folderbrowse.pas',
   {$ENDIF}
-  {$IFDEF UseOLEDragDrop}
   DropTarget in 'import\oledragdrop\DropTarget.pas',
   DropSource in 'import\oledragdrop\DropSource.pas',
-  {$ENDIF}
   {$IFDEF ExceptionDlg}
   cl_exceptionlog in 'import\exceptionlog\cl_exceptionlog.pas',
   frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',

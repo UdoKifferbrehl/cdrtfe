@@ -2,9 +2,9 @@
 
   cl_diskinfo.pas: Zugriff auf Rohlingsinformationen und Medien-Überprüfung
 
-  Copyright (c) 2006-2008 Oliver Valencia
+  Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  27.09.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,7 +68,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        Choice        : Byte;
        {Daten-CD}
        ForcedContinue: Boolean;
-       CDSize        : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       CDSize        : Int64;
        SectorsNeededS: string;
        SectorsNeededI: Integer;
        TaoEndSecCount: Integer;
@@ -555,11 +555,9 @@ var CmdCdrecord: string;
     VLevel     : string;
 begin
   {ATIP auslesen}
-   CmdOption := '-atip';
-   CmdCdrecord := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
+  CmdOption := '-atip';
+  CmdCdrecord := StartUpDir + cCdrecordBin;
   CmdCdrecord := QuotePath(CmdCdrecord);
-  {$ENDIF}
   case vv of
     True : VLevel := 'vv';
     False: VLevel := 'v';
@@ -584,9 +582,7 @@ var CmdCdrecord: string;
 begin
   {ATIP auslesen}
   CmdCdrecord := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   CmdCdrecord := QuotePath(CmdCdrecord);
-  {$ENDIF}
   CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' -msinfo -silent';
   Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF DebugReadCDInfo}
@@ -709,9 +705,7 @@ begin
   {$ENDIF}
   ATIPSec := FSectors;
   CmdCdrecord := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   CmdCdrecord := QuotePath(CmdCdrecord);
-  {$ENDIF}
   CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' -toc -silent';
   Output := GetDosOutput(PChar(CmdCdrecord), True, False);
   p := Pos('track:lout lba:', Output);
@@ -1013,14 +1007,12 @@ begin
       if FMsInfo = '' then
       begin
         {weitermachen oder nicht?}
-        {$IFDEF Confirm}
         if not (FSettings.CmdLineFlags.ExecuteProject or
                 FSettings.General.NoConfirm) then
         begin
           i := ShowMsgDlg(FLang.GMS('eburn04'), FLang.GMS('eburn05'),
                           MB_OKCancel or MB_ICONWARNING);
         end else
-        {$ENDIF}
         begin
           i := ID_OK;
         end;
@@ -1237,11 +1229,9 @@ var CmdCdrecord: string;
     VLevel     : string;
 begin
   {Medieninfo auslesen}
-   CmdOption := '-minfo';
-   CmdCdrecord := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
+  CmdOption := '-minfo';
+  CmdCdrecord := StartUpDir + cCdrecordBin;
   CmdCdrecord := QuotePath(CmdCdrecord);
-  {$ENDIF}
   case vv of
     True : VLevel := 'vv';
     False: VLevel := 'v';
@@ -1623,14 +1613,12 @@ begin
     {Warnung: DVD+RW überschreiben?}
     if FDiskType in [DT_DVD_PlusRW] then
     begin
-      {$IFDEF Confirm}
       if not (FSettings.CmdLineFlags.ExecuteProject or
               FSettings.General.NoConfirm) then
       begin
         i := ShowMsgDlg(FLang.GMS('eburn17'), FLang.GMS('g001'),
                         MB_OKCancel or MB_ICONWARNING);
       end else
-      {$ENDIF}
       begin
         i := ID_OK;
       end;
@@ -1681,14 +1669,12 @@ begin
       if FMsInfo = '' then
       begin
         {weitermachen oder nicht?}
-        {$IFDEF Confirm}
         if not (FSettings.CmdLineFlags.ExecuteProject or
                 FSettings.General.NoConfirm) then
         begin
           i := ShowMsgDlg(FLang.GMS('eburn04'), FLang.GMS('eburn05'),
                           MB_OKCancel or MB_ICONWARNING);
         end else
-        {$ENDIF}
         begin
           i := ID_OK;
         end;

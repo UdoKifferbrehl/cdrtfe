@@ -2,10 +2,10 @@
 
   cl_verifyhread.pas: Quell- und Zieldateien vergleichen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -69,7 +69,7 @@ type TVerificationThread = class(TThread)
        FXCDExt      : string;
        FXCDKeepExt  : Boolean;
        {Variablen für das Aufspüren von Duplikaten}
-       FDupSize     : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+       FDupSize     : Int64;
        {mehrfach verwendete Variablen}
        FLang        : TLang;       
        FVerifyList  : TStringList;
@@ -210,13 +210,8 @@ begin
     cFindDuplicates: if Terminated then
                        SendMessage(FHandle, WM_FTerminated, -1, -1) else
                      begin
-                       {$IFDEF LargeFiles}
                        SizeLow := LoComp(FDupSize);
                        SizeHigh := HiComp(FDupSize);
-                       {$ELSE}
-                       SizeLow := FDupSize;
-                       SizeHigh := 0;
-                       {$ENDIF}
                        SendMessage(FHandle, WM_FTerminated, SizeHigh, SizeLow);
                      end;
     cCreateInfoFile: if Terminated then
@@ -408,7 +403,7 @@ function TVerificationThread.CompareFiles(const FileName1, FileName2: string):
                                           Boolean;
 var File1, File2: TFileStream;
     p1, p2: Pointer;
-    FSize1, FSize2: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+    FSize1, FSize2: Int64;
     BSize: Integer;
     NBytes: Integer; //Number of bytes to read
 begin
@@ -422,24 +417,14 @@ begin
     try
       File1 := TFileStream.Create(FileName1, fmOpenRead or fmShareDenyNone);
       File2 := TFileStream.Create(FileName2, fmOpenRead or fmShareDenyNone);
-      {$IFDEF LargeFiles}
       FSize1 := GetFileSize(FileName1);
       FSize2 := GetFileSize(FileName2);
-      {$ELSE}
-      FSize1 := File1.Size;
-      FSize2 := File2.Size;
-      {$ENDIF}
       if (FSize1 = FSize2) and (FSize1 > 0) then
       begin
         while (FSize1 <> 0) and Result and not Terminated do
         begin
-          {$IFDEF LargeFiles}
           if FSize1 > BSize then NBytes := BSize else NBytes := LoComp(FSize1);
           FSize1 := FSize1 - NBytes;
-          {$ELSE}
-          if FSize1 > BSize then NBytes := BSize else NBytes := FSize1;
-          Dec(FSize1, NBytes);
-          {$ENDIF}
           File1.ReadBuffer(p1^, NBytes);
           File2.ReadBuffer(p2^, NBytes);
           Result := Result and CompareBufferA(p1, p2, NBytes);
@@ -902,7 +887,7 @@ var i              : Integer;
     SourceFileSize,
     HashFileSize,
     DuplicateSize,
-    TotalSize      : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+    TotalSize      : Int64;
     Quota          : Single;
     HashValue      : Longint;
     HashValueStr   : string;
@@ -996,7 +981,7 @@ procedure TVerificationThread.CreateInfoFile;
 var i, j     : Integer;
     Folder   : string;
     FileName : string;
-    Size     : {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF};
+    Size     : Int64;
     CRC32    : Longint;
     InfoList : TStringList;
     Count    : Integer;

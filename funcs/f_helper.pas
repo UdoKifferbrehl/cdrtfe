@@ -2,9 +2,9 @@
 
   f_helper.pas: Hilfsfunktionen
 
-  Copyright (c) 2005-2008 Oliver Valencia
+  Copyright (c) 2005-2009 Oliver Valencia
 
-  letzte Änderung 18.12.2008
+  letzte Änderung 26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -88,9 +88,7 @@ var Temp       : string;
     ReloadError: Boolean;
 begin
   Temp := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
-  {$ENDIF}
   Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -eject';
   Temp := GetDosOutput(PChar(Temp), True, False);
   ReloadError := (Pos('Cannot load media with this drive!', Temp) > 0) or
@@ -99,9 +97,7 @@ begin
   if not ReloadError then
   begin
     Temp := StartUpDir + cCdrecordBin;
-    {$IFDEF QuoteCommandlinePath}
     Temp := QuotePath(Temp);
-    {$ENDIF}
     Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -load';
     Temp := GetDosOutput(PChar(Temp), True, False);
     ReloadError := (Pos('Cannot load media with this drive!', Temp) > 0) or
@@ -119,9 +115,7 @@ procedure EjectDisk(const Dev: string);
 var Temp: string;
 begin
   Temp := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
-  {$ENDIF}
   Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -eject';
   Temp := GetDosOutput(PChar(Temp), True, False);
 end;
@@ -134,9 +128,7 @@ procedure LoadDisk(const Dev: string);
 var Temp: string;
 begin
   Temp := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
-  {$ENDIF}
   Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -load';
   Temp := GetDosOutput(PChar(Temp), True, False);
 end;
@@ -194,9 +186,7 @@ var Temp: string;
     p   : Integer;
 begin
   Temp := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
-  {$ENDIF}
   Temp := Temp + ' dev=' + SCSIIF(Dev) + ' -checkdrive';
   Temp := GetDosOutput(PChar(Temp), True, True);
   p := Pos('Driver flags   :', Temp);

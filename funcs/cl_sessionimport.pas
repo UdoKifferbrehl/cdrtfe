@@ -2,9 +2,9 @@
 
   cl_sessionimport.pas: Auswählen und Importieren von vorigen Sessions
 
-  Copyright (c) 2008 Oliver Valencia
+  Copyright (c) 2008-2009 Oliver Valencia
 
-  letzte Änderung  28.11.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,7 +47,7 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
        FStartSector: string;
        FSectorList : string;
        FVolID      : string;
-       FSpaceUsed  : {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       FSpaceUsed  : Int64;
        function DiskPresent: Boolean;
        procedure CheckSession;
        procedure ConvertPathlistToTreeStructure(List, Structure: TStringList);
@@ -320,9 +320,7 @@ procedure TSessionImportHelper.GetDiskInfo;
 var Temp: string;
 begin
   Temp := StartUpDir + cCdrecordBin;
-  {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
-  {$ENDIF}
   Temp := Temp + ' dev=' + SCSIIF(FDevice) + ' -minfo -v';
   FMediumInfo := GetDosOutput(PChar(Temp), True, False);
 end;
@@ -335,9 +333,7 @@ procedure TSessionImportHelper.GetFileSysInfo(const Mode: TGetFileSysMode);
 var Temp: string;
 begin
   Temp := StartUpDir + cISOInfoBin;
-  {$IFDEF QuoteCommandlinePath}
   Temp := QuotePath(Temp);
-  {$ENDIF}
   Temp := Temp + ' dev=' + SCSIIF(FDevice) + ' -T ' + FStartSector;
   case Mode of
     gfsmPVD   : Temp := Temp + ' -d';

@@ -1,10 +1,10 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  20.12.2008
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -66,37 +66,12 @@
          //    - betrifft: frm_amin.pas, cl_logwindow.pas
 
 
-(* ----------------------------------------------------- QuoteCommandlinePath *)
-
-{$DEFINE QuoteCommandlinePath}
-         // Wenn dieses Symbol definiert ist, wird der Pfad des Kommandozeilen-
-         // programmes in doppelte Anführungszeichen (") gesetzt, wenn er
-         // Leerzeichen enthält.
-         //    - betrifft: cl_action.pas, f_init.pas
-
-
-(* ----------------------------------------------------- Bestätigungs-Dialoge *)
-
-{$DEFINE Confirm}
-         // aktiviert die Sicherheitsabfrage vor dem Brennen
-         //    - gilt für Daten-CD, Audio-CD, XCD, Brennen von Images
-         //    - betrifft: cl_action
-
-
 (* -------------------------------------------- expliziter Hinweis auf Fehler *)
 
 {$DEFINE xShowCmdError}
          // Falls beim Ausführen der Kommandozeile ein Fehler auftritt (d.h.
          // ProcessExitCode <> 0), wird eine Warnung ausgegeben.
          //    - betrifft: frm_main.pas, cl_actionthread.pas, cl_lang.pas
-
-
-(* -------------------------------------------------------- OLE-Drag-and-Drop *)
-
-{$DEFINE UseOLEDragDrop}
-         // OLE-Funktionen für das Drag-and-Drop aus dem Explorer in den Tree-
-         // View von cdrtfe verwenden.
-         //    - betrifft: frm_main.pas
 
 
 (* --------------------------------------------------------- Optionen togglen *)
@@ -207,20 +182,6 @@
 {$IFDEF DVDSupport}
          // Die folgenden Symbole sollen nur berücksichtigt werden, wenn cdrtfe
          // mit DVD-Unterstützung kompiliert wird.
-
-{$DEFINE LargeProject}
-         // Unterstützung für Projekte > 2 GiByte
-         //   - Für Berechnungen der Gesamtgröße der zu schreibenden Daten wird
-         //     der Typ Comp statt Integer verwendet.
-         //   - betrifft: frm_main.pas, cl_projectdata.pas, cl_cd.pas,
-         //     cl_action.pas, frm_audiocd_tracks.pas, f_chekproject.pas,
-         //     f_strings.pas
-
-{$DEFINE LargeFiles}
-         // Unterstützung für Dateien > 2 GiByte
-         //   - Für Dateigrößen wird der Type Comp statt Integer verwendet.
-         //   - Die Funktion GetFileSize verwendet Daten aus TWin32FindData
-         //   - betrifft:
 
 {$DEFINE xForceUnknownMedium}
          // Erzwingt das Nicht-Erkennen des DVD-Rohlings. Zu Testzwecken.

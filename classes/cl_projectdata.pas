@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.01.2009
+  letzte Änderung  26.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -192,7 +192,7 @@ type TProjectData = class(TObject)
        function GetFileList(const Path: string; const Choice: Byte): TStringList;
        function GetForm2FileCount: Integer;
        function GetProjectMaxLevel(const Choice: Byte): Integer;
-       function GetProjectPrevSessSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+       function GetProjectPrevSessSize: Int64;
        function GetSmallForm2FileCount: Integer;
        function GetTrackPause(const Index: Integer): string;
        function ProjectIsEmpty(const Choice: Byte): Boolean;
@@ -208,7 +208,7 @@ type TProjectData = class(TObject)
        procedure DeleteFromPathlistByIndex(const Index: Integer; const Path: string; const Choice: Byte);
        procedure DeleteFromPathlistByName(const Name, Path: string; const Choice: Byte);
        procedure GetCDText(const Index: Integer; var TextData: TCDTextTrackData);
-       procedure GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF}; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte);
+       procedure GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: Int64; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte);
        procedure GetSubFolders(const Choice: Byte; const Path: string; FolderList: TStringList);
        procedure ExportStructureToTreeView(const Choice: Byte; Tree: TTreeView);
        procedure LoadFromFile(const Name: string);
@@ -218,7 +218,7 @@ type TProjectData = class(TObject)
        procedure MoveTrack(const Index: Integer; const Direction: TDirection; const Choice: Byte);
        procedure MultisessionCDImportFolder(List: TStringList);
        procedure MultisessionCDImportFile(const Path, Name, Size, Drive: string);
-       procedure MultisessionCDImportSetSizeUsed(const Size: {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
+       procedure MultisessionCDImportSetSizeUsed(const Size: Int64);
        procedure NewFolder(const Path, Name: string; const Choice: Byte);
        procedure RenameFileByIndex(const Index: Integer; const Path, Name: string; const MaxLength, Choice: Byte);
        procedure RenameFileByName(const Path, OldName, Name: string; const MaxLength, Choice: Byte);
@@ -256,8 +256,8 @@ type TProjectData = class(TObject)
        property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
      end;
 
-procedure ExtractFileInfoFromEntry(const Entry: string; var Name, Path: string; var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF});
-procedure ExtractTrackInfoFromEntry(const Entry: string; var Name, Path: string; var Size: {$IFDEF LargeFiles} Int64 {$ELSE} Longint {$ENDIF}; var TrackLength: Extended);
+procedure ExtractFileInfoFromEntry(const Entry: string; var Name, Path: string; var Size: Int64);
+procedure ExtractTrackInfoFromEntry(const Entry: string; var Name, Path: string; var Size: Int64; var TrackLength: Extended);
 
 implementation
 
@@ -875,8 +875,7 @@ end;
   alle Variablen nötig sind, ist unschön, spart aber eine zusätzliche Prozedur.}
 
 procedure TProjectData.GetProjectInfo(var FileCount, FolderCount: Integer;
-                                      var CDSize: {$IFDEF LargeProject} Int64
-                                                  {$ELSE} Longint {$ENDIF};
+                                      var CDSize: Int64;
                                       var CDTime: Extended;
                                       var TrackCount: Integer;
                                       const Choice: Byte);
@@ -933,8 +932,7 @@ end;
 
   liefert die Größe des belegten Speichers bei Multisession-CDs.               }
 
-function TProjectData.GetProjectPrevSessSize:
-                           {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF};
+function TProjectData.GetProjectPrevSessSize: Int64;
 begin
   Result := FDataCD.PrevSessSize;
 end;
@@ -1591,8 +1589,7 @@ begin
   FDataCD.MultisessionCDImportFile(Path, Name, Size, Drive);
 end;
 
-procedure TProjectData.MultisessionCDImportSetSizeUsed(const Size:
-                          {$IFDEF LargeProject} Int64 {$ELSE} Longint {$ENDIF});
+procedure TProjectData.MultisessionCDImportSetSizeUsed(const Size: Int64);
 begin
   FDataCD.MultisessionCDImportSetSizeUsed(Size);
 end;
@@ -1634,8 +1631,7 @@ end;
 
 procedure ExtractFileInfoFromEntry(const Entry: string;
                                    var Name, Path: string;
-                                   var Size: {$IFDEF LargeFiles} Int64
-                                             {$ELSE} Longint {$ENDIF});
+                                   var Size: Int64);
 var Temp: string;
 begin
   Temp := Entry;
@@ -1649,14 +1645,10 @@ begin
   begin
     Delete(Temp, Length(Temp), 1);
   end;
-  {$IFDEF LargeFiles}
   {$IFNDEF Delphi4Up}
   Size := StrToFloatDef(Temp, 0);
   {$ELSE}
   Size := StrToInt64Def(Temp, 0);
-  {$ENDIF}
-  {$ELSE}
-  Size := StrToIntDef(Temp, 0);
   {$ENDIF}
 end;
 
@@ -1667,22 +1659,17 @@ end;
 
 procedure ExtractTrackInfoFromEntry(const Entry: string;
                                     var Name, Path: string;
-                                    var Size: {$IFDEF LargeFiles} Int64
-                                              {$ELSE} Longint {$ENDIF};
+                                    var Size: Int64;
                                     var TrackLength: Extended);
 begin
   {Datei-Name ist alles _vor_ dem letzen ':'}
   Path := StringLeft(Entry, '|');
   Name := ExtractFileName(Path);
   {Dateigröße extrahieren}
-  {$IFDEF LargeFiles}
   {$IFNDEF Delphi4Up}
   Size := StrToFloatDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
   {$ELSE}
   Size := StrToInt64Def(StringLeft(StringRight(Entry, '|'), '*'), 0);
-  {$ENDIF}
-  {$ELSE}
-  Size := StrToIntDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
   {$ENDIF}
   {Länge der Wave-Datei}
   TrackLength := StrToFloatDef(StringRight(Entry, '*'), 0);
