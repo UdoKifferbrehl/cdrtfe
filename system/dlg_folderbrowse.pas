@@ -1,8 +1,8 @@
 { dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
-  Copyright (c) 2007-2008 Oliver Valencia
+  Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  28.12.2008
+  letzte Änderung  29.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -342,6 +342,7 @@ begin
       Parent      := FBDialog;
       Caption     := FButtonCapCancel;
       ModalResult := mrAbort;
+      Cancel      := True;
     end;
 
     {OK-Button}
