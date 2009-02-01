@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  01.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -271,6 +271,9 @@ type
     SplitterXCDHorizontal: TSplitter;
     XCDEListView2: TListView;
     XCDETreeView: TTreeView;
+    CDEListViewPopupAddFolder: TMenuItem;
+    CDEListViewPopupN6: TMenuItem;
+    CDEListViewPopupNewFolder: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -391,6 +394,8 @@ type
     procedure ListViewDblClick(Sender: TObject);
     procedure CDEListViewPopupOpenClick(Sender: TObject);
     procedure Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure CDEListViewPopupAddFolderClick(Sender: TObject);
+    procedure CDEListViewPopupNewFolderClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -5985,22 +5990,31 @@ begin
   if ListView.SelCount = 0 then
   begin
     CDEListViewPopupAddFile.Visible := True;
+    CDEListViewPopupAddFolder.Visible := True;
     CDEListViewPopupN1.Visible := False;
     CDEListViewPopupRenameFile.Visible := False;
     CDEListViewPopupDeleteFile.Visible := False;
+    CDEListViewPopupN5.Visible := True;
+    CDEListViewPopupNewFolder.Visible := True;
   end else
   if ListView.SelCount = 1 then
   begin
     CDEListViewPopupAddFile.Visible := True;
+    CDEListViewPopupAddFolder.Visible := True;
     CDEListViewPopupN1.Visible := True;
     CDEListViewPopupRenameFile.Visible := True;
     CDEListViewPopupDeleteFile.Visible := True;
+    CDEListViewPopupN5.Visible := True;
+    CDEListViewPopupNewFolder.Visible := True;    
   end else
   begin
     CDEListViewPopupAddFile.Visible := True;
+    CDEListViewPopupAddFolder.Visible := True;    
     CDEListViewPopupN1.Visible := True;
     CDEListViewPopupRenameFile.Visible := False;
     CDEListViewPopupDeleteFile.Visible := True;
+    CDEListViewPopupN5.Visible := True;
+    CDEListViewPopupNewFolder.Visible := True;      
   end;
   if ListView = XCDEListView2 then
   begin
@@ -6016,7 +6030,7 @@ begin
     CDEListViewPopupAddMovie.Visible := False;
   end;
   OpenVisible := (ListView.SelCount > 0) and FSettings.General.AllowFileOpen;
-  CDEListViewPopupN5.Visible := OpenVisible;
+  CDEListViewPopupN6.Visible := OpenVisible;
   CDEListViewPopupOpen.Visible := OpenVisible;
   CDEListViewPopupOpen.Default := FSettings.General.AllowDblClick;
 end;
@@ -6035,6 +6049,13 @@ begin
                ShowFolderContent(XCDETreeView, XCDEListView1);
              end;
   end;
+end;
+
+{ Data-CD, XCD: Add folder }
+
+procedure TForm1.CDEListViewPopupAddFolderClick(Sender: TObject);
+begin
+  CDETreeViewPopupAddFolderClick(Sender);
 end;
 
 { XCD: Add file as Form2 file }
@@ -6067,6 +6088,13 @@ begin
     cXCD   : UserDeleteFile(XCDETreeView,
                             TListView(CDEListViewPopupMenu.PopupComponent));
   end;
+end;
+
+{ Data-CD, XCD, New folder }
+
+procedure TForm1.CDEListViewPopupNewFolderClick(Sender: TObject);
+begin
+  UserNewFolder(GetCurrentTreeView);
 end;
 
 { Data-CD, XCD: Open file }
