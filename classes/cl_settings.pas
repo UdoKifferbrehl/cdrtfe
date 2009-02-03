@@ -2,10 +2,10 @@
 
   cl_settings.pas: Einstellungen von cdrtfe
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.12.2008
+  letzte Änderung  03.02.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -96,6 +96,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        UseMPlayer    : Boolean;
        MPlayerCmd    : string;
        MPlayerOpt    : string;
+       FileInfoTitle : Boolean;
      end;
 
      TWinPos = record
@@ -600,6 +601,7 @@ begin
     UseMPlayer := False;
     MPlayerCmd := '';
     MPlayerOpt := '%N';
+    FileInfoTitle := False;
   end;
 
   with WinPos do
@@ -1182,6 +1184,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'UseMPlayer', UseMPlayer);
       WriteString(Section, 'MPlayerCmd', MPlayerCmd);
       WriteString(Section, 'MPlayerOpt', MPlayerOpt);
+      WriteBool(Section, 'FileInfoTitle', FileInfoTitle);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1581,7 +1584,8 @@ var PF     : TIniFile; // ProjectFile
       AllowDblClick := ReadBool(section, 'AllowDblClick', True);
       MPlayerCmd := ReadString(Section, 'MPlayerCmd', '');
       MPlayerOpt := ReadString(Section, 'MPlayerOpt', '');
-      FileFlags.MPlayerOk := FileExists(MPlayerCmd);      
+      FileFlags.MPlayerOk := FileExists(MPlayerCmd);
+      FileInfoTitle := ReadBool(Section, 'FileInfoTitle', False);
     end;
     ProgressBarUpdate(1);
 

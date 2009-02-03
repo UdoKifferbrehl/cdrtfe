@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.02.2009
+  letzte Änderung  03.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -462,6 +462,7 @@ type
     procedure ToggleStayOnTopState;
     procedure UpdateGauges;
     procedure UpdateSpaceMeter(Size, Time: Integer);
+    procedure UpdateTaskBarEntry(s: string);
     procedure UpdateOptionPanel;
     procedure UserAddFile(Tree: TTreeView);
     procedure UserAddFolder(Tree: TTreeView);
@@ -2815,6 +2816,20 @@ begin
   {SpaceMeter}
   UpdateSpaceMeter(Round(CDSize/(1024*1024)), Round(CDTime));
 
+  {TaskBarEntry}
+  if FSettings.General.FileInfoTitle then
+  begin
+    Temp := '';
+    case FSettings.General.Choice of
+      cDataCD,
+      cXCD    : Temp := '[' + IntToStr(FileCount) + ' ' +
+                              SizeToString(CDSize) + ']';
+      cAudioCD: Temp := '[' + IntToStr(TrackCount) +  ' ' +
+                              FormatTime(CDTime) + ']';
+    end;
+    UpdateTaskBarEntry(Temp);
+  end;
+
   {$IFDEF DebugUpdateGauges}
   with FormDebug.Memo3.Lines do
   begin
@@ -2868,6 +2883,23 @@ begin
     SpaceMeter.DiskSize := 0;
   end;
   StatusBar.Panels[1].Text := SpaceMeter.RemainingSpaceString;
+end;
+
+{ UpdateTaskBarEntry -----------------------------------------------------------
+
+  zeigt, wenn gewünscht, die Anzahl von Datein im TaskBar-Eintrag an.          }
+
+procedure TForm1.UpdateTaskBarEntry(s: string);
+{J+}
+const Title: string = '';
+{J-}
+begin
+  if not FSettings.Environment.ProcessRunning then
+  begin
+    if Title = '' then Title := Application.Title;
+    if s <> '' then s := s + ' ';
+    Application.Title := s + Title;
+  end;
 end;
 
 { UpdateOptionPanel ------------------------------------------------------------
@@ -3550,7 +3582,7 @@ end;
   externen Programme ausführt.
   Zusätzlich wird hier das Flag für laufende Prozesse gesetzt.                 }
 
-procedure TForm1.Setbuttons(const Status: TOnOff);
+procedure TForm1.SetButtons(const Status: TOnOff);
 {$J+}
 const Title: string = '';
 {$J-}
