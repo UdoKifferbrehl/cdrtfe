@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  04.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,20 +50,6 @@
          // Für die Darstellung von jpeg-Dateien nicht Borlands jpeg.pas ver-
          // wenden, sondern die Routinen von ImagingLib
          //    - betrifft: frm_splash_screen.pas, frm_about.pas
-
-
-(* -------------------------------------------- Fortschritt in Taskbar zeigen *)
-
-{$DEFINE ShowProgressTaskBar}
-         // Fortschritt der Aktionen im Taskbar-Eintrag zeigen
-         //    - betrifft: cl_actionthread.pas, cl_logwindow.pas
-
-
-(* ----------------------------------------------------------- Taskbareintrag *)
-
-{$DEFINE xTitleFirst}
-         // Taskbar-Eintrag: cdrtfe [aktiv] statt [aktiv] cdrtfe
-         //    - betrifft: frm_amin.pas, cl_logwindow.pas
 
 
 (* -------------------------------------------- expliziter Hinweis auf Fehler *)

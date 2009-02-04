@@ -2,9 +2,9 @@
 
   cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 
-  Copyright (c) 2006-2008 Oliver Valencia
+  Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  20.01.2008
+  letzte Änderung  04.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -80,11 +80,9 @@ type TLogWin = class(TObject)
        procedure Clear;
        procedure ClearLine;
        procedure DeleteFromLine(i: Integer);
-       {$IFDEF ShowProgressTaskBar}
        procedure ShowProgressTaskBar;
        procedure ShowProgressTaskBarString(const s: string);
        function ProcessProgress(const s: string): string;            // wird später ausgelagert!
-       {$ENDIF}
        property OutWindowHandle: THandle read FOutWindowHandle;
        property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
        property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
@@ -334,7 +332,6 @@ begin
   // FMemo.Lines.SaveToFile(Name);
 end;
 
-{$IFDEF ShowProgressTaskBar}
 
 { ShowProgressTaskBar ----------------------------------------------------------
 
@@ -345,14 +342,6 @@ var s: string;
 begin
   if FLog.Count > 0 then s := FLog[FLog.Count - 1];
   s := ProcessProgress(s);
-  {$IFDEF TitleFirst}
-  if s <> '' then
-  begin
-    Application.Title := Copy(Application.Title, 1,
-                              Pos('[', Application.Title) - 2) + ' [' + s + ']';
-    UpdatePanels('<>', s);
-  end;
-  {$ELSE}
   if s <> '' then
   begin
     Application.Title := '[' + s + '] ' +
@@ -360,7 +349,6 @@ begin
         Length(Application.Title) - Pos(']', Application.Title) + 2);
     UpdatePanels('<>', s);
   end;
-  {$ENDIF}
 end;
 
 { ShowProgressTaskBarString ----------------------------------------------------
@@ -369,16 +357,10 @@ end;
 
 procedure TLogWin.ShowProgressTaskBarString(const s: string);
 begin
-  {$IFDEF TitleFirst}
-  if s <> '' then
-    Application.Title := Copy(Application.Title, 1,
-      Pos('[', Application.Title) - 2) + ' [' + s + ']';
-  {$ELSE}
   if s <> '' then
     Application.Title := '[' + s + '] ' +
       Copy(Application.Title, Pos(']', Application.Title) + 2,
         Length(Application.Title) - Pos(']', Application.Title) + 2);
-  {$ENDIF}
   // UpdatePanels('<>', s);
 end;
 
@@ -484,7 +466,6 @@ begin
   end;                   *)
   Result := Progress;
 end;
-{$ENDIF}
 
 initialization
 
