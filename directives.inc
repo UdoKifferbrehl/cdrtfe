@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  04.02.2009
+  letzte Änderung  08.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,18 +20,6 @@
 (* ------------------------------------------------------------ Delphiversion *)
 
 {$I compiler.inc}
-
-
-(* ------------------------------------------------------------------- Lizenz *)
-
-{$DEFINE xGPLonly}
-         // Wenn dieses Symbol definiert ist, werden nur die Teile von cdrtfe
-         // kompiliert, die unter der GPL oder einer kompatiblen Lizenz stehen.
-         // Einige Funktionen stehen dann aber nicht zur Verfügung.
-         //
-         // If this symbol is defines only the GPL'ed (and compatible) parts of
-         // cdrtfe will be compiled. In this case, some functions are not
-         // available.
 
 
 (* -------------------------------------------------------------- Testversion *)
@@ -237,9 +225,6 @@
          // Ordner zugleich auszuwählen.
          //   - betrifft: frm_main.pas, f_filesystem.pas, cdrtfe.dpr
 
-{$IFDEF GPLonly}
-  {$UNDEF MultipleFolderBrowsing}
-{$ENDIF}
 {$IFNDEF Delphi7Up}
   {$UNDEF MultipleFolderBrowsing}
 {$ENDIF}
@@ -251,9 +236,6 @@
          // fängt Exceptions ab und zeigt Infos an
          //   - betrifft: cdrtfe.dpr, cl_exceptionlog.pas, frm_exceptdlg.pas
 
-{$IFDEF GPLonly}
-  {$UNDEF ExceptionDlg}
-{$ENDIF}
 {$IFNDEF Delphi7Up}
   {$UNDEF ExceptionDlg}
 {$ENDIF}

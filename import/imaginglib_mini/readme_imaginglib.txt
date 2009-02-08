@@ -14,7 +14,7 @@ werden, das dann in dieses Verzeichnis (import\imaginglib_mini) entpackt werden
 muﬂ.
 
 Standardm‰ﬂig wird cdrtfe unter Verwendung der Vampyre Imaging Library kompi-
-liert. Dies kann durch Anpassen der directive.pas ge‰ndert werden, siehe
+liert. Dies kann durch Anpassen der directive.inc ge‰ndert werden, siehe
 {$DEFINE UseImagingLib}
 
 
@@ -32,4 +32,4 @@ which contains the needed parts of the Vampyre Imaging Library from the cdrtfe
 download page. Extract the files into this folder (import\imaginglib_mini).
 
 By default cdrtfe is compiled with the Vampyre Imaging Library. You can change
-this by editing directives.pas, see {$DEFINE UseImagingLib}.
+this by editing directives.inc, see {$DEFINE UseImagingLib}.

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.01.2009
+  letzte Änderung  08.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -58,11 +58,7 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF GPLonly}
-  {$R ../resource/license.res}
-{$ELSE}
-  {$R ../resource/license_ex.res}
-{$ENDIF}
+{$R ../resource/license_ex.res}
 
 {$IFNDEF ExceptionDlg}
   {$R ../resource/credits.res}
