@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.02.2008
+  letzte Änderung  11.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -257,6 +257,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        HideTransTBL: Boolean;
        NLPathTBL   : Boolean;
        HideRRMoved : Boolean;
+       ForceMSRR   : Boolean;
        {Meta-Daten}
        UseMeta     : Boolean;
        IDPublisher : string;
@@ -763,6 +764,7 @@ begin
     HideTransTBL := True;
     NLPathTBL    := False;
     HideRRMoved  := False;
+    ForceMSRR    := True;
     {Meta-Daten}
     UseMeta      := False;
     IDPublisher  := '';
@@ -1306,6 +1308,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'NLPathTBL', NLPathTBL);
       WriteBool(Section, 'HideRRMoved', HideRRMoved);
       WriteBool(Section, 'SelectSess', SelectSess);
+      WriteBool(Section, 'ForceMSRR', ForceMSRR);
       {Meta-Daten}
       WriteBool(Section, 'UseMeta', UseMeta);
       WriteString(Section, 'Publisher', IDPublisher);
@@ -1738,6 +1741,7 @@ var PF     : TIniFile; // ProjectFile
       NLPathTBL := ReadBool(Section, 'NLPathTBL', False);
       HideRRMoved := ReadBool(Section, 'HideRRMoved', False);
       SelectSess := ReadBool(Section, 'SelectSess', False);
+      ForceMSRR := ReadBool(Section, 'ForceMSRR', True);
       {Meta-Daten}
       UseMeta := ReadBool(Section, 'UseMeta', False);
       IDPublisher := ReadString(Section, 'Publisher', '');

@@ -2,10 +2,10 @@
 
   frm_datacd_fs.pas: mkisfos-Optionen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  11.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -276,7 +276,7 @@ begin
     NLPathTBL     := CheckBoxNLPathtables.Checked;
     HideRRMoved   := CheckBoxHideRRMoved.Checked;
     {wenn kein RockRidge, dann auch kein Multisession}
-    if not RockRidge then
+    if not RockRidge and ForceMSRR then
     begin
       Multi := False;
     end;

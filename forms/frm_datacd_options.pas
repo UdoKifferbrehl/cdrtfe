@@ -2,10 +2,10 @@
 
   frm_datacd_options.pas: Daten-CD: Optionen, DVD-Video: Image-Optionen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  11.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -204,7 +204,7 @@ begin
       end;
       OverBurn := CheckBoxOverburn.Checked;
       {wenn Multisession, dann muß auch Rockridge aktiviert werden}
-      if Multi then
+      if Multi and ForceMSRR then
       begin
         RockRidge := True;
       end;

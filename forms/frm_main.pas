@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.02.2009
+  letzte Änderung  11.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3067,7 +3067,7 @@ begin
     if (L = LabelDataCDSingle) or (L = LabelDataCDMulti) then
     begin
       Multi := not Multi;
-      if Multi then RockRidge := True;
+      if Multi and ForceMSRR then RockRidge := True;
     end;
     if L = LabelDataCDOTF then
     begin
@@ -3093,7 +3093,7 @@ begin
     if L = LabelDataCDRockRidge then
     begin
       RockRidge := not RockRidge;
-      if not RockRidge then Multi := False;
+      if not RockRidge and ForceMSRR then Multi := False;
     end;
     if L = LabelDataCDUDF then
     begin
