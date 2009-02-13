@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2009
+  letzte Änderung  13.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -354,6 +354,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Action     : Byte;
        Device     : string;
        Speed      : string;
+       SpeedW     : string;
        Bulk       : Boolean;
        Paranoia   : Boolean;
        NoInfoFile : Boolean;
@@ -866,6 +867,7 @@ begin
     Action      := 0;
     Device      := '';
     Speed       := '';
+    SpeedW      := '';
     Bulk        := True;
     Paranoia    := False;
     NoInfoFile  := True;
@@ -1408,6 +1410,7 @@ var PF     : TIniFile; // ProjectFile
       WriteInteger(Section, 'Action', Action);
       WriteString(Section, 'Device', Device);
       WriteString(Section, 'Speed', Speed);
+      WriteString(Section, 'SpeedW', SpeedW);
       WriteBool(Section, 'Bulk', Bulk);
       WriteBool(Section, 'Paranoia', Paranoia);
       WriteBool(Section, 'NoInfoFile', NoInfoFile);
@@ -1846,6 +1849,7 @@ var PF     : TIniFile; // ProjectFile
       Action := ReadInteger(Section, 'Action', 0);
       Device := ReadString(Section, 'Device', '');
       Speed := ReadString(Section, 'Speed', '');
+      SpeedW := ReadString(Section, 'SpeedW', '');
       Bulk := ReadBool(Section, 'Bulk', True);
       Paranoia := ReadBool(Section, 'Paranoia', False);
       NoInfoFile := ReadBool(Section, 'NoInfoFile', True);

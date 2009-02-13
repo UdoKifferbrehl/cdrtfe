@@ -1,10 +1,10 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_dae_options.pas: DAE: Optionen
 
-  Copyright (c) 2006-2007 Oliver Valencia
+  Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  14.11.2007
+  letzte Änderung  13.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -69,6 +69,8 @@ type
     LabelCustomCmd: TLabel;
     LabelCustomOpt: TLabel;
     CheckBoxDAEWriteCopy: TCheckBox;
+    ComboBoxSpeedW: TComboBox;
+    LabelSpeedW: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -99,7 +101,8 @@ implementation
 
 uses f_misc, constant;
 
-{var}
+const DefaultSpeedList : string
+                         = ',0,1,2,4,6,8,10,12,16,20,24,32,36,40,42,48,50,52';
 
 { ActivateTab ------------------------------------------------------------------
 
@@ -178,7 +181,7 @@ begin
     EditCustomOpt.Text                   := CustomOpt;                                        
     ComboBoxDAEMp3Quality.ItemIndex :=
                                 ComboBoxDAEMp3Quality.Items.IndexOf(LamePreset);
-
+    ComboBoxSpeedW.ItemIndex := ComboBoxSpeedW.Items.IndexOf(SpeedW);
   end;
   ActivateTab;
 end;
@@ -211,6 +214,7 @@ begin
     CustomCmd   := EditCustomCmd.Text;
     CustomOpt   := EditCustomOpt.Text;
     LamePreset  := ComboBoxDAEMp3Quality.Items[ComboBoxDAEMp3Quality.ItemIndex];
+    SpeedW      := ComboBoxSpeedW.Items[ComboBoxSpeedW.ItemIndex];
   end;
   FSettings.General.TabFrmDAE := GetActivePage;
 end;
@@ -255,10 +259,12 @@ begin
   SetFont(Self);
   FLang.SetFormLang(Self);
   ComboBoxDAEMp3Quality.Items.Assign(FSettings.General.Mp3Qualities);
+  ComboBoxSpeedW.Items.CommaText := DefaultSpeedList;
   GetSettings;
   CheckControls(Sender);
   LabelDAEFlacCurQuality.Caption := IntToStr(TrackBarFlac.Position);
   LabelDAEOggCurQuality.Caption := IntToStr(TrackBarOgg.Position);
+  LabelSpeedW.Caption := FLang.GMS('c001');
 end;
 
 

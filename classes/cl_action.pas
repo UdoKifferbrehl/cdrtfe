@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  13.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1822,7 +1822,7 @@ var Compressed: Boolean;
       Cmd := StartUpDir + cCdrecordBin;
       Cmd := QuotePath(Cmd);
       Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
-      if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
+      if SpeedW <> '' then Cmd := Cmd + ' speed=' + SpeedW;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
       if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
