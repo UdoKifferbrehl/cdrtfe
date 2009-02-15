@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.02.2009
+  letzte Änderung  15.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1818,7 +1818,7 @@ var Compressed: Boolean;
     with FSettings.DAE, FSettings.Cdrecord do
     begin
       if Path[Length(Path)] <> '\' then Path := Path + '\';
-      OutPath := MakePathConform(Path + Prefix + '*.wav');
+      OutPath := QuotePath(MakePathConform(Path)) + Prefix + '*.wav';
       Cmd := StartUpDir + cCdrecordBin;
       Cmd := QuotePath(Cmd);
       Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
@@ -1832,8 +1832,7 @@ var Compressed: Boolean;
       if Dummy       then Cmd := Cmd + ' -dummy';
       if DMASpeedCheck and ForceSpeed then
                           Cmd := Cmd + ' -force';
-      Cmd := Cmd + ' -sao -audio -useinfo -text '
-                 + QuotePath(OutPath);
+      Cmd := Cmd + ' -sao -audio -useinfo -text ' + OutPath;
     end;
     {Kommando ausführen}
     if not Ok then
