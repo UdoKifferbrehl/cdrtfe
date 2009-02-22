@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.02.2009
+  letzte Änderung  22.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -402,7 +402,7 @@ end;
 
 procedure TCDAction.CreateDataDisk;
 var i              : Integer;
-    Temp           : string;
+    Temp, MetaTemp : string;
     BurnList       : TStringList;
     CmdC, CmdM,
     CmdOnTheFly,
@@ -574,10 +574,16 @@ begin
     if VolId <> '' then CmdM := CmdM + ' -volid ' + QuotePath(VolId);
     if UseMeta then
     begin
-      CmdM := CmdM + ' -publisher ' + QuotePath(IDPublisher);
-      CmdM := CmdM + ' -p ' + QuotePath(IDPreparer);
-      CmdM := CmdM + ' -copyright ' + QuotePath(IDCopyright);
-      CmdM := CmdM + ' -sysid ' + QuotePath(IDSystem);
+      MetaTemp := '';
+      if IDPublisher <> '' then
+        MetaTemp := MetaTemp + ' -publisher ' + QuotePath(IDPublisher);
+      if IDPreparer <> '' then
+        MetaTemp := MetaTemp + ' -p ' + QuotePath(IDPreparer);
+      if IDCopyright <> '' then
+        MetaTemp := MetaTemp + ' -copyright ' + QuotePath(IDCopyright);
+      if IDSystem <> '' then
+        MetaTemp := MetaTemp + ' -sysid ' + QuotePath(IDSystem);
+      CmdM := CmdM + MetaTemp;
     end;
     if MkisofsUseCustOpts and (MkisofsCustOptsIndex > -1) then
       CmdM := CmdM + ' ' + MkisofsCustOpts[MkisofsCustOptsIndex];
