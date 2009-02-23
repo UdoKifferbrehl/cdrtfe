@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2009
+  letzte Änderung  23.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -420,12 +420,13 @@ type
     ActionUserAddFileForm2: TAction;
     ActionUserAddFolder: TAction;
     ActionUserDeleteAll: TAction;
-    ActionUserTrackUp: TAction;
+    ActionUserTrackUp  : TAction;
     ActionUserTrackDown: TAction;
     {$ENDIF}
     FImageTabFirstShow : Boolean;
     FImageTabFirstWrite: Boolean;
     FCheckingControls  : Boolean;
+    FLVArray: array[0..cLVCount] of TListView;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
     function GetCurrentTreeView: TTreeView;
@@ -2666,10 +2667,11 @@ end;
   ab.                                                                          }
 
 procedure TForm1.SaveWinPos;
+var i, j: Integer;
 begin
-  {Fensterposition merken}
   with FSettings.WinPos do
   begin
+    {Fensterposition merken}
     if Self.WindowState = wsMaximized then
     begin
       MainMaximized := True;
@@ -2681,6 +2683,10 @@ begin
       MainHeight := Self.Height;
       MainMaximized := False;
     end;
+    {ListView-Spaltenbreite}
+    for i := 0 to cLVCount do
+      for j := 0 to FLVArray[i].Columns.Count - 1 do
+        FSettings.WinPos.LVColWidth[i, j] := FLVArray[i].Columns[j].Width;
   end;
 end;
 
@@ -2690,6 +2696,7 @@ end;
   angepaßt.                                                                    }
 
 procedure TForm1.SetWinPos;
+var i, j: Integer;
 begin
   {falls vorhanden, alte Größe und Position wiederherstellen}
   with FSettings.WinPos do
@@ -2723,6 +2730,11 @@ begin
       Self.Position := poDefault;
       Self.WindowState := wsMaximized;
     end;
+    {ListView-Spaltenbreite}
+    for i := 0 to cLVCount do
+      for j := 0 to FLVArray[i].Columns.Count - 1 do
+        if FSettings.WinPos.LVColWidth[i, j] > -1 then
+          FLVArray[i].Columns[j].Width := FSettings.WinPos.LVColWidth[i, j];
   end;
 end;
 
@@ -3715,6 +3727,17 @@ var GlyphArray    : TGlyphArray;
     Glyphs[21] := VideoSpeedButton4.Glyph;
   end;
 
+  {ListView-Array initialisieren}
+  procedure InitLVArray;
+  begin
+    FLVArray[0] := CDEListView;
+    FLVArray[1] := AudioListView;
+    FLVArray[2] := XCDEListView1;
+    FLVArray[3] := XCDEListView2;
+    FLVArray[4] := DAEListView;
+    FLVArray[5] := VideoListView;
+  end;
+
 begin
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
@@ -3751,6 +3774,8 @@ begin
   {$IFDEF AllowToggle}
   RegisterLabelEvents;
   {$ENDIF}
+  {Array mit dne LsitViews}
+  InitLVArray;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------

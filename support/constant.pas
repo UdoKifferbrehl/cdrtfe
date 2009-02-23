@@ -2,10 +2,10 @@
 
   constant.pas: Konstanten-Deklaration
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.07.2008
+  letzte Änderung  23.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,6 +40,10 @@ const {die GUID für cdrtfe}
 
       {für das Abschalten der TreeView-Tooltips}
       TVS_NoTooltips = $80;
+
+      {ListViews, zählt von Nulll an!}
+      cLVCount       = 5;
+      cLVMaxColCount = 3;
 
       {für TSettings.General.Choice und TAction}
       cDataCD         = 1;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.02.2009
+  letzte Änderung  23.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,7 +59,7 @@ interface
 
 uses {$IFDEF Delphi2005Up} Windows, {$ENDIF}
      Classes, SysUtils, IniFiles, FileCtrl,
-     cl_lang, userevents;
+     cl_lang, userevents, constant;
 
 const TabSheetCount = 9;
 
@@ -111,6 +111,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        OutWidth     : Integer;
        OutMaximized : Boolean;
        OutScrolled  : Boolean;
+       LVColWidth   : array[0..cLVCount, 0..cLVMaxColCount] of Integer;
      end;
 
      TCmdLineFlags = record
@@ -500,7 +501,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     constant, f_filesystem, f_wininfo, f_helper, f_logfile;
+     f_filesystem, f_wininfo, f_helper, f_logfile;
 
 const CSIDL_MyMusic = $000d;
 
@@ -554,7 +555,7 @@ end;
   auch Vorbelgungen für Optionen vorgenommen.                                  }
 
 procedure TSettings.InitSettings;
-var i: Integer;
+var i, j: Integer;
 begin
   {allgemeine Einstellungen/Statusvaraiblen}
   with General do
@@ -619,6 +620,9 @@ begin
     OutWidth      := 0;
     OutMaximized  := False;
     OutScrolled   := True;
+    for i := 0 to cLVCount do
+      for j := 0 to cLVMaxColCount  do
+        LVColWidth[i, j] := -1;
   end;
 
   with CmdLineFlags do
@@ -1158,9 +1162,11 @@ var PF     : TIniFile; // ProjectFile
   {lokale Prozedur, die die Einstellungen in die Datei PF schreibt, wobei PF
    entweder eine Ini-Datei oder auch die Registry sein kann.}
   procedure SaveSettings;
-  var Section: string;
-      i: Integer;
+  var Section : string;
+      TempList: TStringList;
+      i, j    : Integer;
   begin
+    TempList := TStringList.Create;
     {allgemeine Einstellungen/Statusvaraiblen}
     Section := 'General';
     with PF, General do
@@ -1209,6 +1215,13 @@ var PF     : TIniFile; // ProjectFile
         WriteInteger(Section, 'OutHeight', OutHeight);
         WriteBool(Section, 'OutMaximized', OutMaximized);
         WriteBool(Section, 'OutScrolled', OutScrolled);
+        for i := 0 to cLVCount do
+        begin
+          TempList.Clear;
+          for j := 0 to cLVMaxColCount do
+            TempList.Add(IntToStr(LVColWidth[i, j]));
+          WriteString(Section, 'LVCols' + IntToStr(i), TempList.CommaText);
+        end;
       end;
 
       Section := 'Drives';
@@ -1502,6 +1515,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'KeepImage', KeepImage);
       WriteBool(Section, 'Verify', Verify);
     end;
+    TempList.Free;
   end;
 
 begin
@@ -1557,9 +1571,11 @@ var PF     : TIniFile; // ProjectFile
    entweder eine Ini-Datei oder auch die Registry sein kann.}
   procedure LoadSettings;
   var Section  : string;
-      i        : Integer;
+      TempList : TStringList;
+      i, j     : Integer;
       c        : Integer;
   begin
+    TempList := TStringList.Create;
     {allgemeine Einstellungen/Statusvaraiblen}
     Section := 'General';
     with PF, General do
@@ -1625,6 +1641,13 @@ var PF     : TIniFile; // ProjectFile
         OutHeight := ReadInteger(Section, 'OutHeight', 0);
         OutMaximized := ReadBool(Section, 'OutMaximized', False);
         OutScrolled := ReadBool(Section, 'OutScrolled', True);
+        for i := 0 to cLVCount do
+        begin
+          TempList.Clear;
+          TempList.CommaText := ReadString(Section, 'LVCols' + IntToStr(i), '');
+          for j := 0 to TempList.Count - 1 do
+            LVColWidth[i, j] := StrToIntDef(TempList[j], -1); 
+        end;
       end;
       {ProDVD-Schlüssel aus cdrtfe.ini lesen, read-only}
        Environment.ProDVDKey := PF.ReadString('ProDVD', cCDRSEC, '');
@@ -1950,6 +1973,7 @@ var PF     : TIniFile; // ProjectFile
       Verify := ReadBool(Section, 'Verify', False);
     end;
     ProgressBarUpdate(13);
+    TempList.Free;
   end;
 
 begin
