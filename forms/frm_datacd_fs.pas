@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2009
+  letzte Änderung  24.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -96,6 +96,7 @@ type
     procedure CheckBoxClick(Sender: TObject);
     procedure ButtonBootImageSelectClick(Sender: TObject);
     procedure EditKeyPress(Sender: TObject; var Key: Char);
+    procedure EditChange(Sender: TObject);
   private
     { Private declarations }
     FSettings: TSettings;
@@ -466,6 +467,34 @@ begin
     if C = EditBootImage then
     begin
       ButtonOk.SetFocus;
+    end;
+  end;
+end;
+
+
+{ CheckBox-Events ------------------------------------------------------------ }
+
+{ OnChange ---------------------------------------------------------------------
+
+  prüfen, ob die Längenbeschränkungen der Meta-Daten eingehalten werden.       }
+
+procedure TFormDataCDFS.EditChange(Sender: TObject);
+var Edit     : TEdit;
+    MaxLength: Integer;
+begin
+  if Sender is TEdit then
+  begin
+    MaxLength := 1;
+    Edit := Sender as TEdit;
+    if Edit = EditPublisher then MaxLength := 128;
+    if Edit = EditPreparer  then MaxLength := 128;
+    if Edit = EditCopyright then MaxLength := 37;
+    if Edit = EditSystem    then MaxLength := 32;
+    if Length(Edit.Text) > MaxLength then
+    begin
+      Edit.Text := Copy(Edit.Text, 1, MaxLength);
+      ShowMsgDlg(Format(FLang.GMS('m502'), [MaxLength]),
+                 FLang.GMS('g004'), MB_ICONINFORMATION or MB_OK);
     end;
   end;
 end;
