@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.02.2009
+  letzte Änderung  25.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5398,10 +5398,10 @@ begin
       Node.Text := S;
     end else
     begin
-      Temp := S;
-      S := Node.Text;
+      S := Copy(S, 1, 32);
       Node.Text := S;
-      {evtl. noch Fehlermeldungen ausgeben.}    
+      ShowMsgDlg(Format(FLang.GMS('m502'), [32]),
+                 FLang.GMS('g004'), MB_ICONINFORMATION or MB_OK);
     end;
   end;
 end;
@@ -6470,6 +6470,8 @@ begin
     begin
       EditDVDVideoVolID.Text := Copy(EditDVDVideoVolID.Text, 1, 32);
       EditDVDVideoVolID.SelStart := 32;
+      ShowMsgDlg(Format(FLang.GMS('m502'), [32]),
+                 FLang.GMS('g004'), MB_ICONINFORMATION or MB_OK);
     end;
   end;
 end;
