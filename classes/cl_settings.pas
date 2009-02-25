@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.02.2009
+  letzte Änderung  25.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -97,6 +97,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        MPlayerCmd    : string;
        MPlayerOpt    : string;
        FileInfoTitle : Boolean;
+       SpaceMeter    : Boolean;
      end;
 
      TWinPos = record
@@ -605,6 +606,7 @@ begin
     MPlayerCmd := '';
     MPlayerOpt := '%N';
     FileInfoTitle := False;
+    SpaceMeter := True;
   end;
 
   with WinPos do
@@ -1195,6 +1197,7 @@ var PF     : TIniFile; // ProjectFile
       WriteString(Section, 'MPlayerCmd', MPlayerCmd);
       WriteString(Section, 'MPlayerOpt', MPlayerOpt);
       WriteBool(Section, 'FileInfoTitle', FileInfoTitle);
+      WriteBool(Section, 'SpaceMeter', SpaceMeter);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1608,6 +1611,7 @@ var PF     : TIniFile; // ProjectFile
       MPlayerOpt := ReadString(Section, 'MPlayerOpt', '');
       FileFlags.MPlayerOk := FileExists(MPlayerCmd);
       FileInfoTitle := ReadBool(Section, 'FileInfoTitle', False);
+      SpaceMeter := ReadBool(Section, 'SpaceMeter', True);
     end;
     ProgressBarUpdate(1);
 

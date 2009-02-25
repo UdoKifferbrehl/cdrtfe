@@ -2875,26 +2875,33 @@ end;
 
 procedure TForm1.UpdateSpaceMeter(Size, Time: Integer);
 begin
-  SpaceMeter.DiskType := TSpaceMeterDiskType(
+  if FSettings.General.SpaceMeter then
+  begin
+    SpaceMeter.DiskType := TSpaceMeterDiskType(
                     FSettings.General.TabSheetSMType[FSettings.General.Choice]);
-  case FSettings.General.Choice of
-    cDataCD : begin
-                SpaceMeter.SpaceMeterMode := SMM_DataCD;
-                SpaceMeter.DiskSize := Size;
-              end;
-    cAudioCD: begin
-                SpaceMeter.SpaceMeterMode := SMM_AudioCD;
-                SpaceMeter.DiskSize := Time;
-              end;
-    cXCD    : begin
-                SpaceMeter.SpaceMeterMode := SMM_XCD;
-                SpaceMeter.DiskSize := Size;
-              end;
-  else
+    case FSettings.General.Choice of
+      cDataCD : begin
+                  SpaceMeter.SpaceMeterMode := SMM_DataCD;
+                  SpaceMeter.DiskSize := Size;
+                end;
+      cAudioCD: begin
+                  SpaceMeter.SpaceMeterMode := SMM_AudioCD;
+                  SpaceMeter.DiskSize := Time;
+                end;
+      cXCD    : begin
+                  SpaceMeter.SpaceMeterMode := SMM_XCD;
+                  SpaceMeter.DiskSize := Size;
+                end;
+    else
+      SpaceMeter.SpaceMeterMode := SMM_NoDisk;
+      SpaceMeter.DiskSize := 0;
+    end;
+    StatusBar.Panels[1].Text := SpaceMeter.RemainingSpaceString;
+  end else
+  begin
     SpaceMeter.SpaceMeterMode := SMM_NoDisk;
     SpaceMeter.DiskSize := 0;
   end;
-  StatusBar.Panels[1].Text := SpaceMeter.RemainingSpaceString;
 end;
 
 { UpdateTaskBarEntry -----------------------------------------------------------
