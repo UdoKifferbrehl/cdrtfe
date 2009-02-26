@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.02.2009
+  letzte Änderung  26.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -257,138 +257,7 @@ end;
 
   StartExecution führt die Kommandozeile aus und leitet die Ausgaben an
   ProcessOutput weiter.                                                        }
-(*
-procedure TActionThread.StartExecution;
-const SECURITY_DESCRIPTOR_REVISION = 1;
-var lpPipeAttributes        : TSecurityAttributes;
-    ReadStdOut, NewStdOut   : THandle;
-    WriteStdIn, NewStdIn    : THandle;
-    lpStartupInfo           : TStartupInfo;
-    lpProcessInformation    : TProcessInformation;
-    lpSecurityDescriptor    : TSecurityDescriptor;
-    lpNumberOfBytesRead     : DWORD;
-    lpNumberOfBytesAvailable: DWORD;
-    Buffer                  : array[0..10] of Char;
-    Temp                    : string;
-    StartWithNewLine        : Boolean;
-    OnlyBS                  : Boolean;
-    ExitCode                : Integer;
-    Changed                 : Boolean;
-begin
-  FLine := FCommandLine;
-  Synchronize(DAddLine);
-  StartWithNewLine := True;
-  ZeroMemory(@lpPipeAttributes, SizeOf(TSecurityAttributes));
-  lpPipeAttributes.nLength := SizeOf(TSecurityAttributes);
-  lpPipeAttributes.bInheritHandle := True;
 
-  if PlatformWinNT then
-  begin
-    InitializeSecurityDescriptor(@lpSecurityDescriptor,
-                                 SECURITY_DESCRIPTOR_REVISION);
-    SetSecurityDescriptorDacl(@lpSecurityDescriptor, True, nil, False);
-    lpPipeAttributes.lpSecurityDescriptor := @lpSecurityDescriptor;
-  end else
-  begin
-    lpPipeAttributes.lpSecurityDescriptor := nil;
-  end;
-
-  if (CreatePipe(ReadStdOut, NewStdOut, @lpPipeAttributes, 0)) and
-     (CreatePipe(NewStdIn, WriteStdIn, @lpPipeAttributes, 0)) then
-  begin
-    ZeroMemory(@lpStartupInfo, SizeOf(TStartupInfo));
-    ZeroMemory(@lpProcessInformation, SizeOf(TProcessInformation));
-    lpStartupInfo.cb := SizeOf(TStartupInfo);
-    lpStartupInfo.dwFlags := STARTF_USESTDHANDLES or STARTF_USESHOWWINDOW;
-    lpStartupInfo.hStdOutput := NewStdOut;
-    lpStartupInfo.hStdError := NewStdOut;
-    lpStartupInfo.hStdInput := NewStdIn;
-    lpStartupInfo.wShowWindow := SW_HIDE;
-    if CreateProcess(nil, PChar(FCommandLine), nil, nil, True,
-                     CREATE_NEW_CONSOLE {or CREATE_NEW_PROCESS_GROUP},
-                     FEnvironmentBlock, nil,
-                     lpStartupInfo, lpProcessInformation) then
-      try
-        FPHandle := lpProcessInformation.hProcess;
-        FPStdIn := WriteStdIn;
-        FPID := lpProcessInformation.dwProcessId;
-        Buffer[0] := #0;
-        Temp := '';
-        Changed := True;
-        repeat
-          GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
-          if Changed then
-          begin
-            Temp := Temp + Buffer;
-            {jetzt Zeichen verarbeiten und anzeigen}
-            Temp := ProcessOutput(Temp, StartWithNewLine);
-          end;
-
-          ZeroMemory(@Buffer, SizeOf(Buffer));
-          lpNumberOfBytesRead := 0;
-          // Application.ProcessMessages;
-
-          {ReadSuccess := }
-          PeekNamedPipe(ReadStdout, @Buffer, SizeOf(Buffer),
-                        @lpNumberOfBytesRead,
-                        @lpNumberOfBytesAvailable, nil);
-
-          Changed := lpNumberOfBytesAvailable > 0;
-          if lpNumberOfBytesAvailable <> 0 then
-          begin
-            ZeroMemory(@Buffer, SizeOf(Buffer));
-            {ReadSuccess :=}
-            ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
-                     lpNumberOfBytesRead, nil);
-          end else
-          begin
-            {nach StdIn schreiben}
-          end;
-
-          Sleep(1);
-        until (ExitCode <> STILL_ACTIVE) and (lpNumberOfBytesAvailable = 0);
-
-        {Falls noch Reste in Temp stehen, diese verarbeiten und ausgeben}
-        OnlyBS := False;
-        repeat
-          Temp := ProcessOutput(Temp, StartWithNewLine);
-          if Length(Temp) > 0 then
-          begin
-            if (Temp[1] = BckSp) and (Temp[Length(Temp)] = BckSP) then
-            begin
-              OnlyBS := True;
-            end;
-          end;
-        until (Temp = '') or OnlyBS;
-        if not Terminated then
-        begin
-          // Ausführung beendet.
-          FLine := FMessageOk; // FLine := GMS('moutput01');
-        end else
-        begin
-          // Ausführung durch Anwender abgebrochen.
-          FLine := FMessageAborted; // FLine := GMS('moutput02');
-        end;
-        Synchronize(DAddLine);
-        FLine := '';
-        Synchronize(DAddLine);
-      finally
-        {$IFDEF ShowCmdError}
-        repeat
-          GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
-        until ExitCode <> STILL_ACTIVE;
-        if FExitCode = 0 then FExitCode := ExitCode;
-        {$ENDIF}
-        CloseHandle(NewStdIn);
-        CloseHandle(NewStdOut);
-        CloseHandle(ReadStdOut);
-        CloseHandle(WriteStdIn);
-        CloseHandle(lpProcessInformation.hThread);
-        CloseHandle(lpProcessInformation.hProcess);
-      end;
-  end;
-end;
-*)
 procedure TActionThread.StartExecution;
 var lpPipeAttributes: TSecurityAttributes;
     ReadStdOut, NewStdOut: THandle;
@@ -572,38 +441,6 @@ begin
     Thread.EnvironmentBlock := EnvironmentBlock;
   Thread.Resume;
 end;
-          (*
-{ EnumWindowsProc --------------------------------------------------------------
-
-  Callback-Funktion für EnumWindows.                                           }
-
-function EnumWindowsProc(const Wnd: HWnd;
-                         const ProcWndInfo: PProcessWindow): Boolean; stdcall;
-var  WndProcessID: Cardinal;
-begin
-  GetWindowThreadProcessId(Wnd, @WndProcessID);
-  if WndProcessID = ProcWndInfo^.TargetProcessID then
-  begin
-    ProcWndInfo^.FoundWindow := Wnd;
-    Result := False; // stop enumerating since we've already found a window.
-  end else
-  begin
-    Result := True; // Keep searching
-  end;
-end;
-
-{ GetProcessWindow -------------------------------------------------------------
-
-  GetProcessWindow bestimmt das zu einem Prozeß gehörende Fenster.             }
-
-function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
-var ProcWndInfo: TProcessWindow;
-begin
-  ProcWndInfo.TargetProcessID := TargetProcessID;
-  ProcWndInfo.FoundWindow := 0;
-  EnumWindows(@EnumWindowsProc, integer(@ProcWndInfo));
-  Result := ProcWndInfo.FoundWindow;
-end;                            *)
 
 { TerminateExecution -----------------------------------------------------------
 
