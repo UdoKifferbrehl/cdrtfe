@@ -2,9 +2,9 @@
 
   f_logstrings.pas: vordefinierte Strings
 
-  Copyright (c) 2007-2008 Oliver Valencia
+  Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  17.02.2008
+  letzte Änderung  06.03.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,6 +50,8 @@ begin
     Add('1055=TForm1.FormClose');
     Add('1056=frm_main.pas finalization');
     Add('1057=Received Message: WM_DriveSettings');
+    Add('1058=UserOpenFile: Open audio or video track with special program.');
+    Add('1059=UserOpenFile: Open file with standard program.');
     {f_process.pas/cl_actionthread.pas}
     Add('1100=GetDOSOutputEx:');
     Add('1101=Running commandline');
@@ -60,6 +62,7 @@ begin
     Add('1106=Sending Ctrl-c to processes');
     Add('1107=Killing process softly');
     Add('1108=Killing child processes');
+    Add('1109=Calling ShellExecute:');
     {cl_devices.pas}
     Add('1200=Entering TDevices.DetectDrives -----------------------------------------------------------');
     Add('1201=Leaving TDevices.DetectDrives ------------------------------------------------------------');

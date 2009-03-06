@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.02.2009
+  letzte Änderung  06.02.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2325,6 +2325,9 @@ begin
       if ((List = AudioListView) or (List = VideoListView)) and
          FSettings.General.UseMPlayer then
       begin
+        {$IFDEF WriteLogfile}
+        AddLogCode(1058);
+        {$ENDIF}
         if FSettings.FileFlags.MPlayerOk then
           ShlExecute(QuotePath(FSettings.General.MPlayerCmd),
                      ReplaceString(FSettings.General.MPlayerOpt, '%N',
@@ -2333,6 +2336,9 @@ begin
       begin
         if not ItemIsFolder(Item) then
         begin
+          {$IFDEF WriteLogfile}
+          AddLogCode(1059);
+          {$ENDIF}
           ShlExecute('', QuotePath(List.Selected.SubItems[2]));
         end else
         begin
