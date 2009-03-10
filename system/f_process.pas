@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.03.2008
+  letzte Änderung  10.03.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -786,6 +786,8 @@ end;
   vereinfachter Zugriff auf ShellExecute.                                      }
 
 procedure ShlExecute(const Cmd, Opt: string);
+var ErrorCode: Integer;
+    Msg, Msg2: string;
 begin
   {$IFDEF WriteLogfile}
   AddLogCode(1109);
@@ -802,12 +804,34 @@ begin
   {$ENDIF}
   if Cmd = '' then
   begin
-    ShellExecute(Application.MainForm.Handle, 'open',
-                 PChar(Opt), nil, nil, SW_SHOWNORMAL);
+    ErrorCode := ShellExecute(Application.MainForm.Handle, 'open',
+                                PChar(Opt), nil, nil, SW_SHOWNORMAL);
   end else
   begin
-    ShellExecute(Application.MainForm.Handle, nil,
-                 PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
+    ErrorCode := ShellExecute(Application.MainForm.Handle, nil,
+                                PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
+  end;
+  if ErrorCode <= 32 then
+  begin
+    case ErrorCode of
+       2: Msg2 := 'File not found.';
+       3: Msg2 := 'Path not found.';
+       5: Msg2 := 'Access denied.';
+       8: Msg2 := 'Out of memory.';
+      26: Msg2 := 'Sharing violation.';
+      27: Msg2 := 'Incomplete or invalid file name association.';
+      28: Msg2 := 'DDE transaction timed out.';
+      29: Msg2 := 'DDE transaction failed.';
+      30: Msg2 := 'DDE busy.';
+      31: Msg2 := 'No file name association for file type.';
+      32: Msg2 := 'DLL not found.';
+    else
+      Msg2 := 'unknown';
+    end;
+    Msg := 'ShellExecute failed.' + CRLF +
+           'Error code: ' + IntToStr(ErrorCode) + CRLF +
+           'Error message: ' + Msg2;
+    ShowMsgDlg(Msg, 'Error', MB_OK or MB_ICONWARNING);
   end;
 end;
 
