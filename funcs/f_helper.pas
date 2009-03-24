@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2009 Oliver Valencia
 
-  letzte Änderung 26.01.2009
+  letzte Änderung 24.03.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,12 +16,14 @@
     * Eingabe-Liste für rrenc erzeugen
     * DVD-Video-Quellordner prüfen
     * prüfen, ob eine DVD eingelegt ist
+    * prüfen, ob Disk eingelegt ist
     * für Spezialfälle aktuelles Verzeichnis festlegen
 
 
   exportierte Funktionen/Prozeduren:
 
     ConvertXCDParamListToRrencInputList(Source, Dest: TStringList)
+    DiskInserted(const Dev: string): Boolean
     DiskIsDVD(const Dev: string): Boolean
     EjectDisk(const Dev: string)
     LoadDisk(const Dev: string)
@@ -41,6 +43,7 @@ interface
 
 uses Classes, FileCtrl, SysUtils;
 
+function DiskInserted(const Dev: string): Boolean;
 function DiskIsDVD(const Dev: string): Boolean;
 function GetCurrentFolder(const CommandLine: string): string;
 function IsValidDVDSource(const Path: string): Boolean;
@@ -194,6 +197,23 @@ begin
   p := Pos(LF, Temp);
   Temp := Copy(Temp, 1, p);
   Result := Pos('DVD', Temp) > 0;
+end;
+
+{ DiskInserted -----------------------------------------------------------------
+
+  True : Es ist eine Disk im Laufwerk.
+  False: Das Laufwerk ist leer.                                                }
+
+function DiskInserted(const Dev: string): Boolean;
+var CommandLine: string;
+    Output     : string;
+begin
+  CommandLine := StartUpDir + cCdrecordBin;
+  CommandLine := QuotePath(CommandLine);
+  CommandLine := CommandLine + ' dev=' + Dev + ' -toc';
+  Output := GetDOSOutput(PChar(CommandLine), True, False);
+  Result := (Pos('No disk / Wrong disk!', Output) = 0) and
+            (Pos('Cannot load media with this drive', Output) = 0);
 end;
 
 { GetCurrentDir ----------------------------------------------------------------

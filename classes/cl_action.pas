@@ -1302,10 +1302,10 @@ end;
   in FData.DAE.TrackList.                                                      }
 
 procedure TCDAction.DAEReadTOC;
-var Output: TStringList;
-    TrackList: TStringList;
+var Output     : TStringList;
+    TrackList  : TStringList;
     CommandLine: string;
-    CDPresent: Boolean;
+    CDPresent  : Boolean;
 
   { UnescapeString -------------------------------------------------------------
 
@@ -1401,18 +1401,10 @@ begin
   {$IFDEF DebugReadAudioTOC}
   FormDebug.Memo1.Lines.Add('Reading TOC ...');
   {$ENDIF}
-  CDPresent := False;
   Output := TStringList.Create;
   {feststellen, ob CD eingelegt ist, sonst würde cdda2wav auf Benutzereingabe
    warten}
-  CommandLine := StartUpDir + cCdrecordBin;
-  CommandLine := QuotePath(CommandLine);
-  CommandLine := CommandLine + ' dev=' + SCSIIF(FSettings.DAE.Device) + ' -toc';
-  Output.Text := GetDOSOutput(PChar(CommandLine), True, False);
-  if Pos('No disk / Wrong disk!', Output.text) = 0 then
-  begin
-    CDPresent := True;
-  end;
+  CDPresent := DiskInserted(SCSIIF(FSettings.DAE.Device));
   {Toc auslesen}
   CommandLine := StartUpDir + cCdda2wavBin;
   CommandLine := QuotePath(CommandLine);
@@ -1429,19 +1421,26 @@ begin
   if CDPresent then
   begin
     Output.Text := GetDOSOutput(PChar(CommandLine), True, False);
-  end;
-  {$IFDEF DebugReadAudioTOC}
-  AddCRStringToList(Output.Text, FormDebug.Memo1.Lines);
-  FormDebug.Memo1.Lines.Add('');
-  {$ENDIF}
-  {Aus der cdda2wav-Ausgabe die Infos herausholen.}
-  ExtractTrackInfo(Output);
-  {TrackListe zuweisen}
-  TrackList := FData.GetFileList('', cDAE);
-  TrackList.Assign(Output);
-  {$IFDEF DebugReadAudioTOC}
-  FormDebug.Memo2.Lines.Assign(TrackList);
-  {$ENDIF}
+    {$IFDEF DebugReadAudioTOC}
+    AddCRStringToList(Output.Text, FormDebug.Memo1.Lines);
+    FormDebug.Memo1.Lines.Add('');
+    {$ENDIF}
+    {TrackListe zuweisen}
+    TrackList := FData.GetFileList('', cDAE);
+    TrackList.Assign(Output);
+    {Aus der cdda2wav-Ausgabe die Infos herausholen.}
+    ExtractTrackInfo(TrackList);
+    {$IFDEF DebugReadAudioTOC}
+    FormDebug.Memo2.Lines.Assign(TrackList);
+    {$ENDIF}
+    if TrackList.Count = 0 then
+    begin
+      ShowMsgDlg(FLang.GMS('everify04'), FLang.GMS('g001'),
+                 MB_OK or MB_ICONWARNING);
+    end;
+  end else
+      ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'),
+                 MB_OK or MB_ICONWARNING);
   Output.Free;
 end;
 
