@@ -6,6 +6,10 @@
   erstellt         23.11.2004
   letzte Änderung  28.09.2007
 
+  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
+  GNU General Public License weitergeben und/oder modifizieren. Weitere
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
+
   cl_deviceenum.pas stellt einen einfachen SCSI-Device-Enumerator zur Verfügung.
   Der SCSI-Bus kann nach bestimmten Gerätetypen durchsucht werden. Wenn ent-
   sprechende Geräte vorhanden sind, werden diese in String-Listen eingetragen.
