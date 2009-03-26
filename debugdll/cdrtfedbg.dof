@@ -28,7 +28,6 @@ Z=1
 ShowHints=1
 ShowWarnings=1
 UnitAliases=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
-
 [Linker]
 MapFile=0
 OutputObjs=0
@@ -38,7 +37,6 @@ MinStackSize=16384
 MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
-
 [Directories]
 OutputDir=i:\cdrtfe\proto
 UnitOutputDir=units
@@ -47,17 +45,15 @@ Packages=VCLX30;VCL30;VCLDB30;VCLDBX30;INETDB30;INET30;VCLSMP30;QRPT30;TEEUI30;T
 Conditionals=
 DebugSourceDirs=
 UsePackages=0
-
 [Parameters]
 RunParams=
 HostApplication=
-
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=1
-MinorVer=2
-Release=6
+MinorVer=3
+Release=5
 Build=0
 Debug=0
 PreRelease=0
@@ -66,15 +62,18 @@ Private=0
 DLL=0
 Locale=1031
 CodePage=1252
-
 [Version Info Keys]
 CompanyName=cdrtfe Homepage:
 FileDescription=cdrtfe debug dll
-FileVersion=1.2.6.0
+FileVersion=1.3.5.0
 InternalName=cdrtfedbg.dll
-LegalCopyright=Copyright © 2007  O. Valencia
+LegalCopyright=Copyright © 2007-2009  O. Valencia
 LegalTrademarks=
 OriginalFilename=
 ProductName=cdrtools Frontend
-ProductVersion=1.2
+ProductVersion=1.3
 Comments=
+http://cdrtfe.sourceforge.net
+
+eMail:
+kerberos002@arcor.de
