@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2009 Oliver Valencia
 ;
-;  letzte Änderung  02.01.2008
+;  letzte Änderung  25.03.2009
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVerName "cdrtfe 1.3.4"
+#define MyAppVerName "cdrtfe 1.3.5"
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
@@ -33,11 +33,11 @@ UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
 ; Compiler
-VersionInfoVersion=1.3.4
+VersionInfoVersion=1.3.5
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
 ;OutputDir=J:\shared\cdrtfe
-OutputBaseFilename=cdrtfe-1.3.4
+OutputBaseFilename=cdrtfe-1.3.5
 ; Compression
 ;Compression=none
 Compression=lzma
