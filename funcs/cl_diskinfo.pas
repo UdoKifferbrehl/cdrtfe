@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  03.05.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1070,7 +1070,8 @@ begin
       Result := False;
     end;
     {Fehler: Restkapazität nicht ausreichend}
-    if Result and (FTimeFree > 0) and (Args.CDTime > FTimeFree) then
+    if Result and (FTimeFree > 0) and (Args.CDTime > FTimeFree)
+              and not FSettings.AudioCD.Overburn then
     begin
       Temp := FLang.GMS('eburn06') +
               Format(FLang.GMS('mburn04'),
@@ -1733,7 +1734,8 @@ begin
       Result := False;
     end;
     {Fehler: Restkapazität nicht ausreichend}
-    if Result and (FTimeFree > 0) and (Args.CDTime > FTimeFree) then
+    if Result and (FTimeFree > 0) and (Args.CDTime > FTimeFree)
+              and not FSettings.AudioCD.Overburn then
     begin
       Temp := FLang.GMS('eburn06') +
               Format(FLang.GMS('mburn04'),
