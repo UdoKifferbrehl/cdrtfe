@@ -1,10 +1,10 @@
 { cl_deviceenum.pas: Implementierung eines einfachen SCSI-Device-Enumerators
 
-  Copyright (c) 2004-2005, 2007 Oliver Valencia
+  Copyright (c) 2004-2005, 2007-2009 Oliver Valencia
 
   Version          1.1
   erstellt         23.11.2004
-  letzte Änderung  28.09.2007
+  letzte Änderung  03.05.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -14,13 +14,16 @@
   Der SCSI-Bus kann nach bestimmten Gerätetypen durchsucht werden. Wenn ent-
   sprechende Geräte vorhanden sind, werden diese in String-Listen eingetragen.
 
-  Zur Zeit kann nur nach CD-ROM-Laufwerken gesucht werden.
+  Zur Zeit kann nur nach CD-ROM-Laufwerken gesucht werden. Externe Laufwerke
+  (z.B. USB-Laufwerke) werden nur mit Laufwerksbuchstaben und Namen erkannt; die
+  SCSI-ID kann für diese Laufwerke zur Zeit nicht ermittelt werden.
 
 
   TSCSIDevices: SCSI-Device-Enumerator
 
     Properties   DeviceIDList
                  DeviceList
+                 DeviceListNoID
                  LastError
                  Layer
                  Log
@@ -52,7 +55,7 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
      {Geräteinformation}
      PDeviceInfo = ^DeviceInfo;
      DeviceInfo = record
-       HA, ID, LUN: Byte;
+       HA, ID, LUN: Shortint;
        Name       : string;
        Vendor     : string;
        ProductID  : string;
@@ -63,14 +66,15 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
 
      TSCSIDevices = class(TObject)
      private
-       FASPIHandle  : THandle;
-       FASPILoaded  : Boolean;
-       FDeviceIDList: TStringList;          // h,t,l=<driveletter>
-       FDeviceList  : TStringList;          // h,t,l=<name>
-       FLastError   : TSCSIDevicesError;
-       FLayer       : TSCSILayer;
+       FASPIHandle    : THandle;
+       FASPILoaded    : Boolean;
+       FDeviceIDList  : TStringList;          // h,t,l=<driveletter>
+       FDeviceList    : TStringList;          // h,t,l=<name>
+       FDeviceListNoID: TStringList;          // <name>=<driveletter>
+       FLastError     : TSCSIDevicesError;
+       FLayer         : TSCSILayer;
        {$IFDEF EnableLogging}
-       FLog         : TStringList;
+       FLog           : TStringList;
        {$ENDIF}
        function ASPIGetDiskVendor(P: PDeviceInfo): Boolean;
        function ASPIGetDriveLetter(HA, ID, LUN: Byte): string;
@@ -94,6 +98,7 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
        {Properties}
        property DeviceIDList: TStringList read FDeviceIDList;
        property DeviceList: TStringList read FDeviceList;
+       property DeviceListNoID: TStringList read FDeviceListNoID;
        property LastError: TSCSIDevicesError read GetLastError;
        property Layer: string read GetLayer;
        {$IFDEF EnableLogging}
@@ -323,8 +328,8 @@ begin
       CurrDev.Revision   := Copy(DriveString, 24 + 1, 4);
       CurrDev.VendorSpec := Copy(DriveString, 28 + 1, 20);
       CurrDev.Name       := Trim(CurrDev.Vendor) + ' ' +
-                            Trim(CurrDev.ProductID) + ' ' +
-                            Trim(CurrDev.Revision);
+                            Trim(CurrDev.ProductID); { + ' ' +
+                            Trim(CurrDev.Revision);   }
       {Adresse (path/tgt/lun) des Laufwerks mit IOCTL_SCSI_GET_ADDRESS}
       ZeroMemory(@Buffer, 1024);
       pscsiAddr         := PSCSI_ADDRESS(@Buffer);
@@ -349,8 +354,16 @@ begin
        {$ENDIF}
       end else
       begin
+        CurrDev.HA  := -1;
+        CurrDev.ID  := -1;
+        CurrDev.LUN := -1;
         {$IFDEF EnableLogging}
-        FLog.Add('     Get SCSI address ... failed' + #13#10);
+        FLog.Add('     Get SCSI address ... failed.');
+        FLog.Add('       Probably an USB device.');
+        FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
+        FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
+        FLog.Add('       Device Revision  : ' + CurrDev.Revision);
+        FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
        {$ENDIF}
         Result := False;
       end;
@@ -564,6 +577,10 @@ begin
         FDeviceIDList.Add(DevID + '=' + Drive.DriveLetter);
         FDeviceList.Add(DevID + '=' + Drive.Name);
       end;
+    end else
+    begin
+      // USB-Laufwerk, ID kann nicht ermittelt werden
+      FDeviceListNoID.Add(Drive.Name + '=' + Drive.DriveLetter);
     end;
   end;
   DriveList.Free;
@@ -803,14 +820,15 @@ end;
 constructor TSCSIDevices.Create;
 begin
   inherited Create;
-  FASPIHandle   := 0;
-  FASPILoaded   := False;
-  FDeviceIDList := TStringList.Create;
-  FDeviceList   := TStringList.Create;
-  FLastError    := SD_NoError;
-  FLayer        := L_Undef;
+  FASPIHandle     := 0;
+  FASPILoaded     := False;
+  FDeviceIDList   := TStringList.Create;
+  FDeviceList     := TStringList.Create;
+  FDeviceListNoID := TStringList.Create;
+  FLastError      := SD_NoError;
+  FLayer          := L_Undef;
   {$IFDEF EnableLogging}
-  FLog          := TStringList.Create;
+  FLog            := TStringList.Create;
   {$ENDIF}
 end;
 
@@ -822,6 +840,7 @@ begin
   ASPIFree;
   FDeviceIDList.Free;
   FDeviceList.Free;
+  FDeviceListNoID.Free;
   inherited Destroy;
 end;
 

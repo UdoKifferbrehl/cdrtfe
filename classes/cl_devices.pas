@@ -5,7 +5,7 @@
   Copyright (c) 2005-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  03.05.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -348,7 +348,8 @@ begin
   AddLogCode(1202);
   AddLog(SCSIDevices.Log.Text, 3);
   AddLog(SCSIDevices.DeviceIDList.Text + CRLF +
-         SCSIDevices.DeviceList.Text + CRLF, 3);
+         SCSIDevices.DeviceList.Text + CRLF +
+         SCSIDevices.DeviceListNoID.Text + CRLF, 3);
   {$ENDIF}
   {Zuweisungen der Buchstaben}
   for i := 0 to FLocalCDDevices.Count - 1 do
@@ -360,6 +361,11 @@ begin
     if Found then Temp := FLocalCDDriveLetter.Values[DeviceID];
     {neuen DriveLetter laut SCSI-Scan holen}
     DriveLetter := SCSIDevices.DeviceIDList.Values[DeviceID];
+    {Wenn es keinen DriveLetter nach ID gibt, dann nach Namen suchen (USB-LW).
+     Dieser Workaround funktioniert nur, wenn die Laufwerke ohne ID unter-
+     schiedliche Name haben!}
+    if DriveLetter = '' then DriveLetter :=
+      SCSIDevices.DeviceListNoID.Values[(FLocalCDDevices.Names[i])];
     {DriveLetter ersetzen bzw. hinzufügen}
     if Found then
     begin
