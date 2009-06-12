@@ -2,7 +2,7 @@
 
   Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  29.01.2009
+  letzte Änderung  11.06.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,6 +12,8 @@
     * Anzeige der verfügbaren Ordner (auch Windows-Spezial-Ordner)
     * Auswahl der anzuzeigenden Ordner und des Startordners
     * Möglichkeit einen oder auch mehrere Ordner auszuwählen
+    * Statt der ShellShock-Komponenten verwendet der Dialog jetzt die Delphi-
+      ShellControls.
     * Die Verwendung der ShellShock-Komponenten setzt die Datei comctl32.dll in
       der Version 5.81 oder höher voraus. Bei niedrigeren Versionen wird der
       Standard-Auswahldialog für einen einzelnen Ordner verwendet.
@@ -29,8 +31,6 @@
                  Position
                  Multiselect
                  Root
-                 SpecialRoot
-                 SpecialStartIn
                  InitialDir
                  Path
                  PathList
@@ -50,12 +50,12 @@ unit dlg_folderbrowse;
 interface
 
 uses Classes, Windows, Forms, StdCtrls, Controls, FileCtrl, SysUtils, ComCtrls,
-     ShlObj, ActiveX, SsBase, StShlCtl;
+     ShlObj, ActiveX, ShellCtrls;
 
 type TFolderBrowser = class(TComponent)
        {Dialog und dessen Komponenten}
        FBDialog        : TForm;
-       FBShellTreeView : TStShellTreeView;
+       FBShellTreeView : TShellTreeView;
        FBListView      : TListView;
        FBLabelTitle    : TLabel;
        FBButtonOk      : TButton;
@@ -77,8 +77,6 @@ type TFolderBrowser = class(TComponent)
        FColCaption     : string;
        {ShellTreeView}
        FRoot           : string;
-       FSpecialRoot    : TStSpecialRootFolder;
-       FSpecialStartIn : TStSpecialRootFolder;
        FInitialDir     : string;
        {Buttons}
        FButtonCapOk    : string;
@@ -111,8 +109,6 @@ type TFolderBrowser = class(TComponent)
        property Multiselect   : Boolean read FMultiselect write FMultiselect;
        {ShellTreeview-Properties}
        property Root          : string write FRoot;
-       property SpecialRoot   : TStSpecialRootFolder write FSpecialRoot;
-       property SpecialStartIn: TStSpecialRootFolder write FSpecialStartIn;
        property InitialDir    : string write SetInitialDir;
        {Path}
        property Path          : string read FPath;
@@ -252,7 +248,7 @@ begin
   *)
   if ((ssAlt in Shift) and (Key = VK_INSERT)) or
      (Key = VK_F11) then
-    InsertFolder(FBShellTreeView.SelectedFolder.Path);
+    InsertFolder(FBShellTreeView.SelectedFolder.PathName);
 end;
 
 { Listview - OnKeyDown ---------------------------------------------------------
@@ -276,8 +272,7 @@ begin
   FWidth           := 315;
   FPosition        := poScreenCenter;
   FRoot            := '';
-  FSpecialRoot     := sfDesktop;
-  FSpecialStartIn  := sfDrives;
+  FInitialDir      := '';
   FButtonCapOk     := 'Ok';
   FButtonCapCancel := 'Abbrechen';
   FPath            := '';
@@ -377,28 +372,28 @@ begin
     end;
 
     {ShellTreeView}
-    FBShellTreeView := TStShellTreeView.Create(Self);
+    FBShellTreeView := TShellTreeView.Create(Self);
     with FBShellTreeView do
     begin
       SetBounds(8, NewTop, FWidth - 16, FHeight - NewTop - (FHeight - NewBottom));
       Parent := FBDialog;
-      SpecialRootFolder := FSpecialRoot;
-      if DirectoryExists(FRoot) then
-      begin
-        RootFolder := FRoot;
-        SpecialRootFolder := sfNone;
-      end;
-      if Length(FInitialDir) > 0 then
-      begin
-        FBShellTreeView.StartInFolder := FInitialDir;
-      end else
-      begin
-        FBShellTreeView.SpecialStartInFolder := FSpecialStartIn;
-      end;
       HideSelection    := False;
       OnClick          := STVClick;
       OnKeyDown        := STVKeyDown;
-      Options          := [toExpandTopNode, toShowHidden, toShellMenu];
+      ObjectTypes      := [otFolders, otHidden];      
+      if DirectoryExists(FRoot) then
+      begin
+        Root := FRoot;
+      end;
+      if Length(FInitialDir) > 0 then
+      begin
+        FBShellTreeView.Path := FInitialDir;
+        FBShellTreeView.Selected.Expand(False);
+      end else
+      begin
+        FBShellTreeView.Path := 'c:\';
+        FBShellTreeView.Selected.Parent.Selected := True;
+      end;
     end;
 
     {TabOrder}
@@ -410,7 +405,7 @@ begin
     Result := FBDialog.ShowModal = mrOK;
     if FBDialog.ModalResult = mrOK then
     begin
-      FPath := FBShellTreeView.SelectedFolder.Path;
+      FPath := FBShellTreeView.SelectedFolder.PathName;
       if FPathList.Count = 0 then InsertFolder(FPath);
     end;
   end else

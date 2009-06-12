@@ -1,0 +1,61 @@
+--- ShellCtrls_org.pas	2005-11-14 10:00:00.000000000 +0100
++++ ShellCtrls.pas	2009-06-11 16:30:12.781250000 +0200
+@@ -206,6 +206,7 @@
+     procedure RefreshEvent;
+   public
+     constructor Create(AOwner: TComponent); override;
++    destructor Destroy; override; // 11.06.2009: Bugfix, missing destructor
+     procedure Refresh(Node: TTreeNode);
+     function SelectedFolder: TShellFolder;
+     property AutoRefresh: boolean read FAutoRefresh write SetAutoRefresh;
+@@ -1594,6 +1595,16 @@
+   FLoadingRoot := False;
+ end;
+ 
++// 11.06.2009: Bugfix, missing destructor
++
++destructor TCustomShellTreeView.Destroy;
++begin
++  if Assigned(FRootFolder) then
++    FRootFolder.Free;
++  inherited;
++end;
++
++
+ procedure TCustomShellTreeView.ClearItems;
+ var
+   I: Integer;
+@@ -2721,7 +2732,13 @@
+ end;
+ 
+ destructor TCustomShellComboBox.Destroy;
++var i: integer;
+ begin
++  // 11.06.2009: Bugfix, missing Free
++  for i := 0 to Items.Count - 1 do
++  if Assigned(Folders[i]) then Folders[I].Free;
++  if assigned(FRootFolder) then FRootFolder.Free;
++
+   inherited Destroy;
+   if Assigned(FImageList) then FImageList.Free;
+ end;
+@@ -2809,6 +2826,9 @@
+ begin
+   ClearItems;
+   FFolders.Free;
++  // 11.06.2009: Bugfix, missing FRootFolder.Free
++  if Assigned(FRootFolder) then
++    FRootFolder.Free;
+   inherited;
+ end;
+ 
+@@ -2978,7 +2998,8 @@
+         SetPathFromID(AbsoluteID)
+       else
+         ShellExecute(Handle, nil, PChar(PathName), nil,
+-          PChar(ExtractFilePath(PathName)), 0);  
++          PChar(ExtractFilePath(PathName)), sw_ShowNormal);
++         // 11.06.2009: patched, sw_shownormal instead of 0
+   inherited DblClick;
+ end;
+ 
