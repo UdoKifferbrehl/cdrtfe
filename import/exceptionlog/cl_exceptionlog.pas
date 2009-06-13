@@ -21,7 +21,7 @@
   Get call stack and other information when an exception occurs. Based on the
   JEDI Code Library (JCL).
 
-  Last modified: 2007/01/20
+  Last modified: 2009/06/13
 
 }
 
@@ -408,18 +408,24 @@ end;
   wird JclDebugThreadList.OnSyncException zugewiesen.                          }
 
 class procedure TExceptionLog.ExceptionThreadHandler(Thread: TJclDebugThread);
+var E: Exception;
 begin
-  if ExceptionShowing then
-    Application.ShowException(Thread.SyncException)
-  else
-  begin
-    ExceptionShowing := True;
-    try
-      ShowException(Thread.SyncException, Thread);
-    finally
-      ExceptionShowing := False;
+  E := Exception(Thread.SyncException);
+  if Assigned(E) then
+    if ExceptionShowing then
+      Application.ShowException(E)
+    else
+    begin
+      ExceptionShowing := True;
+      try
+        if IsIgnoredException(E.ClassType) then
+          Application.ShowException(E)
+        else
+          ShowException(E, Thread);
+      finally
+        ExceptionShowing := False;
+      end;
     end;
-  end;
 end;
 
 { ShowException ----------------------------------------------------------------
