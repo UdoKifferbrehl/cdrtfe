@@ -1,11 +1,11 @@
 { cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
-  frm_main.pas: Hauptfenster
+  frm_main.pas: Hauptfenster                   
 
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2009
+  letzte Änderung  14.06.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2733,7 +2733,7 @@ begin
     end;
     if MainMaximized then
     begin
-      Self.Position := poDefault;
+      //Self.Position := poDefault;
       Self.WindowState := wsMaximized;
     end;
     {ListView-Spaltenbreite}
@@ -3755,12 +3755,16 @@ begin
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
   DragAcceptFiles(Form1.Handle, true);
-  {Sonderbehandlung, falls große Schriftarten verwendet werden}         (*
-  if Screen.PixelsPerInch > 96 then
+  {Constraints für minimale Fenstergröße}
+  if (Screen.PixelsPerInch <= 96) then
   begin
-    Form1.Width := 923;
-    Form1.Height := 610;
-  end;                                                                   *)
+    Form1.Constraints.MinWidth := dWidth;
+    Form1.Constraints.MinHeight := dHeight;
+  end else
+  begin
+    Form1.Constraints.MinWidth := dWidthBigFont;
+    Form1.Constraints.MinHeight := dHeightBigFont;  
+  end;
   {Das schöne der beiden großen Icons für cdrtfe. Anscheinend übergibt GetIcon
    nur ein Handle, daher muß in FormDestroy Application.Icon.ReleaseHandle aus-
    geführt werden, da sonst das Icon sowohl durch das TApplication als auch
@@ -3800,7 +3804,8 @@ begin
   SpaceMeter := TSpaceMeter.Create(Self);
   SpaceMeter.Font := Self.Font;
   SpaceMeter.Captions := FLang.GMS('g014');
-  SpaceMeter.Init(Form1, StatusBar.Top - 34, 8, 545, 30);
+  SpaceMeter.Init(Form1, StatusBar.Top - 34, 8, 545, 30,
+                  [akLeft, akRight, akBottom]);
   SpaceMeter.OnSpaceMeterTypeChange := SpaceMeterTypeChange;
 end;
 
@@ -4272,87 +4277,19 @@ end;
 
 { FormResize -------------------------------------------------------------------
 
-  Größenänderung des Hauptfensters, ursprünglich Mod by Oli.                   }
-  
+  Größenänderung des Hauptfensters, ursprünglich Mod by Oli. Sonderbehandlung
+  für die Speedbuttons auf TabSheet3 (XCD).                                    }
+
 procedure TForm1.FormResize(Sender: TObject);
-var i       : Integer;
-    TSHeight: Integer;
+var TSHeight: Integer;
 begin
   {Resize bei kleiner Schriftart}
   if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
   begin
-    {minimale Größe festlegen}
-    if Form1.Width < dWidth then Form1.Width := dWidth;
-    if Form1.Height < dHeight then Form1.Height := dHeight;
-    {allgemeine Controls}
-    {V-Button: richtige Größe bestimmen}
-    ButtonShowOutput.Width  := GetSystemMetrics(SM_CXVSCROLL);
-    ButtonshowOutput.Height := GetSystemMetrics(SM_CYHSCROLL);
-    {Länge der Trennlinie der Hauptmenüleiste}
-    Bevel4.Width := ClientWidth;
-    {StatusBar}
-    StatusBar.Width := ClientWidth - 192 - (Width - ClientWidth);
-    StatusBar.Top := ClientHeight - StatusBar.Height;
-    {Ausgabefenster}
-    Memo1.Width := StatusBar.Width;
-    Memo1.Top := StatusBar.Top - 147; //109;
-    {CDSizer}
-    SpaceMeter.Top := StatusBar.Top - 34;
-    SpaceMeter.Width := StatusBar.Width;
-    {V-Button}
-    ButtonShowOutput.Left := Memo1.Left + Memo1.Width -
-                                          ButtonShowOutput.Width - 2;
-    ButtonShowOutput.Top := Memo1.Top + Memo1.Height -
-                                        ButtonShowOutput.Height - 2;
-
-    {Controls am rechten Rand}
-    GroupBoxDrive.Left := ClientWidth - GroupBoxDrive.Width - 8;
-    Bevel1.Left := GroupBoxDrive.Left;
-    CheckBoxDummy.Left := GroupBoxDrive.Left + 8;
-    SpeedButtonFixCD.Left := ClientWidth - SpeedButtonFixCD.Width - 8; 
-    Panel1.Left := GroupBoxDrive.Left;
-    Panel1.Top := ClientHeight - Panel1.Height;
-
-    {Pagecontrol und TabSheets}
-    PageControl1.Width := GroupBoxDrive.Left - 14;
-    PageControl1.Height := Memo1.Top - 15;
-    for i := 0 to PageControl1.PageCount - 1 do
-    begin
-      PageControl1.Pages[i].Width := PageControl1.Width - 8;
-      PageControl1.Pages[i].Height := PageControl1.Height - 28;
-    end;
-
     {Höhe des aktuellen TabSheets}
     TSHeight := PageControl1.ActivePage.Height;
-
-    {TabSheet1}
-    PanelDataCD.Top := TSHeight - 69;
-    CDESpeedButton1.Left := TabSheet1.Width - 26;
-    CDESpeedButton2.Left := CDESpeedButton1.Left;
-    CDESpeedButton3.Left := CDESpeedButton1.Left;
-    CDESpeedButton4.Left := CDESpeedButton1.Left;
-    CDESpeedButton5.Left := CDESpeedButton1.Left;
-    PanelDataCDView.Height := PanelDataCD.Top - 15;
-    PanelDataCDView.Width := CDESpeedButton1.Left - 15;
-
-    {TabSheet2}
-    PanelAudioCD.Top := TSHeight - 69;
-    AudioSpeedButton1.Left := TabSheet2.Width - 26;
-    AudioSpeedButton2.Left := AudioSpeedButton1.Left;
-    AudioSpeedButton3.Left := AudioSpeedButton1.Left;
-    AudioSpeedButton4.Left := AudioSpeedButton1.Left;
-    AudioListView.Height := PanelAudioCD.Top - 15;
-    AudioListView.Width := TabSheet2.Width - 41;
-
     {TabSheet3}
     PanelXCD.Top := TSHeight - 101;
-    XCDESpeedButton1.Left := TabSheet3.Width - 26;
-    XCDESpeedButton2.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton3.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton4.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton5.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton6.Left := XCDESpeedButton1.Left - 32;
-    XCDESpeedButton7.Left := XCDESpeedButton1.Left;
     PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
     PanelXCDView.Width := XCDESpeedButton1.Left - 15;
     XCDETreeView.Height := PanelXCD.Top - 15;
@@ -4360,116 +4297,14 @@ begin
                              SplitterXCDHorizontal.Height) div 2;
     XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
     XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
-    XCDESpeedButton6.Top  := TSHeight - 29;                       
-    XCDESpeedButton7.Top  := TSHeight - 29;
-
-    {TabSheet4}
-    GroupBoxCDRWDelete.Top := (TSHeight - GroupBoxCDRWDelete.Height) div 2;
-    GroupBoxCDRWDelete.Left := (TabSheet4.Width - GroupBoxCDRWDelete.Width)
-                               div 2;
-
-    {TabSheet5}
-    GroupBoxCDInfo.Top := (TSHeight - GroupBoxCDInfo.Height) div 2;
-    GroupBoxCDInfo.Left := (TabSheet5.Width - GroupBoxCDInfo.Width) div 2;
-
-    {TabSheet6}
-    PanelDAE.Top := TSHeight - 69;
-    DAEListView.Height := PanelDAE.Top - 15;
-    DAEListView.Width := TabSheet6.Width - 41;
-
-    {TabSheet7}
-    PanelImage.Top := (TSHeight - PanelImage.Height) div 2;
-    PanelImage.Left := (TabSheet7.Width - PanelImage.Width) div 2;
-
-    {TabSheet8}
-    PanelVideoCD.Top := TSHeight - 69;
-    VideoSpeedButton1.Left := TabSheet8.Width - 26;
-    VideoSpeedButton2.Left := VideoSpeedButton1.Left;
-    VideoSpeedButton3.Left := VideoSpeedButton1.Left;
-    VideoSpeedButton4.Left := VideoSpeedButton1.Left;
-    VideoListView.Height := PanelVideoCD.Top - 15;
-    VideoListView.Width := TabSheet8.Width - 41;
-
-    {TabSheet9}
-    GroupBoxDVDVideo.Top := (TSHeight - GroupBoxDVDVideo.Height) div 2;
-    GroupBoxDVDVideo.Left := (TabSheet9.Width - GroupBoxDVDVideo.Width) div 2;
-
   end else
   {Resize mit großer Schriftart}
   if (Screen.PixelsPerInch > 96) and not Application.Terminated then
   begin
-    {minimale Größe festlegen}
-    if Form1.Width < dWidthBigFont then Form1.Width := dWidthBigFont;
-    if Form1.Height < dHeightBigFont then Form1.Height := dHeightBigFont;
-    {allgemeine Controls}
-    {V-Button: richtige Größe bestimmen}
-    ButtonShowOutput.Width  := GetSystemMetrics(SM_CXVSCROLL);
-    ButtonShowOutput.Height := GetSystemMetrics(SM_CYHSCROLL);
-    {Länge der Trennlinie der Hauptmenüleiste}
-    Bevel4.Width := ClientWidth;
-    {StatusBar}
-    StatusBar.Width := ClientWidth - 236 - (Width - ClientWidth);
-    StatusBar.Top := ClientHeight - StatusBar.Height;
-    {Ausgabefenster}
-    Memo1.Width := StatusBar.Width;
-    Memo1.Top := StatusBar.Top - 177; //139;
-    {CDSizer}
-    SpaceMeter.Top := StatusBar.Top - 34;
-    SpaceMeter.Width := StatusBar.Width;    
-    {V-Button}
-    ButtonShowOutput.Left := Memo1.Left + Memo1.Width -
-                                          ButtonShowOutput.Width - 2;
-    ButtonShowOutput.Top := Memo1.Top + Memo1.Height -
-                                        ButtonShowOutput.Height - 2;
-
-    {Controls am rechten Rand}
-    GroupBoxDrive.Left := ClientWidth - GroupBoxDrive.Width - 8;
-    Bevel1.Left := GroupBoxDrive.Left;
-    CheckBoxDummy.Left := GroupBoxDrive.Left + 10;
-    SpeedButtonFixCD.Left := ClientWidth - SpeedButtonFixCD.Width - 8;
-    Panel1.Left := GroupBoxDrive.Left;
-    Panel1.Top := ClientHeight - Panel1.Height;
-
-    {Pagecontrol und TabSheets}
-    PageControl1.Width := GroupBoxDrive.Left - 14;
-    PageControl1.Height := Memo1.Top - 15;
-    for i := 0 to PageControl1.PageCount - 1 do
-    begin
-      PageControl1.Pages[i].Width := PageControl1.Width - 8;
-      PageControl1.Pages[i].Height := PageControl1.Height - 28;
-    end;
-
     {Höhe des aktuellen TabSheets}
     TSHeight := PageControl1.ActivePage.Height;
-
-    {TabSheet1}
-    PanelDataCD.Top := TSHeight - 88;
-    CDESpeedButton1.Left := TabSheet1.Width - 34;
-    CDESpeedButton2.Left := CDESpeedButton1.Left;
-    CDESpeedButton3.Left := CDESpeedButton1.Left;
-    CDESpeedButton4.Left := CDESpeedButton1.Left;
-    CDESpeedButton5.Left := CDESpeedButton1.Left;
-    PanelDataCDView.Height := PanelDataCD.Top - 19;
-    PanelDataCDView.Width := CDESpeedButton1.Left - 15;
-
-    {TabSheet2}
-    PanelAudioCD.Top := TSHeight - 88;
-    AudioSpeedButton1.Left := TabSheet2.Width - 34;
-    AudioSpeedButton2.Left := AudioSpeedButton1.Left;
-    AudioSpeedButton3.Left := AudioSpeedButton1.Left;
-    AudioSpeedButton4.Left := AudioSpeedButton1.Left;
-    AudioListView.Height := PanelAudioCD.Top - 19;
-    AudioListView.Width := TabSheet2.Width - 52;
-
     {TabSheet3}
     PanelXCD.Top := TSHeight - 127;
-    XCDESpeedButton1.Left := TabSheet3.Width - 34;
-    XCDESpeedButton2.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton3.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton4.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton5.Left := XCDESpeedButton1.Left;
-    XCDESpeedButton6.Left := XCDESpeedButton1.Left - 32;
-    XCDESpeedButton7.Left := XCDESpeedButton1.Left;
     PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
     PanelXCDView.Width := XCDESpeedButton1.Left - 15;
     XCDETreeView.Height := PanelXCD.Top - 15;
@@ -4477,39 +4312,6 @@ begin
                              SplitterXCDHorizontal.Height) div 2;
     XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
     XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
-    XCDESpeedButton6.Top  := TSHeight - 39;
-    XCDESpeedButton7.Top  := TSHeight - 39;
-
-    {TabSheet4}
-    GroupBoxCDRWDelete.Top := (TSHeight - GroupBoxCDRWDelete.Height) div 2;
-    GroupBoxCDRWDelete.Left := (TabSheet4.Width - GroupBoxCDRWDelete.Width)
-                               div 2;
-
-    {TabSheet5}
-    GroupBoxCDInfo.Top := (TSHeight - GroupBoxCDInfo.Height) div 2;
-    GroupBoxCDInfo.Left := (TabSheet5.Width - GroupBoxCDInfo.Width) div 2;
-
-    {TabSheet6}
-    PanelDAE.Top := TSHeight - 85;
-    DAEListView.Height := PanelDAE.Top - 15;
-    DAEListView.Width := TabSheet6.Width - 52;
-
-    {TabSheet7}
-    PanelImage.Top := (TSHeight - PanelImage.Height) div 2;
-    PanelImage.Left := (TabSheet7.Width - PanelImage.Width) div 2;
-
-    {TabSheet8}
-    PanelVideoCD.Top := TSHeight - 88;
-    VideoSpeedButton1.Left := TabSheet2.Width - 34;
-    VideoSpeedButton2.Left := VideoSpeedButton1.Left;
-    VideoSpeedButton3.Left := VideoSpeedButton1.Left;
-    VideoSpeedButton4.Left := VideoSpeedButton1.Left;
-    VideoListView.Height := PanelVideoCD.Top - 19;
-    VideoListView.Width := TabSheet8.Width - 52;
-
-    {TabSheet9}
-    GroupBoxDVDVideo.Top := (TSHeight - GroupBoxDVDVideo.Height) div 2;
-    GroupBoxDVDVideo.Left := (TabSheet9.Width - GroupBoxDVDVideo.Width) div 2;
   end;
 end;
 

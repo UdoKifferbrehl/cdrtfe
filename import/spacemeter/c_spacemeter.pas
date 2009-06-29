@@ -2,9 +2,9 @@
 
   c_spacemeter.pas: Anzeigen des auf der Disk beanspruchten Speicherplatzes
 
-  Copyright (c) 2008 Oliver Valencia
+  Copyright (c) 2008-2009 Oliver Valencia
 
-  letzte Änderung  17.09.2008
+  letzte Änderung  14.06.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -114,7 +114,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
      public
        constructor Create(AOwner: TComponent); override;
        destructor Destroy; override;
-       procedure Init(CParent: TWinControl; PTop, PLeft, SWidth, SHeight: Integer);
+       procedure Init(CParent: TWinControl; PTop, PLeft, SWidth, SHeight: Integer; SMAnchors: TAnchors);
      published
        property Captions: string read FCaptions write SetCaptions;
        property DiskSize: Integer read FDiskSize write SetDiskSize;
@@ -501,7 +501,7 @@ end;
   Init setzt den Parent, Position und Größe.                                   }
 
 procedure TSpaceMeter.Init(CParent: TWinControl;
-                           PTop, PLeft, SWidth, SHeight: Integer);
+                           PTop, PLeft, SWidth, SHeight: Integer; SMAnchors: TAnchors);
 begin
   {Panel}
   Parent := CParent;
@@ -509,6 +509,7 @@ begin
   Left := PLeft;
   Width := SWidth;
   Height := SHeight;
+  Anchors := SMAnchors;
   {ProgressBar}
   FProgressBar.Width := SWidth;
   {Scale}
