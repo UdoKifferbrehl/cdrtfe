@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  28.06.2009
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -92,6 +92,7 @@ uses
   f_environment in 'system\f_environment.pas',
   f_process in 'system\f_process.pas',
   f_filesystem in 'system\f_filesystem.pas',
+  c_filebrowser in 'system\c_filebrowser.pas', {FrameFileBrowser: TFrame}
   cl_diskinfo in 'funcs\cl_diskinfo.pas',
   cl_cueinfo in 'funcs\cl_cueinfo.pas',
   cl_sessionimport in 'funcs\cl_sessionimport.pas',  

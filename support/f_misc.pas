@@ -1,13 +1,13 @@
 { f_misc.pas: unterstützende Funktionen (sonstiges)
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.10.2008
+  letzte Änderung  19.06.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
   f_misc.pas stellt Hilfs-Funktionen zur Verfügung:
     * allgemeine Funktionen für List- und Tree-Views
@@ -38,7 +38,7 @@
     PropertyExists(Comp: TComponent; Name: string): Boolean
     SelectRootIfNoneSelected(Tree: TTreeView)
     SetCompProp(Comp: TComponent; const Name, Value: string)
-    SetFont(Form: TForm)
+    SetFont(Control: TWinControl)
     SortListByValue(List: TStringList)
     ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
     WindowStayOnTop(Handle: THandle; Value: Boolean)
@@ -80,7 +80,7 @@ procedure ExportFontList;
 procedure ListViewSelectAll(ListView: TListView);
 procedure SelectRootIfNoneSelected(Tree: TTreeView);
 procedure SetCompProp(Comp: TComponent; const Name, Value: string);
-procedure SetFont(Form: TForm);
+procedure SetFont(Control: TWinControl);
 procedure SortListByValue(List: TStringList);
 procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 
@@ -365,12 +365,19 @@ end;
   SetFont sorgt unter Windows XP dafür, daß eine Schriftart verwendet wird, die
   ClearType (Kantenglättung) unterstützt.                                      }
 
-procedure SetFont(Form: TForm);
+procedure SetFont(Control: TWinControl);
+var FontName: string;
 begin
+  FontName := 'Microsoft Sans Serif';
   if PlatformWin2kXP and (Win32MinorVersion > 0) then
   begin
-    if Screen.Fonts.IndexOf('Microsoft Sans Serif') >= 0 then
-      Form.Font.Name := 'Microsoft Sans Serif';
+    if Screen.Fonts.IndexOf(FontName) >= 0 then
+    begin
+      if Control is TForm then
+        (Control as TForm).Font.Name := FontName;
+      if Control is TFrame then
+        (Control as TFrame).Font.Name := FontName;
+    end;
   end;
 end;
 

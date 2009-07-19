@@ -29,6 +29,17 @@
          //    - betrifft: frm_about.pas
 
 
+(* -------------------------------------------------------------- MemoryLeaks *)
+
+{$IFDEF TestVersion}
+  {$IFDEF Delphi2006Up}
+    {$DEFINE DoMemCheck}
+  {$ENDIF}
+{$ENDIF}
+         // aktiviert die Prüffunktionen des Delphi-Speichermanagers
+         //    - betrifft: frm_main.pas
+
+
 (* --------------------------------------------------------------- ImagingLib *)
 
 {$IFDEF Delphi6Up}

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.06.2009
+  letzte Änderung  19.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,19 +16,20 @@
 unit frm_main;
 
 {$I directives.inc}
-                
+
 interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
      {$IFDEF Delphi7Up}
-     ActnList,
+     ActnList, ShellCtrls,
      {$ENDIF}
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
      DropTarget, DropSource,
+     c_filebrowser,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
      cl_action, cl_cmdlineparser, cl_devices, cl_logwindow, c_spacemeter,
@@ -70,7 +71,6 @@ type
     Bevel4: TBevel;
     Datei1: TMenuItem;
     MainMenuClose: TMenuItem;
-    ButtonShowOutput: TButton;
     TabSheet6: TTabSheet;
     RadioButtonCapacity: TRadioButton;
     CDETreeViewPopupMenu: TPopupMenu;
@@ -274,6 +274,11 @@ type
     CDEListViewPopupAddFolder: TMenuItem;
     CDEListViewPopupN6: TMenuItem;
     CDEListViewPopupNewFolder: TMenuItem;
+    PanelBrowser: TPanel;
+    Ansicht1: TMenuItem;
+    MainMenuToggleFileExplorer: TMenuItem;
+    MainMenuShowOutputWindow: TMenuItem;
+    MainMenuSettings: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -341,7 +346,6 @@ type
     procedure EditKeyPress(Sender: TObject; var Key: Char);
     procedure EditExit(Sender: TObject);
     procedure ButtonSettingsClick(Sender: TObject);
-    procedure ButtonShowOutputClick(Sender: TObject);
     procedure ComboBoxChange(Sender: TObject);
     procedure ButtonDAEReadTocClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -396,6 +400,11 @@ type
     procedure Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure CDEListViewPopupAddFolderClick(Sender: TObject);
     procedure CDEListViewPopupNewFolderClick(Sender: TObject);
+    procedure CDEListViewDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure CDEListViewDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure MainMenuToggleFileExplorerClick(Sender: TObject);
+    procedure MainMenuShowOutputWindowClick(Sender: TObject);
+    procedure MainMenuSettingsClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -413,6 +422,7 @@ type
     DropFileTargetCDETreeView: TDropFileTarget;
     DropFileTargetXCDETreeView: TDropFileTarget;
     SpaceMeter: TSpaceMeter;
+    FileBrowser: TFrameFileBrowser;
     StayOnTopState: Boolean;
     {$IFDEF Delphi7Up}
     ActionList: TActionList;
@@ -422,10 +432,14 @@ type
     ActionUserDeleteAll: TAction;
     ActionUserTrackUp  : TAction;
     ActionUserTrackDown: TAction;
+    ActionUserToggleFileExplorer: TAction;
+    ActionUserSettings : TAction;
     {$ENDIF}
-    FImageTabFirstShow : Boolean;
-    FImageTabFirstWrite: Boolean;
-    FCheckingControls  : Boolean;
+    FImageTabFirstShow  : Boolean;
+    FImageTabFirstWrite : Boolean;
+    FCheckingControls   : Boolean;
+    FFileExplorerShowing: Boolean;
+    FOutputWindowShowing: Boolean;
     FLVArray: array[0..cLVCount] of TListView;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
@@ -457,6 +471,8 @@ type
     procedure ShowFolderContent(const Tree: TTreeView; ListView: TListView);
     procedure ShowTracks;
     procedure ShowTracksDAE;
+    procedure ToggleFileExplorer(const Status: Boolean);
+    procedure ToggleOutputWindow(const Status: Boolean);
     {$IFDEF AllowToggle}
     procedure ToggleOptions(Sender: TObject);
     {$ENDIF}
@@ -508,6 +524,7 @@ type
     {eigene Event-Handler}
     procedure DeviceArrival(Drive: string);
     procedure DeviceRemoval(Drive: string);
+    procedure FileBrowserSelected(Sender: TObject);
     procedure HandleError(const ErrorCode: Byte; const Name: string);
     procedure HandleKeyboardShortcut(const Key: Word);
     procedure LangChange;
@@ -532,6 +549,8 @@ type
     procedure ActionUserDeleteAllExecute(Sender: TObject);
     procedure ActionUserTrackUpExecute(Sender: TObject);
     procedure ActionUserTrackDownExecute(Sender: TObject);
+    procedure ActionUserToggleFileExplorerExecute(Sender: TObject);
+    procedure ActionUserSettingsExecute(Sender: TObject);
     {$ENDIF}
     procedure ImageTabInitRadioButtons;
   public
@@ -2052,7 +2071,8 @@ begin
      (DestNode.TreeView as TTreeView).Items.BeginUpdate;
      SourceNode.MoveTo(DestNode, naAddChild);
      DestNode.AlphaSort;
-     (DestNode.TreeView as TTreeView).Items.EndUpdate;
+     SourceNode.ImageIndex := FImageLists.IconFolder;  // <- sonst manchmal Dar-
+     (DestNode.TreeView as TTreeView).Items.EndUpdate; //    stellungsfehler
    end;
 end;
 
@@ -3073,6 +3093,52 @@ begin
   end;
 end;
 
+{ ToggleFileExplorer -----------------------------------------------------------
+
+  Der FileExlorer wird je nach übergebenem Wert ein- bzw. abgeschaltet.        }
+
+procedure TForm1.ToggleFileExplorer(const Status: Boolean);
+begin
+  {FileExplorer zeigen}
+  if Status then
+  begin
+    FFileExplorerShowing := True;
+    MainMenuToggleFileExplorer.Checked := True;
+    {PageControl verkleinern}
+    PageControl1.Height  := PageControl1.Height - 200;
+    PageControl1.Top     := PageControl1.Top + 200;
+    PanelBrowser.Visible := True;
+  end else
+  {FileExplorer ausblenden}
+  begin
+    FFileExplorerShowing := False;
+    MainMenuToggleFileExplorer.Checked := False;
+    PageControl1.Height  := PageControl1.Height + 200;
+    PageControl1.Top     := PageControl1.Top - 200;
+    PanelBrowser.Visible := False;
+  end;
+  FormResize(Self);
+end;
+
+{ ToggleOutputWindow -----------------------------------------------------------
+
+  Das Ausgabefenster zeigen oder beenden.                                      }
+
+procedure TForm1.ToggleOutputWindow(const Status: Boolean);
+var FormOutput: TFormOutput;
+begin
+  FormOutput := TFormOutput.Create(nil);
+  try
+    FormOutput.Lang := FLang;
+    FormOutput.Settings := FSettings;
+    TLogWin.Inst.SetMemo2(FormOutput.Memo1);
+    FormOutput.ShowModal;
+  finally
+    TLogWin.Inst.UnsetMemo2;
+    FormOutput.Release;
+  end;
+end;
+
 { ToggleOptions ----------------------------------------------------------------
 
   Beim Klick auf ein Label, das den Zustand einer Option darstellt, soll die
@@ -3751,6 +3817,27 @@ var GlyphArray    : TGlyphArray;
     FLVArray[5] := VideoListView;
   end;
 
+  procedure InitFileBrowser;
+  begin
+    PanelBrowser.Top := PageControl1.Top;
+    PanelBrowser.Left := PageControl1.Left + 12;
+    PanelBrowser.Width := PageControl1.Width - 12 - 36; //41;
+    PanelBrowser.Height := 192;
+    PanelBrowser.Color := clBackground;
+    PanelBrowser.Anchors := [akLeft, akTop, akRight];
+    FileBrowser := TFrameFileBrowser.Create(Self);
+    FileBrowser.Parent := PanelBrowser;
+    FileBrowser.TreeViewWidth := CDETreeView.Width;
+    FileBrowser.OnFFBSelected := FileBrowserSelected;
+    FileBrowser.LabelCaption := FLang.GMS('g016');
+    FileBrowser.ColCaptionName := CDEListView.Columns[0].Caption;
+    FileBrowser.ColCaptionSize := CDEListView.Columns[2].Caption;
+    FileBrowser.ColCaptionType := CDEListView.Columns[1].Caption;
+    FileBrowser.ColCaptionModified := FLang.GMS('g015');
+    FileBrowser.Init;
+    FileBrowser.Show;
+  end;
+
 begin
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
@@ -3791,8 +3878,10 @@ begin
   {$IFDEF AllowToggle}
   RegisterLabelEvents;
   {$ENDIF}
-  {Array mit dne LsitViews}
+  {Array mit den ListViews}
   InitLVArray;
+  {FileBroser}
+  InitFileBrowser;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------
@@ -3900,13 +3989,39 @@ begin
   // TLogWin.Inst.Add('Removal: ' + Drive);
 end;
 
+{ FileBrowserSelected ----------------------------------------------------------
+
+  wird ausgelöst, wenn im FileBrowser eine Auswahl getroffen wurde.            }
+
+procedure TForm1.FileBrowserSelected(Sender: TObject);
+begin
+  case FSettings.General.Choice of
+    cDataCD,
+    cAudioCD,
+    cVideoCD : CDEListViewDragDrop(Sender, Sender, 0, 0);
+    cXCD     : XCDEListView1DragDrop(Sender, Sender, 0, 0);
+  end;
+end;
+
 { LangChange -------------------------------------------------------------------
 
   Reaktionen auf das LangChange-Event.                                         }
 
 procedure TForm1.LangChange;
+
+  procedure SetLangFileBrowser;
+  begin
+    FileBrowser.LabelCaption := FLang.GMS('g016');
+    FileBrowser.ColCaptionName := CDEListView.Columns[0].Caption;
+    FileBrowser.ColCaptionSize := CDEListView.Columns[2].Caption;
+    FileBrowser.ColCaptionType := CDEListView.Columns[1].Caption;
+    FileBrowser.ColCaptionModified := FLang.GMS('g015');
+    FileBrowser.UpdateTranslation;
+  end;
+
 begin
   FLang.SetFormLang(Self);
+  SetLangFileBrowser;
   CheckControls;
   UpdateGauges;
   FormResize(Self);
@@ -3992,9 +4107,11 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
-  FImageTabFirstShow  := True;
-  FImageTabFirstWrite := True;
-  FCheckingControls   := False;
+  FImageTabFirstShow   := True;
+  FImageTabFirstWrite  := True;
+  FCheckingControls    := False;
+  FFileExplorerShowing := False;
+  FOutputWindowShowing := False;
   {$IFDEF Delphi7Up}
   InitActions;
   {$ENDIF}
@@ -4281,7 +4398,9 @@ end;
   für die Speedbuttons auf TabSheet3 (XCD).                                    }
 
 procedure TForm1.FormResize(Sender: TObject);
-var TSHeight: Integer;
+var TSHeight           : Integer;
+    CanShowFileExplorer: Boolean;
+    ShouldNotShowFileExplorer: Boolean;
 begin
   {Resize bei kleiner Schriftart}
   if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
@@ -4313,6 +4432,15 @@ begin
     XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
     XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
   end;
+  {In Abhängigkeit der Fensterhöhe FileExplorer zulassen oder nicht}
+  CanShowFileExplorer := ((PageControl1.Height - 200) >= 250);
+  MainMenuToggleFileExplorer.Enabled := FFileExplorerShowing or
+                                        CanShowFileExplorer;
+  {gegebenenfalls FileExplorer automatisch ausblenden}
+  ShouldNotShowFileExplorer := FFileExplorerShowing
+                  and not (CanShowFileExplorer or (PageControl1.Height >= 250));
+  if ShouldNotShowFileExplorer then ToggleFileExplorer(False);
+
 end;
 
 { FormCloseQuery ---------------------------------------------------------------
@@ -4323,7 +4451,7 @@ procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if FSettings.Environment.ProcessRunning then
     CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
-                           MB_YESNO or MB_ICONWARNING) = ID_YES; 
+                           MB_YESNO or MB_ICONWARNING) = ID_YES;
 end;
 
 { FormClose --------------------------------------------------------------------
@@ -4517,14 +4645,27 @@ procedure TForm1.HandleKeyboardShortcut(const Key: Word);
     end;
   end;
 
+  procedure HKSToggleFileExplorer;
+  begin
+    if MainMenuToggleFileExplorer.Enabled then
+      MainMenuToggleFileExplorerClick(nil);
+  end;
+
+  procedure HKSSettings;
+  begin
+    MainMenuSettingsClick(nil);
+  end;
+
 begin
   case Key of
+    {VK_E}$45: HKSToggleFileExplorer;
     {VK_O}$4F: HKSAddFiles;
     {VK_V}$56: begin
                  if FSettings.General.Choice = cXCD then
                  begin FSettings.General.XCDAddMovie := True; HKSAddFiles; end;
                end;
     {VK_I}$49: HKSAddFolder;
+    {VK_S}$53: HKSSettings;
     VK_Delete: HKSDeleteAll;
     VK_UP    : HKSTRackUp;
     VK_DOWN  : HKSTrackDown;
@@ -4774,38 +4915,8 @@ end;
 { cdrtfe Settings }
 
 procedure TForm1.ButtonSettingsClick(Sender: TObject);
-var FormSettings: TFormSettings;
 begin
-  SetSettings;
-  SaveWinPos;
-  FormSettings := TFormSettings.Create(nil);
-  try
-    FormSettings.Settings := FSettings;
-    FormSettings.Lang := FLang;
-    FormSettings.FormHandle := Self.Handle;
-    FormSettings.OnMessageShow := Form1.MessageShow;
-    FormSettings.ShowModal;
-  finally
-    FormSettings.Release;
-  end;
-  GetSettings;
-end;
-
-{ Show output window }
-
-procedure TForm1.ButtonShowOutputClick(Sender: TObject);
-var FormOutput: TFormOutput;
-begin
-  FormOutput := TFormOutput.Create(nil);
-  try
-    FormOutput.Lang := FLang;
-    FormOutput.Settings := FSettings;
-    TLogWin.Inst.SetMemo2(FormOutput.Memo1);
-    FormOutput.ShowModal;
-  finally
-    TLogWin.Inst.UnsetMemo2;
-    FormOutput.Release;
-  end;
+  MainMenuSettingsClick(nil);
 end;
 
 { Abort action }
@@ -4915,11 +5026,58 @@ begin
   UpdateGauges;
 end;
 
+{ Ansicht/Dateiexplorer }
+
+
+procedure TForm1.MainMenuToggleFileExplorerClick(Sender: TObject);
+begin
+  if FFileExplorerShowing then
+  begin
+    ToggleFileExplorer(False);
+  end else
+  begin
+    ToggleFileExplorer(True);
+  end;
+end;
+
+{ Ansicht/Ausgabefenster }
+
+procedure TForm1.MainMenuShowOutputWindowClick(Sender: TObject);
+begin
+  if FOutputWindowShowing then
+  begin
+    ToggleOutputWindow(False);
+  end else
+  begin
+    ToggleOutputWindow(True);
+  end;
+end;
+
 { Extras/Sprache ändern }
 
 procedure TForm1.MainMenuSetLangClick(Sender: TObject);
 begin
   FLang.SelectLanguage;
+end;
+
+{ Extras/Einstellungen }
+
+procedure TForm1.MainMenuSettingsClick(Sender: TObject);
+var FormSettings: TFormSettings;
+begin
+  SetSettings;
+  SaveWinPos;
+  FormSettings := TFormSettings.Create(nil);
+  try
+    FormSettings.Settings := FSettings;
+    FormSettings.Lang := FLang;
+    FormSettings.FormHandle := Self.Handle;
+    FormSettings.OnMessageShow := Form1.MessageShow;
+    FormSettings.ShowModal;
+  finally
+    FormSettings.Release;
+  end;
+  GetSettings;
 end;
 
 { ?/Info }
@@ -5053,7 +5211,8 @@ var Tree     : TTreeView;
 begin
   DoRepaint := False;
   Tree := (Sender as TTreeView);
-  if (Source is TTreeView) or (Source is TListView) then
+  if (Source is TTreeView) or (Source is TListView) or
+     (Source is TShellTreeView) or (Source is TShellListView) then
   begin
     Accept := True;
     {da THETreeView nicht mehr benutzt wird, muß hier gescrollt werden}
@@ -5116,6 +5275,12 @@ begin
     begin
       UserMoveFolder(SourceNode, DestNode);
     end;
+  end;
+  {FileExplorer -> TreeView}
+  if (Source is TShellTreeView) or (Source is TShellListView) then
+  begin
+    if DestNode <> nil then DestNode.Selected := True;
+    CDEListViewDragDrop(Sender, Source, 0 ,0);
   end;
 end;
 
@@ -5345,6 +5510,56 @@ begin
   end;
 end;
 
+{ ListViewDragDrop -------------------------------------------------------------
+
+  entgegenmehmen von Dateien und Ordnern vom FileExplorer.                     }
+
+procedure TForm1.CDEListViewDragDrop(Sender, Source: TObject; X, Y: Integer);
+var Tree       : TShellTreeView;
+    List       : TShellListView;
+    Folder     : TShellFolder;
+    FileName   : string;
+    i          : Integer;
+    FolderAdded: Boolean;
+begin
+  if (Source is TShellTreeView) then
+  begin
+    Tree := Source as TShellTreeView;
+    Folder := Tree.SelectedFolder;
+    AddToPathlist(Folder.PathName);
+    AddToPathListSort(True);
+  end else
+  if (Source is TShellListView) then
+  begin
+    FolderAdded := False;
+    List := Source as TShellListView;
+    for i := 0 to List.Items.Count - 1 do
+    begin
+      if List.Items[i].Selected then
+      begin
+        FileName := List.Folders[i].PathName;
+        AddToPathlist(FileName);
+        {Flag setzen, wenn Order hinzugefügt wurde}
+        if not FolderAdded then
+        begin
+          if DirectoryExists(FileName) then FolderAdded := True;
+        end;
+      end;
+    end;
+    AddToPathListSort(FolderAdded);
+  end;
+end;
+
+{ ListViewDragOver -------------------------------------------------------------
+
+  entgegenmehmen von Dateien und Ordnern vom FileExplorer.                     }
+
+procedure TForm1.CDEListViewDragOver(Sender, Source: TObject; X, Y: Integer;
+                                     State: TDragState; var Accept: Boolean);
+begin
+  Accept := (Source is TShellListView) or (Source is TShellTreeView);
+end;
+
 { XCDEListView1: OnDragDrop ----------------------------------------------------
 
   verschieben von Dateien von Datei-List zur Movie-Liste und umgekehrt. Gilt nur
@@ -5355,6 +5570,10 @@ var Path: string;
     i: Integer;
 begin
   Path := GetPathFromNode(XCDETreeView.Selected);
+  if (Source is TShellListView) or (Source is TShellTreeView) then
+  begin
+    CDEListViewDragDrop(Sender, Source, X, Y);
+  end else
   if {Form1 -> Form2}
      ((Source as TListView) = XCDEListView1) and
      ((Sender as TListView) = XCDEListView2) or
@@ -5370,9 +5589,9 @@ begin
         FData.ChangeForm2Status((Source as TListView).Items[i].Caption, Path);
       end;
     end;
+    FData.SortFileList(Path, cXCD);
+    ShowFolderContent(XCDETreeView, XCDEListView1);
   end;
-  FData.SortFileList(Path, cXCD);
-  ShowFolderContent(XCDETreeView, XCDEListView1);
 end;
 
 { XCDEListView1: OnDragOver ----------------------------------------------------
@@ -5382,13 +5601,8 @@ end;
 procedure TForm1.XCDEListView1DragOver(Sender, Source: TObject; X, Y: Integer;
                                        State: TDragState; var Accept: Boolean);
 begin
-   if (Source is TListView) then
-  begin
-    Accept := True;
-  end else
-  begin
-    Accept := False;
-  end;
+  Accept := (Source is TShellListView) or (Source is TShellTreeView) or
+            (Source is TListView);
 end;
 
 { XCDEListView1: OnEditing -----------------------------------------------------
@@ -6091,7 +6305,7 @@ begin
     MiscPopupEject.Visible := False;
     MiscPopupLoad.Visible := False;
   end else
-  if ((Sender as TPopupMenu).PopupComponent = ButtonShowOutput) then
+  if ((Sender as TPopupMenu).PopupComponent = Memo1) then
   begin
     MiscPopupVerify.Visible := False;
     MiscPopupClearOutput.Visible := True;
@@ -6451,6 +6665,16 @@ begin
   ActionUserTrackDown.ShortCut := ShortCut(VK_Down, [ssAlt]);
   ActionUserTrackDown.OnExecute := ActionUserTrackDownExecute;
   ActionUserTrackDown.ActionList := ActionList;
+  {Actions erstellen - FileExplorer aufrufen}
+  ActionUserToggleFileExplorer := TAction.Create(ActionList);
+  ActionUserToggleFileExplorer.ShortCut := ShortCut($45{VK_E}, [ssAlt]);
+  ActionUserToggleFileExplorer.OnExecute := ActionUserToggleFileExplorerExecute;
+  ActionUserToggleFileExplorer.ActionList := ActionList;
+  {Actions erstellen - Einstellungsdialog aufrufen}
+  ActionUserSettings := TAction.Create(ActionList);
+  ActionUserSettings.ShortCut := ShortCut($53{VK_S}, [ssAlt]);
+  ActionUserSettings.OnExecute := ActionUserSettingsExecute;
+  ActionUserSettings.ActionList := ActionList;
 end;
 
 procedure TForm1.ActionUserAddFileExecute(Sender: TObject);
@@ -6481,6 +6705,16 @@ end;
 procedure TForm1.ActionUserTrackDownExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut(VK_DOWN);
+end;
+
+procedure TForm1.ActionUserToggleFileExplorerExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($45);
+end;
+
+procedure TForm1.ActionUserSettingsExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($53);
 end;
 {$ENDIF}
 
@@ -6552,7 +6786,12 @@ begin
   {$ENDIF}
 end;
 
+{$IFDEF TestVersion}{$MESSAGE Hint 'Kompilation als Testversion!'}{$ENDIF}
+
 initialization
+  {$IFDEF DoMemCheck}
+  ReportMemoryLeaksOnShutdown := True;
+  {$ENDIF}
   DeviceChangeNotifier := TDeviceChangeNotifier.Create(nil);
   DeviceChangeNotifier.OnDiskInserted := Form1.DeviceArrival;
   DeviceChangeNotifier.OnDiskRemoved := Form1.DeviceRemoval;
