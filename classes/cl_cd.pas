@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -737,11 +737,7 @@ begin
     Result := 0;
   end else
   begin
-    {$IFNDEF Delphi4Up}
-    Result := StrToFloatDef(Temp, 0);
-    {$ELSE}
     Result := StrToInt64Def(Temp, 0);
-    {$ENDIF}
   end;
 end;
 
@@ -3041,11 +3037,7 @@ function TVideoCD.ExtractFileSizeFromEntry(const Entry: string): Int64;
 var Temp: string;
 begin
   Temp := StringLeft(StringRight(Entry, '|'), '*');
-  {$IFNDEF Delphi4Up}
-  Result := StrToFloatDef(Temp, 0);
-  {$ELSE}
   Result := StrToInt64Def(Temp, 0);
-  {$ENDIF}
 end;
 
 { GetCDTime --------------------------------------------------------------------

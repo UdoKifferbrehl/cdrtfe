@@ -2,9 +2,9 @@
 
   frm_splash_screen: Splash-Screen
 
-  Copyright (c) 2008      Oliver Valencia, Fabrice Tiercelin
+  Copyright (c) 2008-2009 Oliver Valencia, Fabrice Tiercelin
 
-  letzte Änderung  12.09.2008
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -105,16 +105,12 @@ end;
 procedure TFormSplashScreen.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
-  {$IFDEF Delphi7Up}
   AnimateWindow(Handle, 400, AW_HIDE or AW_BLEND);
-  {$ENDIF}
 end;
 
 procedure TFormSplashScreen.FormHide(Sender: TObject);
 begin
-  {$IFDEF Delphi7Up}
   AnimateWindow(Handle, 400, AW_HIDE or AW_BLEND);
-  {$ENDIF}
 end;
 
 { TFormSplashScreen - private }

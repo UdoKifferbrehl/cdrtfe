@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1645,11 +1645,7 @@ begin
   begin
     Delete(Temp, Length(Temp), 1);
   end;
-  {$IFNDEF Delphi4Up}
-  Size := StrToFloatDef(Temp, 0);
-  {$ELSE}
   Size := StrToInt64Def(Temp, 0);
-  {$ENDIF}
 end;
 
 { ExtractTrackInfoFromEntry ----------------------------------------------------
@@ -1666,11 +1662,7 @@ begin
   Path := StringLeft(Entry, '|');
   Name := ExtractFileName(Path);
   {Dateigröße extrahieren}
-  {$IFNDEF Delphi4Up}
-  Size := StrToFloatDef(StringLeft(StringRight(Entry, '|'), '*'), 0);
-  {$ELSE}
   Size := StrToInt64Def(StringLeft(StringRight(Entry, '|'), '*'), 0);
-  {$ENDIF}
   {Länge der Wave-Datei}
   TrackLength := StrToFloatDef(StringRight(Entry, '*'), 0);
 end;

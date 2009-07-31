@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.03.2008
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -100,13 +100,8 @@ end;
 
 function KillProcessSoftly(const hProcess: Cardinal;
                            var   uExitCode: Cardinal): Boolean;
-{$IFDEF Delphi7Up}
 var iExitCode: Cardinal;
     iThreadId: Cardinal;
-{$ELSE}
-var iExitCode: Integer;
-    iThreadId: Integer;
-{$ENDIF}
     hThread  : Cardinal;
     hKernel  : HMODULE;
     pExitProc: TFarProc;
@@ -542,8 +537,7 @@ var lpPipeAttributes        : TSecurityAttributes;
     Buffer                  : PChar;
     Temp                    : string;
     Changed                 : Boolean;
-    ExitCode                : {$IFDEF Delphi3} Integer {$ELSE}
-                                               Cardinal {$ENDIF};
+    ExitCode                : Cardinal;
 begin
   Buffer := nil;
   ZeroMemory(@lpPipeAttributes, SizeOf(TSecurityAttributes));
@@ -689,7 +683,7 @@ function GetDOSOutputEx(const lpCommandLine: PChar;
                         const FastMode: Boolean): string;
 var Thread      : TDOSThread;
     i           : Integer;
-    BytesWritten: {$IFDEF Delphi3} Integer {$ELSE} Cardinal {$ENDIF};
+    BytesWritten: Cardinal;
     Msg, Cap    : string;
     Window      : HWnd;
     Buffer      : array[0..1] of Char;

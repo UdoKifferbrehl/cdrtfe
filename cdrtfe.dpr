@@ -97,9 +97,7 @@ uses
   cl_cueinfo in 'funcs\cl_cueinfo.pas',
   cl_sessionimport in 'funcs\cl_sessionimport.pas',  
   c_spacemeter in 'import\spacemeter\c_spacemeter.pas',
-  {$IFDEF Delphi6Up}
   QProgBar in 'import\spacemeter\QProgBar.pas',
-  {$ENDIF}
   {$IFDEF MultipleFolderBrowsing}
   dlg_folderbrowse in 'system\dlg_folderbrowse.pas',
   {$ENDIF}

@@ -4,7 +4,7 @@
 
   Version          1.1
   erstellt         23.11.2004
-  letzte Änderung  03.05.2009
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -141,7 +141,7 @@ var DriveList  : TStringList;
     FH         : THandle;
     DriveLetter: string;
     DriveName  : array[0..31] of Char;
-    dwFlags    : {$IFDEF Delphi4Up}Cardinal{$ELSE}DWORD{$ENDIF};
+    dwFlags    : Cardinal;
 begin
   {$IFDEF EnableLogging}
   FLog.Add('    Checking non-Admin SPTI access');
@@ -187,9 +187,9 @@ end;
   auch ohne Admin-Recht möglich, aber nur mit CD-Laufwerken.                   }
 
 function TSCSIDevices.GetSCSIDevID(Driveletter: string): string;
-var DeviceHandle   : {$IFDEF Delphi4Up}Cardinal{$ELSE}Integer{$ENDIF};
+var DeviceHandle   : Cardinal;
     bytesReturned  : DWORD;
-    lpBytesReturned: {$IFDEF Delphi4Up}Cardinal{$ELSE}DWORD{$ENDIF};
+    lpBytesReturned: Cardinal;
     DeviceName     : array[0..MAX_PATH] of UCHAR;
     DataBuffer     : SCSI_ADDRESS;
     Returned       : Cardinal;
@@ -278,8 +278,8 @@ var FH         : THandle;
     PSWB       : PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER;
     pscsiAddr  : PSCSI_ADDRESS;
     Length     : Integer;
-    Returned   : {$IFDEF Delphi4Up}Cardinal{$ELSE}Integer{$ENDIF};
-    dwFlags    : {$IFDEF Delphi4Up}Cardinal{$ELSE}DWORD{$ENDIF};
+    Returned   : Cardinal;
+    dwFlags    : Cardinal;
     DriveString: PChar;
     s          : string;
 begin

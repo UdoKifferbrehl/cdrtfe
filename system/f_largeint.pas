@@ -1,8 +1,8 @@
 { f_largeint.pas: 64-Bit-Integer
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  24.06.2007
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,13 +27,6 @@ unit f_largeint;
 {$I directives.inc}
 
 interface
-
-{ uses Windows; }
-
-{$IFNDEF Delphi4Up}
-type Int64    = Comp;
-     Longword = Longint;
-{$ENDIF}
 
 function HiComp(const Value: Int64): Integer;
 function IntToComp(const LowInt, HighInt: Integer): Int64;

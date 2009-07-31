@@ -3,7 +3,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.06.2009
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -683,7 +683,7 @@ var iWaitTimeout  : Integer;
     sVolumeName   : string;
     sDrive        : string;
     bIOResult     : Boolean;
-    cBytesReturned: {$IFDEF Delphi4Up}Cardinal{$ELSE}Longint{$ENDIF};
+    cBytesReturned: Cardinal;
     hVolumeHandle : THandle;
 
 begin

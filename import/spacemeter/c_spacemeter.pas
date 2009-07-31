@@ -4,7 +4,7 @@
 
   Copyright (c) 2008-2009 Oliver Valencia
 
-  letzte Änderung  14.06.2009
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -30,14 +30,10 @@ unit c_spacemeter;
 
 {$I compiler.inc}
 
-{$IFDEF Delphi6Up}
-  {$DEFINE UseQProgBar}
-{$ENDIF}
-
 interface
 
 uses Windows, Classes, Controls, ComCtrls, ExtCtrls, Graphics, Menus,
-     {$IFDEF UseQProgBar}QProgBar,{$ENDIF} SysUtils;
+     QProgBar, SysUtils;
 
 const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
 
@@ -86,7 +82,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        FDiskType      : TSpaceMeterDiskType;
        FDiskSizeMax   : Integer;
        FDiskSize      : Integer;
-       FProgressBar   : {$IFDEF UseQProgBar}TQProgressBar{$ELSE}TProgressBar{$ENDIF};
+       FProgressBar   : TQProgressBar;
        FScale         : TScale;
        FPopupMenu     : TPopupMenu;
        FColorOkStart  : TColor;
@@ -307,7 +303,6 @@ begin
   FColorOkFinal   := RGB(255, 255, 0); // $0000FFFF;
   FColorWarnStart := RGB(64, 0, 0);
   FColorWarnFinal := RGB(255, 0, 0);
-  {$IFDEF UseQProgBar}
   FProgressBar := TQProgressBar.Create(Self);     // $0000FFFF;
   FProgressBar.Parent := Self;
   FProgressBar.Top := 0;
@@ -322,23 +317,12 @@ begin
   FProgressBar.BarLook := blMetal;
   FProgressBar.Maximum := 100;
   FProgressBar.Position := 0;
-  {$ELSE}
-  FProgressBar := TProgressBar.Create(Self);
-  FProgressBar.Parent := Self;
-  FProgressBar.Top := 0;
-  FProgressBar.Left := 0;
-  FProgressBar.Height := 11;
-  FProgressBar.Width := Self.Width;
-  FProgressBar.Min := 0;
-  FProgressBar.Max := 100;
-  FProgressBar.Position := 0;
-  {$ENDIF}
   {Scale - TGraphicControl}
   FScale := TScale.Create(Self);
   FScale.Parent := Self;
   FScale.Top := 13;
-  FScale.Left := 0 {$IFDEF UseQProgBar} + 3{$ENDIF};
-  FScale.Width := Self.Width {$IFDEF UseQProgBar} - 6{$ENDIF};
+  FScale.Left := 0 + 3;
+  FScale.Width := Self.Width - 6;
   FScale.Height := 30;
   FScale.Capacity := FDiskSizeMax;
   FScale.SpaceMeterMode := FSpaceMeterMode;
@@ -429,7 +413,6 @@ procedure TSpaceMeter.UpdateProgressBar;
 var Position: Extended;
 begin
   Position := (FDiskSize / FDiskSizeMax) * 100;
-  {$IFDEF UseQProgBar}
   if Position > 100 then
   begin
     FProgressBar.StartColor := FColorWarnStart;
@@ -439,7 +422,6 @@ begin
     FProgressBar.StartColor := FColorOkStart;
     FProgressBar.FinalColor := FColorOkFinal;
   end;
-  {$ENDIF}
   FProgressBar.Position := Round(Position);
 end;
 
@@ -470,7 +452,7 @@ end;
 procedure TSpaceMeter.SpaceMeterResize;
 begin
   FProgressBar.Width := Self.Width;
-  FScale.Width := Self.Width {$IFDEF UseQProgBar} - 6{$ENDIF};
+  FScale.Width := Self.Width  - 6;
 end;
 
 { SpaceMeterTypeChange ---------------------------------------------------------
@@ -513,7 +495,7 @@ begin
   {ProgressBar}
   FProgressBar.Width := SWidth;
   {Scale}
-  FScale.Width := SWidth {$IFDEF UseQProgBar} - 6{$ENDIF};
+  FScale.Width := SWidth - 6;
 end;
 
 

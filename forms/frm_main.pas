@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.07.2009
+  letzte Änderung  31.07.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,9 +21,7 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
-     {$IFDEF Delphi7Up}
      ActnList, ShellCtrls,
-     {$ENDIF}
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
@@ -424,7 +422,6 @@ type
     SpaceMeter: TSpaceMeter;
     FileBrowser: TFrameFileBrowser;
     StayOnTopState: Boolean;
-    {$IFDEF Delphi7Up}
     ActionList: TActionList;
     ActionUserAddFile: TAction;
     ActionUserAddFileForm2: TAction;
@@ -434,7 +431,6 @@ type
     ActionUserTrackDown: TAction;
     ActionUserToggleFileExplorer: TAction;
     ActionUserSettings : TAction;
-    {$ENDIF}
     FImageTabFirstShow  : Boolean;
     FImageTabFirstWrite : Boolean;
     FCheckingControls   : Boolean;
@@ -541,7 +537,6 @@ type
     procedure DropFileTargetTreeViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewLeave(Sender: TObject);
     {ActionList/Actions}
-    {$IFDEF Delphi7Up}
     procedure InitActions;
     procedure ActionUserAddFileExecute(Sender: TObject);
     procedure ActionUserAddFileForm2Execute(Sender: TObject);
@@ -551,7 +546,6 @@ type
     procedure ActionUserTrackDownExecute(Sender: TObject);
     procedure ActionUserToggleFileExplorerExecute(Sender: TObject);
     procedure ActionUserSettingsExecute(Sender: TObject);
-    {$ENDIF}
     procedure ImageTabInitRadioButtons;
   public
     { Public declarations }
@@ -4112,9 +4106,7 @@ begin
   FCheckingControls    := False;
   FFileExplorerShowing := False;
   FOutputWindowShowing := False;
-  {$IFDEF Delphi7Up}
   InitActions;
-  {$ENDIF}
   {$IFDEF WriteLogfile} AddLogCode(1051); {$ENDIF}
   SetFont(Self);
   FInstanceTermination := False;
@@ -4580,12 +4572,6 @@ end;
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
                              Shift: TShiftState);
 begin
-  {$IFNDEF Delphi7Up}
-  if  ssAlt in Shift then
-  begin
-    HandleKeyboardShortcut(Key);
-  end else
-  {$ENDIF}
   case Key of
     VK_F12: ToggleStayOnTopState;
   end;
@@ -6623,7 +6609,7 @@ begin
   end;
 end;
 
-{$IFDEF Delphi7Up}
+
 { Actions -------------------------------------------------------------------- }
 
 { InitActions ------------------------------------------------------------------
@@ -6716,7 +6702,7 @@ procedure TForm1.ActionUserSettingsExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($53);
 end;
-{$ENDIF}
+
 
 { Hilfsfunktionen ------------------------------------------------------------ }
 
