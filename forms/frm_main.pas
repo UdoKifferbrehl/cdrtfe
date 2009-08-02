@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  02.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -431,6 +431,7 @@ type
     ActionUserTrackDown: TAction;
     ActionUserToggleFileExplorer: TAction;
     ActionUserSettings : TAction;
+    ActionUserShowOutputWindow: TAction;    
     FImageTabFirstShow  : Boolean;
     FImageTabFirstWrite : Boolean;
     FCheckingControls   : Boolean;
@@ -546,6 +547,7 @@ type
     procedure ActionUserTrackDownExecute(Sender: TObject);
     procedure ActionUserToggleFileExplorerExecute(Sender: TObject);
     procedure ActionUserSettingsExecute(Sender: TObject);
+    procedure ActionUserShowOutputWindowExecute(Sender: TObject);
     procedure ImageTabInitRadioButtons;
   public
     { Public declarations }
@@ -4642,18 +4644,24 @@ procedure TForm1.HandleKeyboardShortcut(const Key: Word);
     MainMenuSettingsClick(nil);
   end;
 
+  procedure HKSShowOutputWindow;
+  begin
+    MainMenuShowOutputWindowClick(nil);
+  end;
+
 begin
   case Key of
     {VK_E}$45: HKSToggleFileExplorer;
+    {VK_I}$49: HKSAddFolder;
+    {VK_L}$4C: HKSShowOutputWindow;
     {VK_O}$4F: HKSAddFiles;
+    {VK_S}$53: HKSSettings;
     {VK_V}$56: begin
                  if FSettings.General.Choice = cXCD then
                  begin FSettings.General.XCDAddMovie := True; HKSAddFiles; end;
                end;
-    {VK_I}$49: HKSAddFolder;
-    {VK_S}$53: HKSSettings;
     VK_Delete: HKSDeleteAll;
-    VK_UP    : HKSTRackUp;
+    VK_UP    : HKSTrackUp;
     VK_DOWN  : HKSTrackDown;
   end;
 end;
@@ -6661,6 +6669,11 @@ begin
   ActionUserSettings.ShortCut := ShortCut($53{VK_S}, [ssAlt]);
   ActionUserSettings.OnExecute := ActionUserSettingsExecute;
   ActionUserSettings.ActionList := ActionList;
+  {Actions erstellen - Logfenster öffnen}
+  ActionUserShowOutputWindow := TAction.Create(ActionList);
+  ActionUserShowOutputWindow.ShortCut := ShortCut($4C{VK_L}, [ssAlt]);
+  ActionUserShowOutputWindow.OnExecute := ActionUserShowOutputWindowExecute;
+  ActionUserShowOutputWindow.ActionList := ActionList;
 end;
 
 procedure TForm1.ActionUserAddFileExecute(Sender: TObject);
@@ -6701,6 +6714,11 @@ end;
 procedure TForm1.ActionUserSettingsExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($53);
+end;
+
+procedure TForm1.ActionUserShowOutputWindowExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($4C);
 end;
 
 
