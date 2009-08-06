@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.03.2009
+  letzte Änderung  06.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,23 +27,31 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
 type
   TFormAbout = class(TForm)
     Button1: TButton;
-    Image1: TImage;
-    StaticText1: TStaticText;
-    StaticText2: TStaticText;
+    PanelTop: TPanel;
+    Bevel1: TBevel;
+    StaticTextName: TStaticText;
+    Image2: TImage;
+    LabelDescription: TLabel;
+    PageControl: TPageControl;
+    TabSheet1: TTabSheet;
+    TabSheetLicense: TTabSheet;
+    TabSheetCredits: TTabSheet;
+    StaticTextVersion: TStaticText;
     StaticText3: TStaticText;
-    Label1: TLabel;
-    Label2: TLabel;
+    StaticText6: TStaticText;
     StaticText4: TStaticText;
     StaticText5: TStaticText;
-    RichEdit1: TRichEdit;
-    StaticText6: TStaticText;
-    ButtonSwitch: TButton;
+    Image1: TImage;
     StaticText7: TStaticText;
+    Label1: TLabel;
+    Label2: TLabel;
+    RichEdit1: TRichEdit;
+    RichEdit2: TRichEdit;
+    LabelHintTest: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure Label2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure ButtonSwitchClick(Sender: TObject);
   private
     { Private declarations }
     FLang: TLang;
@@ -68,7 +76,8 @@ implementation
 
 uses constant, f_misc, f_filesystem;
 
-const Cdrtfe_Version     = 'cdrtfe 1.3.5'
+const Cdrtfe_Name        = 'cdrtfe';
+      Cdrtfe_Version     = 'cdrtfe 1.3.5'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2009  O. Valencia';
@@ -76,11 +85,11 @@ const Cdrtfe_Version     = 'cdrtfe 1.3.5'
       Cdrtfe_Homepage    = 'http://cdrtfe.sourceforge.net';
       Cdrtfe_eMail       = 'kerberos002@arcor.de';
       {$IFDEF TestVersion}
-      Cdrtfe_HintTest    = 'Achtung/Attention!' + CRLF + CRLF +
+      Cdrtfe_HintTest    = 'Achtung/Attention!' + CRLF +
                            'Dies ist eine Testversion, die noch schwere ' +
-                           'Fehler enthalten könnte.' + CRLF + CRLF +
+                           'Fehler enthalten könnte.' + CRLF +
                            'This is a test version which still may have ' +
-                           'severe bugs.' + CRLF + CRLF;
+                           'severe bugs.';
       {$ENDIF}
 
 procedure TFormAbout.FormCreate(Sender: TObject);
@@ -88,28 +97,44 @@ var TempStream : TResourceStream;
     JPEGImage  : {$IFDEF UseImagingLib}TImagingJpeg{$ELSE}TJPEGImage{$ENDIF};
 begin
   SetFont(Self);
-  StaticText1.Caption := Cdrtfe_Version;
-  StaticText2.Caption := Cdrtfe_Description;
-  StaticText3.Caption := Cdrtfe_Copyright;
-  StaticText6.Caption := Cdrtfe_Copyright2;
-  StaticText7.Caption := '(' + GetFileVersionString(Application.ExeName) + ')';
-  StaticText7.Left := StaticText1.Left + StaticText1.Width + 10;
-  Label1.Caption      := Cdrtfe_Homepage;
-  Label2.Caption      := Cdrtfe_eMail;
 
-  Label1.Font.Color:=clBlue;
-  Label1.Font.Style:=[fsUnderline];
-  Label1.Cursor:=crHandPoint;
+  {special Font settings}
+  Label1.Font.Color := clBlue;
+  Label1.Font.Style := [fsUnderline];
+  Label1.Cursor := crHandPoint;
 
   Label2.Font.Color:=clBlue;
   Label2.Font.Style:=[fsUnderline];
   Label2.Cursor:=crHandPoint;
 
-  TempStream := TResourceStream.Create(hInstance, 'License', RT_RCDATA);
+  StaticTextName.Font.Style := [fsBold];
+  StaticTextVersion.Font.Style := [fsBold];
+  LabelHintTest.Font.Color := clMaroon;
+  LabelHintTest.Caption := '';
 
+  {set cyptions}
+  StaticTextName.Caption     := Cdrtfe_Name;
+  LabelDescription.Caption   := Cdrtfe_Description;
+  StaticTextVersion.Caption  := Cdrtfe_Version;
+  StaticText3.Caption := Cdrtfe_Copyright;
+  StaticText6.Caption := Cdrtfe_Copyright2;
+  StaticText7.Caption := '(' + GetFileVersionString(Application.ExeName) + ')';
+  StaticText7.Left := StaticTextVersion.Left + StaticTextVersion.Width + 10;
+  Label1.Caption      := Cdrtfe_Homepage;
+  Label2.Caption      := Cdrtfe_eMail;
+
+  TempStream := TResourceStream.Create(hInstance, 'License', RT_RCDATA);
   try
     TempStream.Position := 0;
     RichEdit1.Lines.LoadFromStream(TempStream);
+  finally
+    TempStream.Free;
+  end;
+
+  TempStream := TResourceStream.Create(hInstance, 'Credits', RT_RCDATA);
+  try
+    TempStream.Position := 0;
+    RichEdit2.Lines.LoadFromStream(TempStream);
   finally
     TempStream.Free;
   end;
@@ -124,10 +149,22 @@ begin
   finally
     TempStream.Free;
     JPEGImage.Free;
+  end;                      
+
+  TempStream := TResourceStream.Create(hInstance, 'grad1', 'JPEG');
+  JPEGImage := {$IFDEF UseImagingLib}TImagingJPEG.Create{$ELSE}
+                                     TJPEGImage.Create{$ENDIF};
+  try
+    TempStream.Position := 0;
+    JPEGImage.LoadFromStream(TempStream);
+    Image2.Picture.Assign(JPEGImage);
+  finally
+    TempStream.Free;
+    JPEGImage.Free;
   end;
 
   {$IFDEF TestVersion}
-  RichEdit1.Lines.Insert(0, Cdrtfe_HintTest);
+  LabelHintTest.Caption := Cdrtfe_HintTest;
   {$ENDIF}
 
 end;
@@ -151,22 +188,6 @@ end;
 procedure TFormAbout.FormShow(Sender: TObject);
 begin
   FLang.SetFormLang(self);
-end;
-
-procedure TFormAbout.ButtonSwitchClick(Sender: TObject);
-const {$J+} ShowCredits: Boolean = True; {$J-}
-var TempStream : TResourceStream;
-    Section    : string;
-begin
-  if ShowCredits then Section := 'Credits' else Section := 'License';
-  TempStream := TResourceStream.Create(hInstance, Section, RT_RCDATA);
-  try
-    TempStream.Position := 0;
-    RichEdit1.Lines.LoadFromStream(TempStream);
-  finally
-    TempStream.Free;
-  end;
-  ShowCredits := not ShowCredits;
 end;
 
 initialization
