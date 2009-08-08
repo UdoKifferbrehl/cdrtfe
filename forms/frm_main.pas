@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.08.2009
+  letzte Änderung  08.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1268,7 +1268,7 @@ begin
     IsoPath    := EditImageIsoPath.Text;
     TAO        := RadioButtonImageTAO.Checked;
     DAO        := RadioButtonImageDAO.Checked;
-    RAW        := RadioButtonImageRAW.Checked;
+    RAW        := RadioButtonImageRAW.Checked;                          
     if RadioButtonImageRaw96r.Checked then
     begin
       RawMode := 'raw96r';
@@ -3848,12 +3848,6 @@ begin
     Form1.Constraints.MinWidth := dWidthBigFont;
     Form1.Constraints.MinHeight := dHeightBigFont;  
   end;
-  {Das schöne der beiden großen Icons für cdrtfe. Anscheinend übergibt GetIcon
-   nur ein Handle, daher muß in FormDestroy Application.Icon.ReleaseHandle aus-
-   geführt werden, da sonst das Icon sowohl durch das TApplication als auch
-   durch TImnageLists freigegeben wird, was einen Fehler (bei Memcheck)
-   verursacht.}
-  FImageLists.IconImages.GetIcon(0, Application.Icon);
   {Bitmaps für die Glyphs laden}
   InitGlyphArray(GlyphArray);
   FImageLists.LoadGlyphs(GlyphArray);
@@ -4291,11 +4285,6 @@ begin
   VideoListView.Free;
   {$ENDIF}
   SpaceMeter.Free;
-  {Verhindern, daß das Icon doppelt freigegeben wird. Freigabe erfolgte bereits
-   mit FImageLists.Free.
-   Wenn jedoch abgebrochen wird, weil eine weitere Instanz gefunden wurde, dann
-   muß das Icon von TApplication.Destroy abgeräumt werden.}
-  if not FInstanceTermination then Application.Icon.ReleaseHandle;
 end;
 
 { FormShow ---------------------------------------------------------------------
