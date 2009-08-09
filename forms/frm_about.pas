@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.08.2009
+  letzte Änderung  09.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,16 +22,11 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ExtCtrls, ShellAPI, ComCtrls,
      {$IFDEF UseImagingLib}ImagingComponents,{$ELSE}jpeg,{$ENDIF}
-     cl_lang;
+     cl_lang, c_frametopbanner;
 
 type
   TFormAbout = class(TForm)
     Button1: TButton;
-    PanelTop: TPanel;
-    Bevel1: TBevel;
-    StaticTextName: TStaticText;
-    Image2: TImage;
-    LabelDescription: TLabel;
     PageControl: TPageControl;
     TabSheet1: TTabSheet;
     TabSheetLicense: TTabSheet;
@@ -48,6 +43,7 @@ type
     RichEdit1: TRichEdit;
     RichEdit2: TRichEdit;
     LabelHintTest: TLabel;
+    FrameTopBanner1: TFrameTopBanner;
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure Label2Click(Sender: TObject);
@@ -98,6 +94,11 @@ var TempStream : TResourceStream;
 begin
   SetFont(Self);
 
+  {Banner}
+  FrameTopBanner1.Caption := Cdrtfe_Name;
+  FrameTopBanner1.Description := Cdrtfe_Description;
+  FrameTopBanner1.BackgroundJPEGResourceName := 'grad1';
+
   {special Font settings}
   Label1.Font.Color := clBlue;
   Label1.Font.Style := [fsUnderline];
@@ -107,14 +108,11 @@ begin
   Label2.Font.Style:=[fsUnderline];
   Label2.Cursor:=crHandPoint;
 
-  StaticTextName.Font.Style := [fsBold];
   StaticTextVersion.Font.Style := [fsBold];
   LabelHintTest.Font.Color := clMaroon;
   LabelHintTest.Caption := '';
 
-  {set cyptions}
-  StaticTextName.Caption     := Cdrtfe_Name;
-  LabelDescription.Caption   := Cdrtfe_Description;
+  {set captions}
   StaticTextVersion.Caption  := Cdrtfe_Version;
   StaticText3.Caption := Cdrtfe_Copyright;
   StaticText6.Caption := Cdrtfe_Copyright2;
@@ -146,18 +144,6 @@ begin
     TempStream.Position := 0;
     JPEGImage.LoadFromStream(TempStream);
     Image1.Picture.Assign(JPEGImage);
-  finally
-    TempStream.Free;
-    JPEGImage.Free;
-  end;                      
-
-  TempStream := TResourceStream.Create(hInstance, 'grad1', 'JPEG');
-  JPEGImage := {$IFDEF UseImagingLib}TImagingJPEG.Create{$ELSE}
-                                     TJPEGImage.Create{$ENDIF};
-  try
-    TempStream.Position := 0;
-    JPEGImage.LoadFromStream(TempStream);
-    Image2.Picture.Assign(JPEGImage);
   finally
     TempStream.Free;
     JPEGImage.Free;

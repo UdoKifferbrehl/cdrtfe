@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.06.2009
+  letzte Änderung  09.08.2009
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -108,7 +108,8 @@ uses
   frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',
   {$ENDIF}
   W32Waves in 'import\w32waves.pas',
-  atl_oggvorbis in 'import\atl_oggvorbis.pas';
+  atl_oggvorbis in 'import\atl_oggvorbis.pas',
+  c_frametopbanner in 'frames\c_frametopbanner.pas' {FrameTopBanner: TFrame};
 
 { verwendete externe Komponenten/Units:
   -------------------------------------
