@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, Grids,
      {eigene Klassendefinitionen/Units}
-     cl_projectdata, cl_settings, cl_lang, f_largeint;
+     cl_projectdata, cl_settings, cl_lang, f_largeint, c_frametopbanner;
 
 type
   TFormAudioCDTracks = class(TForm)
@@ -41,6 +41,7 @@ type
     RadioButtonUserdefinedPause: TRadioButton;
     EditPause: TEdit;
     ComboBoxPause: TComboBox;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -304,6 +305,7 @@ end;
 procedure TFormAudioCDTracks.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc05'), 'grad1');
   FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);

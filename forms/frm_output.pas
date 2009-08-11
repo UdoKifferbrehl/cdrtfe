@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.01.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,7 +21,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_lang, cl_settings;
+  cl_lang, cl_settings, c_frametopbanner;
 
 
 type
@@ -29,6 +29,7 @@ type
     Memo1: TMemo;
     ButtonOk: TButton;
     CheckBoxAutoUpdate: TCheckBox;
+    FrameTopBanner1: TFrameTopBanner;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -56,15 +57,18 @@ uses frm_main, f_misc, cl_logwindow;
 procedure TFormOutput.FormCreate(Sender: TObject);
 begin
   SetFont(Self);
+  (*
   if Screen.PixelsPerInch > 96 then
   begin
     self.Width := 756;
     self.Height := 634;
-  end;
+  end;*)
 end;
 
 procedure TFormOutput.FormShow(Sender: TObject);
 begin
+  {Banner}
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc01'), 'grad1');
   {falls vorhanden, alte Größe und Position wiederherstellen}
   with FSettings.WinPos do
   begin
@@ -95,7 +99,7 @@ begin
 end;
 
 procedure TFormOutput.FormResize(Sender: TObject);
-begin
+begin      (*
   if Screen.PixelsPerInch <= 96 then
   begin
     Memo1.Width := self.ClientWidth - 16;
@@ -111,7 +115,7 @@ begin
     ButtonOk.Top := ClientHeight - 39;
     ButtonOk.Left := ClientWidth - 8 - ButtonOk.Width;
     CheckBoxAutoUpdate.Top := ClientHeight - 39;
-  end;
+  end;       *)
 end;
 
 procedure TFormOutput.FormClose(Sender: TObject; var Action: TCloseAction);

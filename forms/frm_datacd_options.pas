@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.02.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -23,7 +23,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_settings, cl_lang;
+  cl_settings, cl_lang, c_frametopbanner;
 
 type
   TFormDataCDOptions = class(TForm)
@@ -51,6 +51,7 @@ type
     CheckBoxOverburn: TCheckBox;
     CheckBoxLastSession: TCheckBox;
     CheckBoxSelectSess: TCheckBox;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -349,6 +350,7 @@ procedure TFormDataCDOptions.FormShow(Sender: TObject);
 var Diff: Integer;
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc03'), 'grad1');
   FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);

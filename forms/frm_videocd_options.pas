@@ -2,9 +2,9 @@
 
   frm_videocd_options.pas: Video-CD: Optionen
 
-  Copyright (c) 2005-2008 Oliver Valencia
+  Copyright (c) 2005-2009 Oliver Valencia
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_settings, cl_lang;
+  cl_settings, cl_lang, c_frametopbanner;
 
 type
   TFormVideoCDOptions = class(TForm)
@@ -42,6 +42,7 @@ type
     CheckBoxSVCDCompat: TCheckBox;
     CheckBoxSec2336: TCheckBox;
     CheckBoxVerbose: TCheckBox;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonImageSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -219,6 +220,7 @@ end;
 procedure TFormVideoCDOptions.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc09'), 'grad1');
   FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);

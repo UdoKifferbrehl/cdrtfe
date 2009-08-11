@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.02.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_settings, cl_lang, ComCtrls;
+     cl_settings, cl_lang, ComCtrls, c_frametopbanner;
 
 type
   TFormDataCDFS = class(TForm)
@@ -91,6 +91,7 @@ type
     CheckBoxHideTransTBL: TCheckBox;
     CheckBoxNLPathtables: TCheckBox;
     CheckBoxHideRRMoved: TCheckBox;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -415,6 +416,7 @@ end;
 procedure TFormDataCDFS.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc02'), 'grad1');
   FLang.SetFormLang(Self);
   ComboBoxISOOutChar.Items.Assign(FSettings.General.Charsets);
   ComboBoxISOInChar.Items.Assign(FSettings.General.Charsets);

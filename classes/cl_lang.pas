@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.06.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -350,6 +350,17 @@ begin
     Add('msess01=Session auswählen');
     Add('msess02=Fortzusetzende Session:');
     Add('msess03=Session');
+    {Dialog-Beschreibungen}
+    Add('desc01=Ausgabe der Kommandozeilenprogramme');
+    Add('desc02=Einstellungen für das Dateisystem der CD/DVD');
+    Add('desc03=Einstellungen für das Schreiben der CD/DVD');
+    Add('desc04=Einstellungen für das Schreiben von Audio-CDs');
+    Add('desc05=Eigenschaften der einzelnen Audio-Tracks');
+    Add('desc06=Potentielle Fehler im Dateisystem der CD/DVD korrigieren');
+    Add('desc07=Einstellungen für das Auslesen von Audio-CD-Tracks');
+    Add('desc08=Einstellungen für die Erstellung von XCDs');
+    Add('desc09=Einstellungen für das Schreiben von (S)VCDs');
+    Add('desc10=Allgemeine Programmeinstellungen von cdrtfe');
   end;
 end;
 

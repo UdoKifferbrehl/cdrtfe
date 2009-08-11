@@ -2,10 +2,10 @@
 
   frm_audiocd_options.pas: Audio-CD: Optionen
 
-  Copyright (c) 2004-2005 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.09.2005
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,7 +20,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ExtCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_settings, cl_lang;
+     cl_settings, cl_lang, c_frametopbanner;
 
 type
   TFormAudioCDOptions = class(TForm)
@@ -46,6 +46,7 @@ type
     CheckBoxFix: TCheckBox;
     CheckBoxMulti: TCheckBox;
     CheckBoxCDText: TCheckBox;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure RadioButtonClick(Sender: TObject);
@@ -216,6 +217,7 @@ end;
 procedure TFormAudioCDOptions.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc04'), 'grad1');
   FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);

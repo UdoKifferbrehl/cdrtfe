@@ -2,10 +2,10 @@
 
   frm_datacd_fs_error.pas: Dialog zum Korrigieren von zu langen Dateinamen
 
-  Copyright (c) 2004-2007 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2007
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -23,7 +23,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, ShellAPI, StdCtrls, Menus, ExtCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_projectdata, cl_lang, cl_imagelists, cl_settings;
+  cl_projectdata, cl_lang, cl_imagelists, cl_settings, c_frametopbanner;
 
 type
   TFSEMode = (mFiles, mFolders, mInvalidFiles, mNoAccess);
@@ -42,6 +42,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Timer1: TTimer;
+    FrameTopBanner1: TFrameTopBanner;
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
@@ -411,6 +412,7 @@ begin
   ListView.LargeImages := FImageLists.LargeImages;
   ListView.SmallImages := FImageLists.SmallImages;
   FLang.SetFormLang(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc06'), 'grad1');
   {Liste anzeigen}
   ListView.Items.Clear;
   case FMode of

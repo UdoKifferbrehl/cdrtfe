@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  13.02.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,7 +20,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_settings, cl_lang, ComCtrls;
+  cl_settings, cl_lang, ComCtrls, c_frametopbanner;
 
 type
   TFormDAEOptions = class(TForm)
@@ -71,6 +71,7 @@ type
     CheckBoxDAEWriteCopy: TCheckBox;
     ComboBoxSpeedW: TComboBox;
     LabelSpeedW: TLabel;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -257,6 +258,7 @@ end;
 procedure TFormDAEOptions.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc07'), 'grad1');
   FLang.SetFormLang(Self);
   ComboBoxDAEMp3Quality.Items.Assign(FSettings.General.Mp3Qualities);
   ComboBoxSpeedW.Items.CommaText := DefaultSpeedList;

@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ExtCtrls, FileCtrl, ComCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_lang, cl_settings, userevents;
+     cl_lang, cl_settings, userevents, c_frametopbanner;
 
 type
   TFormSettings = class(TForm)
@@ -100,6 +100,7 @@ type
     RadioButtonUseOwnDLL: TRadioButton;
     RadioButtonUseSearchPathDLL: TRadioButton;
     LabelUseDLL: TLabel;
+    FrameTopBanner1: TFrameTopBanner;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -529,6 +530,7 @@ end;
 procedure TFormSettings.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc10'), 'grad1');
   FLang.SetFormLang(Self);
   StaticText5.Caption := FLang.GMS('m302');
   FShellExtIsSet := ShellExtensionsRegistered;

@@ -2,10 +2,10 @@
 
   frm_xcd_options.pas: XCD-CD: Optionen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -23,7 +23,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_settings, cl_lang;
+  cl_settings, cl_lang, c_frametopbanner;
 
 type
   TFormXCDOptions = class(TForm)
@@ -51,6 +51,7 @@ type
     CheckBoxUseErrorProtection: TCheckBox;
     LabelSecCount: TLabel;
     EditSecCount: TEdit;
+    FrameTopBanner1: TFrameTopBanner;
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonImageSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -259,6 +260,7 @@ end;
 procedure TFormXCDOptions.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc08'), 'grad1');
   FLang.SetFormLang(Self);
   GetSettings;
   CheckControls(Sender);

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.08.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -28,7 +28,7 @@ type
   TFormAbout = class(TForm)
     Button1: TButton;
     PageControl: TPageControl;
-    TabSheet1: TTabSheet;
+    TabSheetInfo: TTabSheet;
     TabSheetLicense: TTabSheet;
     TabSheetCredits: TTabSheet;
     StaticTextVersion: TStaticText;
@@ -95,9 +95,7 @@ begin
   SetFont(Self);
 
   {Banner}
-  FrameTopBanner1.Caption := Cdrtfe_Name;
-  FrameTopBanner1.Description := Cdrtfe_Description;
-  FrameTopBanner1.BackgroundJPEGResourceName := 'grad1';
+  FrameTopBanner1.Init(Cdrtfe_Name, Cdrtfe_Description, 'grad1');
 
   {special Font settings}
   Label1.Font.Color := clBlue;
