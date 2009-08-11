@@ -2,7 +2,7 @@
 
   Copyright (c) 2009 Oliver Valencia
 
-  letzte Änderung  09.08.2009
+  letzte Änderung  10.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -14,11 +14,11 @@
 
   TFrameFileBrowser
 
-    Properties       Caption
-                     Description
-                     BackgroundJPEGResourceName
+    Properties   Caption
+                 Description
+                 BackgroundJPEGResourceName
 
-    Methoden     x
+    Methoden     Init(const Cap, Desc, BGJPEGRN: string)
 
 }
 
@@ -47,6 +47,7 @@ type
     procedure SetBGJPEGResource(Value: string);
   public
     { Public-Deklarationen }
+    procedure Init(const Cap, Desc, BGJPEGRN: string);
     property Caption: string write SetLabelCaption;
     property Description: string write SetLabelDescription;
     property BackgroundJPEGResourceName: string write SetBGJPEGResource;
@@ -55,6 +56,10 @@ type
 implementation
 
 {$R *.dfm}
+
+{ TFrameTopBanner ------------------------------------------------------------ }
+
+{ TFrameTopBanner - private }
 
 procedure TFrameTopBanner.SetLabelCaption(Value: string);
 begin
@@ -82,6 +87,15 @@ begin
     TempStream.Free;
     JPEGImage.Free;
   end;
+end;
+
+{ TFrameTopBanner - public }
+
+procedure TFrameTopBanner.Init(const Cap: string; const Desc: string; const BGJPEGRN: string);
+begin
+  Caption := Cap;
+  Description := Desc;
+  BackgroundJPEGResourceName := BGJPEGRN;
 end;
 
 end.

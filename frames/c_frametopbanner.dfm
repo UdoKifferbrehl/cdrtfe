@@ -3,7 +3,7 @@ object FrameTopBanner: TFrameTopBanner
   Top = 0
   Width = 345
   Height = 53
-  Anchors = [akLeft, akTop, akRight, akBottom]
+  Anchors = [akLeft, akTop, akRight]
   TabOrder = 0
   TabStop = True
   DesignSize = (
