@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  03.05.2009
+  letzte Änderung  16.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1712,6 +1712,14 @@ begin
                           FSecFree]);
       ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
       Result := False;
+    end;
+    {Warnung: CD, Multisession und DAO}
+    if Result and FSettings.DataCD.Multi and
+       FSettings.DataCD.DAO and not FIsDVD then
+    begin
+      i := ShowMsgDlg(FLang.GMS('eburn21'), FLang.GMS('g004'),
+                      MB_OKCancel or MB_ICONWARNING);
+      Result := i = ID_OK;
     end;
     {Fehler: DVD und Multisession}
     if Result and FSettings.DataCD.Multi and FIsDVD and
