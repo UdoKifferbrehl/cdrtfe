@@ -277,6 +277,7 @@ type
     MainMenuToggleFileExplorer: TMenuItem;
     MainMenuShowOutputWindow: TMenuItem;
     MainMenuSettings: TMenuItem;
+    N5: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
