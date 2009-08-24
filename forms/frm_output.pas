@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.08.2009
+  letzte Änderung  24.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -67,6 +67,7 @@ end;
 
 procedure TFormOutput.FormShow(Sender: TObject);
 begin
+  FLang.SetFormLang(self);
   {Banner}
   FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc01'), 'grad1');
   {falls vorhanden, alte Größe und Position wiederherstellen}
@@ -88,7 +89,6 @@ begin
     end;
     if OutMaximized then self.WindowState := wsMaximized;
   end;
-  FLang.SetFormLang(self);
 
   {zur ersten Zeile scrollen}
   // Memo1.Perform(EM_LineScroll, 0, -Memo1.Lines.Count - 1);

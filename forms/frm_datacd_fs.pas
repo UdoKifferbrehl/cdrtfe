@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.08.2009
+  letzte Änderung  24.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -416,8 +416,8 @@ end;
 procedure TFormDataCDFS.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FLang.SetFormLang(Self);  
   FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc02'), 'grad1');
-  FLang.SetFormLang(Self);
   ComboBoxISOOutChar.Items.Assign(FSettings.General.Charsets);
   ComboBoxISOInChar.Items.Assign(FSettings.General.Charsets);
   GetSettings;

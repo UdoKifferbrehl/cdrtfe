@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  10.08.2009
+  letzte Änderung  24.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -258,8 +258,8 @@ end;
 procedure TFormDAEOptions.FormShow(Sender: TObject);
 begin
   SetFont(Self);
+  FLang.SetFormLang(Self);  
   FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc07'), 'grad1');
-  FLang.SetFormLang(Self);
   ComboBoxDAEMp3Quality.Items.Assign(FSettings.General.Mp3Qualities);
   ComboBoxSpeedW.Items.CommaText := DefaultSpeedList;
   GetSettings;
