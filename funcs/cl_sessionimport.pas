@@ -4,7 +4,7 @@
 
   Copyright (c) 2008-2009 Oliver Valencia
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  24.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -74,7 +74,7 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
 implementation
 
 uses f_logfile, cl_cdrtfedata, cl_lang, f_misc, f_process, f_helper, f_strings,
-     f_filesystem, constant, cl_cd;
+     f_filesystem, constant, cl_cd, c_frametopbanner;
 
 const SearchDir    : string = 'Directory listing of ';
       SearchDirID  : string = 'd---------';
@@ -89,6 +89,7 @@ type TFormSelectSession = class(TForm)
        ComboBox    : TComboBox;
        ButtonOk    : TButton;
        ButtonCancel: TButton;
+       FrameTopBanner1: TFrameTopBanner;
        procedure FormShow(Sender: TObject);
        procedure ButtonClick(Sender: TObject);
        procedure ButtonCancelClick(Sender: TObject);
@@ -120,13 +121,20 @@ begin
   ClientWidth := 220;
   OnShow := FormShow;
   OnDestroy := FormDestroy;
+  {Banner}
+  FrameTopBanner1 := TFrameTopBanner.Create(Self);
+  FrameTopBanner1.Parent := Self;
+  FrameTopBanner1.Top := 0;
+  FrameTopBanner1.Left := 0;
+  FrameTopBanner1.Width := ClientWidth;
+  FrameTopBanner1.Init(Self.Caption, '', 'grad1');
   {StaticText}
   StaticText := TStaticText.Create(Self);
   with StaticText do
   begin
     Parent := Self;
     Left := 8;
-    Top := 8;
+    Top := 56; // 8;
     AutoSize := False;
     Height := 93;
     Width := 203;

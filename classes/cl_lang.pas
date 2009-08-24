@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.08.2009
+  letzte Änderung  24.08.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -88,7 +88,8 @@ procedure ExportStringProperties;
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_logfile, f_filesystem, f_misc, f_strings, f_wininfo, constant;
+     f_logfile, f_filesystem, f_misc, f_strings, f_wininfo, c_frametopbanner,
+     constant;
 
 type TFormSelectLang = class(TForm)
        ComboBox: TComboBox;
@@ -96,6 +97,7 @@ type TFormSelectLang = class(TForm)
        ButtonCancel: TButton;
        LabelOk: TLabel;
        LabelCancel: TLabel;
+       FrameTopBanner1: TFrameTopBanner;
        procedure FormShow(Sender: TObject);
        procedure ButtonClick(Sender: TObject);
      private
@@ -1015,16 +1017,23 @@ begin
   Caption := FLang.GMS('mlang01');
   Position := poScreenCenter;
   BorderIcons := [biSystemMenu];
-  ClientHeight := 70; // Height := 98;
+  ClientHeight := 118; //70; // Height := 98;
   ClientWidth := 220; // Width := 227;
   OnShow := FormShow;
+  {Banner}
+  FrameTopBanner1 := TFrameTopBanner.Create(Self);
+  FrameTopBanner1.Parent := Self;
+  FrameTopBanner1.Top := 0;
+  FrameTopBanner1.Left := 0;
+  FrameTopBanner1.Width := ClientWidth;
+  FrameTopBanner1.Init(Self.Caption, '', 'grad1');
   {ComboBox}
   ComboBox := TComboBox.Create(Self);
   with ComboBox do
   begin
     Parent := Self;
     Left := 8;
-    Top := 8;
+    Top := 56; //8;
     Height := 98;
     Width := 203;
     Visible := True;
@@ -1038,7 +1047,7 @@ begin
   begin
     Parent := Self;
     Left := 56;
-    Top := 40;
+    Top := 88; //40;
     Height := 25;
     Width := 75;
     Caption := FLang.GMS('mlang02');
@@ -1052,12 +1061,12 @@ begin
   begin
     Parent := Self;
     Left := 136;
-    Top := 40;
+    Top := 88; //40;
     Height := 25;
     Width := 75;
     Caption := FLang.GMS('mlang03');
     Hint := '[Cancel]';
-    ShowHint := True;        
+    ShowHint := True;
     ModalResult := mrCancel;
     Cancel := True;
   end;
