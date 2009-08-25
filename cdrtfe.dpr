@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.08.2009
+  letzte Änderung  25.08.2009
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -98,15 +98,11 @@ uses
   cl_sessionimport in 'funcs\cl_sessionimport.pas',  
   c_spacemeter in 'import\spacemeter\c_spacemeter.pas',
   QProgBar in 'import\spacemeter\QProgBar.pas',
-  {$IFDEF MultipleFolderBrowsing}
   dlg_folderbrowse in 'system\dlg_folderbrowse.pas',
-  {$ENDIF}
   DropTarget in 'import\oledragdrop\DropTarget.pas',
   DropSource in 'import\oledragdrop\DropSource.pas',
-  {$IFDEF ExceptionDlg}
   cl_exceptionlog in 'import\exceptionlog\cl_exceptionlog.pas',
   frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',
-  {$ENDIF}
   W32Waves in 'import\w32waves.pas',
   atl_oggvorbis in 'import\atl_oggvorbis.pas',
   c_frametopbanner in 'frames\c_frametopbanner.pas' {FrameTopBanner: TFrame};
