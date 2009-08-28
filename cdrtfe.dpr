@@ -51,7 +51,7 @@ uses
   frm_audiocd_tracks in 'forms\frm_audiocd_tracks.pas' {FormAudioCDTracks},
   frm_videocd_options in 'forms\frm_videocd_options.pas' {FormVideoCDOptions},
   frm_dae_options in 'forms\frm_dae_options.pas' {FormDAEOptions},
-  frm_splash_screen in 'forms\frm_splash_screen.pas' {FormSplashScreen},  
+  frm_splash_screen in 'forms\frm_splash_screen.pas' {FormSplashScreen},
   cl_lang in 'classes\cl_lang.pas',
   cl_settings in 'classes\cl_settings.pas',
   cl_cd in 'classes\cl_cd.pas',
@@ -92,10 +92,10 @@ uses
   f_environment in 'system\f_environment.pas',
   f_process in 'system\f_process.pas',
   f_filesystem in 'system\f_filesystem.pas',
-  c_filebrowser in 'system\c_filebrowser.pas', {FrameFileBrowser: TFrame}
+  c_filebrowser in 'system\c_filebrowser.pas',
   cl_diskinfo in 'funcs\cl_diskinfo.pas',
   cl_cueinfo in 'funcs\cl_cueinfo.pas',
-  cl_sessionimport in 'funcs\cl_sessionimport.pas',  
+  cl_sessionimport in 'funcs\cl_sessionimport.pas',
   c_spacemeter in 'import\spacemeter\c_spacemeter.pas',
   QProgBar in 'import\spacemeter\QProgBar.pas',
   dlg_folderbrowse in 'system\dlg_folderbrowse.pas',
@@ -103,9 +103,10 @@ uses
   DropSource in 'import\oledragdrop\DropSource.pas',
   cl_exceptionlog in 'import\exceptionlog\cl_exceptionlog.pas',
   frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',
-  W32Waves in 'import\w32waves.pas',
+  w32waves in 'import\w32waves.pas',
   atl_oggvorbis in 'import\atl_oggvorbis.pas',
-  c_frametopbanner in 'frames\c_frametopbanner.pas' {FrameTopBanner: TFrame};
+  c_frametopbanner in 'frames\c_frametopbanner.pas' {FrameTopBanner: TFrame},
+  f_screensaversup in 'system\f_screensaversup.pas';
 
 { verwendete externe Komponenten/Units:
   -------------------------------------

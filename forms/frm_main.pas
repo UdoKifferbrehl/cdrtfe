@@ -573,7 +573,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
      f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init, f_helper,
-     f_checkproject, f_foldernamecache;
+     f_checkproject, f_foldernamecache, f_screensaversup;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
     {$IFDEF ShowTime}
@@ -3668,7 +3668,8 @@ end;
 
   SetButtons wird benötig, um die Buttons zu deaktivieren, wenn cdrtfe die
   externen Programme ausführt.
-  Zusätzlich wird hier das Flag für laufende Prozesse gesetzt.                 }
+  Zusätzlich wird hier das Flag für laufende Prozesse gesetzt und gegebenenfalls
+  der Bildschirmschoner deaktiviert.                         .                 }
 
 procedure TForm1.SetButtons(const Status: TOnOff);
 {$J+}
@@ -3683,6 +3684,7 @@ begin
     ButtonSettings.Enabled := False;
     ButtonAbort.Visible := True;
     SpeedButtonFixCD.Enabled := False;
+    if FSettings.General.DisableScrSvr then DeactivateScreenSaver;
     if Title = '' then Title := Application.Title;
     Application.Title := FLang.GMS('g009') + ' ' + Title;
     Self.Update; {damit die Änderngen sofort wirksam werden}
@@ -3694,6 +3696,7 @@ begin
     ButtonSettings.Enabled := True;
     ButtonAbort.Visible := False;
     SpeedButtonFixCD.Enabled := True;
+    if FSettings.General.DisableScrSvr then ActivateScreenSaver;    
     Application.Title := Title;
   end;
 end;
