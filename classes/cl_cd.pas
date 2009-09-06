@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  06.09.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -44,6 +44,7 @@
                  ExportStructureToStringList(List: TStringList)
                  ExportStructureToTreeView(Tree: TTreeView)
                  ImportStructureFromStringList(List: TStringList)
+                 GetFolderSizeFromPath(const Path: string): Int64
                  GetFolderFromPath(Path: string): TNode
                  GetSubFolders(const Choice: Byte; const Path: string; FolderList: TStringList)
                  MoveFileByIndex(const Index: Integer; const SourcePath, DestPath: string)
@@ -226,6 +227,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        destructor Destroy; override;
        function GetFileList(const Path: string): TStringList;
        function GetFolderFromPath(Path: string): TNode;
+       function GetFolderSizeFromPath(const Path: string): Int64;
        procedure CreateBurnList(List: TStringList); virtual;
        procedure AddFile(const AddName, DestPath: string); virtual;
        procedure CheckFS(var Args: TCheckFSArgs);
@@ -1198,6 +1200,18 @@ begin
   Stream.Position := 0;
   FRoot.LoadStructureFromStream(Stream);
   Stream.Free;
+end;
+
+{ GetFolderSize ----------------------------------------------------------------
+
+  GetFolderSize liefert die Größe des durch Path angegebenen Ordners inkl. aller
+  Unterordner.                                                                 }
+
+function TCD.GetFolderSizeFromPath(const Path: string): Int64;
+var Node: TNode;
+begin
+  Node := GetFolderFromPath(Path);
+  Result := GetFolderSize(Node);
 end;
 
 { GetFolderFromPath ------------------------------------------------------------

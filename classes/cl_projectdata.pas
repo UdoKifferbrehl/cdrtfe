@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  06.09.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -63,6 +63,7 @@
                  GetCDLabel(const Choice: Byte): string
                  GetCDText(const Index: Integer; var TextData: TCDTextTrackData)
                  GetFileList(const Path: string; const Choice: Byte): TStringList
+                 GetFolderSizeFromPath(const Path: string; const Choice: Byte): Int64
                  GetForm2FileCount: Integer
                  GetProjectInfo(var FileCount, FolderCount: Integer; var CDSize: Longint; var CDTime: Extended; var TrackCount: Integer; const Choice: Byte)
                  GetProjectMaxLevel(const Choice: Byte): Integer
@@ -190,6 +191,7 @@ type TProjectData = class(TObject)
        function GetCDLabel(const Choice: Byte): string;
        function GetDataCDFilesToDelete: Boolean;
        function GetFileList(const Path: string; const Choice: Byte): TStringList;
+       function GetFolderSizeFromPath(const Path: string; const Choice: Byte): Int64;
        function GetForm2FileCount: Integer;
        function GetProjectMaxLevel(const Choice: Byte): Integer;
        function GetProjectPrevSessSize: Int64;
@@ -935,6 +937,20 @@ end;
 function TProjectData.GetProjectPrevSessSize: Int64;
 begin
   Result := FDataCD.PrevSessSize;
+end;
+
+{ GetFolderSizeFromPath --------------------------------------------------------
+
+  liefert die Größe des durch Path angegebenen Ordners (inkl. Unterordner).    }
+
+function TProjectData.GetFolderSizeFromPath(const Path: string;
+                                            const Choice: Byte): Int64;
+begin
+  Result := 0;
+  case Choice of
+    cDataCD: Result := FDataCD.GetFolderSizeFromPath(Path);
+    cXCD   : Result := FXCD.GetFolderSizeFromPath(Path);  
+  end;
 end;
 
 { GetForm2FileCount ------------------------------------------------------------

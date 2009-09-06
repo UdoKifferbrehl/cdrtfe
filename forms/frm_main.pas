@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.08.2009
+  letzte Änderung  06.09.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2444,18 +2444,26 @@ var NewItem    : TListItem;
     Caption    : string;
     Filetype   : string;
     SizeString : string;
+    Path       : string;
     IsFolder   : Boolean;
     TrackLength: Extended;
+    p          : Integer;
 begin
   if (FSettings.General.Choice = cDataCD) or
      (FSettings.General.Choice = cXCD) then
   begin
-    IsFolder := Pos(';', Item) = 1;
+    p := Pos(';', Item);
+    IsFolder := p > 0;
     if IsFolder then
     begin
-      Size := 0;
-      Caption := Copy(Item, 2, Length(Item) - 1);
+      Path := Copy(Item, 1, p - 1);
+      Caption := Copy(Item, p + 1, Length(Item) - p);
       Name := StartUpDir;
+      if FSettings.General.ShowFolderSize then
+        Size := FData.GetFolderSizeFromPath(Path + Caption + '/',
+                                            FSettings.General.Choice)
+      else
+        Size := 0;
     end else
       ExtractFileInfoFromEntry(Item, Caption, Name, Size);
     NewItem := ListView.Items.Add;             
@@ -2471,7 +2479,7 @@ begin
     SizeString := FormatFloat('#,###,##0 ' + UnitKiByte, Size);
     if IsFolder then
     begin
-      SizeString := '';
+      if not FSettings.General.ShowFolderSize then SizeString := '';
       Name := '';
     end;
     NewItem.SubItems.Add(SizeString);
@@ -2558,7 +2566,7 @@ begin
       {Folders}
       for i := 0 to SubFolders.Count - 1 do
       begin
-        AddItemToListView(';' + SubFolders[i], ListView);
+        AddItemToListView(Path + ';' + SubFolders[i], ListView);
       end;
       ListView.Tag := SubFolders.Count;
       {Files}
@@ -2577,7 +2585,7 @@ begin
       {Folders}
       for i := 0 to SubFolders.Count - 1 do
       begin
-        AddItemToListView(';' + SubFolders[i], ListView);
+        AddItemToListView(Path + ';' + SubFolders[i], ListView);
       end;
       ListView.Tag := SubFolders.Count;
       {Files}
@@ -3992,6 +4000,8 @@ begin
   case FSettings.General.Choice of
     cDataCD,
     cAudioCD,
+    cDVDVideo,
+    cCDImage,
     cVideoCD : CDEListViewDragDrop(Sender, Sender, 0, 0);
     cXCD     : XCDEListView1DragDrop(Sender, Sender, 0, 0);
   end;

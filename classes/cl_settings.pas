@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.08.2009
+  letzte Änderung  06.09.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -99,6 +99,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        FileInfoTitle : Boolean;
        SpaceMeter    : Boolean;
        DisableScrSvr : Boolean;
+       ShowFolderSize: Boolean;
      end;
 
      TWinPos = record
@@ -609,6 +610,7 @@ begin
     FileInfoTitle := False;
     SpaceMeter := True;
     DisableScrSvr := False;
+    ShowFolderSize := False;
   end;
 
   with WinPos do
@@ -1201,6 +1203,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'FileInfoTitle', FileInfoTitle);
       WriteBool(Section, 'SpaceMeter', SpaceMeter);
       WriteBool(Section, 'DisableScrSvr', DisableScrSvr);
+      WriteBool(Section, 'ShowFolderSize', ShowFolderSize);
     end;
 
     {Die Fensterpositionen und Drive-Settings sollen nicht in 'normalen'
@@ -1616,6 +1619,7 @@ var PF     : TIniFile; // ProjectFile
       FileInfoTitle := ReadBool(Section, 'FileInfoTitle', False);
       SpaceMeter := ReadBool(Section, 'SpaceMeter', True);
       DisableScrSvr := ReadBool(Section, 'DisableScrSvr', False);
+      ShowFolderSize := ReadBool(Section, 'ShowFolderSize', False);
     end;
     ProgressBarUpdate(1);
 
