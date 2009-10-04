@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.09.2009
+  letzte Änderung  04.10.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -24,6 +24,7 @@
 
     Variablen    record General
                         WinPos
+                        FileExplorer
                         CmdLineFlags
                         FileFlags
                         Environment
@@ -115,6 +116,10 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        OutMaximized : Boolean;
        OutScrolled  : Boolean;
        LVColWidth   : array[0..cLVCount, 0..cLVMaxColCount] of Integer;
+     end;
+
+     TFileExplorer = record
+       Height       : Integer;
      end;
 
      TCmdLineFlags = record
@@ -468,6 +473,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
      public
        General     : TGeneralSettings;
        WinPos      : TWinPos;
+       FileExplorer: TFileExplorer;
        CmdLineFlags: TCmdLineFlags;
        FileFlags   : TFileFlags;
        Environment : TEnvironment;
@@ -629,6 +635,11 @@ begin
     for i := 0 to cLVCount do
       for j := 0 to cLVMaxColCount  do
         LVColWidth[i, j] := -1;
+  end;
+
+  with FileExplorer do
+  begin
+    Height := 192;
   end;
 
   with CmdLineFlags do

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.09.2009
+  letzte Änderung  04.10.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3103,23 +3103,25 @@ end;
   Der FileExlorer wird je nach übergebenem Wert ein- bzw. abgeschaltet.        }
 
 procedure TForm1.ToggleFileExplorer(const Status: Boolean);
+var FileExplorerHeight: Integer;
 begin
+  FileExplorerHeight := FSettings.FileExplorer.Height + 8;
   {FileExplorer zeigen}
   if Status then
   begin
     FFileExplorerShowing := True;
     MainMenuToggleFileExplorer.Checked := True;
     {PageControl verkleinern}
-    PageControl1.Height  := PageControl1.Height - 200;
-    PageControl1.Top     := PageControl1.Top + 200;
+    PageControl1.Height  := PageControl1.Height - FileExplorerHeight;
+    PageControl1.Top     := PageControl1.Top + FileExplorerHeight;
     PanelBrowser.Visible := True;
   end else
   {FileExplorer ausblenden}
   begin
     FFileExplorerShowing := False;
     MainMenuToggleFileExplorer.Checked := False;
-    PageControl1.Height  := PageControl1.Height + 200;
-    PageControl1.Top     := PageControl1.Top - 200;
+    PageControl1.Height  := PageControl1.Height + FileExplorerHeight;
+    PageControl1.Top     := PageControl1.Top - FileExplorerHeight;
     PanelBrowser.Visible := False;
   end;
   FormResize(Self);
@@ -3830,7 +3832,7 @@ var GlyphArray    : TGlyphArray;
     PanelBrowser.Top := PageControl1.Top;
     PanelBrowser.Left := PageControl1.Left + 12;
     PanelBrowser.Width := PageControl1.Width - 12 - 36; //41;
-    PanelBrowser.Height := 192;
+    PanelBrowser.Height := FSettings.FileExplorer.Height;
     PanelBrowser.Color := clBackground;
     PanelBrowser.Anchors := [akLeft, akTop, akRight];
     FileBrowser := TFrameFileBrowser.Create(Self);
@@ -4395,9 +4397,10 @@ end;
   für die Speedbuttons auf TabSheet3 (XCD).                                    }
 
 procedure TForm1.FormResize(Sender: TObject);
-var TSHeight           : Integer;
-    CanShowFileExplorer: Boolean;
+var TSHeight                 : Integer;
+    CanShowFileExplorer      : Boolean;
     ShouldNotShowFileExplorer: Boolean;
+    FileExplorerHeight       : Integer;
 begin
   {Resize bei kleiner Schriftart}
   if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
@@ -4430,7 +4433,8 @@ begin
     XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
   end;
   {In Abhängigkeit der Fensterhöhe FileExplorer zulassen oder nicht}
-  CanShowFileExplorer := ((PageControl1.Height - 200) >= 250);
+  FileExplorerHeight := FSettings.FileExplorer.Height + 8;
+  CanShowFileExplorer := ((PageControl1.Height - FileExplorerHeight) >= 250);
   if not FInstanceTermination then
     MainMenuToggleFileExplorer.Enabled := FFileExplorerShowing or
                                           CanShowFileExplorer;
