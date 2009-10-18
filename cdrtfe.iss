@@ -1,10 +1,10 @@
 ; cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 ;
-;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.2.2
+;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.3.5
 ;
 ;  Copyright (c) 2006-2009 Oliver Valencia
 ;
-;  letzte Änderung  11.10.2009
+;  letzte Änderung  18.10.2009
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -66,8 +66,6 @@ Name: desktopicon\common; Description: {cm:TaskAllUsers}; GroupDescription: {cm:
 Name: desktopicon\user; Description: {cm:TaskCurrentUser}; GroupDescription: {cm:AdditionalIcons}; Flags: exclusive unchecked; MinVersion: 0, 1
 ; Quicklaunch icon
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
-; Copy cygwin files
-Name: copycyg; Description: {cm:CopyCygwin}; GroupDescription: {cm:SpecialTask}; Flags: unchecked
 
 [Files]
 ; Main program file
@@ -121,7 +119,6 @@ Source: I:\cdrtfe\proto\tools\vcdimager\vcdimager.exe; DestDir: {app}\tools\vcdi
 Source: I:\cdrtfe\misc\scripts\cmdshell.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet;
 Source: I:\cdrtfe\misc\scripts\cmdshellinit.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet;
 Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
-Source: I:\cdrtfe\misc\scripts\copycyg.bat; DestDir: {tmp}; Tasks: copycyg
 ; Readme cdrtfe
 Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
 Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl
@@ -169,18 +166,17 @@ Name: {userdesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: deskto
 Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon\common; MinVersion: 0, 1
 Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: quicklaunchicon
 
+[Registry]
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\cdrtfe.exe"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.cmd"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt
+
 [Run]
-Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
 Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_dvd_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\changes.txt"; Flags: shellexec postinstall skipifsilent unchecked
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
-
-[UninstallDelete]
-Type: files; Name: "{app}\tools\cdrtools\*.dll"; Tasks: copycyg
-Type: files; Name: "{app}\tools\cdrtools\*.cmd"; Tasks: copycyg
 
 [Types]
 Name: custom; Description: cdrtfe Setup; Flags: iscustom
@@ -239,7 +235,7 @@ var FileName  : string;
 begin
   FileName := ExpandConstant(CurrentFileName);
   ScriptPath := ExtractFilePath(FileName);
-  StartCmd := 'cmd.exe /k call ' + ScriptPath + 'cmdshellinit.cmd';
+  StartCmd := 'cmd.exe /k call "' + ScriptPath + 'cmdshellinit.cmd"';
   ScriptFile := TStringList.Create;
   ScriptFile.LoadFromFile(FileName);
   ScriptFile[1] :=  StartCmd;
@@ -419,8 +415,6 @@ de.CygwinReadyUseOwn=Verwende mitgelieferte cygwin-DLLs.
 de.OldVersionError=Eine ältere Version wurde gefunden. Bitte zuerst deinstallieren.
 de.IconHelpFile=cdrtfe Hilfe
 de.IconSourceFiles=Quelltexte
-de.SpecialTask=spezielle Aufgaben:
-de.CopyCygwin=Cygwin-DLLs und Skripte kopieren (nur für Experten, nicht empfohlen)
 ; English
 en.CompLang=Multi language support (necessary for languages other than German)
 en.CompTools=Commandline tools
@@ -444,8 +438,6 @@ en.CygwinReadyUseOwn=Using included cygwin DLLs.
 en.OldVersionError=An older version has been found. Please uninstall first.
 en.IconHelpFile=cdrtfe Help
 en.IconSourceFiles=Source files
-en.SpecialTask=special Tasks:
-en.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; French
 fr.CompLang=Support multilingue (nécessaire pour les langues autres que l'allemand)
 fr.CompTools=Outils en ligne de commande
@@ -469,8 +461,6 @@ fr.CygwinReadyUseOwn=Utilisation des DLL fournies.
 fr.OldVersionError=Une ancienne version a été trouvée. Veuillez d'abord la désinstaller.
 fr.IconHelpFile=Aide de cdrtfe
 fr.IconSourceFiles=Fichiers sources
-fr.SpecialTask=special Tasks:
-fr.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; Italian
 it.CompLang=Supporto multilingue (necessario per lingue diverse dal tedesco)
 it.CompTools=Strumenti a riga di comando
@@ -494,8 +484,6 @@ it.CygwinReadyUseOwn=Si stanno usando le DLL cygwin incluse.
 it.OldVersionError=E' stata trovata una versione meno recente: si deve prima disinstallarla.
 it.IconHelpFile=Help di cdrtfe
 it.IconSourceFiles=File sorgente
-it.SpecialTask=special Tasks:
-it.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; Polish
 pl.CompLang=Dodatkowe jêzyki (dla innych wersji jêzykowych ni¿ niemiecki)
 pl.CompTools=Narzêdzia wiersza poleceñ
@@ -519,6 +507,4 @@ pl.CygwinReadyUseOwn=U¿ywam za³¹czone pliki cygwin DLL.
 pl.OldVersionError=Znaleziono star¹ wersje programu. Najpierw j¹ odinstaluj.
 pl.IconHelpFile=Pomoc cdrtfe
 pl.IconSourceFiles=Pliki Ÿród³owe
-pl.SpecialTask=special Tasks:
-pl.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 
