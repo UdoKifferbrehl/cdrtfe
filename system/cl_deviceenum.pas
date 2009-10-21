@@ -2,9 +2,9 @@
 
   Copyright (c) 2004-2005, 2007-2009 Oliver Valencia
 
-  Version          1.1
+  Version          1.2
   erstellt         23.11.2004
-  letzte Änderung  31.07.2009
+  letzte Änderung  21.10.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -14,9 +14,10 @@
   Der SCSI-Bus kann nach bestimmten Gerätetypen durchsucht werden. Wenn ent-
   sprechende Geräte vorhanden sind, werden diese in String-Listen eingetragen.
 
-  Zur Zeit kann nur nach CD-ROM-Laufwerken gesucht werden. Externe Laufwerke
-  (z.B. USB-Laufwerke) werden nur mit Laufwerksbuchstaben und Namen erkannt; die
-  SCSI-ID kann für diese Laufwerke zur Zeit nicht ermittelt werden.
+  Zur Zeit kann nur nach CD-ROM-Laufwerken gesucht werden. 
+
+  Bei Verwendung von SPTI werden die SCSI-IDs ermittelt, wie bei cdrecord. Der
+  SPTI-Teil basiert zum Teil auf scsi-wnt.c aus den cdrtools von J. Schilling.
 
 
   TSCSIDevices: SCSI-Device-Enumerator
@@ -56,12 +57,15 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
      PDeviceInfo = ^DeviceInfo;
      DeviceInfo = record
        HA, ID, LUN: Shortint;
+       PathID     : Byte;
+       PortNumber : Byte;
        Name       : string;
        Vendor     : string;
        ProductID  : string;
        Revision   : string;
        VendorSpec : string;
        DriveLetter: string;
+       Used       : Boolean;
      end;
 
      TSCSIDevices = class(TObject)
@@ -73,6 +77,9 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
        FDeviceListNoID: TStringList;          // <name>=<driveletter>
        FLastError     : TSCSIDevicesError;
        FLayer         : TSCSILayer;
+       FSPTIHaMax     : Integer;
+       FSPTIHaSortArr : array[0..25] of Word;
+       FSPTIGlobal    : array[0..25] of DeviceInfo;
        {$IFDEF EnableLogging}
        FLog           : TStringList;
        {$ENDIF}
@@ -87,8 +94,12 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
        procedure ASPIInit;
        procedure ASPIScanbus;
        procedure IOCTLGetDriveLetters;
+       procedure SPTICopyDeviceInfo(Device: DeviceInfo; Index: Integer);
+       procedure SPTICreateDeviceIDList;
+       procedure SPTIDetectAdapters;
        procedure SPTIInit;
        procedure SPTIScanbus;
+       procedure SPTISortIDs;
        procedure InitSRB(P: Pointer; const Len: Word);
      public
        constructor Create;
@@ -265,6 +276,183 @@ begin
   DriveList.Free;
 end;
 
+{ SPTICreateDeviceIDList -------------------------------------------------------
+
+  SPTICreateDeviceIDList erzeugt aus den ermittelten Daten die Listen mit den
+  Laufwerksbuchstaben und SCSI-IDs.                                            }
+
+procedure TSCSIDevices.SPTICreateDeviceIDList;
+var i    : Integer;
+    DevID: string;
+begin
+  for i := 0 to 25 do
+  begin
+    if FSPTIGlobal[i].Used then
+    begin
+      DevID := IntToStr(FSPTIGlobal[i].HA) + ',' +
+               IntToStr(FSPTIGlobal[i].ID) + ',' +
+               IntToStr(FSPTIGlobal[i].LUN);    
+      {jede ID nur einmal in die Liste schreiben}
+      if FDeviceIDList.Values[DevID] = '' then
+      begin
+        FDeviceIDList.Add(DevID + '=' + FSPTIGlobal[i].DriveLetter);
+        FDeviceList.Add(DevID + '=' + FSPTIGlobal[i].Name);
+      end;               
+    end;
+  end;
+end;
+
+{ SPTICopyDeviceInfo -----------------------------------------------------------
+
+  SPTICopyDeviceInfo kopiert die Laufwerksinfos in das globale Array.          }
+
+procedure TSCSIDevices.SPTICopyDeviceInfo(Device: DeviceInfo; Index: Integer);
+var HaSortVal: Word;
+    i, j     : Integer;
+    Ok       : Boolean;
+begin
+  FSPTIGlobal[Index].HA          := Device.HA;
+  FSPTIGlobal[Index].ID          := Device.ID;
+  FSPTIGlobal[Index].LUN         := Device.LUN;
+  FSPTIGlobal[Index].PathID      := Device.PathID;
+  FSPTIGlobal[Index].PortNumber  := Device.PortNumber;
+  FSPTIGlobal[Index].Name        := Device.Name;
+  FSPTIGlobal[Index].Vendor      := Device.Vendor;
+  FSPTIGlobal[Index].ProductID   := Device.ProductID;
+  FSPTIGlobal[Index].Revision    := Device.Revision;
+  FSPTIGlobal[Index].VendorSpec  := Device.VendorSpec;
+  FSPTIGlobal[Index].DriveLetter := Device.DriveLetter;
+  FSPTIGlobal[Index].Used        := True;
+  {Sortieren}
+  HaSortVal := (Device.PortNumber shl 8) or Device.PathID;
+  j := 0;
+  Ok := True;
+  while (j < FSPTIHaMax) and Ok do
+  begin
+    if HaSortVal <= FSPTIHaSortArr[j] then Ok := False;
+    if Ok then Inc(j);
+  end;
+  if j = FSPTIHaMax then
+  begin
+    FSPTIHaSortArr[j] := HaSortVal;
+    Inc(FSPTIHaMax);
+  end else
+  if HaSortVal < FSPTIHaSortArr[j] then
+  begin
+    for i := 25 downto j + 1 do FSPTIHaSortArr[i] := FSPTIHaSortArr[i-1];
+    FSPTIHaSortArr[j] := HaSortVal;
+    Inc(FSPTIHaMax);
+  end;
+  {$IFDEF EnableLogging}
+  //FLog.Add('       FSPTIHaMax: ' + IntToStr(FSPTIHaMax));
+  //FLog.Add('       HaSortVal : ' + IntToStr(HaSortVal) + #13#10);
+  {$ENDIF}
+end;
+
+{ SPTISortIDs ------------------------------------------------------------------
+
+  SPTISortIDs paßt die virtuellen SCSI-IDs an.                                 }
+
+procedure TSCSIDevices.SPTISortIDs;
+var i, j: Integer;
+    Ok  : Boolean; s: string;
+begin
+  if FSPTIHaMax > 0 then
+  begin
+    for i := 0 to 25 do
+    begin
+      if FSPTIGlobal[i].Used then
+      begin
+        {$IFDEF EnableLogging}
+        s := IntToStr(FSPTIGlobal[i].HA) + ',' +
+             IntToStr(FSPTIGlobal[i].ID) + ',' +
+             IntToStr(FSPTIGlobal[i].LUN);
+        {$ENDIF}
+        j := 0;
+        Ok := True;
+        while (j < FSPTIHaMax) and Ok do
+        begin
+          if FSPTIHaSortArr[j] = ((FSPTIGlobal[i].PortNumber shl 8) or
+                                   FSPTIGlobal[i].PathID) then
+          begin
+            FSPTIGlobal[i].HA := j;
+            Ok := False;
+          end;
+          Inc(j);
+        end;
+        {$IFDEF EnableLogging}
+        s := s + ' --> ' + IntToStr(FSPTIGlobal[i].HA) + ',' +
+             IntToStr(FSPTIGlobal[i].ID) + ',' +
+             IntToStr(FSPTIGlobal[i].LUN);
+        FLog.Add('   Address: ' + s);
+        {$ENDIF}
+      end;
+    end;
+  end;
+  {$IFDEF EnableLogging}
+  FLog.Add('');
+  {$ENDIF}
+end;
+
+{ SPTIDetectAdapters -----------------------------------------------------------
+
+  SPTIDetectAdapters ermittelt alle SCSI-Busse an allen Adaptern.              }
+
+procedure TSCSIDevices.SPTIDetectAdapters;
+var i, bus       : Integer;
+    AdapterName  : array[0..31] of Char;
+    AdapterInfo  : PSCSI_ADAPTER_BUS_INFO;
+    InquiryBuffer: array[0..2047] of Char;
+    FH           : THandle;
+    Ok           : Boolean;
+    Returned     : Cardinal;
+    Temp         : string;
+begin
+  FSPTIHaMax := 0;
+  i := 0;
+  repeat
+    {Adapternamen zusammenstellen und Datei öffnen}
+    Temp := Format( '\\.\SCSI%d:', [i]);
+    StrPCopy(@AdapterName, Temp);
+    FH := CreateFile(AdapterName, GENERIC_READ or GENERIC_WRITE,
+                     FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING,
+                     0, 0);
+    if FH <> INVALID_HANDLE_VALUE then
+    begin
+      {$IFDEF EnableLogging}
+      FLog.Add('   SCSI-Adapter: ' + Temp);
+      {$ENDIF}
+      ZeroMemory(@InquiryBuffer, 2047);
+      Ok := DeviceIoControl(FH, IOCTL_SCSI_GET_INQUIRY_DATA, nil, 0,
+                     						@InquiryBuffer, 2048, Returned, nil);
+      if Ok then
+      begin
+        AdapterInfo := PSCSI_ADAPTER_BUS_INFO(@InquiryBuffer);
+        {$IFDEF EnableLogging}
+        FLog.Add('     Number of Busses: ' +
+                 IntToStr(AdapterInfo.NumberOfBusses));
+        {$ENDIF}
+        for bus := 0 to AdapterInfo.NumberOfBusses -1 do
+        begin
+          FSPTIHaSortarr[FSPTIHaMax] := ((i shl 8) or bus);
+          {$IFDEF EnableLogging}
+          // FLog.Add('     FSPTIHaSortarr[' + IntToStr(FSPTIHaMax) +']: ' +
+          //         IntToStr(FSPTIHaSortarr[FSPTIHaMax]));
+          {$ENDIF}
+          Inc(FSPTIHaMAx);
+        end;
+      end;
+
+      CloseHandle(FH);
+      {$IFDEF EnableLogging}
+      // FLog.Add('     FSPTIHaMax: ' + IntToStr(FSPTIHaMax));      
+      FLog.Add('');
+      {$ENDIF}
+    end;
+    Inc(i);
+  until FH = INVALID_HANDLE_VALUE;
+end;
+
 { SPTIGetDriveInformation ------------------------------------------------------
 
   SPTIGetDriveInformation ermittelt Informationen über ein Laufwerk.           }
@@ -283,6 +471,7 @@ var FH         : THandle;
     DriveString: PChar;
     s          : string;
 begin
+  Result := True;
   {$IFDEF EnableLogging}
   FLog.Add(Format('   SPTIGetDriveInformation for drive %s',
                   [CurrDev.DriveLetter]));
@@ -314,7 +503,7 @@ begin
     PSWB^.spt.Cdb[4]             := 100;
     Length := SizeOf(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER);
     Ok := DeviceIoControl(FH, IOCTL_SCSI_PASS_THROUGH_DIRECT,
-                          PSWB, Length, PSWB, Length, Returned, nil );
+                          PSWB, Length, PSWB, Length, Returned, nil);
     if OK then
     begin
       {$IFDEF EnableLogging}
@@ -337,9 +526,11 @@ begin
       if DeviceIoControl(FH, IOCTL_SCSI_GET_ADDRESS, nil, 0,
                          pscsiAddr, SizeOf(SCSI_ADDRESS), Returned, nil) then
       begin
-        CurrDev.HA  := pscsiAddr^.PortNumber;
-        CurrDev.ID  := pscsiAddr^.TargetId;
-        CurrDev.LUN := pscsiAddr^.Lun;
+        CurrDev.HA         := pscsiAddr^.PortNumber;
+        CurrDev.ID         := pscsiAddr^.TargetId;
+        CurrDev.LUN        := pscsiAddr^.Lun;
+        CurrDev.PathID     := pscsiAddr^.PathId;
+        CurrDev.PortNumber := pscsiAddr^.PortNumber;
         Result := True;
         {$IFDEF EnableLogging}
         s := IntToStr(CurrDev.HA) + ',' +
@@ -347,6 +538,8 @@ begin
              IntToStr(CurrDev.LUN);
         FLog.Add('     Get SCSI address ... ok');
         FLog.Add('       Device ID        : ' + s);
+        FLog.Add('       PathID           : ' + IntToStr(CurrDev.PathID));
+        FLog.Add('       PortNumber       : ' + IntToStr(CurrDev.PortNumber));
         FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
         FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
         FLog.Add('       Device Revision  : ' + CurrDev.Revision);
@@ -354,18 +547,43 @@ begin
        {$ENDIF}
       end else
       begin
-        CurrDev.HA  := -1;
-        CurrDev.ID  := -1;
-        CurrDev.LUN := -1;
-        {$IFDEF EnableLogging}
-        FLog.Add('     Get SCSI address ... failed.');
-        FLog.Add('       Probably an USB device.');
-        FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
-        FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
-        FLog.Add('       Device Revision  : ' + CurrDev.Revision);
-        FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
-       {$ENDIF}
-        Result := False;
+        // USB/FW drives:
+        if Windows.GetLastError = 50 then
+        begin
+          CurrDev.HA         := Ord(CurrDev.DriveLetter[1]) - 65;
+          CurrDev.ID         := 0;
+          CurrDev.LUN        := 0;
+          CurrDev.PathID     := 0;
+          CurrDev.PortNumber := CurrDev.HA + 64;
+          {$IFDEF EnableLogging}
+          s := IntToStr(CurrDev.HA) + ',' +
+               IntToStr(CurrDev.ID) + ',' +
+               IntToStr(CurrDev.LUN);
+          FLog.Add('     Get SCSI address ... failed.');
+          FLog.Add('       Probably an USB/FW device.');
+          FLog.Add('       Set drive letter as ID.');
+          FLog.Add('       Device ID        : ' + s);
+          FLog.Add('       PathID           : ' + IntToStr(CurrDev.PathID));
+          FLog.Add('       PortNumber       : ' + IntToStr(CurrDev.PortNumber));
+          FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
+          FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
+          FLog.Add('       Device Revision  : ' + CurrDev.Revision);
+          FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
+          {$ENDIF}
+        end else
+        begin
+          CurrDev.HA  := -1;
+          CurrDev.ID  := -1;
+          CurrDev.LUN := -1;
+          {$IFDEF EnableLogging}
+          FLog.Add('     Get SCSI address ... failed.');
+          FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
+          FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
+          FLog.Add('       Device Revision  : ' + CurrDev.Revision);
+          FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
+         {$ENDIF}
+          Result := False;
+        end;
       end;
       CloseHandle(FH);
     end else
@@ -390,6 +608,8 @@ begin
     {Device konnte nicht geöffnet werden (z.B. keine Admin-Rechte vorhanden)}
     Result := False;
   end;
+  {Device-Daten kopieren}
+  if Result then SPTICopyDeviceInfo(CurrDev, Ord(CurrDev.DriveLetter[1]) - 65);
 end;
 
 { InitSRB ----------------------------------------------------------------------
@@ -553,36 +773,29 @@ var DriveList: TStringList;
     i        : Integer;
     Ok       : Boolean;
     Drive    : DeviceInfo;
-    DevID    : string;
 begin
   FDeviceIDList.Clear;
   FDeviceList.Clear;
   DriveList := TStringList.Create;
+  {Alle SCSI-Busse und -Adapter ermitteln}
+  SPTIDetectAdapters;
   {Laufwerksliste erstellen: (Festplatten und CD-Laufwerke)}
-  // GetDriveList(DRIVE_FIXED, DriveList);
-  GetDriveList(DRIVE_CDROM, DriveList);
+  GetDriveList(DRIVE_CDROM, DriveList); // GetDriveList(DRIVE_FIXED, DriveList);
   {für jedes Laufwerk Infos abrufen}
   for i := 0 to DriveList.Count - 1 do
   begin
     Drive.DriveLetter := DriveList[i][1];
     Ok := SPTIGetDriveInformation(Drive);
-    if Ok then
+    if not Ok then
     begin
-      DevID := IntToStr(Drive.HA) + ',' +
-               IntToStr(Drive.ID) + ',' +
-               IntToStr(Drive.LUN);
-      {jede ID nur einmal in die Liste schreiben}
-      if FDeviceIDList.Values[DevID] = '' then
-      begin
-        FDeviceIDList.Add(DevID + '=' + Drive.DriveLetter);
-        FDeviceList.Add(DevID + '=' + Drive.Name);
-      end;
-    end else
-    begin
-      // USB-Laufwerk, ID kann nicht ermittelt werden
+      // Fehler, ID kann nicht ermittelt werden
       FDeviceListNoID.Add(Drive.Name + '=' + Drive.DriveLetter);
     end;
   end;
+  {IDs sortieren}
+  SPTISortIDs;
+  {Device-IDs in die Listen übernehmen}
+  SPTICreateDeviceIDList;
   DriveList.Free;
 end;
 
@@ -799,7 +1012,7 @@ end;
 procedure TSCSIDevices.Scanbus;
 begin
   {$IFDEF EnableLogging}
-  FLog.Add(#13#10 + '   Scanning SCSI bus');
+  FLog.Add(#13#10 + '   Scanning SCSI bus' + #13#10);
   {$ENDIF}
   case FLayer of
     L_ASPI: begin
@@ -818,6 +1031,7 @@ begin
 end;
 
 constructor TSCSIDevices.Create;
+var i: Integer;
 begin
   inherited Create;
   FASPIHandle     := 0;
@@ -827,6 +1041,7 @@ begin
   FDeviceListNoID := TStringList.Create;
   FLastError      := SD_NoError;
   FLayer          := L_Undef;
+  for i := 0 to 25 do  FSPTIGlobal[i].Used := False;    
   {$IFDEF EnableLogging}
   FLog            := TStringList.Create;
   {$ENDIF}

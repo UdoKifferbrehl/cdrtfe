@@ -73,6 +73,19 @@ type SCSI_PASS_THROUGH = record
 
      PSCSI_ADDRESS = ^SCSI_ADDRESS;
 
+     SCSI_BUS_DATA = record
+       NumberOfLogicalUnits: Byte;
+       InitiatorBusId      : Byte;
+       InquiryDataOffset   : Cardinal;
+     end;
+
+     SCSI_ADAPTER_BUS_INFO = record
+       NumberOfBusses: Byte;
+       BusData       : SCSI_BUS_DATA;
+     end;
+
+     PSCSI_ADAPTER_BUS_INFO = ^SCSI_ADAPTER_BUS_INFO;
+
 
 { Konstanten-Deklaration ----------------------------------------------------- }
 
