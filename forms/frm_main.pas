@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.10.2009
+  letzte Änderung  28.10.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1049,10 +1049,20 @@ end;
   FSettings.                                                                   }
 
 procedure TForm1.GetSettings;
+var i: Integer;
 begin
   {allgemein}
   MainMenuReloadDefaults.Enabled := FSettings.FileFlags.IniFileOk;
   CheckBoxDummy.Checked := FSettings.Cdrecord.Dummy;
+  {Devices, Speeds}
+  for i := 1 to TabSheetCount do
+  begin
+    if ComboBoxDrives.Items.Count <= FSettings.General.TabSheetDrive[i] then
+    begin
+      ComboBoxDrives.ItemIndex := 0;
+      FSettings.General.TabSheetDrive[i] := 0;
+    end;
+  end;
   {Data-CD}
   with FSettings.DataCD do
   begin
