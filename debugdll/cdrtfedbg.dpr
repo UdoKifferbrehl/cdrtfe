@@ -2,9 +2,9 @@
 
   cdrtfedbg.dpr: Debug-DLL
 
-  Copyright (c) 2007-2008 Oliver Valencia
+  Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  12.01.2008
+  letzte Änderung  23.09.2009
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
