@@ -1,5 +1,5 @@
 --- ShellCtrls_org.pas	2005-11-14 10:00:00.000000000 +0100
-+++ ShellCtrls.pas	2009-06-11 16:30:12.781250000 +0200
++++ ShellCtrls.pas	2009-10-28 14:59:31.859375000 +0100
 @@ -206,6 +206,7 @@
      procedure RefreshEvent;
    public
@@ -25,6 +25,15 @@
  procedure TCustomShellTreeView.ClearItems;
  var
    I: Integer;
+@@ -1699,7 +1710,7 @@
+     end;
+     if NewNode.SelectedIndex = 0 then NewNode.SelectedIndex := NewNode.ImageIndex;
+     NewNode.HasChildren := SubFolders;
+-    if fpShared in Properties then NewNode.OverlayIndex := 0;
++    // if fpShared in Properties then NewNode.OverlayIndex := 0;
+     if (otNonFolders in ObjectTypes) and (ShellFolder <> nil) then
+       NewNode.HasChildren := GetHasSubItems(ShellFolder, ObjectFlags(FObjectTypes));
+   end;
 @@ -2721,7 +2732,13 @@
  end;
  
