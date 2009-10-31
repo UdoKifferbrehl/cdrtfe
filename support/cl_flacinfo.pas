@@ -1,8 +1,8 @@
 { cl_flacinfo.pas: Funktionen für FLAC-Audio-Dateien
 
-  Copyright (c) 2006 Oliver Valencia
+  Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  17.08.2006
+  letzte Änderung  31.10.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -98,7 +98,7 @@ type TFLACInfoError = (FIE_NoError, FIE_FileNotFound, FIE_InvalidFLACFile);
 
      TFLACFile = class(TObject)
      private
-       FBlockList : array[MDBT_STREAMINFO..MDBT_CUESHEET, 1..2] of Integer;
+       FBlockList : array[MDBT_STREAMINFO..MDBT_INVALID, 1..2] of Integer;  // ..MDBT_CUESHEET
        FFileName  : string;
        FFLACTags  : TFLACTags;
        FLastError : TFLACInfoError;
