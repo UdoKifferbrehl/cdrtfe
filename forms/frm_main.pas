@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.10.2009
+  letzte Änderung  07.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -278,6 +278,7 @@ type
     MainMenuShowOutputWindow: TMenuItem;
     MainMenuSettings: TMenuItem;
     N5: TMenuItem;
+    ProgressBarTotal: TProgressBar;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -530,6 +531,9 @@ type
     procedure ProgressBarHide;
     procedure ProgressBarShow(const Max: Integer);
     procedure ProgressBarUpdate(const Position: Integer);
+    procedure ProgressBarTotalHide;
+    procedure ProgressBarTotalShow(const Max: Integer);
+    procedure ProgressBarTotalUpdate(const Position: Integer);
     procedure SpaceMeterTypeChange;
     procedure UpdatePanels(const s1, s2: string);
     {Ole-Drop-Target-Funktionen}
@@ -4100,6 +4104,37 @@ begin
   ProgressBar.Position := Position;
 end;
 
+{ ProgressBarHide --------------------------------------------------------------
+
+  ProgressBarHide macht den Progress-Bar unsichtbar.                           }
+
+procedure TForm1.ProgressBarTotalHide;
+begin
+  ProgressBarTotal.Visible := False;
+end;
+
+{ ProgressBarShow --------------------------------------------------------------
+
+  ProgressBarReset setzt ProgressBar.Position auf Null, ProgressBar.Max auf
+  Max und ProgressBar.Visible auf True.                                        }
+
+procedure TForm1.ProgressBarTotalShow(const Max: Integer);
+begin
+  ProgressBarTotal.Position := 0;
+  ProgressBarTotal.Max := Max;
+  ProgressBarTotal.Visible := True;
+end;
+
+{ ProgressBarUpdate ------------------------------------------------------------
+
+  ProgressBarReset setzt StatusBar.Position auf FSettings.Shared.
+  ProgressBarPosition.                                                         }
+
+procedure TForm1.ProgressBarTotalUpdate(const Position: Integer);
+begin
+  ProgressBarTotal.Position := Position;
+end;
+
 { SpaceMeterTypeChange ---------------------------------------------------------
 
   Speichert den neues Disk-Type des SpaceMeters.                               }
@@ -4174,6 +4209,9 @@ begin
   TLogWin.Inst.OnProgressBarHide := ProgressBarHide;
   TLogWin.Inst.OnProgressBarShow := ProgressBarShow;
   TLogWin.Inst.OnProgressBarUpdate := ProgressBarUpdate;
+  TLogWin.Inst.OnProgressBarTotalHide := ProgressBarTotalHide;
+  TLogWin.Inst.OnProgressBarTotalShow := ProgressBarTotalShow;
+  TLogWin.Inst.OnProgressBarTotalUpdate := ProgressBarTotalUpdate;
   {Kommandzeile auswerten}
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
