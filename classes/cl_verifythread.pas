@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.02.2009
+  letzte Änderung  08.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,9 +26,9 @@
     Properties   Action
                  AutoExec
                  Drive
-                 ProgressBar
                  Reload
                  StatusBar
+                 TotalSizte
                  XCDExt
                  XCDKeepExt
 
@@ -56,9 +56,9 @@ type TVerificationThread = class(TThread)
        {Variablen für Ausgabe}
        FHandle      : THandle;           // Window-Handle des Formulars mit Memo
        FStatusBar   : TStatusBar;        // für Anzeige von Status-Infos
-       FProgressBar : TProgressBar;      // Fortschrittsanzeige
        FLine        : string;            // Zeile, die ausgegeben werden soll
        FPBPos       : Integer;           // Position des PorgressBars
+       FPBTotalPos  : Integer;           // Gesamtfortschritt
        {Variablen für Vergleiche (Daten-/XCD}
        FDevice      : string;
        FDrive       : string;
@@ -73,6 +73,8 @@ type TVerificationThread = class(TThread)
        {mehrfach verwendete Variablen}
        FLang        : TLang;       
        FVerifyList  : TStringList;
+       FTotalSize   : Int64;
+       FSizeVerified: Int64;
        procedure CleanUpList(List: TStringList);
        procedure CreateInfoFile;
        procedure CreateInfoFileInit;
@@ -100,9 +102,9 @@ type TVerificationThread = class(TThread)
      public
        constructor Create(List: TStringList; Device: string; Lang: TLang; Suspended: Boolean);
        property Action: Byte write FAction;
+       property TotalSize: Int64 write FTotalSize;
        {Properties für Ausgabe}
        property StatusBar: TStatusBar write FStatusBar;
-       property ProgressBar: TProgressBar write FProgressBar;
        {Properties für Vergleiche}
        property AutoExec: Boolean write FAutoExec;
        property Reload: Boolean write FReload;
@@ -179,7 +181,8 @@ end;
 
 procedure TVerificationThread.DSetProgressBar;
 begin
-  FProgressBar.Position := FPBPos;
+  TLogWin.Inst.ProgressBarUpdate(1, FPBPos);
+  TlogWin.Inst.ProgressBarUpdate(2, FPBTotalPos);
 end;
 
 procedure TVerificationThread.DReloadError;
@@ -201,7 +204,8 @@ procedure TVerificationThread.SendTerminationMessage;
 var SizeHigh: Integer;
     SizeLow: Integer;
 begin
-  FProgressBar.Visible := False;
+  TLogWin.Inst.ProgressBarHide(1);
+  TLogWin.Inst.ProgressBarHide(2);
   case FAction of
     cFindDuplicates: if Terminated then
                        SendMessage(FHandle, WM_FTerminated, -1, -1) else
@@ -397,11 +401,11 @@ end;
 
 function TVerificationThread.CompareFiles(const FileName1, FileName2: string):
                                           Boolean;
-var File1, File2: TFileStream;
-    p1, p2: Pointer;
+var File1, File2  : TFileStream;
+    p1, p2        : Pointer;
     FSize1, FSize2: Int64;
-    BSize: Integer;
-    NBytes: Integer; //Number of bytes to read
+    BSize         : Integer;
+    NBytes        : Integer; //Number of bytes to read
 begin
   File1 := nil;
   File2 := nil;
@@ -425,14 +429,15 @@ begin
           File2.ReadBuffer(p2^, NBytes);
           Result := Result and CompareBufferA(p1, p2, NBytes);
           FPBPos := Round(((FSize2 - FSize1) / FSize2) * 100);
+          FPBTotalPos := Round((((FSizeVerified + FSize2 - FSize1) / FTotalSize)
+                                                                        * 100));
           Synchronize(DSetProgressBar);
         end;
       end else
       begin
         Result := (FSize1 = 0) and (FSize2 = 0);
-        // if (FSize1 = 0) and (FSize2 = 0) then Result := True else
-        // Result := False;
       end;
+      FSizeVerified := FSizeVerified + FSize2;
     except
       Result := False;
     end;
@@ -452,16 +457,16 @@ end;
 
 function TVerificationThread.CompareForm2Files(const FileName1, FileName2:
                                                                string): Boolean;
-var File1, File2: TFileStream;
-    p1: Pointer;
-    HBuffer: array[0..43] of Char;   // Buffer for Header
-    SBuffer: array[0..2351] of Char; // Buffer for Sector
-    FileHeader: ^TM2F2FileHeader;
-    Sector: ^TM2F2Sector;
-    SecCount: Integer;               // Sectors to read
+var File1, File2  : TFileStream;
+    p1            : Pointer;
+    HBuffer       : array[0..43] of Char;   // Buffer for Header
+    SBuffer       : array[0..2351] of Char; // Buffer for Sector
+    FileHeader    : ^TM2F2FileHeader;
+    Sector        : ^TM2F2Sector;
+    SecCount      : Integer;                // Sectors to read
     FSize1, FSize2: LongInt;
     BSize1, BSize2: Integer;
-    NBytes: Integer;                 //Number of bytes to read/compare
+    NBytes        : Integer;                //Number of bytes to read/compare
 begin
   File1 := nil;
   File2 := nil;
@@ -498,12 +503,15 @@ begin
           {Vergleichen}
           Result := Result and CompareBufferA(p1, @Sector^.Data, NBytes);
           FPBPos := Round(((FSize2 - FSize1) / FSize2) * 100);
+          FPBTotalPos := Round((((FSizeVerified + FSize2 - FSize1) / FTotalSize)
+                                                                        * 100));
           Synchronize(DSetProgressBar);
         end;
       end else
       begin
         Result := False;
       end;
+      FSizeVerified := FSizeVerified + FSize2;
     except
       Result := False;
     end;
@@ -528,15 +536,16 @@ end;
 
 function TVerificationThread.GetFileCRC32(const FileName: string;
                                           var CRC32: Longint): Boolean;
-var FileIn : TFileStream;
-    p: Pointer;
-    FSize: Longint;
+var FileIn  : TFileStream;
+    p       : Pointer;
+    FSize   : Longint;
     FSIzeBak: Longint;
-    BSize: Integer;
-    NBytes: Integer; //Number of bytes to read
+    BSize   : Integer;
+    NBytes  : Integer; //Number of bytes to read
 begin
   FileIn := nil;
   Result := True;
+  FSizeBak := 0;
   {Blockgröße von 2 KiByte erscheint als schnellste Variante}
   BSize := cBufSize;
   GetMem(p, BSize);
@@ -556,6 +565,8 @@ begin
           FileIn.ReadBuffer(p^, NBytes);
           CRC32 := UpdateCRC32A(Crc32, p, NBytes);
           FPBPos := Round(((FSizeBak - FSize) / FSizeBak) * 100);
+          FPBTotalPos := Round((((FSizeVerified + FSizeBak - FSize)
+                                  / FTotalSize) * 100));
           Synchronize(DSetProgressBar);
         end;
         {für PKZIP-Kompatibilität muß Wert noch invertiert werden}
@@ -564,63 +575,12 @@ begin
     except
       Result := False;
     end;
+    FSizeVerified := FSizeVerified + FSizeBak;
   finally
     FileIn.Free;
     FreeMem(p, BSize);
   end;
 end;
-(* {Variante mit BlockRead statt mit File-Stream}
-var f: File;
-    p: Pointer;
-    FSize: LongInt;
-    FSizeBak: LongInt;
-    BSize: Integer;
-    tmp: Word;
-    OldFileMode: Integer;
-begin
-  OldFileMode := FileMode;
-  FileMode := 0;
-  FPBPos := 0;
-  Synchronize(DSetProgressBar);
-  {$I+}
-  try
-    FSize := GetFileSize(FileName);
-    FSizeBak := FSize;
-    AssignFile(f, FileName);
-    Reset(f, 1);
-    {da es nicht mit Textdateien funktioniert, wird FileSize nicht verwendet:
-    FSize := FileSize(f); }
-    if FSize <> 0 then
-    begin
-      {Blockgröße von 2 KiByte erscheint als schnellste Variante}
-      BSize := cBufSize;
-      {Startwert -1 für PKZIP-kompatible CRC32-Werte}
-      CRC32 := -1;
-      while (FSize <> 0) and not FTerminate do
-      begin
-        if FSize > BSize then tmp := BSize else tmp := FSize;
-        Dec(FSize, tmp);
-        GetMem(p, tmp);
-        BlockRead(f, p^, tmp);
-        CRC32 := UpdateCRC32A(Crc32, p, tmp);
-        FreeMem(p, tmp);
-        FPBPos := Round(((FSizeBak - FSize) / FSizeBak) * 100);
-        Synchronize(DSetProgressBar);
-      end;
-      {für PKZIP-Kompatibilität muß Wert noch invertiert werden}
-      CRC32 := not CRC32;
-    end;
-    Result := True;
-  except
-    Result := False;
-  end;
-  try
-    CloseFile(f);
-  except
-  end;
-  {$I-}
-  FileMode := OldFileMode;
-end; *)
 
 {$IFNDEF BitwiseVerify}
 
@@ -971,7 +931,7 @@ end;
 
 { CreateInfoFile ---------------------------------------------------------------
 
-  Für alle Form2-Dateien Dateigrpße und CRC32 ermitteln.                       }
+  Für alle Form2-Dateien Dateigröße und CRC32 ermitteln.                       }
 
 procedure TVerificationThread.CreateInfoFile;
 var i, j     : Integer;
@@ -1083,6 +1043,7 @@ end;
 
 procedure TVerificationThread.Execute;
 begin
+  // if FXCD then Synchronize(DHideProgressBarTotal);
   case FAction of
     cFindDuplicates: FindDuplicateFilesInit;
     cCreateInfoFile: CreateInfoFileInit;
@@ -1106,7 +1067,10 @@ begin
   FXCDExt := '';
   FXCDKeepExt := True;
   FDupSize := 0;
+  FSizeVerified := 0;
   inherited Create(Suspended);
+  TLogWin.Inst.ProgressBarShow(1, 100);
+  TLogWin.Inst.ProgressBarShow(2, 100);
 end;
 
 

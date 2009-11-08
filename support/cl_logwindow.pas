@@ -57,17 +57,8 @@ type TLogWin = class(TObject)
        FOnProgressBarHide       : TProgressBarHideEvent;
        FOnProgressBarShow       : TProgressBarShowEvent;
        FOnProgressBarUpdate     : TProgressBarUpdateEvent;
-(*       FOnProgressBarTotalHide  : TProgressBarTotalHideEvent;
-       FOnProgressBarTotalShow  : TProgressBarTotalShowEvent;
-       FOnProgressBarTotalUpdate: TProgressBarTotalUpdateEvent; *)
        FProgressBarShowing      : array[1..2] of Boolean;
        procedure UpdatePanels(const s1, s2: string);
-       procedure ProgressBarHide(const PB: Integer);
-       procedure ProgressBarShow(const PB, Max: Integer);
-       procedure ProgressBarUpdate(const PB, Position: Integer);
-(*       procedure ProgressBarTotalHide;
-       procedure ProgressBarTotalShow(const Max: Integer);
-       procedure ProgressBarTotalUpdate(const Position: Integer);*)
      protected
        constructor CreateInstance;
        class function AccessInstance(Request: Integer): TLogWin;
@@ -86,6 +77,9 @@ type TLogWin = class(TObject)
        procedure Clear;
        procedure ClearLine;
        procedure DeleteFromLine(i: Integer);
+       procedure ProgressBarHide(const PB: Integer);
+       procedure ProgressBarShow(const PB, Max: Integer);
+       procedure ProgressBarUpdate(const PB, Position: Integer);
        procedure ShowProgressTaskBar;
        procedure ShowProgressTaskBarString(const s: string);
        function ProcessProgress(const s: string): string;
@@ -94,9 +88,6 @@ type TLogWin = class(TObject)
        property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
        property OnProgressBarShow: TProgressBarShowEvent read FOnProgressBarShow write FOnProgressBarShow;
        property OnProgressBarUpdate: TProgressBarUpdateEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
-(*       property OnProgressBarTotalHide: TProgressBarTotalHideEvent read FOnProgressBarTotalHide write FOnProgressBarTotalHide;
-       property OnProgressBarTotalShow: TProgressBarTotalShowEvent read FOnProgressBarTotalShow write FOnProgressBarTotalShow;
-       property OnProgressBarTotalUpdate: TProgressBarTotalUpdateEvent read FOnProgressBarTotalUpdate write FOnProgressBarTotalUpdate;*)
      end;
 
 implementation
@@ -117,59 +108,6 @@ procedure TLogWin.UpdatePanels(const s1, s2: string);
 begin
   if Assigned(FOnUpdatePanels) then FOnUpdatePanels(s1, s2);
 end;
-
-{ ProgressBar[Hide|Show|Update] ------------------------------------------------
-
-  Löst die Event OnProgressBar[Hide|Show|Update] aus, die das Hauptfenster ver-
-  anlassen, die entsprechende Aktion im ProgressBar auszuführen.}
-
-procedure TLogWin.ProgressBarHide(const PB: Integer);
-begin
-  if Assigned(FOnProgressBarHide) and FProgressBarShowing[PB] then
-  begin
-    FOnProgressBarHide(PB);
-    FProgressBarShowing[PB] := False;
-  end;
-end;
-
-procedure TLogWin.ProgressBarShow(const PB, Max: Integer);
-begin
-  if Assigned(FOnProgressBarShow) and not FProgressBarShowing[PB] then
-  begin
-    FOnProgressBarShow(PB, Max);
-    FProgressBarShowing[PB] := True;
-  end;
-end;
-
-procedure TLogWin.ProgressBarUpdate(const PB, Position: Integer);
-begin
-  if Assigned(FOnProgressBarUpdate) and FProgressBarShowing[PB] then
-    FOnProgressBarUpdate(PB, Position);
-end;
-                             (*
-procedure TLogWin.ProgressBarTotalHide;
-begin
-  if Assigned(FOnProgressBarTotalHide) and FProgressBarTotalShowing then
-  begin
-    FOnProgressBarTotalHide;
-    FProgressBarTotalShowing := False;
-  end;
-end;
-
-procedure TLogWin.ProgressBarTotalShow(const Max: Integer);
-begin
-  if Assigned(FOnProgressBarTotalShow) and not FProgressbarShowing then
-  begin
-    FOnProgressBarTotalShow(Max);
-    FProgressBarTotalShowing := True;
-  end;
-end;
-
-procedure TLogWin.ProgressBarTotalUpdate(const Position: Integer);
-begin
-  if Assigned(FOnProgressBarTotalUpdate) and FProgressBarTotalShowing then
-    FOnProgressBarTotalUpdate(Position);
-end;                           *)
 
 { TLogWindow - protected }
 
@@ -226,6 +164,35 @@ end;
 procedure ReleaseLogWindow;
 begin
   TLogWin.ReleaseInstance;
+end;
+
+{ ProgressBar[Hide|Show|Update] ------------------------------------------------
+
+  Löst die Events OnProgressBar[Hide|Show|Update] aus, die das Hauptfenster ver-
+  anlassen, die entsprechende Aktion im ProgressBar auszuführen.}
+
+procedure TLogWin.ProgressBarHide(const PB: Integer);
+begin
+  if Assigned(FOnProgressBarHide) and FProgressBarShowing[PB] then
+  begin
+    FOnProgressBarHide(PB);
+    FProgressBarShowing[PB] := False;
+  end;
+end;
+
+procedure TLogWin.ProgressBarShow(const PB, Max: Integer);
+begin
+  if Assigned(FOnProgressBarShow) and not FProgressBarShowing[PB] then
+  begin
+    FOnProgressBarShow(PB, Max);
+    FProgressBarShowing[PB] := True;
+  end;
+end;
+
+procedure TLogWin.ProgressBarUpdate(const PB, Position: Integer);
+begin
+  if Assigned(FOnProgressBarUpdate) and FProgressBarShowing[PB] then
+    FOnProgressBarUpdate(PB, Position);
 end;
 
 { SetMemo ----------------------------------------------------------------------

@@ -1,11 +1,11 @@
 { cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
- 
+
   cl_action.pas: die im GUI gewählte Aktion ausführen
 
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.03.2009
+  letzte Änderung  08.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -197,18 +197,20 @@ end;
   FindDuplicateFiles sucht in der Pfadliste nach Dateiduplikaten.              }
 
 procedure TCDAction.FindDuplicateFiles(List: TStringList);
+var CDSize: Int64;
+    DummyI: Integer;
+    DummyE: Extended;
 begin
-  FProgressBar.Visible := True;
-  FProgressBar.Max := 100;
-  FProgressBar.Position := 0;
+  FData.GetProjectInfo(DummyI, DummyI, CDSize, DummyE, DummyI,
+                       FSettings.General.Choice);
   {Pfadlisten in FVList laden}
   FVerificationThread := TVerificationThread.Create(List,
                                                     FSettings.DataCD.Device,
                                                     FLang, True);
   FVerificationThread.FreeOnTerminate := True;
   FVerificationThread.Action := cFindDuplicates;
+  FVerificationThread.TotalSize := CDSize;
   FVerificationThread.StatusBar := FStatusBar;
-  FVerificationThread.ProgressBar := FProgressBar;
   {Thread starten}
   FVerificationThread.Resume;
 end;
@@ -219,18 +221,21 @@ end;
   Dateigrößen der Form2-Dateien sowie deren CRC32-Prüfsumme gespeichert sind.  }
 
 procedure TCDAction.CreateXCDInfoFile(List: TStringList);
+var CDSize: Int64;
+    DummyI: Integer;
+    DummyE: Extended;
 begin      
-  FProgressBar.Visible := True;
-  FProgressBar.Max := 100;
-  FProgressBar.Position := 0;
+  FData.GetProjectInfo(DummyI, DummyI, CDSize, DummyE, DummyI,
+                       FSettings.General.Choice);
   {Pfadlisten in FVList laden}
   FVerificationThread := TVerificationThread.Create(List,
                                                     FSettings.DataCD.Device,
                                                     FLang, True);
   FVerificationThread.FreeOnTerminate := True;
+  FVerificationThread.XCD := True;
   FVerificationThread.Action := cCreateInfoFile;
+  FVerificationThread.TotalSize := CDSize;
   FVerificationThread.StatusBar := FStatusBar;
-  FVerificationThread.ProgressBar := FProgressBar;
   {Thread starten}
   FVerificationThread.Resume;
 end;
@@ -2182,13 +2187,15 @@ end;
 procedure TCDAction.StartVerification(const Action: Byte);
 var Device: string;
     Drive : string;
+    CDSize: Int64;
+    DummyI: Integer;
+    DummyE: Extended;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  FProgressBar.Visible := True;
-  FProgressBar.Max := 100;
-  FProgressBar.Position := 0;
   {Pfadlisten in FVList laden}
   FVList.Clear;
+  FData.GetProjectInfo(DummyI, DummyI, CDSize, DummyE, DummyI,
+                       FSettings.General.Choice);
   case Action of
     cVerify        : begin
                        Device := FSettings.DataCD.Device;
@@ -2209,6 +2216,7 @@ begin
                                                     FLang, True);
   FVerificationThread.FreeOnTerminate := True;
   FVerificationThread.Action := Action;
+  FVerificationThread.TotalSize := CDSize;
   {jetzt weitere (optionale) Properties setzen}
   if Action = cVerifyXCD then
   begin
@@ -2217,7 +2225,6 @@ begin
     FVerificationThread.XCDKeepExt := FSettings.XCD.KeepExt;
   end;
   FVerificationThread.StatusBar := FStatusBar;
-  FVerificationThread.ProgressBar := FProgressBar;
   FVerificationThread.AutoExec := FSettings.CmdLineFlags.ExecuteProject;
   FVerificationThread.Reload := FReload;
   FVerificationThread.Drive := Drive;
