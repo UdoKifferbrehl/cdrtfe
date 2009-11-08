@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.09.2009
+  letzte Änderung  08.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -197,7 +197,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        function CountFilesPrevSess(Root: TNode): Integer;
        function CountFolders(Root: TNode): Integer;
        function ExtractFileNameFromEntry(const Entry: string): string;
-       function ExtractFileSizeFromEntry(const Entry: string): Int64;
+       function ExtractFileSizeFromEntry(const Entry: string): Int64; virtual;
        function FileIsUnique(const Name: string; const Node: TNode): Boolean;
        function FolderIsUnique(const Name: string; const Node: TNode): Boolean;
        function GetPathFromFolder(const Root: TNode): string;
@@ -273,6 +273,7 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FAddAsForm2: Boolean;
        function CountForm2Files(Root: TNode): Integer;
        function CountSmallForm2Files(Root: TNode): Integer;
+       function ExtractFileSizeFromEntry(const Entry: string): Int64; override;
        function GetForm2FileCount: Integer;
        function GetSmallForm2FileCount: Integer;
        function IsPreviousSessionFile(const Entry: string): Boolean; override;
@@ -722,7 +723,7 @@ begin
   Result := StringLeft(Entry, ':');
 end;
 
-{ GetFileSize ------------------------------------------------------------------
+{ ExtractFileSizeFromEntry -----------------------------------------------------
 
   GetFileSize extrahiert aus dem Filelisten-Eintrag die Dateigröße. Die Größen
   von Dateien, die aus vorigen Session stammen werden ignoriert, es werden nur
@@ -1976,6 +1977,22 @@ procedure TXCD.NodeAddMovie(const Name: string; const Node: TNode);
 begin
   TPList(Node.Data)^.Add(ExtractFileName(Name) + ':' + Name + '*' +
                          FloatToStr(GetFileSize(Name)) + '>');
+end;
+
+{ ExtractFileSizeFromEntry -----------------------------------------------------
+
+  ermittelt die Größe der Datei aus dem Eintrag.                               }
+
+function TXCD.ExtractFileSizeFromEntry(const Entry: string): Int64;
+var Temp: string;
+begin
+  Temp := Entry;
+  Temp := StringRight(Entry, '*');
+  if Pos('>', Temp) > 0 then
+  begin
+    Delete(Temp, Pos('>', Temp), 1);
+  end;
+  Result := StrToInt64Def(Temp, 0);
 end;
 
 { CountForm2Files --------------------------------------------------------------
