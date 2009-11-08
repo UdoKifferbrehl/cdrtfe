@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.11.2009
+  letzte Änderung  08.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -443,6 +443,7 @@ type
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
     function GetCurrentTreeView: TTreeView;
+    function GetProgressBar(const PB: Integer): TProgressBar;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
     procedure AddToPathList(const Filename: string);
@@ -528,12 +529,9 @@ type
     procedure HandleKeyboardShortcut(const Key: Word);
     procedure LangChange;
     procedure MessageShow(const s: string);
-    procedure ProgressBarHide;
-    procedure ProgressBarShow(const Max: Integer);
-    procedure ProgressBarUpdate(const Position: Integer);
-    procedure ProgressBarTotalHide;
-    procedure ProgressBarTotalShow(const Max: Integer);
-    procedure ProgressBarTotalUpdate(const Position: Integer);
+    procedure ProgressBarHide(const PB: Integer);
+    procedure ProgressBarShow(const PB, Max: Integer);
+    procedure ProgressBarUpdate(const PB, Position: Integer);
     procedure SpaceMeterTypeChange;
     procedure UpdatePanels(const s1, s2: string);
     {Ole-Drop-Target-Funktionen}
@@ -4073,13 +4071,29 @@ begin
   if s2 <> '<>' then StatusBar.Panels[1].Text := s2;
 end;
 
+{ GetProgressBar ---------------------------------------------------------------
+
+  liefert den entsprechenden ProgresBar.                                       }
+
+function TForm1.GetProgressBar(const PB: Integer): TProgressBar;
+begin
+  case PB of
+    1: Result := ProgressBar;       // lower ProgressBar
+    2: Result := ProgressBarTotal;  // upper ProgressBar
+  else
+    Result := nil;
+  end;
+end;
+
 { ProgressBarHide --------------------------------------------------------------
 
   ProgressBarHide macht den Progress-Bar unsichtbar.                           }
 
-procedure TForm1.ProgressBarHide;
+procedure TForm1.ProgressBarHide(const PB: Integer);
+var Bar: TProgressBar;
 begin
-  ProgressBar.Visible := False;
+  Bar := GetProgressBar(PB);
+  if Bar <> nil then Bar.Visible := False;
 end;
 
 { ProgressBarShow --------------------------------------------------------------
@@ -4087,11 +4101,16 @@ end;
   ProgressBarReset setzt ProgressBar.Position auf Null, ProgressBar.Max auf
   Max und ProgressBar.Visible auf True.                                        }
 
-procedure TForm1.ProgressBarShow(const Max: Integer);
+procedure TForm1.ProgressBarShow(const PB, Max: Integer);
+var Bar: TProgressBar;
 begin
-  ProgressBar.Position := 0;
-  ProgressBar.Max := Max;
-  ProgressBar.Visible := True;
+  Bar := GetProgressBar(PB);
+  if Bar <> nil then
+  begin
+    Bar.Position := 0;
+    Bar.Max := Max;
+    Bar.Visible := True;
+  end;
 end;
 
 { ProgressBarUpdate ------------------------------------------------------------
@@ -4099,40 +4118,11 @@ end;
   ProgressBarReset setzt StatusBar.Position auf FSettings.Shared.
   ProgressBarPosition.                                                         }
 
-procedure TForm1.ProgressBarUpdate(const Position: Integer);
+procedure TForm1.ProgressBarUpdate(const PB, Position: Integer);
+var Bar: TProgressBar;
 begin
-  ProgressBar.Position := Position;
-end;
-
-{ ProgressBarHide --------------------------------------------------------------
-
-  ProgressBarHide macht den Progress-Bar unsichtbar.                           }
-
-procedure TForm1.ProgressBarTotalHide;
-begin
-  ProgressBarTotal.Visible := False;
-end;
-
-{ ProgressBarShow --------------------------------------------------------------
-
-  ProgressBarReset setzt ProgressBar.Position auf Null, ProgressBar.Max auf
-  Max und ProgressBar.Visible auf True.                                        }
-
-procedure TForm1.ProgressBarTotalShow(const Max: Integer);
-begin
-  ProgressBarTotal.Position := 0;
-  ProgressBarTotal.Max := Max;
-  ProgressBarTotal.Visible := True;
-end;
-
-{ ProgressBarUpdate ------------------------------------------------------------
-
-  ProgressBarReset setzt StatusBar.Position auf FSettings.Shared.
-  ProgressBarPosition.                                                         }
-
-procedure TForm1.ProgressBarTotalUpdate(const Position: Integer);
-begin
-  ProgressBarTotal.Position := Position;
+  Bar := GetProgressBar(PB);
+  if Bar <> nil then Bar.Position := Position;
 end;
 
 { SpaceMeterTypeChange ---------------------------------------------------------
@@ -4209,9 +4199,6 @@ begin
   TLogWin.Inst.OnProgressBarHide := ProgressBarHide;
   TLogWin.Inst.OnProgressBarShow := ProgressBarShow;
   TLogWin.Inst.OnProgressBarUpdate := ProgressBarUpdate;
-  TLogWin.Inst.OnProgressBarTotalHide := ProgressBarTotalHide;
-  TLogWin.Inst.OnProgressBarTotalShow := ProgressBarTotalShow;
-  TLogWin.Inst.OnProgressBarTotalUpdate := ProgressBarTotalUpdate;
   {Kommandzeile auswerten}
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
