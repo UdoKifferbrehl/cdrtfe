@@ -2,9 +2,9 @@
 
   f_cdtext.pas: CD-Text-Funktionen
 
-  Copyright (c) 2004-2006 Oliver Valencia
+  Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  11.02.2006
+  letzte Änderung  20.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -167,6 +167,7 @@ type TCDTextTrackData = record
      end;
 
 function AutoCDText(const Args: TAutoCDText): string;
+function RemoveUTFBOM(const s: string): string;
 function TextTrackDataToString(const TextTrackData: TCDTextTrackData): string;
 procedure CreateCDTextFile(const Name: string; TextData: TStringList);
 procedure StringToTextTrackData(const S: string; var TextTrackData: TCDTextTrackData);
@@ -681,7 +682,8 @@ begin
   if UseTags then
   begin
     {Tags sollen benutzt werden.}
-    Result := Args.Title + '|' + Args.Performer + '||||';
+    Result := RemoveUTFBOM(Args.Title) + '|' +
+              RemoveUTFBOM(Args.Performer) + '||||';
   end else
   begin
     {Infos aus Dateinamen erzeugen.}
@@ -711,6 +713,17 @@ begin
     {Korrektur, falls Dateiname kein ' - ' enthielt.}
     if Pos('|', Name) = 0 then Result := Name + '|||||';
   end;
+end;
+
+{ RemoveUTFBOM -----------------------------------------------------------------
+
+  entfernt die BOM ($FEFF) am Anfang der CD-Text-Daten.                        }
+
+function RemoveUTFBOM(const s: string): string;
+const UTFBOM = #255#254; //'ÿþ';
+begin
+  Result := s;
+  if (Length(s) > 2) and (Pos(UTFBOM, s) = 1) then Delete(Result, 1, 2);
 end;
 
 end.
