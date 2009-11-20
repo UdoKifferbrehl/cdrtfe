@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.11.2009
+  letzte Änderung  20.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -607,11 +607,13 @@ end;
 
 procedure TForm1.WMDROPFILES (var Msg: TMessage);
 var i, Anzahl, Size: Integer;
-    Dateiname: PChar;
-    Filename: string;
-    FolderAdded: Boolean;
+    Dateiname      : PChar;
+    Filename       : string;
+    FolderAdded    : Boolean;
+    FileList       : TStringList;
 begin
   inherited;
+  FileList := TStringList.Create;
   FolderAdded := False;
   Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
   {Wieviele Objekte wurden auf cdrtfe gezogen?}
@@ -622,15 +624,21 @@ begin
     Dateiname:= StrAlloc(Size);
     DragQueryFile(Msg.WParam, i, Dateiname, Size);
     Filename := string(Dateiname);
-    AddToPathList(FileName);
+    FileList.Add(Filename);
+    StrDispose(Dateiname);
+  end;
+  FileList.Sort;
+  for i := 0 to (Anzahl - 1) do
+  begin
+    AddToPathList(FileList[i]);
     {Flag setzen, wenn Order hinzugefügt wurde}
     if not FolderAdded then
     begin
-      if DirectoryExists(FileName) then FolderAdded := True;
+      if DirectoryExists(FileList[i]) then FolderAdded := True;
     end;
-    StrDispose(Dateiname);
   end;
   DragFinish(Msg.WParam);
+  FileList.Free;
   {Ordner sortieren}
   AddToPathlistSort(FolderAdded);
 end;
@@ -2236,8 +2244,10 @@ end;
 procedure TForm1.UserAddTrack;
 var i       : Integer;
     DialogID: TDialogID;
+    FileList: TStringList;
 begin
   DialogID := DIDDummy;
+  FileList := TStringList.Create;
   with Form1 do
   begin
     OpenDialog1 := TOpenDialog.Create(Form1);
@@ -2259,14 +2269,16 @@ begin
     OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
     if OpenDialog1.Execute then
     begin
-      Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');    
-      for i :=0 to OpenDialog1.Files.Count - 1 do
+      Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
+      FileList.Assign(OpenDialog1.Files);
+      FileList.Sort;
+      for i := 0 to FileList.Count - 1 do
       begin
         case FSettings.General.Choice of
-          cAudioCD: FData.AddToPathlist(OpenDialog1.Files[i], '', cAudioCD);
-          cVideoCD: FData.AddToPathlist(OpenDialog1.Files[i], '', cVideoCD);
+          cAudioCD: FData.AddToPathlist(FileList[i], '', cAudioCD);
+          cVideoCD: FData.AddToPathlist(FileList[i], '', cVideoCD);
         end;
-        HandleError(FData.LastError, OpenDialog1.Files[i]);
+        HandleError(FData.LastError, FileList[i]);
       end;
       CacheFolderName(DialogID, OpenDialog1.FileName);
     end;
@@ -2274,6 +2286,7 @@ begin
     ShowTracks;
     UpdateGauges;
   end;
+  FileList.Free;
 end;
 
 { UserMoveTrack ----------------------------------------------------------------
