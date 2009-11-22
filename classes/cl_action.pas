@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.11.2009
+  letzte Änderung  22.11.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1528,10 +1528,9 @@ var Compressed: Boolean;
       Performer: string;
   begin
     Cmd := '';
+    OutName := GetCustomName(Info, Index, Title, Performer, Name);
     if FSettings.DAE.PrefixNames then
-      OutName := FSettings.DAE.Prefix + Format('_%.2d', [Index + 1])
-    else
-      OutName := GetCustomName(Info, Index, Title, Performer, Name);
+      OutName := FSettings.DAE.Prefix + Format('_%.2d', [Index + 1]);
     if FSettings.DAE.MP3 then
     begin
       Cmd := StartUpDir + cLameBin;
@@ -1881,8 +1880,7 @@ begin
       if PrefixNames and not Compressed then
       begin
         DAEGrabTracksSimple;
-      end;
-      if not PrefixNames or Compressed then
+      end else
       begin
         DAEGrabTracksEx;
       end;
