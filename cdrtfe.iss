@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2009 Oliver Valencia
 ;
-;  letzte Änderung  26.10.2009
+;  letzte Änderung  25.11.2009
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,11 +52,11 @@ AppCopyright={#MyAppCopyright}
 ShowUndisplayableLanguages=yes
 
 [Languages]
-Name: en; MessagesFile: compiler:Default.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_en.rtf
-Name: de; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_de.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_de.rtf
-Name: fr; MessagesFile: compiler:Languages\French.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_fr.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_fr.rtf
-Name: it; MessagesFile: compiler:Languages\Italian.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_it.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_it.rtf
-Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\license_pl.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info_pl.rtf
+Name: en; MessagesFile: compiler:Default.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
+Name: de; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_de.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_de.rtf
+Name: fr; MessagesFile: compiler:Languages\French.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_fr.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_fr.rtf
+Name: it; MessagesFile: compiler:Languages\Italian.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_it.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_it.rtf
+Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pl.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pl.rtf
 
 [Tasks]
 ; Desktop icon
