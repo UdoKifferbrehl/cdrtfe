@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  05.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -259,18 +259,20 @@ end;
   ProcessOutput weiter.                                                        }
 
 procedure TActionThread.StartExecution;
-var lpPipeAttributes: TSecurityAttributes;
+var lpPipeAttributes     : TSecurityAttributes;
     ReadStdOut, NewStdOut: THandle;
-    WriteStdIn, NewStdIn: THandle;
-    lpStartupInfo: TStartupInfo;
-    lpProcessInformation: TProcessInformation;
-    lpNumberOfBytesRead: DWORD;
-    Buffer: array[0..10] of Char;
-    Temp: string;
-    StartWithNewLine: Boolean;
-    OnlyBS: Boolean;
+    WriteStdIn, NewStdIn : THandle;
+    lpStartupInfo        : TStartupInfo;
+    lpProcessInformation : TProcessInformation;
+    lpNumberOfBytesRead  : DWORD;
+    lpNumberOfBytesAvail : DWORD;
+    BytesToRead          : DWORD;
+    Buffer               : array[0..10] of Char;
+    Temp                 : string;
+    StartWithNewLine     : Boolean;
+    OnlyBS               : Boolean;
     {$IFDEF ShowCmdError}
-    ExitCode: Integer;
+    ExitCode             : Integer;
     {$ENDIF}
 begin
   FLine := FCommandLine;
@@ -302,12 +304,18 @@ begin
         CloseHandle(NewStdIn);
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
-        FPID := lpProcessInformation.dwProcessId; 
+        FPID := lpProcessInformation.dwProcessId;
         Buffer[0] := #0;
         Temp := '';
         repeat
           Temp := Temp + Buffer;
 
+          PeekNamedPipe(ReadStdOut, @Buffer, SizeOf(Buffer) - 1,
+                        @lpNumberOfBytesRead, @lpNumberOfBytesAvail, nil);
+          if (lpNumberOfBytesAvail < SizeOf(Buffer) - 1) then
+            BytesToRead := 1
+          else
+            BytesToRead := SizeOf(Buffer) - 1;
           {jetzt Zeichen verarbeiten und anzeigen}
           Temp := ProcessOutput(Temp, StartWithNewLine);
 
@@ -321,7 +329,7 @@ begin
             TerminateProcess(lpProcessInformation.hProcess, 0);
           end;                                                 }
 
-        until not ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
+        until not ReadFile(ReadStdOut, Buffer, BytesToRead,
                            lpNumberOfBytesRead, nil);
 
         {Falls noch Reste in Temp stehen, diese verarbeiten und ausgeben}
