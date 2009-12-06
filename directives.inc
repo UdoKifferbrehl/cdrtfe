@@ -40,6 +40,13 @@
          //    - betrifft: frm_main.pas
 
 
+(* ------------------------------------------------------------- Win7-Support *)
+
+{$DEFINE xWin7Comp}
+         // Unterstützung für Win7-Aero-Funktionen (z.B. Fortschrittsanzeige
+         // Taskbar-Eintrag.
+
+
 (* --------------------------------------------------------------- ImagingLib *)
 
 {$IFDEF Delphi6Up}

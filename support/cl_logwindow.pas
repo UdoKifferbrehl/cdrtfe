@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  08.11.2009
+  letzte Änderung  06.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,7 +45,9 @@ unit cl_logwindow;
 
 interface
 
-uses Windows, Forms, Classes, SysUtils, StdCtrls, userevents;
+uses Windows, Forms, Classes, SysUtils, StdCtrls,
+     {$IFDEF Win7Comp} dwProgressBar, {$ENDIF}
+     userevents;
 
 type TLogWin = class(TObject)
      private
@@ -53,6 +55,9 @@ type TLogWin = class(TObject)
        FMemo                    : TMemo;
        FMemo2                   : TMemo;
        FOutWindowHandle         : THandle;
+       {$IFDEF Win7Comp}
+       FTaskBarProgressIndicator: TdwTaskbarProgressIndicator;
+       {$ENDIF}
        FOnUpdatePanels          : TUpdatePanelsEvent;
        FOnProgressBarHide       : TProgressBarHideEvent;
        FOnProgressBarShow       : TProgressBarShowEvent;
@@ -82,6 +87,13 @@ type TLogWin = class(TObject)
        procedure ProgressBarUpdate(const PB, Position: Integer);
        procedure ShowProgressTaskBar;
        procedure ShowProgressTaskBarString(const s: string);
+       {$IFDEF Win7Comp}
+       procedure TaskBarProgressIndicatorInit;
+       procedure TaskBarProgressIndicatorHide;
+       procedure TaskBarProgressIndicatorShow;
+       procedure TaskBarProgressIndicatorDoMarquee;
+       procedure TaskBarProgressIndicatorUpdate(const Position: Integer);
+       {$ENDIF}
        function ProcessProgress(const s: string): string;
        property OutWindowHandle: THandle read FOutWindowHandle;
        property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
@@ -99,6 +111,20 @@ uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
 
 { TLogWindow - private }
 
+{ TaskBarProgressIndicatorInit -------------------------------------------------
+
+  für Windows 7 die TaskBar-Fortschrittsanzeige initialisieren.                }
+
+{$IFDEF Win7Comp}
+procedure TLogWin.TaskBarProgressIndicatorInit;
+begin
+  FTaskBarProgressIndicator := TdwTaskbarProgressIndicator.Create(nil);
+  FTaskBarProgressIndicator.Min := 0;
+  FTaskBarProgressIndicator.Max := 100;
+  FTaskBarProgressIndicator.ShowInTaskbar := False;
+end;
+{$ENDIF}
+
 { UpdatePanels -----------------------------------------------------------------
 
   Löst das Event OnMessageShow aus, das das Hauptfenster veranlaßt, den Text aus
@@ -115,6 +141,9 @@ constructor TLogWin.CreateInstance;
 begin
   inherited Create;
   FLog := TStringList.Create;
+  {$IFDEF Win7Comp}
+  TaskBarProgressIndicatorInit;
+  {$ENDIF}
   FProgressBarShowing[1] := False;
   FProgressBarShowing[2] := False;
 end;
@@ -148,6 +177,9 @@ destructor TLogWin.Destroy;
 begin
   if AccessInstance(0) = Self then AccessInstance(2);
   FLog.Free;
+  {$IFDEF Win7Comp}
+  FTaskBarProgressIndicator.Free;
+  {$ENDIF}
   inherited Destroy;
 end;
 
@@ -178,6 +210,9 @@ begin
     FOnProgressBarHide(PB);
     FProgressBarShowing[PB] := False;
   end;
+  {$IFDEF Win7Comp}
+  if PB = 2 then TaskBarProgressIndicatorHide;
+  {$ENDIF}
 end;
 
 procedure TLogWin.ProgressBarShow(const PB, Max: Integer);
@@ -187,13 +222,50 @@ begin
     FOnProgressBarShow(PB, Max);
     FProgressBarShowing[PB] := True;
   end;
+  {$IFDEF Win7Comp}
+  if PB = 2 then TaskBarProgressIndicatorShow;
+  {$ENDIF}
 end;
 
 procedure TLogWin.ProgressBarUpdate(const PB, Position: Integer);
 begin
   if Assigned(FOnProgressBarUpdate) and FProgressBarShowing[PB] then
     FOnProgressBarUpdate(PB, Position);
+  {$IFDEF Win7Comp}
+  if PB = 2 then TaskBarProgressIndicatorUpdate(Position);
+  {$ENDIF}
 end;
+
+{ TaskBarProgressIndicator[Hide|Show|Update] -----------------------------------
+
+  steuern die Foprtschrittsanzeige in der TaskBar (ab Win7).                   }
+
+{$IFDEF Win7Comp}
+procedure TLogWin.TaskBarProgressIndicatorHide;
+begin
+  FTaskBarProgressIndicator.ShowInTaskbar := False;
+end;
+
+procedure TLogWin.TaskBarProgressIndicatorShow;
+begin
+  FTaskBarProgressIndicator.Position := 0;
+  FTaskBarProgressIndicator.MarqueeEnabled := False;
+  FTaskBarProgressIndicator.ProgressBarState := pbstNormal;
+  FTaskBarProgressIndicator.ShowInTaskbar := True;
+end;
+
+procedure TLogWin.TaskBarProgressIndicatorUpdate(const Position: Integer);
+begin
+  FTaskBarProgressIndicator.Position := Position;
+end;
+
+procedure TLogWin.TaskBarProgressIndicatorDoMarquee;
+begin
+  TaskBarProgressIndicatorShow;
+  FTaskBarProgressIndicator.MarqueeEnabled := True;
+  FTaskBarProgressIndicator.ProgressBarState := pbstMarquee;
+end;
+{$ENDIF}
 
 { SetMemo ----------------------------------------------------------------------
 
@@ -430,11 +502,17 @@ begin
   if s = 'Fixating...' then
   begin
     Progress := s;
+    {$IFDEF Win7Comp}
+    TaskBarProgressIndicatorDoMarquee;
+    {$ENDIF}
   end else
   {cdrecord: Blanking ...}
   if Pos('Blanking', Temp) > 0 then
   begin
     Progress := 'Blanking...';
+    {$IFDEF Win7Comp}
+    TaskBarProgressIndicatorDoMarquee;
+    {$ENDIF}
   end else
   {mkisofs: ...% done}
   if Pos('done,', Temp) > 0 then

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.11.2009
+  letzte Änderung  06.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3725,6 +3725,9 @@ begin
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
+    {$IFDEF Win7Comp}
+    TLogWin.Inst.TaskBarProgressIndicatorHide;
+    {$ENDIF}
     FSettings.Environment.ProcessRunning := False;
     ButtonStart.Enabled := True;
     ButtonCancel.Enabled := True;
