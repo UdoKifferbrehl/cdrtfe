@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  08.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -114,7 +114,6 @@ const cTool: string = 'Tools';
 var Ini  : TIniFile;
     Path : string;
     Temp : string;
-    Found: Boolean;
 begin
   {standardmäßig sollen sich die Tools im Ordner \tools\ befinden}
   if DirectoryExists(StartUpDir + cToolDir) then
@@ -140,33 +139,6 @@ begin
     cM2F2ExtractBin  := Path + cXCDDir       + cM2F2ExtractBin;
     cDat2FileBin     := Path + cXCDDir       + cDat2FileBin;
     cD2FGuiBin       := Path + cXCDDir       + cD2FGuiBin;
-    {cygwin1.dll}
-    Temp := cCygwin1Dll;
-    cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
-    if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
-    Found := (FindInSearchPath(Temp) <> '');
-    {$IFDEF WriteLogFile}
-    AddLogCode(1260);
-    AddLog(FindInSearchPath(Temp) + CRLF + ' ', 3);
-    {$ENDIF}
-    if Found and not UseOwnCygwinDLLs then
-    begin
-      cCygwin1Dll := Temp;
-      {$IFDEF WriteLogfile} AddLogCode(1250); {$ENDIF}
-    end else
-    {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisitert.}
-    if FileExists(StartUpDir + '\' + cCygwin1Dll) then
-    begin
-      {$IFDEF WriteLogFile} if not Found then AddLogCode(1259); {$ENDIF}
-      {$IFDEF WriteLogfile} AddLogCode(1251); {$ENDIF}
-      Path := GetEnvVarValue(cPath);
-      {$IFDEF WriteLogFile} AddLog(Path + CRLF + ' ', 3); {$ENDIF}
-      Path := StartUpDir + cToolDir + cCygwinDir + ';' + Path;  
-      SetEnvVarValue(cPath, Path);
-      {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
-      {Prüfen, ob cygwin1.dll in Systemordnern ist. Falls ja, warnen}
-      if UseOwnCygwinDLLs then CheckSysFolderCygwin;
-    end;
   end;
   {Angaben aus der cdrtfe_tools.ini haben jedoch Vorrang.}
   if FileExists(StartUpDir + cIniFileTools) then
@@ -253,6 +225,58 @@ begin
   end;
 end;
 
+{ GetCygwinPath ----------------------------------------------------------------
+
+  setzt den Pfad zur cygwin1.dll.                                              }
+
+procedure GetCygwinPath;
+const cTool: string = 'Tools';
+      cPath: string = 'PATH';
+var Path, OldPath: string;
+    Temp         : string;
+    Found        : Boolean;
+begin
+  if DirectoryExists(StartUpDir + cToolDir) then
+  begin
+    Path := cToolDir;
+    Temp := cCygwin1Dll;
+    cCygwin1Dll      := Path + cCygwinDir + '\' + cCygwin1Dll;
+    if Pos('\', cCygwin1Dll) = 1 then Delete(cCygwin1Dll, 1, 1);
+    Found := (FindInSearchPath(Temp) <> '');
+    {$IFDEF WriteLogFile}
+    AddLogCode(1260);
+    AddLog(FindInSearchPath(Temp) + CRLF + ' ', 3);
+    {$ENDIF}
+    if Found and not UseOwnCygwinDLLs then
+    begin
+      cCygwin1Dll := Temp;
+      {$IFDEF WriteLogfile} AddLogCode(1250); {$ENDIF}
+    end else
+    {Pfad zu cygwin1.dll in den Suchpfad eintragen, sofern die Datei exisitert.}
+    if FileExists(StartUpDir + '\' + cCygwin1Dll) then
+    begin
+      {$IFDEF WriteLogFile} if not Found then AddLogCode(1259); {$ENDIF}
+      {$IFDEF WriteLogfile} AddLogCode(1251); {$ENDIF}
+      Path := GetEnvVarValue(cPath);
+      OldPath := Path;
+      {$IFDEF WriteLogFile} AddLog(Path + CRLF + ' ', 3); {$ENDIF}
+      Path := StartUpDir + cToolDir + cCygwinDir + ';' + Path;
+      SetEnvVarValue(cPath, Path);
+      {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
+      {Prüfen, ob cygwin1.dll in Systemordnern ist. Falls ja, warnen}
+      if UseOwnCygwinDLLs then CheckSysFolderCygwin;
+    end;
+  end;
+  {Sonderbehandlung: Es wurde eine bereits aktive cygwin1.dll gefunden!}
+  if DLLIsLoaded('cygwin1.dll', Temp) then
+  begin
+    Path := ExtractFilePath(Temp) + ';' + OldPath;
+    SetEnvVarValue(cPath, Path);
+    {$IFDEF WriteLogfile} AddLogCode(1261); {$ENDIF}
+    {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
+  end;
+end;
+
 { CheckMkisofsImports ----------------------------------------------------------
 
   Mkisofs kann je nach Version noch zuästzliche DLLs importieren.
@@ -308,6 +332,7 @@ begin
   FLang := Lang;
   Settings.FileFlags.CygInPath := (FindInSearchPath(cCygwin1Dll) <> '');
   GetToolNames;
+  GetCygwinPath;
   with Settings.FileFlags do
   begin
     {Sind die cdrtools da?}

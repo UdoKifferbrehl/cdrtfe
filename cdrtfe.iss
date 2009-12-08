@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2009 Oliver Valencia
 ;
-;  letzte Änderung  25.11.2009
+;  letzte Änderung  07.12.2009
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -116,8 +116,10 @@ Source: I:\cdrtfe\proto\tools\sound\flac.exe; DestDir: {app}\tools\sound; Flags:
 ; Tools: VCDImager
 Source: I:\cdrtfe\proto\tools\vcdimager\vcdimager.exe; DestDir: {app}\tools\vcdimager; Flags: ignoreversion; Components: tools\vcd
 ; Commandline Scripts
-Source: I:\cdrtfe\misc\scripts\cmdshell.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet;
-Source: I:\cdrtfe\misc\scripts\cmdshellinit.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet;
+Source: I:\cdrtfe\misc\scripts\cmdshell.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet; MinVersion: 0, 1
+Source: I:\cdrtfe\misc\scripts\cmdshellinit.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet; MinVersion: 0, 1
+Source: I:\cdrtfe\misc\scripts\cmdshell.bat; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet; MinVersion: 1, 0
+Source: I:\cdrtfe\misc\scripts\cmdshellinit.bat; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet; MinVersion: 1, 0
 Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
 ; Readme cdrtfe
 Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
@@ -141,7 +143,8 @@ Source: I:\cdrtfe\cdrtfe\shellex\cdrtfeShlEx\*; DestDir: {app}\source\cdrtfeShlE
 ; Program
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}
 ; CommandShell
-Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd;
+Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd; MinVersion: 0, 1
+Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.bat; MinVersion: 1, 0
 ; Help file
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_german.chm; Languages: de
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl
@@ -167,8 +170,9 @@ Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desk
 Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: quicklaunchicon
 
 [Registry]
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\cdrtfe.exe"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 0, 1
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\cdrtfe.exe"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt;
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.cmd"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 0, 1
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.bat"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 1, 0
 
 [Run]
 Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl; Flags: shellexec postinstall skipifsilent unchecked
@@ -229,13 +233,21 @@ end;
 
 procedure CmdShellSet();
 var FileName  : string;
+    FileExt   : string;
     ScriptPath: string;
     StartCmd  : string;
     ScriptFile: TStringList;
 begin
   FileName := ExpandConstant(CurrentFileName);
+  FileExt := ExtractFileExt(FileName);
   ScriptPath := ExtractFilePath(FileName);
-  StartCmd := 'cmd.exe /k call "' + ScriptPath + 'cmdshellinit.cmd"';
+  if FileExt = '.cmd' then
+  begin
+    StartCmd := 'cmd.exe /k call "' + ScriptPath + 'cmdshellinit.cmd"';
+  end else
+  begin
+    StartCmd := 'command /e:30000 /k call "' + ScriptPath + 'cmdshellinit.bat"';
+  end;
   ScriptFile := TStringList.Create;
   ScriptFile.LoadFromFile(FileName);
   ScriptFile[1] :=  StartCmd;

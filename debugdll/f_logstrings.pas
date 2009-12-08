@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  06.03.2009
+  letzte Änderung  08.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -99,6 +99,7 @@ begin
     Add('1258=Use cygwin DLLs found in search path if possible.');
     Add('1259=cygwin1.dll not found in search path.');
     Add('1260=cygwin1.dll path:');
+    Add('1261=An active cygwin1.dll has been found. Overriding path setting...');
     {cl_cueinfo.pas}
     Add('1270=Creating temporary cue file');
     {cl_settings.pas}

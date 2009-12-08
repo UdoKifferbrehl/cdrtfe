@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  08.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,6 +19,7 @@
 
   exportierte Funktionen/Prozeduren:
 
+    DLLIsLoaded(const Name: string; var FullPath: string): Boolean
     GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string
     GetProcessWindow(const TargetProcessID: Cardinal): HWnd
     IsAlreadyRunning: Boolean
@@ -33,8 +34,9 @@ unit f_process;
 
 interface
 
-uses Windows, Classes, Forms, SysUtils, ShellAPI, TlHelp32;
+uses Windows, Classes, Forms, SysUtils, ShellAPI, TLHelp32;
 
+function DLLIsLoaded(const Name: string; var FullPath: string): Boolean;
 function GetChildProcessByModuleName(const Name: string; const ParentID: DWORD): DWORD;
 function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string;
 function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
@@ -827,6 +829,58 @@ begin
            'Error message: ' + Msg2;
     ShowMsgDlg(Msg, 'Error', MB_OK or MB_ICONWARNING);
   end;
+end;
+
+{ DLLIsLoaded ------------------------------------------------------------------
+
+  True, wenn die DLL Name bereits geladen ist. In diesem Fallm enthält FullPath
+  den komletten Pfad zur Datei.                                                }
+
+function DLLIsLoaded(const Name: string; var FullPath: string): Boolean;
+type TProcessData = packed record
+                      UsageCnt: Word;
+                      RelocateCnt: Word;
+                    end;
+var SnapProcHandle,
+    SnapModuleHandle: THandle;
+    ProcessEntry    : TProcessEntry32;
+    ModuleEntry     : TModuleEntry32;
+    ProcessNext,
+    ModuleNext      : Boolean;
+    Found           : Boolean;
+    Path            : string;
+begin
+  Found := False;
+  SnapProcHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if SnapProcHandle <> INVALID_HANDLE_VALUE then
+  begin
+    ProcessEntry.dwSize := Sizeof(ProcessEntry);
+    ProcessNext := Process32First(SnapProcHandle, ProcessEntry);
+    while ProcessNext and not Found do
+    begin
+      SnapModuleHandle := CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
+                                                    ProcessEntry.th32ProcessID);
+      if SnapModuleHandle <> INVALID_HANDLE_VALUE then
+      begin
+        ModuleEntry.dwSize := Sizeof(ModuleEntry);
+        ModuleNext := Module32First(SnapModuleHandle, ModuleEntry);
+        while ModuleNext and not Found do
+        begin
+          Path := ExtractFileName(ModuleEntry.szExePath);
+          if LowerCase(Path) = LowerCase(Name) then
+          begin
+            Found := True;
+            FullPath := ModuleEntry.szExePath;
+          end;
+          ModuleNext := Module32Next(SnapModuleHandle, ModuleEntry);
+        end;
+        CloseHandle(SnapModuleHandle);
+      end;
+      ProcessNext := Process32Next(SnapProcHandle, ProcessEntry);
+    end;
+    CloseHandle(SnapProcHandle);
+  end;
+  Result := Found;
 end;
 
 initialization
