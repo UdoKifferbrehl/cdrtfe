@@ -7,13 +7,14 @@ object FrameFileBrowser: TFrameFileBrowser
   VertScrollBar.Visible = False
   AutoSize = True
   TabOrder = 0
+  TabStop = True
   DesignSize = (
     390
     173)
   object Label1: TLabel
     Left = 0
     Top = 0
-    Width = 32
+    Width = 31
     Height = 13
     Caption = 'Label1'
     Color = clBtnFace

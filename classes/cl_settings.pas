@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.11.2009
+  letzte Änderung  09.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -119,6 +119,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
      end;
 
      TFileExplorer = record
+       Showing      : Boolean;
+       Path         : string;
        Height       : Integer;
      end;
 
@@ -640,6 +642,8 @@ begin
   with FileExplorer do
   begin
     Height := 192;
+    Showing := False;
+    Path := '';
   end;
 
   with CmdLineFlags do
@@ -1244,6 +1248,13 @@ var PF     : TIniFile; // ProjectFile
         end;
       end;
 
+      Section := 'FileExplorer';
+      with PF, FileExplorer do
+      begin
+        WriteBool(Section, 'Showing', Showing);
+        WriteString(Section, 'Path', Path);
+      end;
+
       Section := 'Drives';
       with PF, Drives do
       begin
@@ -1671,6 +1682,12 @@ var PF     : TIniFile; // ProjectFile
           for j := 0 to TempList.Count - 1 do
             LVColWidth[i, j] := StrToIntDef(TempList[j], -1); 
         end;
+      end;
+      Section := 'FileExplorer';
+      with PF, FileExplorer do
+      begin
+        Showing := ReadBool(Section, 'Showing', False);
+        Path := ReadString(Section, 'Path', '');
       end;
       {ProDVD-Schlüssel aus cdrtfe.ini lesen, read-only}
        Environment.ProDVDKey := PF.ReadString('ProDVD', cCDRSEC, '');

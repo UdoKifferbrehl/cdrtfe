@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.12.2009
+  letzte Änderung  09.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2744,6 +2744,9 @@ begin
       for j := 0 to FLVArray[i].Columns.Count - 1 do
         FSettings.WinPos.LVColWidth[i, j] := FLVArray[i].Columns[j].Width;
   end;
+  {FileExplorer}
+  FSettings.FileExplorer.Showing := FFileExplorerShowing;
+  FSettings.FileExplorer.Path := FileBrowser.Path;
 end;
 
 { SetWinPos --------------------------------------------------------------------
@@ -2792,6 +2795,8 @@ begin
         if FSettings.WinPos.LVColWidth[i, j] > -1 then
           FLVArray[i].Columns[j].Width := FSettings.WinPos.LVColWidth[i, j];
   end;
+  {FileExplorer}
+  ToggleFileExplorer(FSettings.FileExplorer.Showing);
 end;
 
 { ActivateTab ------------------------------------------------------------------
@@ -3132,16 +3137,18 @@ var FileExplorerHeight: Integer;
 begin
   FileExplorerHeight := FSettings.FileExplorer.Height + 8;
   {FileExplorer zeigen}
-  if Status then
+  if Status and not FFileExplorerShowing then
   begin
     FFileExplorerShowing := True;
     MainMenuToggleFileExplorer.Checked := True;
+    FileBrowser.Path := FSettings.FileExplorer.Path;
     {PageControl verkleinern}
     PageControl1.Height  := PageControl1.Height - FileExplorerHeight;
     PageControl1.Top     := PageControl1.Top + FileExplorerHeight;
     PanelBrowser.Visible := True;
   end else
   {FileExplorer ausblenden}
+  if not Status and FFileExplorerShowing then
   begin
     FFileExplorerShowing := False;
     MainMenuToggleFileExplorer.Checked := False;

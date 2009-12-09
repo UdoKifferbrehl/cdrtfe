@@ -2,7 +2,7 @@
 
   Copyright (c) 2009 Oliver Valencia
 
-  letzte Änderung  21.06.2009
+  letzte Änderung  09.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -57,9 +57,12 @@ type
     FColCaptionSize: string;
     FColCaptionType: string;
     FColCaptionModified: string;
+    FPath: string;
     FTreeViewWidth: Integer;
     FFFBSelected: TFFBSelectedEvent;
     procedure FFBKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FFBTVChange(Sender: TObject; Node: TTreeNode);
+    procedure SetPath(const NewPath: string);
   public
     { Public-Deklarationen }
     procedure Init;
@@ -69,6 +72,7 @@ type
     property ColCaptionSize: string write FColCaptionSize;
     property ColCaptionType: string write FColCaptionType;
     property ColCaptionModified: string write FColCaptionModified;
+    property Path: string read FPath write SetPath;
     property TreeViewWidth: Integer write FTreeViewWidth;
     property OnFFBSelected: TFFBSelectedEvent read FFFBSelected write FFFBSelected;
   end;
@@ -84,6 +88,30 @@ begin
      (Key = VK_F11) then
   begin
     if Assigned(FFFBSelected) then FFFBSelected(Sender);
+  end;
+end;
+
+procedure TFrameFileBrowser.FFBTVChange(Sender: TObject; Node: TTreeNode);
+begin
+  FPath := FBShellTreeView.Path;
+end;
+
+procedure TFrameFileBrowser.SetPath(const NewPath: string);
+var CurrentFolder: TTreeNode;
+begin
+  if DirectoryExists(NewPath) then
+  begin
+    FPath := NewPath;
+    FBShellTreeView.Path := NewPath;
+    CurrentFolder := FBShellTreeView.Selected;
+    FBShellTreeView.Selected.Parent.Selected := True;
+    CurrentFolder.Selected := True;
+  end else
+  begin
+    {Arbeitsplatz öffnen}
+    FBShellTreeView.Path := 'c:\';
+    //FBShellTreeView.Selected.Expand(False);
+    FBShellTreeView.Selected.Parent.Selected := True;
   end;
 end;
 
@@ -117,6 +145,7 @@ begin
     HideSelection := False;
     DragMode := dmAutomatic;
     OnKeyDown := FFBKeyDown;
+    OnChange := FFBTVChange;
   end;
 
   {FileListView}
@@ -134,10 +163,8 @@ begin
   FBShellTreeView.ShellListView := FBShellListView;
   FBShellListView.ShellTreeView := FBShellTreeView;
 
-  {Arbeitsplatz öffnen}
-  FBShellTreeView.Path := 'c:\';
-  //FBShellTreeView.Selected.Expand(False);
-  FBShellTreeView.Selected.Parent.Selected := True;
+  {Anfangsverzeichnis}
+  SetPath(FPath);
 
   if FTreeViewWidth > 0 then PanelFolder.Width := FTreeViewWidth;
 
