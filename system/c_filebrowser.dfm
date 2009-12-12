@@ -7,7 +7,6 @@ object FrameFileBrowser: TFrameFileBrowser
   VertScrollBar.Visible = False
   AutoSize = True
   TabOrder = 0
-  TabStop = True
   DesignSize = (
     390
     173)
