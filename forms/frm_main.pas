@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.12.2009
+  letzte Änderung  12.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -433,7 +433,8 @@ type
     ActionUserTrackDown: TAction;
     ActionUserToggleFileExplorer: TAction;
     ActionUserSettings : TAction;
-    ActionUserShowOutputWindow: TAction;    
+    ActionUserShowOutputWindow: TAction;
+    ActionUserSpecialTab: TAction;
     FImageTabFirstShow  : Boolean;
     FImageTabFirstWrite : Boolean;
     FCheckingControls   : Boolean;
@@ -471,6 +472,7 @@ type
     procedure ShowFolderContent(const Tree: TTreeView; ListView: TListView);
     procedure ShowTracks;
     procedure ShowTracksDAE;
+    procedure SpecialTab;
     procedure ToggleFileExplorer(const Status: Boolean);
     procedure ToggleOutputWindow(const Status: Boolean);
     {$IFDEF AllowToggle}
@@ -551,6 +553,7 @@ type
     procedure ActionUserToggleFileExplorerExecute(Sender: TObject);
     procedure ActionUserSettingsExecute(Sender: TObject);
     procedure ActionUserShowOutputWindowExecute(Sender: TObject);
+    procedure ActionUserSpecialTabExecute(Sender: TObject);
     procedure ImageTabInitRadioButtons;
   public
     { Public declarations }
@@ -3128,6 +3131,28 @@ begin
   end;
 end;
 
+{ SpecialTab -------------------------------------------------------------------
+
+  direkter Wechsel zum FileExplorer und zurück.                                }
+
+procedure TForm1.SpecialTab;
+begin
+  if FFileExplorerShowing then
+  begin
+    if not (FileBrowser.TreeViewHasFocus or FileBrowser.ListViewHasFocus) then
+      FileBrowser.TreeViewSetFocus
+    else
+    begin
+      case FSettings.General.Choice of
+        cDataCD : CDETreeView.SetFocus;
+        cAudioCD: AudioListView.SetFocus;
+        cXCD    : XCDETreeView.SetFocus;
+        cVideoCD: VideoListView.SetFocus;
+      end;
+    end;
+  end;
+end;
+
 { ToggleFileExplorer -----------------------------------------------------------
 
   Der FileExlorer wird je nach übergebenem Wert ein- bzw. abgeschaltet.        }
@@ -4715,12 +4740,18 @@ procedure TForm1.HandleKeyboardShortcut(const Key: Word);
     MainMenuShowOutputWindowClick(nil);
   end;
 
+  procedure HKSSpecialTab;
+  begin
+    SpecialTab;
+  end;
+
 begin
   case Key of
     {VK_E}$45: HKSToggleFileExplorer;
     {VK_I}$49: HKSAddFolder;
     {VK_L}$4C: HKSShowOutputWindow;
     {VK_O}$4F: HKSAddFiles;
+    {VK_Q}$51: HKSSpecialTab;
     {VK_S}$53: HKSSettings;
     {VK_V}$56: begin
                  if FSettings.General.Choice = cXCD then
@@ -6689,7 +6720,7 @@ end;
 { InitActions ------------------------------------------------------------------
 
   initialisiert die Actions. Action werden benötigt, da im OnKeyDown-Event des
-  Hauptfensters immer ein Beep erzeugt wird, nei Actions jedoch nicht.         }
+  Hauptfensters immer ein Beep erzeugt wird, bei Actions jedoch nicht.         }
 
 procedure TForm1.InitActions;
 begin
@@ -6740,6 +6771,11 @@ begin
   ActionUserShowOutputWindow.ShortCut := ShortCut($4C{VK_L}, [ssAlt]);
   ActionUserShowOutputWindow.OnExecute := ActionUserShowOutputWindowExecute;
   ActionUserShowOutputWindow.ActionList := ActionList;
+  {Actions erstellen - SpecialTab Componentswitch}
+  ActionUserSpecialTab := TAction.Create(ActionList);
+  ActionUserSpecialTab.ShortCut := ShortCut($51{VK_Q}, [ssAlt]);
+  ActionUserSpecialTab.OnExecute := ActionUserSpecialTabExecute;
+  ActionUserSpecialTab.ActionList := ActionList;
 end;
 
 procedure TForm1.ActionUserAddFileExecute(Sender: TObject);
@@ -6787,6 +6823,10 @@ begin
   HandleKeyboardShortcut($4C);
 end;
 
+procedure TForm1.ActionUserSpecialTabExecute(Sender: TObject);
+begin
+    HandleKeyboardShortcut($51);
+end;
 
 { Hilfsfunktionen ------------------------------------------------------------ }
 

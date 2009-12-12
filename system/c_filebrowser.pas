@@ -2,7 +2,7 @@
 
   Copyright (c) 2009 Oliver Valencia
 
-  letzte Änderung  09.12.2009
+  letzte Änderung  11.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -60,6 +60,8 @@ type
     FPath: string;
     FTreeViewWidth: Integer;
     FFFBSelected: TFFBSelectedEvent;
+    function GetTreeViewFocused: Boolean;
+    function GetListViewFocused: Boolean;
     procedure FFBKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FFBTVChange(Sender: TObject; Node: TTreeNode);
     procedure SetPath(const NewPath: string);
@@ -67,6 +69,10 @@ type
     { Public-Deklarationen }
     procedure Init;
     procedure UpdateTranslation;
+    procedure TreeViewSetFocus;
+    procedure ListViewSetFocus;
+    property TreeViewHasFocus: Boolean read GetTreeViewFocused;
+    property ListViewHasFocus: Boolean read GetListViewFocused;
     property LabelCaption: string write FLabelCaption;
     property ColCaptionName: string write FColCaptionName;
     property ColCaptionSize: string write FColCaptionSize;
@@ -113,6 +119,26 @@ begin
     //FBShellTreeView.Selected.Expand(False);
     FBShellTreeView.Selected.Parent.Selected := True;
   end;
+end;
+
+function TFrameFileBrowser.GetTreeViewFocused: Boolean;
+begin
+  Result := FBShellTreeView.Focused;
+end;
+
+function TFrameFileBrowser.GetListViewFocused: Boolean;
+begin
+  Result := FBShellListView.Focused;
+end;
+
+procedure TFrameFileBrowser.TreeViewSetFocus;
+begin
+  FBShellTreeView.SetFocus
+end;
+
+procedure TFrameFileBrowser.ListViewSetFocus;
+begin
+  FBShellListView.SetFocus
 end;
 
 procedure TFrameFileBrowser.UpdateTranslation;
