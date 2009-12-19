@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2008 Oliver Valencia
 
-  letzte Änderung  20.02.2008
+  letzte Änderung  12.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,6 +33,7 @@ interface
 
 uses Windows, SysUtils, Registry, IniFiles;
 
+function CheckForActiveCygwinDLL: Boolean;
 function GetCygwinPathPrefix: string;
 function MakePathCygwinConform(Path: string):string;
 function MakePathMkisofsConform(const Path: string):string;
@@ -179,8 +180,9 @@ begin
   Result := Temp;
 end;
 
-const cCygOwnDLLSec: string = 'CygwinDLL';
-      cCygOwnDLL   : string = 'UseOwnDLLs';
+const cCygOwnDLLSec  : string = 'CygwinDLL';
+      cCygOwnDLL     : string = 'UseOwnDLLs';
+      cCygCheckActive: string = 'CheckForActiveDLL';
 
 { UseOwnDLLs -------------------------------------------------------------------
 
@@ -228,6 +230,28 @@ begin
   Ini.Free;
 end;
 
+{ CheckForActiveCygwinDLL ------------------------------------------------------
+
+  True: nach geladener cygwin1.dll suchen
+  False: nicht nach geladener cygwin1.dll suchen                               }
+
+function CheckForActiveCygwinDLL: Boolean;
+var Ini : TIniFile;
+    Name: string;
+begin
+  Name := StartUpDir + cToolDir + cCygwinDir + cIniCygwin;
+  Result := False;
+  if FileExists(Name) then
+  begin
+    {$IFDEF WriteLogFile}
+    AddLogCode(1256);
+    {$ENDIF}
+    Ini := TIniFile.Create(Name);
+    Result := Ini.ReadBool(cCygOwnDLLSec, cCygCheckActive, False);
+    Ini.Free;
+  end;
+end;
+                
 initialization
   CygPathPrefix := 'unknown';
 

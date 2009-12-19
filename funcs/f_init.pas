@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2009
+  letzte Änderung  12.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -267,13 +267,19 @@ begin
       if UseOwnCygwinDLLs then CheckSysFolderCygwin;
     end;
   end;
-  {Sonderbehandlung: Es wurde eine bereits aktive cygwin1.dll gefunden!}
-  if DLLIsLoaded('cygwin1.dll', Temp) then
+  {Sonderbehandlung: Gibt es eine aktive cygwin1.dll?}
+  if CheckForActiveCygwinDLL then
   begin
-    Path := ExtractFilePath(Temp) + ';' + OldPath;
-    SetEnvVarValue(cPath, Path);
-    {$IFDEF WriteLogfile} AddLogCode(1261); {$ENDIF}
-    {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
+    {$IFDEF WriteLogfile} AddLogCode(1262); {$ENDIF}
+    if DLLIsLoaded('cygwin1.dll', Temp) then
+    begin
+      Path := ExtractFilePath(Temp) + ';' + OldPath;
+      SetEnvVarValue(cPath, Path);
+      {$IFDEF WriteLogfile}
+      AddLogCode(1261);
+      AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3);
+      {$ENDIF}
+    end;
   end;
 end;
 
