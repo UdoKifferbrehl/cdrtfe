@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.12.2009
+  letzte Änderung  18.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -307,6 +307,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        Pause      : Integer;    // 0 = keine; 1 = für alle gleich; 2 = separat
        PauseLength: string;    // Länge in Sekunden bzw. Sektoren
        PauseSector: Boolean;    // Länge der Pause in Sektoren
+       UTFToAnsi  : Boolean;
      end;
 
      { Einstellungen: XCD }
@@ -830,6 +831,7 @@ begin
     Pause       := 1;       // für alle Tracks gleiche Pausenlänge
     PauseLength := '2';     // Länge 2
     PauseSector := False;   // Länge in Sekunden
+    UTFToAnsi   := False;
   end;
 
   {XCD}
@@ -1393,6 +1395,7 @@ var PF     : TIniFile; // ProjectFile
       WriteInteger(Section, 'Pause', Pause);
       WriteString(Section, 'PauseLength', PauseLength);
       WriteBool(Section, 'PauseSector', PauseSector);
+      WriteBool(Section, 'UTFToAnsi', UTFToAnsi);
     end;
 
     {XCD}
@@ -1847,6 +1850,7 @@ var PF     : TIniFile; // ProjectFile
       Pause := ReadInteger(Section, 'Pause', 1);
       PauseLength := ReadString(Section, 'PauseLength', '2');
       PauseSector := ReadBool(Section, 'PauseSector', False);
+      UTFToAnsi := ReadBool(Section, 'UTFToAnsi', False);
     end;
     ProgressBarUpdate(5);
 

@@ -4,7 +4,7 @@
 
   Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  20.11.2009
+  letzte Änderung  18.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -166,7 +166,7 @@ type TCDTextTrackData = record
        IsWave   : Boolean;
      end;
 
-function AutoCDText(const Args: TAutoCDText): string;
+function AutoCDText(Args: TAutoCDText): string;
 function RemoveUTFBOM(const s: string): string;
 function TextTrackDataToString(const TextTrackData: TCDTextTrackData): string;
 procedure CreateCDTextFile(const Name: string; TextData: TStringList);
@@ -671,7 +671,7 @@ end;
   bestimmt Title und Performer, wenn ein Track hinzugefügt wurde. Akzeptierter
   Trenner zwischen Title und Performer ist ' - '.                              }
 
-function AutoCDText(const Args: TAutoCDText): string;
+function AutoCDText(Args: TAutoCDText): string;
 var Name, Title, Performer: string;
     UseTags               : Boolean;
     p                     : Integer;
@@ -682,8 +682,14 @@ begin
   if UseTags then
   begin
     {Tags sollen benutzt werden.}
-    Result := RemoveUTFBOM(Args.Title) + '|' +
-              RemoveUTFBOM(Args.Performer) + '||||';
+    Args.Title := RemoveUTFBOM(Args.Title);
+    Args.Performer := RemoveUTFBOM(Args.Performer);
+    if TCdrtfeData.Instance.Settings.AudioCD.UTFToAnsi then
+    begin
+      Args.Title := TryUTF8ToAnsi(Args.Title);
+      Args.Performer := TryUTF8ToAnsi(Args.Performer);
+    end;
+    Result := Args.Title + '|' + Args.Performer + '||||';
   end else
   begin
     {Infos aus Dateinamen erzeugen.}

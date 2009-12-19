@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2009 Oliver Valencia
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  18.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,6 +29,7 @@
     StringLeft(const Source, Delimiter: string): string;
     StringRight(const Source, Delimiter: string): string;
     StrToFloatDef(const S: string; Default: Extended): Extended
+    TryUTF8ToAnsi(const S: string): string;
     UnQuote(const S: string): string
 
 }
@@ -62,6 +63,7 @@ function SizeToString(const Size: Int64): string;
 function StringLeft(const Source, Delimiter: string): string;
 function StringRight(const Source, Delimiter: string): string;
 function StrToFloatDef(const S: string; Default: Extended): Extended;
+function TryUTF8ToAnsi(const S: string): string;
 function UnQuote(const S: string): string;
 procedure SplitString(Source, Delimiter: string; var Target1, Target2: string);
 procedure SizeToStringSetUnits(const B, KiB, MiB, GiB: string);
@@ -322,6 +324,18 @@ var i: Integer;
 begin
   Result := 0;
   for i := 1 to Length(s) do if s[i] = c then Inc(Result);
+end;
+
+{ TryUTF8ToAnsi ----------------------------------------------------------------
+
+  wandelt einen UTF-8-String in einen ANSI-String um. Tritt dabei ein Fehler
+  auf (UTF8ToAnsi ergibt einen leeren String), wird der ursprüngliche String
+  zurückgegeben.                                                               }
+
+function TryUTF8ToAnsi(const s: string): string;
+begin
+  Result := UTF8ToAnsi(s);
+  if Result = '' then Result := s;
 end;
 
 end.
