@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.12.2009
+  letzte Änderung  22.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -91,6 +91,9 @@ uses cl_logwindow, user_messages, constant, f_misc, f_process, f_wininfo,
     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      f_helper;
 
+const {+J}
+      FirstAbort: Boolean = True;
+      {-J}
 
 { TActionThread -------------------------------------------------------------- }
 
@@ -440,6 +443,7 @@ procedure DisplayDOSOutput(const CommandLine: string;
                            const EnvironmentBlock: Pointer);
 var CurrentDir: string;
 begin
+  FirstAbort := True;
   CurrentDir := GetCurrentFolder(CommandLine);
   Thread := TActionThread.Create(CommandLine, CurrentDir, True);
   Thread.MessageOk := Lang.GMS('moutput01');
@@ -470,8 +474,9 @@ begin
   AddLog(' ', 2);
   AddLogCode(1105);
   {$ENDIF}
-  if Thread <> nil then
+  if (Thread <> nil) and FirstAbort then
   begin
+    FirstAbort := False;
     {Dem Thread signalisieren, daß er die noch ausstehenden Kommandozeilen -
      sofern vorhanden - nicht ausführen soll.}
     Thread.Terminate;
@@ -505,6 +510,13 @@ begin
       Keybd_Event($43, MapVirtualKey($43,0), KEYEVENTF_KEYUP, 0);
       Keybd_Event(vk_Control, MapVirtualKey(vk_Control,0), KEYEVENTF_KEYUP, 0);
     end;
+  end else
+  begin
+    {$IFDEF WriteLogfile}
+    AddLogCode(1110);
+    {$ENDIF}
+    Thread.Terminate;
+    TerminateProcess(Thread.PHandle, 0);
   end;
   {$IFDEF WriteLogfile}
   AddLog(' ', 2);

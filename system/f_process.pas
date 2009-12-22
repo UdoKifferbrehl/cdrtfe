@@ -129,12 +129,21 @@ begin
     hKernel := GetModuleHandle('Kernel32');
     pExitProc := GetProcAddress(hKernel, 'ExitProcess');
     {Remote-Thread im Prozess erzeugen}
+    {$IFDEF WriteLogfile}
+    AddLog('  Creating RemoteThread ... ', 3);
+    {$ENDIF}
     Result := False;
     hThread := CreateRemoteThread(hProcess, nil, 0, pExitProc,
                                   Pointer(uExitCode), 0, iThreadId);
     if hThread <> 0 then
     begin
-      WaitForSingleObject(hProcess, INFINITE);
+      {$IFDEF WriteLogfile}
+      AddLog('  waiting ... ', 3);
+      {$ENDIF}
+      WaitForSingleObject(hProcess, {INFINITE}1000);
+      {$IFDEF WriteLogfile}
+      AddLog('  Closing handle ... ', 3);
+      {$ENDIF}
       CloseHandle(hThread);
       Result := True;
     end;

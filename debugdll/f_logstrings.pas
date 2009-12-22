@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  08.12.2009
+  letzte Änderung  22.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -63,6 +63,7 @@ begin
     Add('1107=Killing process softly');
     Add('1108=Killing child processes');
     Add('1109=Calling ShellExecute:');
+    Add('1110=Killing process by force');
     {cl_devices.pas}
     Add('1200=Entering TDevices.DetectDrives -----------------------------------------------------------');
     Add('1201=Leaving TDevices.DetectDrives ------------------------------------------------------------');
