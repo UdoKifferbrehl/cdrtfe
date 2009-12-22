@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.12.2009
+  letzte Änderung  22.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,7 +20,7 @@
   exportierte Funktionen/Prozeduren:
 
     DLLIsLoaded(const Name: string; var FullPath: string): Boolean
-    GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string
+    GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean; const Timeout: Integer = 0): string
     GetProcessWindow(const TargetProcessID: Cardinal): HWnd
     IsAlreadyRunning: Boolean
     IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean
@@ -34,11 +34,11 @@ unit f_process;
 
 interface
 
-uses Windows, Classes, Forms, SysUtils, ShellAPI, TLHelp32;
+uses Windows, Classes, Forms, SysUtils, ShellAPI, TLHelp32, ExtCtrls;
 
 function DLLIsLoaded(const Name: string; var FullPath: string): Boolean;
 function GetChildProcessByModuleName(const Name: string; const ParentID: DWORD): DWORD;
-function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean): string;
+function GetDOSOutput(const lpCommandLine: PChar; const GetStdErr: Boolean; const FastMode: Boolean; const Timeout: Integer = 0): string;
 function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
 function IsAlreadyRunning: Boolean;
 function IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): Boolean;
@@ -436,6 +436,74 @@ begin
 end;                        *)
 
 
+{ TProcessTimer -------------------------------------------------------------- }
+
+type TProcessTimer = class(TTimer)
+     private
+       FSinceBeginning: Integer;
+       FSinceLastOutput: Integer;
+       procedure HandleTimerEvent(Sender: TObject);
+     public
+       constructor Create(AOwner: TComponent); override;
+       procedure Beginning;                   // zu Beginn aufrufen
+       procedure NewOutput;                   // aufrufen, wenn neue Zeile
+       procedure Ending;                      // aufrufen, wenn Prozess zu Ende
+       property SinceBeginning: Integer read FSinceBeginning;
+       property SinceLastOutput: Integer read FSinceLastOutput;
+     end;
+
+{ TProcessTimer - private }
+
+{ HandleTimerEvent -------------------------------------------------------------
+
+  erhöht die Sekundenzähler um 1.                                              }
+
+procedure TProcessTimer.HandleTimerEvent(Sender: TObject);
+begin
+  Inc(FSinceBeginning);
+  Inc(FSinceLastOutput);
+end;
+
+{ TProcessTimer - public }
+
+constructor TProcessTimer.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Enabled := False; //timer is off
+  OnTimer := HandleTimerEvent;
+end;
+
+{ Beginning --------------------------------------------------------------------
+
+  startet die Zeitzählung .                                                    }
+
+procedure TProcessTimer.Beginning;
+begin
+  Interval         := 1000;     //time is in sec
+  FSinceBeginning  := 0;        //this is the beginning
+  FSinceLastOutput := 0;
+  Enabled          := True;     //set the timer on
+end;
+
+{ NewOutput --------------------------------------------------------------------
+
+  setzt den Timer für die Zeit seit dem letzten Output zurück.                 }
+
+procedure TProcessTimer.NewOutput;
+begin
+  FSinceLastOutput := 0;        //a new output has been caught
+end;
+
+{ Ending -----------------------------------------------------------------------
+
+  beendet die Zeitzählung.                                                     }
+
+procedure TProcessTimer.Ending;
+begin
+  Enabled := False;             //set the timer off
+end;
+
+
 { TDOSThread ----------------------------------------------------------------- }
 
 type TDOSThread = class(TThread)
@@ -449,6 +517,7 @@ type TDOSThread = class(TThread)
        FBuffSize       : Integer;
        FWinLastError   : Integer;
        FErrorInfo      : string;
+       FTimeout        : Integer;
        {$IFDEF ShowCmdError}
        FExitCode       : Integer;
        {$ENDIF}
@@ -459,6 +528,8 @@ type TDOSThread = class(TThread)
        {$IFDEF DebugGetDOSOutputThread}
        FLine           : string;
        {$ENDIF}
+       {Timer}
+       FTimer                 : TProcessTimer;
        function GetUserReloadDisk: Boolean;
        procedure GetDOSOutputThreaded;
        procedure CheckOutput;
@@ -476,6 +547,7 @@ type TDOSThread = class(TThread)
        property Running: Boolean read FRunning;
        property UserReloadDisk: Boolean read GetUserReloadDisk write FUserReloadDisk;
        property FastMode: Boolean write FFastMode;
+       property Timeout: Integer write FTimeout;
      end;
 
 { TDOSThread - private/protected }
@@ -574,6 +646,9 @@ begin
                      lpStartupInfo, lpProcessInformation) then
     begin
       try
+        {Timer starten}
+        FTimer := TProcessTimer.Create(nil);
+        FTimer.Beginning;
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
         FPID := lpProcessInformation.dwProcessId;
@@ -610,20 +685,33 @@ begin
 //          ReadFile(ReadStdOut, Buffer, SizeOf(Buffer) - 1,
             ReadFile(ReadStdOut, Buffer^, FBuffSize - 1,
                      lpNumberOfBytesRead, nil);
+
           end else
           begin
             {nach StdIn schreiben}
           end;
           Sleep(1);
+          {Timeout}
+          if ((FTimer.FSinceBeginning >= FTimeout) and (FTimeout > 0)) then
+          begin
+              break;
+          end;
+
         until (ExitCode <> STILL_ACTIVE) and (lpNumberOfBytesAvailable = 0);
 
       finally
+        {Nach Abbruch oder Timeout Prozess gewaltsam beenden.}
+         if (ExitCode = STILL_ACTIVE) then
+           TerminateProcess(lpProcessInformation.hProcess, 0);
         {$IFDEF ShowCmdError}
         repeat
           GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
         until ExitCode <> STILL_ACTIVE;
         if FExitCode = 0 then FExitCode := ExitCode;
         {$ENDIF}
+        {Timer anhalten}
+        FTimer.Ending;
+        FTimer.Free;
         CloseHandle(NewStdIn);
         CloseHandle(NewStdOut);
         CloseHandle(ReadStdOut);
@@ -670,6 +758,7 @@ begin
   FWinLastError := 0;
   FErrorInfo    := '';
   FRunning      := True;
+  FTimeout      := 0;
   {$IFDEF ShowCmdError}
   FExitCode     := 0;
   {$ENDIF}
@@ -682,7 +771,8 @@ end;
 
 function GetDOSOutputEx(const lpCommandLine: PChar;
                         const GetStdErr: Boolean;
-                        const FastMode: Boolean): string;
+                        const FastMode: Boolean;
+                        const Timeout: Integer): string;
 var Thread      : TDOSThread;
     i           : Integer;
     BytesWritten: Cardinal;
@@ -698,6 +788,7 @@ begin
     True : AddLog('FastMode: True  -> BuffSize = 512' + CRLF, 12);
     False: AddLog('FastMode: False -> BuffSize = 10' + CRLF, 12);
   end;
+  Addlog('Timeout: ' + IntToStr(Timeout) + CRLF, 12);
   {$ENDIF}
   CurrentDir := GetCurrentFolder(string(lpCommandLine));
   if CurrentDir <> '' then
@@ -707,6 +798,7 @@ begin
   Thread := TDOSThread.Create(lpCommandLine, lpCurrentDir, GetStdErr, True);
   Thread.FreeOnTerminate := False;
   Thread.FastMode := FastMode;
+  Thread.Timeout := Timeout;
   {$IFDEF WriteLogfile}
   AddLogCode(1101);
   AddLog(string(lpCommandLine) + CRLF, 12);
@@ -764,12 +856,13 @@ end;
 
 function GetDOSOutput(const lpCommandLine: PChar;
                       const GetStdErr: Boolean;
-                      const FastMode: Boolean): string;
+                      const FastMode: Boolean;
+                      const TimeOut: Integer = 0): string;
 begin
   {$IFNDEF ThreadedGetDOSOutput}
   Result := GetDOSOutputStd(lpCommandLine, GetStdErr, FastMode);
   {$ELSE}
-  Result := GetDOSOutputEx(lpCommandLine, GetStdErr, FastMode);
+  Result := GetDOSOutputEx(lpCommandLine, GetStdErr, FastMode, Timeout);
   {$ENDIF}
   {$IFDEF WriteLogfile}
   AddLogCode(1103);

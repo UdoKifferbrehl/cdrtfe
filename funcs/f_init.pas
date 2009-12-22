@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.12.2009
+  letzte Änderung  22.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,8 +39,8 @@ uses Windows, Classes, Forms, SysUtils, Dialogs, FileCtrl, IniFiles,
 
 function CheckFiles(Settings: TSettings; Lang: TLang): Boolean;
 function CheckMkisofsImports: Boolean;
+function CheckVersion(Settings: TSettings; Lang: TLang): Boolean;
 procedure CheckEnvironment(Settings: TSettings);
-procedure CheckVersion(Settings: TSettings; Lang: TLang);
 
 implementation
 
@@ -444,9 +444,7 @@ begin
       if not MonkeyOk then
       begin
 //        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit12'));
-      end; 
-      {Version von cdrecord/mkisofs prüfen.}
-      CheckVersion(Settings, Lang);
+      end;
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei
        denn, cdrecord ab Version 2.01a24 ist vorhanden.}
       CdrdaoOk := FileExists(StartUpDir + cCdrdaoBin + cExtExe);
@@ -459,6 +457,8 @@ begin
                                         not Settings.Cdrecord.CanWriteCueImage;
       {Ist cdrtfeShlEx.dll da? Falls nicht, entsrpechende Optione deaktivieren.}
       ShlExtDllOk := FileExists(StartUpDir + cCdrtfeShlExDll);
+      {Version und Lauffähigkeit von cdrecord/mkisofs prüfen.}
+      Result := Result and CheckVersion(Settings, Lang);
     end;
   end;
 end;
@@ -468,9 +468,8 @@ end;
   Ermittelt die Version von cdrecord. Ab cdrecord 2.01a26 ist die Angabe des
   Schreibmodus verpflichtend.                                                  }
 
-procedure CheckVersion(Settings: TSettings; Lang: TLang);
+function CheckVersion(Settings: TSettings; Lang: TLang): Boolean;
 var Output       : string;
-    OldOutput    : string;
     VersionString: string;
     VersionValue : Integer;
     Cmd          : string;
@@ -578,18 +577,20 @@ var Output       : string;
     Result := Value;
   end;
 
-  { CheckOutput ----------------------------------------------------------------
+  { CdrtoolsWorking ------------------------------------------------------------
 
-    CheckOutput prüft, ob die Versionsinfos ermittelt werden konnten. Wenn
+    CdrtoolsWorking prüft, ob die Versionsinfos ermittelt werden konnten. Wenn
     nicht, deutet dies auf Probleme mit den Binaries oder der cygwin-DLL hin.  }
 
-  procedure CheckOutput(const s: string);
+  function CdrtoolsWorking(const s: string): Boolean;
   begin
+    Result := True;
     if (s = '') or
        (Pos('[main]', s) > 0) or
        (Pos('shared memory', s) > 0) or
        (Pos('heap', s) > 0) then
     begin
+      Result := False;
       MessageBox(Application.Handle, PChar(Lang.GMS('einit04')),
                  PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION);
     end;
@@ -600,7 +601,7 @@ begin
   Cmd := StartUpDir + cCdrecordBin;
   Cmd := QuotePath(Cmd);
   Cmd := Cmd + ' -version';
-  Output := GetDosOutput(PChar(Cmd), True, True);
+  Output := GetDosOutput(PChar(Cmd),True, True, 3);
   VersionString := GetVersionString(Output);
   VersionValue := GetVersionValue(VersionString);
   {ab cdrecord 2.01a24 ist die CUE-Image-Unterstützung ausreichend}
@@ -623,26 +624,29 @@ begin
     VersionValue >= GetVersionValue('2.01.01a50');
   {haben wir es cdrecord-ProDVD zu tun?}
   Settings.FileFlags.ProDVD := Pos('-ProDVD-', Output) > 0;
-  OldOutput := Output;
+  {Prüfen, ob cdrecord funktionierte}
+  Result := CdrtoolsWorking(Output);
 
   {mkisofs-Version}
-  Cmd := StartUpDir + cMkisofsBin;
-  Cmd := QuotePath(Cmd);
-  Cmd := Cmd + ' -version';
-  Output := GetDosOutput(PChar(Cmd), True, True);
-  if Output <> '' then
-    if Output[1] <> 'm' then Delete(Output, 1, Pos(LF, Output));
-  VersionString := GetVersionString(Output);
-  VersionValue := GetVersionValue(VersionString);
-  {ab mkisofs 2.01.01a31 gibt es -no-limit-pathtables}
-  Settings.Cdrecord.HaveNLPathtables :=
-    VersionValue >= GetVersionValue('2.01.01a31');
-  {ab mkisofs 2.01.01a32 gibt es -hide-udf}
-  Settings.Cdrecord.HaveHideUDF :=
-    VersionValue >= GetVersionValue('2.01.01a32');
-
-  {abschließende Prüfung}
-  CheckOutput(OldOutput + Output);
+  if Result then
+  begin
+    Cmd := StartUpDir + cMkisofsBin;
+    Cmd := QuotePath(Cmd);
+    Cmd := Cmd + ' -version';
+    Output := GetDosOutput(PChar(Cmd), True, True, 3);
+    if Output <> '' then
+      if Output[1] <> 'm' then Delete(Output, 1, Pos(LF, Output));
+    VersionString := GetVersionString(Output);
+    VersionValue := GetVersionValue(VersionString);
+    {ab mkisofs 2.01.01a31 gibt es -no-limit-pathtables}
+    Settings.Cdrecord.HaveNLPathtables :=
+      VersionValue >= GetVersionValue('2.01.01a31');
+    {ab mkisofs 2.01.01a32 gibt es -hide-udf}
+    Settings.Cdrecord.HaveHideUDF :=
+      VersionValue >= GetVersionValue('2.01.01a32');
+    {Prüfen, ob mkisofs funktionierte}
+    Result := Result and CdrtoolsWorking(Output);
+  end;
 end;
 
 { CheckEnvironment -------------------------------------------------------------
