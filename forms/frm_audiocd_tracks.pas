@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.08.2009
+  letzte Änderung  25.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -42,6 +42,8 @@ type
     EditPause: TEdit;
     ComboBoxPause: TComboBox;
     FrameTopBanner1: TFrameTopBanner;
+    LabelCDTextRemaining: TLabel;
+    LabelRemainingChars: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -49,6 +51,11 @@ type
     procedure GridTextDataKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ExitTabSpecial(Sender: TObject);
     procedure GridTextDataEnter(Sender: TObject);
+    procedure EditChange(Sender: TObject);
+    procedure GridTextDataKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure GridTextDataDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
   private
     { Private declarations }
     FData: TProjectData;
@@ -56,6 +63,7 @@ type
     FLang: TLang;
     FTrackCount: Integer;
     function InputOk: Boolean;
+    procedure CheckCDText;
     procedure CheckControls(Sender: TObject);
     procedure GetSettings;
     procedure SetGridTextData(const UserdefPause: Boolean);
@@ -264,6 +272,7 @@ begin
   begin
     EditAlbumPerformer.Text := 'Various';
     EditAlbumPerformer.Enabled := False;
+    CheckCDText;
   end else
   begin
     EditAlbumPerformer.Enabled := True;
@@ -278,6 +287,78 @@ begin
   begin
     SetGridTextData(False);
   end;
+end;
+
+{ CheckCDText ------------------------------------------------------------------
+
+  prüft die Anzahl der verbleibenden Zeichen.                                  }
+
+procedure TFormAudioCDTracks.CheckCDText;
+var CharRemain: Integer;
+    CharUsed  : Integer;
+    CharMax   : Integer;
+    i         : Integer;
+    L         : array[0..5] of Integer;
+//  TrackData : TCDTextTrackData;
+begin
+  CharUsed := 0;
+  CharMax  := 3024;
+         (*
+  if EditAlbumTitle.Text <> '' then
+    CharUsed := CharUsed + Length(EditAlbumTitle.Text) + 1;
+  if EditAlbumPerformer.Text <> '' then
+    CharUsed := CharUsed +Length(EditAlbumTitle.Text) + 1;
+
+  for i := 0 to FTrackCount - 1 do
+  begin
+    {Title}
+    Temp := GridTextData.Cells[1, i + 1];
+    if Temp <> '' then CharUsed := CharUsed + Length(Temp) + 1;
+    {Performer}
+    Temp := GridTextData.Cells[2, i + 1];
+    if Temp <> '' then CharUsed := CharUsed + Length(Temp) + 1;
+  end; *)
+      
+  for i := 0 to 5 do L[i] := 0;
+  for i := -1 to FTrackCount - 1 do
+  begin
+    // FData.GetCDText(i, TrackData);
+    if i = -1 then
+    begin
+      L[0] := L[0] + Length(EditAlbumTitle.Text) + 1;
+      L[1] := L[1] + Length(EditAlbumPerformer.Text) + 1;
+    end else
+    begin 
+      L[0] := L[0] + Length(GridTextData.Cells[1, i + 1]) + 1;
+      L[1] := L[1] + Length(GridTextData.Cells[2, i + 1]) + 1; (*
+      with TrackData do
+      begin      
+        L[2] := L[2] + Length(Songwriter) + 1;
+        L[3] := L[3] + Length(Composer) + 1;
+        L[4] := L[4] + Length(Arranger) + 1;
+        L[5] := L[5] + Length(TextMessage) + 1;              
+      end;                                                   *)
+    end;
+  end;
+  for i := 0 to 5 do
+  begin
+    {wenn für einen Pack-Type keine Daten vorhanden sind, Länge auf Null setzen}
+    if L[i] = FTrackCount + 1 then L[i] := 0;
+    {Auffüllen des letzten Packs berücksichtigen}
+    if L[i] > 0 then
+    begin
+      CharUsed := CharUsed + (L[i] div 12) * 12;
+      if L[i] mod 12 > 0 then CharUsed := CharUsed + 12;
+    end;
+  end;
+  CharRemain := CharMax - CharUsed;
+  if CharRemain < 0 then LabelRemainingChars.Font.Color := clRed else
+    LabelRemainingChars.Font.Color := clWindowText;
+  
+  LabelRemainingChars.Caption := IntToStr(CharRemain) + '/' + IntToStr(CharMax);
+
+//  LabelCDTextRemaining.Caption := 'Zeichen: (' + IntToStr(FData.CDTextLength) 
+//   + ')[' + IntToStr(CharUsed) + ']';
 end;
 
 
@@ -309,6 +390,19 @@ begin
   FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc05'), 'grad1');
   GetSettings;
   CheckControls(Sender);
+  CheckCDText;
+end;
+
+
+{ Edit-Events ---------------------------------------------------------------- }
+
+{ OnChange ---------------------------------------------------------------------
+
+  Texteingabe in die Editfelder.                                               }
+
+procedure TFormAudioCDTracks.EditChange(Sender: TObject);
+begin
+  CheckCDText;
 end;
 
 
@@ -399,9 +493,38 @@ begin
                 end;
               end;
             end;
-    VK_ESCAPE: Close;            
+    VK_ESCAPE: Close;
   end;
 end;
+
+{ OnKeyUp ----------------------------------------------------------------------
+
+  nach jedem Tastendruck muß die Lönge des CD-Textes ermittelt werden.         }
+
+procedure TFormAudioCDTracks.GridTextDataKeyUp(Sender: TObject; var Key: Word;
+                                               Shift: TShiftState);
+begin
+  CheckCDText;
+end;
+
+{ OnDrawCell -------------------------------------------------------------------
+
+  überlange Einträge markieren.                                                }
+
+procedure TFormAudioCDTracks.GridTextDataDrawCell(Sender: TObject; ACol,
+                             ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin    
+  if (ACol > 0) and (ARow > 0) and
+     (Length((Sender as TStringGrid).Cells[ACol, ARow]) > 159) then
+  begin
+    (Sender as TStringGrid).Canvas.Font.Color := clRed;
+    (Sender as TStringGrid).Canvas.FillRect(Rect);
+    (Sender as TStringGrid).Canvas.TextOut(Rect.Left + 2, Rect.Top + 2, 
+                                     (Sender as TStringGrid).Cells[ACol, ARow]); 
+  end;
+           
+end;
+
 
 { Workaround für eine bessere Keyboard-Navigation ---------------------------- }
 
