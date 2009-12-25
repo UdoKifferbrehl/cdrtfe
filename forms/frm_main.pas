@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.12.2009
+  letzte Änderung  25.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2708,7 +2708,7 @@ begin
     SplitString(Temp, '*', Time, Temp);
     SplitString(Temp, '|', Size, Temp);
     SplitString(Temp, '|', Title, Performer);
-    if (Performer <> '') and (Title <> '') then
+    if not((Performer = '') and (Title = '')) then
       Name := Name + '  ' + Performer + ' - ' + Title;
     NewItem.Caption := Name;
     NewItem.SubItems.Add(Time);
