@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.12.2009
+  letzte Änderung  27.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -374,6 +374,8 @@ begin
       Application.Terminate;
     end else
     begin
+      {Version und Lauffähigkeit von cdrecord/mkisofs prüfen.}
+      Result := Result and CheckVersion(Settings, Lang);
       {Ist cdda2wav da? Wenn nicht, dann kein DAE.}
       Cdda2wavOk := FileExists(StartUpDir + cCdda2wavBin + cExtExe);
       if not Cdda2wavOk then
@@ -457,8 +459,6 @@ begin
                                         not Settings.Cdrecord.CanWriteCueImage;
       {Ist cdrtfeShlEx.dll da? Falls nicht, entsrpechende Optione deaktivieren.}
       ShlExtDllOk := FileExists(StartUpDir + cCdrtfeShlExDll);
-      {Version und Lauffähigkeit von cdrecord/mkisofs prüfen.}
-      Result := Result and CheckVersion(Settings, Lang);
     end;
   end;
 end;
