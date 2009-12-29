@@ -5,7 +5,7 @@
   Copyright (c) 2004-2009 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.12.2009
+  letzte Änderung  29.12.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -472,6 +472,18 @@ begin
               Performer := GridTextData.Cells[2, Row];
               GridTextData.Cells[1, Row] := Performer;
               GridTextData.Cells[2, Row] := Title;
+            end;
+    VK_F4 : begin
+              Row := GridTextData.Row;
+              if (GridTextData.ColCount > 1) and
+                 (GridTextData.Cells[2, Row] <> '') and
+                 not CheckBoxSampler.Checked then
+                EditAlbumPerformer.Text := GridTextData.Cells[2, Row];               
+            end;
+    VK_F5 : begin
+              if ssShift in Shift then             
+                for Row := 1 to GridTextData.RowCount - 1 do
+                  GridTextData.Cells[2, Row] := '';
             end;
     VK_TAB: begin
               Grid := Sender as TStringGrid;
