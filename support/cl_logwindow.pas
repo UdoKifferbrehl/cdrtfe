@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2009 Oliver Valencia
 
-  letzte Änderung  06.12.2009
+  letzte Änderung  03.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -507,7 +507,7 @@ begin
     {$ENDIF}
   end else
   {cdrecord: Blanking ...}
-  if Pos('Blanking', Temp) > 0 then
+  if Pos('Blanking PMA, TOC, pregap', Temp) > 0 then
   begin
     Progress := 'Blanking...';
     {$IFDEF Win7Comp}
