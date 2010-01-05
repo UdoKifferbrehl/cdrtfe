@@ -2,9 +2,9 @@
 
   cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 
-  Copyright (c) 2006-2009 Oliver Valencia
+  Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  03.01.2010
+  letzte Änderung  05.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,6 +59,7 @@ type TLogWin = class(TObject)
        FTaskBarProgressIndicator: TdwTaskbarProgressIndicator;
        {$ENDIF}
        FOnUpdatePanels          : TUpdatePanelsEvent;
+       FOnProgressBarDoMarquee  : TProgressBarDoMarqueeEvent;
        FOnProgressBarHide       : TProgressBarHideEvent;
        FOnProgressBarShow       : TProgressBarShowEvent;
        FOnProgressBarUpdate     : TProgressBarUpdateEvent;
@@ -85,6 +86,7 @@ type TLogWin = class(TObject)
        procedure ProgressBarHide(const PB: Integer);
        procedure ProgressBarShow(const PB, Max: Integer);
        procedure ProgressBarUpdate(const PB, Position: Integer);
+       procedure ProgressBarDoMarquee(const Active: Boolean);
        procedure ShowProgressTaskBar;
        procedure ShowProgressTaskBarString(const s: string);
        {$IFDEF Win7Comp}
@@ -97,6 +99,7 @@ type TLogWin = class(TObject)
        function ProcessProgress(const s: string): string;
        property OutWindowHandle: THandle read FOutWindowHandle;
        property OnUpdatePanels: TUpdatePanelsEvent read FOnUpdatePanels write FOnUpdatePanels;
+       property OnProgressBarDoMarquee: TProgressBarDoMarqueeEvent read FOnProgressBarDoMarquee write FOnProgressBarDoMarquee;
        property OnProgressBarHide: TProgressBarHideEvent read FOnProgressBarHide write FOnProgressBarHide;
        property OnProgressBarShow: TProgressBarShowEvent read FOnProgressBarShow write FOnProgressBarShow;
        property OnProgressBarUpdate: TProgressBarUpdateEvent read FOnProgressBarUpdate write FOnProgressBarUpdate;
@@ -234,6 +237,21 @@ begin
   {$IFDEF Win7Comp}
   if PB = 2 then TaskBarProgressIndicatorUpdate(Position);
   {$ENDIF}
+end;
+
+procedure TLogWin.ProgressBarDoMarquee(const Active: Boolean);
+begin
+  if Active then
+  begin
+    ProgressBarShow(1, 100);
+    if Assigned(FOnProgressBarDoMarquee) and FProgressBarShowing[1] then
+      FOnProgressBarDoMarquee(1, Active);
+  end else
+  begin
+    if Assigned(FOnProgressBarDoMarquee) and FProgressBarShowing[1] then
+      FOnProgressBarDoMarquee(1, Active);
+    ProgressBarHide(1);
+  end;
 end;
 
 { TaskBarProgressIndicator[Hide|Show|Update] -----------------------------------
@@ -502,6 +520,7 @@ begin
   if s = 'Fixating...' then
   begin
     Progress := s;
+    ProgressBarDoMarquee(True);
     {$IFDEF Win7Comp}
     TaskBarProgressIndicatorDoMarquee;
     {$ENDIF}
@@ -510,6 +529,7 @@ begin
   if Pos('Blanking PMA, TOC, pregap', Temp) > 0 then
   begin
     Progress := 'Blanking...';
+    ProgressBarDoMarquee(True);
     {$IFDEF Win7Comp}
     TaskBarProgressIndicatorDoMarquee;
     {$ENDIF}

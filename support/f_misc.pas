@@ -1,9 +1,9 @@
 { f_misc.pas: unterstützende Funktionen (sonstiges)
 
-  Copyright (c) 2004-2009 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.09.2009
+  letzte Änderung  05.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,6 +39,7 @@
     SelectRootIfNoneSelected(Tree: TTreeView)
     SetCompProp(Comp: TComponent; const Name, Value: string)
     SetFont(Control: TWinControl)
+    SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
     SortListByValue(List: TStringList)
     ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
     WindowStayOnTop(Handle: THandle; Value: Boolean)
@@ -61,7 +62,7 @@ unit f_misc;
 interface
 
 uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, SysUtils,
-     Windows, TypInfo;
+     Windows, TypInfo, Messages;
 
 function CheckCommandLineSwitch(const Switch: string): Boolean;
 function GetPathFromNode(Root: TTreeNode): string;
@@ -81,6 +82,7 @@ procedure ListViewSelectAll(ListView: TListView);
 procedure SelectRootIfNoneSelected(Tree: TTreeView);
 procedure SetCompProp(Comp: TComponent; const Name, Value: string);
 procedure SetFont(Control: TWinControl);
+procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
 procedure SortListByValue(List: TStringList);
 procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 
@@ -438,6 +440,26 @@ begin
   List.Sort;
   for i := 0 to List.Count - 1 do
     List[i] := List.Values[List.Names[i]];
+end;
+
+{ SetProgressBarMarquee --------------------------------------------------------
+
+  versetzt einen ProgressBar in den Marquee-Modus.                             }
+
+procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
+const PBS_MARQUEE  = $08;
+      PBM_SETMARQUEE = WM_USER + 10;
+var cs: LongInt;
+begin
+  cs := GetWindowLong(PB.Handle, GWL_STYLE);
+  if Active then
+  begin
+    SetWindowLong(PB.Handle, GWL_STYLE, cs or PBS_MARQUEE);
+    SendMessage(PB.Handle, PBM_SETMARQUEE, 1, 50);
+  end else
+  begin
+    SetWindowLong(PB.Handle, GWL_STYLE, cs and not PBS_MARQUEE);
+  end;
 end;
 
 { Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }

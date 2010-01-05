@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster                   
 
-  Copyright (c) 2004-2009 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.12.2009
+  letzte Änderung  05.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -531,6 +531,7 @@ type
     procedure HandleKeyboardShortcut(const Key: Word);
     procedure LangChange;
     procedure MessageShow(const s: string);
+    procedure ProgressBarDoMarquee(const PB: Integer; const Active: Boolean);
     procedure ProgressBarHide(const PB: Integer);
     procedure ProgressBarShow(const PB, Max: Integer);
     procedure ProgressBarUpdate(const PB, Position: Integer);
@@ -3736,7 +3737,7 @@ end;
   SetButtons wird benötig, um die Buttons zu deaktivieren, wenn cdrtfe die
   externen Programme ausführt.
   Zusätzlich wird hier das Flag für laufende Prozesse gesetzt und gegebenenfalls
-  der Bildschirmschoner deaktiviert.                         .                 }
+  der Bildschirmschoner deaktiviert.                                           }
 
 procedure TForm1.SetButtons(const Status: TOnOff);
 {$J+}
@@ -3757,6 +3758,7 @@ begin
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
+    TLogWin.Inst.ProgressBarDoMarquee(False);
     {$IFDEF Win7Comp}
     TLogWin.Inst.TaskBarProgressIndicatorHide;
     {$ENDIF}
@@ -4133,6 +4135,17 @@ begin
   end;
 end;
 
+{ ProgressBarDoMarquee ---------------------------------------------------------
+
+  ProgressBar in den Marquee-Modus versetzen.                                  }
+
+procedure TForm1.ProgressBarDoMarquee(const PB: Integer; const Active: Boolean);
+var Bar: TProgressBar;
+begin
+  Bar := GetProgressBar(PB);
+  if Bar <> nil then SetProgressBarMarquee(Bar, Active);
+end;
+
 { ProgressBarHide --------------------------------------------------------------
 
   ProgressBarHide macht den Progress-Bar unsichtbar.                           }
@@ -4244,6 +4257,7 @@ begin
   {Ausgabefenster global verfügbar machen.}
   TLogWin.Inst.SetMemo(Memo1);
   TLogWin.Inst.OnUpdatePanels := UpdatePanels;
+  TLogWin.Inst.OnProgressBarDoMarquee := ProgressBarDoMarquee;
   TLogWin.Inst.OnProgressBarHide := ProgressBarHide;
   TLogWin.Inst.OnProgressBarShow := ProgressBarShow;
   TLogWin.Inst.OnProgressBarUpdate := ProgressBarUpdate;
