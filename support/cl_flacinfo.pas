@@ -1,8 +1,8 @@
 { cl_flacinfo.pas: Funktionen für FLAC-Audio-Dateien
 
-  Copyright (c) 2006-2009 Oliver Valencia
+  Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  31.10.2009
+  letzte Änderung  09.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -106,6 +106,7 @@ type TFLACInfoError = (FIE_NoError, FIE_FileNotFound, FIE_InvalidFLACFile);
        FOk        : Boolean;
        FStreamInfo: TStreamInfo;
        FVendor    : string;
+       function FindFLACHeader(FileIn: TFileStream):Longint;
        function FLACFileIsValid: Boolean;
        function GetLastError: TFLACInfoError;
        function GetMetaDataBlockType(BT: Byte): TMetaDataBlockType;
@@ -227,6 +228,54 @@ begin
   Result := (BT and $80) = $80;           // ShowMessage('islastblock: ' +inttostr((BT and $80)));
 end;
 
+{ FindFirstMPEGHeader ----------------------------------------------------------
+
+  FindFirstMPEGHeader sucht den ersten gültigen MPEG-Audio-Header in der Datei.
+  Rückgabewerte: Position des Headers in der Datei, sonst -1.
+  MaxHeader legt fest, wieviele aufeinanderfolgende Frames gültig sein müssen,
+  damit die Datei als gültige MPEG-Audio akzeptiert wird.                      }
+
+function TFLACFile.FindFLACHeader(FileIn: TFileStream): Integer;
+var Buffer       : array[0..8191] of Char;
+    BytesRead    : Integer;
+    HeaderPos    : Integer;
+    TempPos      : Integer;
+    i            : Integer;
+    FLACHeader   : TFLACHeader;
+    Ok           : Boolean;
+begin
+  Result := -1;
+  HeaderPos := 0;
+  repeat
+    FillChar(Buffer, SizeOf(Buffer), 0);
+    TempPos := FileIn.Position;
+    BytesRead := FileIn.Read(Buffer, SizeOf(Buffer));
+    {Frame in Buffer suchen}
+    i := 0;
+    repeat
+      FLACHeader[0] := Buffer[i];
+      FLACHeader[1] := Buffer[i + 1];
+      FLACHeader[2] := Buffer[i + 2];
+      FLACHeader[3] := Buffer[i + 3];
+      Ok := FLACHeader = 'fLaC';
+      Inc(i);
+    until Ok or (i = SizeOf(Buffer) - 3);
+    if Ok then
+    begin
+      HeaderPos := TempPos + i - 1;
+    end else
+    begin
+      {Header nicht gefunden}
+      FileIn.Seek(-4, soFromCurrent);
+    end;
+  until Ok or (BytesRead < SizeOf(Buffer));
+  if Ok then
+  begin
+    Result := HeaderPos;
+    FileIn.Seek(HeaderPos + 4, soFromBeginning);
+  end;
+end;
+
 { FLACFileIsValid --------------------------------------------------------------
 
   FLACFileIsValid prüft, ob es sich um eine gültige FLAC-Datei handelt.        }
@@ -234,6 +283,7 @@ end;
 function TFLACFile.FLACFileIsValid: Boolean;
 var FileIn     : TFileStream;
     FLACHeader : TFLACHeader;
+    FLACHdrPos : Integer;
     MDBHeader  : TMetaDataBlockHeader;
     BlockType  : TMetaDataBlockType;
     BlockOffset: Integer;
@@ -246,10 +296,17 @@ begin
     {Datei-Header muß 'fLaC' sein.}
     FileIn.Read(FLACHeader, 4);
     Result := FLACHeader = 'fLaC';
+    if not Result and
+       (FLACHeader[0] = 'I') and (FLACHeader[1] = 'D') and
+       (FLACHeader[2] = '3') then
+    begin
+      FLACHdrPos := FindFlacHeader(FileIn);
+      Result := FLACHdrPos > -1;      
+    end;
     {Es muß der Stream-Info-Block folgen.}
     FileIn.Read(MDBHeader, SizeOf(MDBHeader));
     BlockType := GetMetaDataBlockType(MDBHeader.BlockType);
-    Result := BlockType = MDBT_STREAMINFO;
+    Result := Result and (BlockType = MDBT_STREAMINFO);
     {Wenn es der Stream-Info-Block ist, alle Blöcke suchen.}
     if Result then
     begin
