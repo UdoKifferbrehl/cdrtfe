@@ -2,10 +2,10 @@
 
   f_checkproject.pas: Einstellungen und Daten prüfen
 
-  Copyright (c) 2004-2009 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2009
+  letzte Änderung  09.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -113,7 +113,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
         ShowMsgDlg(GMS('ecdtext01'), GMS('g001'), MB_OK or MB_ICONWARNING or
                    MB_SYSTEMMODAL);
       end;
-      if CDTextLength > (252 * 12) then
+      if CDText and (CDTextLength > (252 * 12)) then
       begin
         Result := False;
         {zu viel CD-Text}
