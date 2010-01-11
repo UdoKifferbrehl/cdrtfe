@@ -2,9 +2,9 @@
 
   frm_dae_options.pas: DAE: Optionen
 
-  Copyright (c) 2006-2009 Oliver Valencia
+  Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  24.08.2009
+  letzte Änderung  10.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -100,7 +100,7 @@ implementation
 
 {$R *.DFM}
 
-uses f_misc, constant;
+uses f_window, const_common;
 
 const DefaultSpeedList : string
                          = ',0,1,2,4,6,8,10,12,16,20,24,32,36,40,42,48,50,52';

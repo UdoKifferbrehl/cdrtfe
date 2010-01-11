@@ -1,10 +1,12 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ $Id: c_spacemeter.pas,v 1.8 2010/01/11 06:37:38 kerberos002 Exp $
+
+  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   c_spacemeter.pas: Anzeigen des auf der Disk beanspruchten Speicherplatzes
 
-  Copyright (c) 2008-2009 Oliver Valencia
+  Copyright (c) 2008-2010 Oliver Valencia
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  06.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,6 +42,7 @@ const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
       cSpaceMeterDiskSizes: array[0..cDiskTypeCount] of Integer =
                               (650, 700, 800, 870, 4482, 8147);
 
+      {$J+}
       cPopupMenuStrings: array[0..cDiskTypeCount] of string =
                            ('CD 650 MiB (74 min)',
                             'CD 700 MiB (80 min)',
@@ -50,6 +53,7 @@ const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
 
       cUnitMiB: string = 'MiB';
       cUnitMin: string = 'min';
+      {$J-}
 
 type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
                             SMDT_DVD, SMDT_DVD_DL);
@@ -500,4 +504,5 @@ end;
 
 
 end.
+
 

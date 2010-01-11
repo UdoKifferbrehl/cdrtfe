@@ -2,9 +2,9 @@
 
   frm_dbg.pas: Debug-Fenster
 
-  Copyright (c) 2007-2008 Oliver Valencia
+  Copyright (c) 2007-2010 Oliver Valencia
 
-  letzte Änderung  12.01.2008
+  letzte Änderung  10.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere

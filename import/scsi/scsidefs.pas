@@ -1,6 +1,8 @@
-{ scsidefs.pas: SCSI definitions
+{ $Id: scsidefs.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $
 
-  letzte Änderung  22.11.2004
+  scsidefs.pas: SCSI definitions
+
+  letzte Änderung  01.10.2008
 
   scsidefs.pas ist eine Umsetzung von scsidefs.h für Delphi
 

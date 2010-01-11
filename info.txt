@@ -30,8 +30,6 @@ Credits
 
   TQProgressBar (v 1.1) © 2004 by Olivier Touzot "QnnO". 
 
-  Windows 7 Component Library by Daniel Wischnewski.
-
   TDropFileTarget - Drag and Drop of files into an application - 
   from Drag and Drop Component Suite. © 1997-2005 Angus Johnson &
   Anders Melander. 
@@ -58,4 +56,4 @@ Credits
 
   Ogg Vorbis support by Jared Breland. 
 
-  The setup file has been created with Inno Setup 5.3.5 by Jordan Russell. 
+  The setup file has been created with Inno Setup 5.1.6 by Jordan Russell. 

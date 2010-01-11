@@ -1,3 +1,5 @@
+{ $Id: QProgBar.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $ }
+
 unit QProgBar;
 
 

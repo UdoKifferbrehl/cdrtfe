@@ -1,21 +1,26 @@
-Hinweise zur Nutzung der Delphi Shell Controls
+Hinweise zur Nutzung von TurboPower ShellShock
 ==============================================
 
-Einige Funktionen von cdrtfe bauen auf den Delphi Shell-Controls auf, somit 
-kann das Programm nur kompiliert werden, wenn diese Komponenten installiert
-sind. Seit Delphi 6 sind diese Komponenten Teil von Delphi. Sie können im 
-Demo-Ordner gefunden werden.
+Einige Funktionen von cdrtfe bauen auf den TurboPower ShellShock-Komponenten auf,
+somit kann das Programm nur kompiliert werden, wenn diese Komponenten installiert
+sind. TurboPower ShellShock kann heruntergeladen werden von
+http://sourceforge.net/projects/tpshellshock/.
 
-cdrtfe verwendet eine leicht veränderte Version. Der entsprechende Patch
-liegt in diesem Ordner.
+Falls eine Installation nicht erwünscht ist, kann von der cdrtfe-Download-Seite
+ein Archiv mit den benötigten Teilen von TurboPower ShellShock heruntergeladen
+werden, das dann in dieses Verzeichnis (import\tpshellshock_mini) entpackt werden
+muß.
 
 
-Notes on the use of the Delphi Shell Controls
-=============================================
+Notes on the use of TurboPower ShellShock
+=========================================
 
-Some functions of cdrtfe are based on the Delphi Shell Controls. Thus, these
-components have to be installed in order to compile the program. Since Delphi 6
-these components are included with Delphi. They can be found in the Demo folder.
+Some functions of cdrtfe are based on the TurboPower ShellShock components.
+Thus, these components have to be installed in order to compile the program.
+You can download TurboPower ShellShock from
+http://sourceforge.net/projects/tpshellshock/.
 
-cdrtfe uses a slightly modified version. The corresponding patch is in this
-folder.
+If you don't want to install these components, you can get a package which
+contains the needed parts of TurboPower ShellShock from the cdrtfe download page.
+Extract the files into this folder (import\tpshellshock_mini).
+

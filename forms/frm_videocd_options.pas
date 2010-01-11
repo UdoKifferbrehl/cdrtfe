@@ -2,9 +2,9 @@
 
   frm_videocd_options.pas: Video-CD: Optionen
 
-  Copyright (c) 2005-2009 Oliver Valencia
+  Copyright (c) 2005-2010 Oliver Valencia
 
-  letzte Änderung  24.08.2009
+  letzte Änderung  10.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,7 +68,7 @@ implementation
 
 {$R *.DFM}
 
-uses f_misc, f_foldernamecache, constant;
+uses f_window, f_foldernamecache, const_common;
 
 { InputOk ----------------------------------------------------------------------
 

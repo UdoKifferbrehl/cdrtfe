@@ -2,10 +2,10 @@
 
   frm_audiocd_tracks.pas: Audio-CD: Track-Eigenschaften
 
-  Copyright (c) 2004-2009 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.12.2009
+  letzte Änderung  10.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -82,7 +82,7 @@ implementation
 
 {$R *.DFM}
 
-uses constant, f_cdtext, f_misc;
+uses f_cdtext, f_window, const_common, const_tabsheets;
 
 var PreviousControl: TObject;
 

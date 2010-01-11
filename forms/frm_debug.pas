@@ -2,9 +2,9 @@
 
   frm_debug.pas: Debugfenster
 
-  Copyright (c) 2004 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
 
-  letzte Änderung  27.06.2004
+  letzte Änderung  10.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere

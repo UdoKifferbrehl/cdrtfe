@@ -1,0 +1,74 @@
+cdrtfe - cdrtools/Mode2CDMaker/VCDImager Frontend
+=================================================
+
+  Copyright (c) 2008-2009 Oliver Valencia, Fabrice Tiercelin
+  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
+
+
+cdrtfe source structure
+=======================
+
+Root folder			cdrtfe main project file
+				Symbol definition include files
+				Info and license files
+
+  core				main components of cdrtfe
+
+    classes			  cdrtfe objects and classes for project settings/data/execution
+
+    common			  common constants/functions/objects/components/events/singletons
+
+    exec			  functions/objects for executing commandline programs and other tasks
+
+    funcs			  project related functions/objects
+
+    misc			  support functions
+
+  debugdll			debug dll sources
+
+  forms				cdrtfe forms
+
+  frames			cdrtfe frame components
+
+  import			external files/components used by this project
+
+    exceptionlog		  Show callstack and other information on exception
+
+    imaginglib_mini		  Vampyre Imaging Library
+
+    jcl_mini			  Jedi Code Library
+
+    jvcl_mini			  Jedi Visual Component Library
+
+    oledragdrop			  components for dragging objects from explorer into the program
+
+    scsi			  SCSI definitions
+
+    ShellControls		  Delphi Shell Controls
+
+    spacemeter			  visual componente to show used space of disc
+
+    tpshellshock_mini		  TurboPower ShellShock components (no longer needed)
+
+  lib				own, but independent procedures/functions/components
+
+    datastructures		  basic data structures (e.g. tree structure (TNode, TNodes))
+
+    devices			  device functions (e.g. scsi device enumerator)
+
+    files			 filesystem routines
+
+    misc			  support functions (crc, commandline options, window, logfile, ...)
+
+    multimedia			  functions for retrieving media file info
+
+    process			  execute commandline programs, instance management
+
+    strings			  string functions
+
+    system			  system functions (Windows environment, information)
+
+  resource			resource files
+
+  units				compiled units

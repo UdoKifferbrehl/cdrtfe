@@ -2,9 +2,9 @@
 
   frm_splash_screen: Splash-Screen
 
-  Copyright (c) 2008-2009 Oliver Valencia, Fabrice Tiercelin
+  Copyright (c) 2008-2010 Oliver Valencia, Fabrice Tiercelin
 
-  letzte Änderung  31.07.2009
+  letzte Änderung  10.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -51,7 +51,8 @@ implementation
 
 {$R *.dfm}
 
-uses f_filesystem, f_misc, f_wininfo, constant;
+uses f_filesystem, f_window, f_wininfo, f_locations, const_locations,
+     f_commandline;
 
 const SplashClientWidth  = 399;
       SplashClientHeight = 300;

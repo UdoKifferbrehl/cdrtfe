@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.01.2009
+  letzte Änderung  10.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -31,7 +31,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
      cl_action, cl_cmdlineparser, cl_devices, cl_logwindow, c_spacemeter,
-     user_messages, constant;
+     usermessages, const_core;
 
 type
   TForm1 = class(TForm)
@@ -578,8 +578,10 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
-     f_filesystem, f_process, f_misc, f_strings, f_largeint, f_init, f_helper,
-     f_checkproject, f_foldernamecache, f_screensaversup;
+     f_filesystem, f_process, f_window, f_strings, f_largeint, f_init, f_helper,
+     f_checkproject, f_foldernamecache, f_screensaversup, f_locations,
+     f_treelistfuncs, f_dischelper, f_instance,
+     const_tabsheets, const_common, const_locations;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
     {$IFDEF ShowTime}

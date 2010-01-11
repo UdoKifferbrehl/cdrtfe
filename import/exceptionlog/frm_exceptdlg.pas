@@ -1,4 +1,6 @@
-{ frm_exceptdlg.pas:
+{ $Id: frm_exceptdlg.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $
+
+  frm_exceptdlg.pas:
 
   The contents of this file are subject to the Mozilla Public License Version
   1.1 (the "License"); you may not use this file except in compliance with the
@@ -87,7 +89,7 @@ implementation
 
 {$R *.dfm}
 
-uses JCLStrings, f_strings, f_misc;
+uses JCLStrings, f_strings, f_window;
 
 { TExceptionDialog - private }
 

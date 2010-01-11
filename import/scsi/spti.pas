@@ -1,6 +1,8 @@
-{ spti.pas: SPTI and IOCTL definitions
+{ $Id: spti.pas,v 1.3 2010/01/11 06:37:38 kerberos002 Exp $
 
-  letzte Änderung  17.05.2007
+  spti.pas: SPTI and IOCTL definitions
+
+  letzte Änderung  05.01.2010
 
 }
 

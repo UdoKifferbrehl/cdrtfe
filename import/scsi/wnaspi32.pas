@@ -1,6 +1,8 @@
-{ wnaspi32.pas: ASPI for Win32 definitions
+{ $Id: wnaspi32.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $
 
-  letzte Änderung  17.05.2007
+  wnaspi32.pas: ASPI for Win32 definitions
+
+  letzte Änderung  01.10.2008
 
   wnaspi32.pas ist eine Umsetzung von wnaspi32.h für Delphi
 

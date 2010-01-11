@@ -1,4 +1,6 @@
-{ Unit for accessing Windows PCM wave file informations
+{ $Id: w32waves.pas,v 1.4 2010/01/11 06:37:38 kerberos002 Exp $
+
+  Unit for accessing Windows PCM wave file informations
   By Ulli Conrad <uconrad@gmx.net>
 
   Modified by Oliver Valencia, Nov. 2002, Feb. & May 2005
