@@ -1,11 +1,11 @@
-{ $Id: cl_filetypeinfo.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: cl_filetypeinfo.pas,v 1.2 2010/01/12 23:05:34 kerberos002 Exp $
 
   cl_filetypeinfo.pas: Dateityp und IconIndex cachen
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.10.2008
+  letzte Änderung  12.01.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -74,19 +74,23 @@ end;
   
 procedure TFileTypeInfo.GetFileInfo(const Name: string; var IconIndex: Integer;
                                     var FileType: string);
-var Info: TSHFileInfo;
+var Info     : TSHFileInfo;
     Extension: string;
-    Infos: string;
-    p: Integer;
+    Infos    : string;
+    IsFolder : Boolean;
+    p        : Integer;
 begin
+  {Ein Ordner?}
+  IsFolder := DirectoryExists(Name);
   {Dateiendung bestimmen}
   Extension := ExtractFileExt(Name);
+  if IsFolder then Extension := ';';
   {Ist dieser Dateityp schon mal behandelt worden?}
   Infos := FFileTypeInfoList.Values[Extension];
   {Wenn nicht, dann Infos ermitteln}
   if Infos = '' then
   begin
-    if Extension = cExtExe then
+    if (Extension = cExtExe) or IsFolder then
       SHGetFileInfo(PChar(Name), 0, Info,
                     SizeOf(TSHFileInfo),
                     SHGFI_SYSIconIndex or SHGFI_TYPENAME)
@@ -103,8 +107,7 @@ begin
        (LowerCase(Extension) <> '.exe') then
     begin
       {$IFDEF DebugFileTypeInfoList}
-      FormDebug.Memo1.Lines.Add(Extension +
-                           ': Dateiinfos nicht vorhanden, werden hinzugefügt.');
+      FormDebug.Memo1.Lines.Add(Extension + ': Dateiinfos nicht vorhanden, werden hinzugefügt.');
       {$ENDIF}
       FFileTypeInfoList.Add(Extension + '=' + IntToStr(IconIndex) + ':' +
                             FileType);
