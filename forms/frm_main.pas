@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2009
+  letzte Änderung  17.01.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -279,6 +279,8 @@ type
     MainMenuSettings: TMenuItem;
     N5: TMenuItem;
     ProgressBarTotal: TProgressBar;
+    MainMenuCdrtfeIni: TMenuItem;
+    N6: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -405,6 +407,7 @@ type
     procedure MainMenuToggleFileExplorerClick(Sender: TObject);
     procedure MainMenuShowOutputWindowClick(Sender: TObject);
     procedure MainMenuSettingsClick(Sender: TObject);
+    procedure MainMenuCdrtfeIniClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -729,6 +732,7 @@ begin
   {$IFDEF ShowCmdError}
   FExitCode := Msg.wParam;
   {$ENDIF}
+  TLogWin.Inst.ProgressBarDoMarquee(False);
   {EnvironmentBlock entsorgen, falls nötig}
   if FSettings.Environment.EnvironmentSize > 0 then CheckEnvironment(FSettings);
   {Aufräumen: aufgrund des Multithreadings hierher verschoben}
@@ -1069,6 +1073,7 @@ var i: Integer;
 begin
   {allgemein}
   MainMenuReloadDefaults.Enabled := FSettings.FileFlags.IniFileOk;
+  MainMenuCdrtfeIni.Enabled := FileExists(FSettings.General.IniFile);
   CheckBoxDummy.Checked := FSettings.Cdrecord.Dummy;
   {Devices, Speeds}
   for i := 1 to TabSheetCount do
@@ -3760,7 +3765,7 @@ begin
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
-    TLogWin.Inst.ProgressBarDoMarquee(False);
+    // TLogWin.Inst.ProgressBarDoMarquee(False);
     {$IFDEF Win7Comp}
     TLogWin.Inst.TaskBarProgressIndicatorHide;
     {$ENDIF}
@@ -4297,7 +4302,7 @@ begin
       FSettings.LoadFromFile(cIniFile);
       {Datenverzeichnis anlegen (WinNT/2k/XP)}
       if FSettings.General.PortableMode then OverrideProgDataDir(True);
-      ProgDataDirCreate;      
+      ProgDataDirCreate;
       {Device-Scan}
       with FDevices do
       begin
@@ -5185,6 +5190,14 @@ begin
     FormSettings.Release;
   end;
   GetSettings;
+end;
+
+{ Extras/cdrtfe.ini }
+
+procedure TForm1.MainMenuCdrtfeIniClick(Sender: TObject);
+begin
+  if FileExists(FSettings.General.IniFile) then
+    ShlExecute('', FSettings.General.IniFile);
 end;
 
 { ?/Info }
