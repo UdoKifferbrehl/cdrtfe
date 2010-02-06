@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  06.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -794,7 +794,9 @@ var i         : Integer;
     DummyL    : Int64;
     Temp      : string;
     Cmd, CmdMP: string;
+    CmdRG     : string;
     BurnList  : TStringList;
+    CopyList  : TStringList;
 
   { PrepareCompressedToWavConversion -------------------------------------------
 
@@ -847,9 +849,65 @@ var i         : Integer;
     end;
   end;
 
+  { PrepareCopyWaveFiles, PrepareWaveGain, CopyWaveFiles -----------------------
+
+    Da WaveGain die Originaldateien verändert müssen Wave-Dateien vorher kopiert
+    werden.                                                                    }
+
+  procedure PrepareCopyWaveFiles;
+  var j             : Integer;
+      Source, Target: string;
+      Ext           : string;
+  begin
+    for j := 0 to BurnList.Count - 1 do
+    begin
+      Source := BurnList[j];
+      Ext := LowerCase(ExtractFileExt(BurnList[j]));
+      if (Ext = cExtWav) then
+      begin
+        Target := FSettings.General.TempFolder + '\' +
+                  ExtractFileName(Source);
+        BurnList[j] := Target;
+        FVList.Add(Target);
+        CopyList.Add(Source + '|' + Target);
+      end;
+    end;
+  end;
+
+  procedure CopyWaveFiles;
+  var j             : Integer;
+      Source, Target: string;
+  begin
+    for j := 0 to CopyList.Count - 1 do
+    begin
+      SplitString(CopyList[j], '|', Source, Target);
+      MessageShow(FLang.GMS('m125'));
+      MessageShow('  ' + Source + ' -> ' + Target + CRLF);
+      Copyfile(PChar(Source), PChar(Target), False);
+    end;
+  end;
+
+  procedure PrepareWaveGain;
+  var j      : Integer;
+      CmdTemp: string;
+      GainStr: string;
+  begin
+    CmdRG := '';
+    GainStr := '';
+    if FSettings.AudioCD.Gain <> '' then
+      GainStr := '-g ' + FSettings.AudioCD.Gain + ' ';
+    for j := 0 to BurnList.Count - 1 do
+    begin
+      CmdTemp := StartUpDir + cWavegainBin + ' -c -y ' + GainStr +
+                 QuotePath(BurnList[j]) + CR;
+      CmdRG := CmdRG + CmdTemp;
+    end;
+  end;
+
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   BurnList := TStringList.Create;
+  CopyList := TStringList.Create;
   FData.CreateBurnList(BurnList, cAudioCD);
   CMArgs.Choice := cAudioCD;
   {$IFDEF ShowBurnList}
@@ -862,8 +920,12 @@ begin
   FDisk.GetDiskInfo(FSettings.AudioCD.Device, True);
   SetPanels('<>', '');
   Ok := FDisk.CheckMedium(CMArgs);
+  {Falls WaveGain verwendet wird, müssen WAV-Dateien kopiert werden!}
+  if FSettings.AudioCD.ReplayGain then PrepareCopyWaveFiles;
   {falls komprimierte Audio-Dateien vorhanden sind, Konvertierung vorbereiten}
   if FData.CompressedAudioFilesPresent then PrepareCompressedToWavConversion;
+  {auf kopierte WAVs und konvertierte Files WaveGain anwenden}
+  if FSettings.AudioCD.ReplayGain then PrepareWaveGain;
   {Pfadliste bearbeiten}
   for i := 0 to (BurnList.Count - 1) do
   begin
@@ -952,6 +1014,8 @@ begin
   end;
   if i = 1 then
   begin
+    if Fsettings.AudioCD.ReplayGain then CopyWaveFiles;
+    if CmdRG <> '' then Cmd := CmdRG + Cmd;   
     if CmdMP <> '' then Cmd := CmdMP + Cmd;
     DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
   end else
@@ -959,6 +1023,7 @@ begin
     SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
     DeleteFile(FSettings.AudioCD.CDTextFile);
   end;
+  CopyList.Free;
 end;
 
 { CreateXCD --------------------------------------------------------------------
@@ -2701,7 +2766,7 @@ begin
       FEjectDevice := FSettings.AudioCD.Device;
       DeleteFile(FSettings.AudioCD.CDTextFile);
       {temporäre Wave-Dateien löschen}
-      if FData.CompressedAudioFilesPresent then
+      if {FData.CompressedAudioFilesPresent} FVList.Count > 0 then
       begin
         for i := 0 to FVList.Count - 1 do DeleteFile(FVList[i]);
       end;

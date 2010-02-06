@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  04.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -77,6 +77,7 @@ begin
   AddLog('cMonkeyBin        ' + cMonkeyBin, 3);
   AddLog('cRrencBin         ' + cRrencBin, 3);
   AddLog('cRrdecBin         ' + cRrdecBin, 3);
+  AddLog('cWavegainBin      ' + cWavegainBin, 3);
   AddLog('cM2F2ExtractBin   ' + cM2F2ExtractBin, 3);
   AddLog('cDat2FileBin      ' + cDat2FileBin, 3);
   AddLog('cD2FGuiBin        ' + cD2FGuiBin, 3);
@@ -134,6 +135,7 @@ begin
     cOggencBin       := Path + cSoundDir     + cOggencBin;
     cFLACBin         := Path + cSoundDir     + cFLACBin;
     cMonkeyBin       := Path + cSoundDir     + cMonkeyBin;
+    cWavegainBin     := Path + cSoundDir     + cWavegainBin;
     cRrencBin        := Path + cXCDDir       + cRrencBin;
     cRrdecBin        := Path + cXCDDir       + cRrdecBin;
     cM2F2ExtractBin  := Path + cXCDDir       + cM2F2ExtractBin;
@@ -190,6 +192,9 @@ begin
 
       Temp := ReadString(cTool, 'MonkeyBin', '');
       if Temp <> '' then cMonkeyBin := Temp;
+
+      Temp := ReadString(cTool, 'WavegainBin', '');
+      if Temp <> '' then cWavegainBin := Temp;
 
       Temp := ReadString(cTool, 'RrencBin', '');
       if Temp <> '' then cRrencBin := Temp;
@@ -447,6 +452,8 @@ begin
       begin
 //        TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit12'));
       end;
+      {Ist WaveGain vorhanden?}
+      WavegainOk := FileExists(StartUpDir + cWavegainBin + cExtExe);
       {Ist cdrdao.exe da? Falls nicht, keine XCDs und keine CUE-Images, es sei
        denn, cdrecord ab Version 2.01a24 ist vorhanden.}
       CdrdaoOk := FileExists(StartUpDir + cCdrdaoBin + cExtExe);

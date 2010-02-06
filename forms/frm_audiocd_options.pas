@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  06.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,6 +47,8 @@ type
     CheckBoxMulti: TCheckBox;
     CheckBoxCDText: TCheckBox;
     FrameTopBanner1: TFrameTopBanner;
+    GroupBoxReplayGain: TGroupBox;
+    CheckBoxReplayGain: TCheckBox;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure RadioButtonClick(Sender: TObject);
@@ -104,6 +106,8 @@ begin
     RadioButtonNoCopy.Checked   := not (Copy or SCMS); // Standard: 1 Kopie
     RadioButtonCopy.Checked     := Copy;
     RadioButtonSCMS.Checked     := SCMS;
+    CheckBoxReplayGain.Checked  := ReplayGain;
+    CheckBoxReplayGain.Enabled  := FSettings.FileFlags.WavegainOk;
     if RawMode = 'raw96r' then
     begin
       RadioButtonRaw96r.Checked := True;
@@ -128,16 +132,17 @@ procedure TFormAudioCDOptions.SetSettings;
 begin
   with FSettings.AudioCD do
   begin
-    Fix     := CheckBoxFix.Checked;
-    Multi   := CheckBoxMulti.Checked;
-    Preemp  := CheckBoxPreemphasis.Checked;
-    UseInfo := CheckBoxUseInfo.Checked;
-    CDText  := CheckBoxCDText.Checked;
-    TAO     := RadioButtonTAO.Checked;
-    DAO     := RadioButtonDAO.Checked;
-    RAW     := RadioButtonRAW.Checked;
-    Copy    := RadioButtonCopy.Checked;
-    SCMS    := RadioButtonSCMS.Checked;
+    Fix        := CheckBoxFix.Checked;
+    Multi      := CheckBoxMulti.Checked;
+    Preemp     := CheckBoxPreemphasis.Checked;
+    UseInfo    := CheckBoxUseInfo.Checked;
+    CDText     := CheckBoxCDText.Checked;
+    TAO        := RadioButtonTAO.Checked;
+    DAO        := RadioButtonDAO.Checked;
+    RAW        := RadioButtonRAW.Checked;
+    Copy       := RadioButtonCopy.Checked;
+    SCMS       := RadioButtonSCMS.Checked;
+    ReplayGain := CheckBoxReplayGain.Checked;
     if RadioButtonRaw96r.Checked then
     begin
       RawMode := 'raw96r';

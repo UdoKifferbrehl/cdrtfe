@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  06.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -156,6 +156,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        FLACOk     : Boolean;
        LameOk     : Boolean;
        MonkeyOk   : Boolean;
+       WavegainOk : Boolean;
        RrencOk    : Boolean;
        RrdecOk    : Boolean;
        MPlayerOk  : Boolean;
@@ -309,6 +310,8 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        PauseLength: string;    // Länge in Sekunden bzw. Sektoren
        PauseSector: Boolean;    // Länge der Pause in Sektoren
        UTFToAnsi  : Boolean;
+       ReplayGain : Boolean;
+       Gain       : string;
      end;
 
      { Einstellungen: XCD }
@@ -681,6 +684,7 @@ begin
     OggencOk    := True;
     FLACOk      := True;
     MonkeyOk    := True;
+    WavegainOk  := True;
     RrencOk     := True;
     RrdecOk     := True;
     MPlayerOk   := True;
@@ -833,6 +837,8 @@ begin
     PauseLength := '2';     // Länge 2
     PauseSector := False;   // Länge in Sekunden
     UTFToAnsi   := False;
+    ReplayGain  := False;
+    Gain        := '';
   end;
 
   {XCD}
@@ -1397,6 +1403,8 @@ var PF     : TIniFile; // ProjectFile
       WriteString(Section, 'PauseLength', PauseLength);
       WriteBool(Section, 'PauseSector', PauseSector);
       WriteBool(Section, 'UTFToAnsi', UTFToAnsi);
+      WriteBool(Section, 'ReplayGain', ReplayGain);
+      WriteString(Section, 'Gain', Gain);
     end;
 
     {XCD}
@@ -1852,6 +1860,9 @@ var PF     : TIniFile; // ProjectFile
       PauseLength := ReadString(Section, 'PauseLength', '2');
       PauseSector := ReadBool(Section, 'PauseSector', False);
       UTFToAnsi := ReadBool(Section, 'UTFToAnsi', False);
+      ReplayGain := ReadBool(Section, 'ReplayGain', False) and
+                    FileFlags.WavegainOk;
+      Gain       := ReadString(Section, 'Gain', '');
     end;
     ProgressBarUpdate(5);
 

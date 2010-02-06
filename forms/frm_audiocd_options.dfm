@@ -49,7 +49,7 @@ object FormAudioCDOptions: TFormAudioCDOptions
     Left = 216
     Top = 56
     Width = 193
-    Height = 169
+    Height = 177
     Caption = 'Schreibmodus'
     TabOrder = 4
     object RadioButtonTAO: TRadioButton
@@ -227,6 +227,22 @@ object FormAudioCDOptions: TFormAudioCDOptions
         Width = 79
         ExplicitWidth = 79
       end
+    end
+  end
+  object GroupBoxReplayGain: TGroupBox
+    Left = 215
+    Top = 240
+    Width = 196
+    Height = 67
+    Caption = 'ReplayGain'
+    TabOrder = 7
+    object CheckBoxReplayGain: TCheckBox
+      Left = 8
+      Top = 24
+      Width = 169
+      Height = 17
+      Caption = 'ReplayGain anwenden'
+      TabOrder = 0
     end
   end
 end

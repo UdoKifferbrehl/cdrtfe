@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  04.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -203,6 +203,7 @@ begin
     Add('m122=%s Track(s): %s');
     Add('m123=Suche Laufwerke ...');
     Add('m124=Prüfe verfügbare Geschwindigkeiten ...');
+    Add('m125=Kopiere WAV-Datei vor Anwendung von ReplayGain:');
     {GUI - Mkisofs}
     Add('c201=DVD-Video - Optionen');
     Add('e201=Name für das Boot-Image fehlt!');

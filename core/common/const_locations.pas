@@ -1,13 +1,13 @@
-{ $Id: const_locations.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: const_locations.pas,v 1.2 2010/02/06 18:22:59 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   const_locations.pas: Konstanten-Deklaration, Dateinamen und Ordner
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.10.2008
+  letzte Änderung  04.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,6 +38,7 @@ const {Dateinamen - Kommandozeilenprogramme}
       cOggencBin       : string = '\oggenc';
       cFLACBin         : string = '\flac';
       cMonkeyBin       : string = '\mac';
+      cWavegainBin     : string = '\wavegain';      
       cRrencBin        : string = '\rrenc';
       cRrdecBin        : string = '\rrdec';
       {$J-}
