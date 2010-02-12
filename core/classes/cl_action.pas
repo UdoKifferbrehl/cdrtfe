@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2010
+  letzte Änderung  12.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1399,19 +1399,22 @@ var Output     : TStringList;
     ExtractTrackInfo baut die einzelnen Zeilen der cdda2wav-Ausgabe um.        }
 
   procedure ExtractTrackInfo(List: TStringList);
-  var i         : Integer;
-      Temp      : string;
-      p         : Integer;
-      Seconds   : Double;
-      Sectors   : Integer;
-      Size      : Double;
-      APerformer: string;
-      Performer : string;
-      Title     : string;
-      NameString: string;
-      SizeString: string;
-      TimeString: string;
+  var i            : Integer;
+      Temp         : string;
+      p            : Integer;
+      Seconds      : Double;
+      Sectors      : Integer;
+      Size         : Double;
+      APerformer   : string;
+      Performer    : string;
+      Title        : string;
+      NameString   : string;
+      SizeString   : string;
+      TimeString   : string;
+      HiddenTrckOff: Integer;
   begin
+    FSettings.DAE.HiddenTrack := False;
+    HiddenTrckOff := 0; // bei hidden tracks verschieben sich die Indizes um 1
     {Album-Performer}
     Temp := List.Text;
     Delete(Temp, 1, Pos('Album title:', Temp));
@@ -1425,12 +1428,15 @@ var Output     : TStringList;
     {Alles Löschen, was keine Trackinfos sind.}
     for i := List.Count - 1 downto 0 do
     begin
+      FSettings.DAE.HiddenTrack := FSettings.DAE.HiddenTrack or
+                                                     (Pos('T00:', List[i]) > 0);
       if not ((Pos('T', List[i]) = 1) and (Pos(':', List[i]) = 4)) or
          (Pos('audio', List[i]) = 0) then
       begin
         List.Delete(i);
       end
     end;
+    if FSettings.DAE.HiddenTrack then HiddenTrckOff := 1;
     {$IFDEF DebugReadAudioTOC}
     AddCRStringToList(Output.Text, FormDebug.Memo1.Lines);
     FormDebug.Memo1.Lines.Add('');
@@ -1461,7 +1467,7 @@ var Output     : TStringList;
       Performer := UnescapeString(Trim(Temp));
       if (Performer = '') and (Title <> '') then Performer := APerformer;
       {Trackname}
-      NameString := Format('Track %.2d', [i + 1]);
+      NameString := Format('Track %.2d', [i + 1 - HiddenTrckOff]);
       {Neuen Eintrag zusammenstellen.}
       List[i] :=  NameString + ':' + TimeString + '*' + SizeString +
                   '|' + Title + '|' + Performer;
@@ -1520,7 +1526,7 @@ end;
   DAEGrabTracks liest die ausgewählte Titel aus.                               }
 
 procedure TCDAction.DAEGrabTracks;
-var Compressed: Boolean;
+var Compressed   : Boolean;
 
   { GetCustomName --------------------------------------------------------------
 
@@ -1671,6 +1677,23 @@ var Compressed: Boolean;
     Result := Cmd;
   end;
 
+  { CorrectTrackList -----------------------------------------------------------
+
+    Bei CDs mit Hidden Track verschieben sich die Tracknummern.                }
+
+  procedure CorrectTrackList(List: TStringList);
+  var i, a: Integer;
+  begin
+    if FSettings.DAE.HiddenTrack then
+    begin
+      for i := 0 to List.Count - 1 do
+      begin
+        a := StrToInt(List[i]) - 1;
+        List[i] := IntToStr(a);
+      end;
+    end;
+  end;
+
   { DAEGrabTracksSimple --------------------------------------------------------
 
     Dies ist die alte Routine (bis 1.2pre1). Die Dateinamen werden durch das
@@ -1691,6 +1714,9 @@ var Compressed: Boolean;
     {zuerst die Trackliste verarbeiten}
     TrackList.CommaText := FSettings.DAE.Tracks;
     TempList.CommaText := FSettings.DAE.Tracks;
+    {bei einem Hidden Track verschieben sich die Tracknummern}
+    CorrectTrackList(TrackList);
+    CorrectTrackList(TempList);
     {aufeinanderfolgende Tracknummern markieren}
     for i := TempList.Count - 1 downto 1 do
     begin
@@ -1781,12 +1807,16 @@ var Compressed: Boolean;
       CmdDAE, CmdComp    : string;
       Temp, Dummy        : string;
       FHShCmd            : TextFile;
+      HiddenTrckOff      : Integer;
   begin
     SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+    if FSettings.DAE.HiddenTrack then HiddenTrckOff := 1 else HiddenTrckOff := 0;
     {Trackliste erstellen}
     InfoList := FData.GetFileList('', cDAE);
     TrackList := TStringList.Create;
     TrackList.CommaText := FSettings.DAE.Tracks;
+    {bei einem Hidden Track verschieben sich die Tracknummern}
+    CorrectTrackList(TrackList);
     CmdDAE := StartUpDir + cCdda2wavBin;
     CmdDAE := QuotePath(CmdDAE);
     if Compressed then
@@ -1806,12 +1836,13 @@ var Compressed: Boolean;
         {Dateinamen bestimmen.}
         if not PrefixNames then
         begin
-          Temp := GetCustomName(InfoList[Index], Index, Dummy, Dummy, Dummy);
+          Temp := GetCustomName(InfoList[Index  + HiddenTrckOff],
+                                                    Index, Dummy, Dummy, Dummy);
         end else
         begin
           {PrefixNames muß berücksichtigt werden für den Fall, daß komprimierte
            Dateien solche Namen erhalten sollen.}
-          Temp := Prefix + Format('_%.2d', [Index + 1]);
+          Temp := Prefix + Format('_%.2d', [Index{ + 1}]);
         end;
         {Kommandozeile anhängen.}
         if not Compressed then
@@ -1823,7 +1854,7 @@ var Compressed: Boolean;
           Temp := Cdda2wavStdCmdLine + ' track=' + TrackList[i] + '+' +
                     TrackList[i] + ' - ';
           {Kommandozeile für das Komprimierungstool zusammenstellen}
-          CmdComp := GetCommandLineCompress(InfoList[Index], Index);
+          CmdComp := GetCommandLineCompress(InfoList[Index + HiddenTrckOff], Index + HiddenTrckOff);
           {Kommandozeilen pipen}
           if FSettings.FileFlags.UseSh then
           begin
@@ -2866,7 +2897,7 @@ begin
     begin
       if FSettings.DAE.DoCopy then
       begin
-        for i := 1 to 99 do
+        for i := 0 to 99 do
         begin
           Path := FSettings.DAE.Path;
           if Path[Length(Path)] <> '\' then Path := Path + '\';
