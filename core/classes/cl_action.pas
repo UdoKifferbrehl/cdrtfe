@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.02.2010
+  letzte Änderung  28.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -894,8 +894,12 @@ var i         : Integer;
   begin
     CmdRG := '';
     GainStr := '';
-    if FSettings.AudioCD.Gain <> '' then
-      GainStr := '-g ' + FSettings.AudioCD.Gain + ' ';
+    if FSettings.AudioCD.Gain <> 0 then
+    begin
+      GainStr := '-g ' +
+                 FloatToStrF(FSettings.AudioCD.Gain / 10, ffNumber, 3, 1) + ' ';
+      GainStr := ReplaceString(GainStr, ',', '.');
+    end;
     for j := 0 to BurnList.Count - 1 do
     begin
       CmdTemp := StartUpDir + cWavegainBin + ' -c -y ' + GainStr +

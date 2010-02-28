@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.02.2010
+  letzte Änderung  28.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -311,7 +311,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        PauseSector: Boolean;    // Länge der Pause in Sektoren
        UTFToAnsi  : Boolean;
        ReplayGain : Boolean;
-       Gain       : string;
+       Gain       : Integer;
      end;
 
      { Einstellungen: XCD }
@@ -839,7 +839,7 @@ begin
     PauseSector := False;   // Länge in Sekunden
     UTFToAnsi   := False;
     ReplayGain  := False;
-    Gain        := '';
+    Gain        := 0;
   end;
 
   {XCD}
@@ -1406,7 +1406,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'PauseSector', PauseSector);
       WriteBool(Section, 'UTFToAnsi', UTFToAnsi);
       WriteBool(Section, 'ReplayGain', ReplayGain);
-      WriteString(Section, 'Gain', Gain);
+      WriteInteger(Section, 'Gain', Gain);
     end;
 
     {XCD}
@@ -1864,7 +1864,7 @@ var PF     : TIniFile; // ProjectFile
       UTFToAnsi := ReadBool(Section, 'UTFToAnsi', False);
       ReplayGain := ReadBool(Section, 'ReplayGain', False) and
                     FileFlags.WavegainOk;
-      Gain       := ReadString(Section, 'Gain', '');
+      Gain       := ReadInteger(Section, 'Gain', 0);
     end;
     ProgressBarUpdate(5);
 

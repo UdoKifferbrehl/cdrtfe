@@ -4,7 +4,7 @@ object FormAudioCDOptions: TFormAudioCDOptions
   HelpContext = 1401
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Audio-CD - Optionen'
-  ClientHeight = 344
+  ClientHeight = 371
   ClientWidth = 419
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object FormAudioCDOptions: TFormAudioCDOptions
   OnShow = FormShow
   DesignSize = (
     419
-    344)
+    371)
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBoxCD: TGroupBox
@@ -121,17 +121,17 @@ object FormAudioCDOptions: TFormAudioCDOptions
     end
   end
   object ButtonOk: TButton
-    Left = 256
-    Top = 312
+    Left = 255
+    Top = 343
     Width = 75
     Height = 25
     Caption = 'Ok'
-    TabOrder = 5
+    TabOrder = 6
     OnClick = ButtonOkClick
   end
   object ButtonCancel: TButton
     Left = 336
-    Top = 312
+    Top = 343
     Width = 75
     Height = 25
     Cancel = True
@@ -209,7 +209,7 @@ object FormAudioCDOptions: TFormAudioCDOptions
     Width = 419
     Height = 53
     Anchors = [akLeft, akTop, akRight]
-    TabOrder = 6
+    TabOrder = 7
     TabStop = True
     ExplicitWidth = 419
     inherited Bevel1: TBevel
@@ -233,9 +233,23 @@ object FormAudioCDOptions: TFormAudioCDOptions
     Left = 215
     Top = 240
     Width = 196
-    Height = 67
+    Height = 97
     Caption = 'ReplayGain'
-    TabOrder = 7
+    TabOrder = 5
+    object LabelGain: TLabel
+      Left = 28
+      Top = 48
+      Width = 115
+      Height = 13
+      Caption = 'zus'#228'tzliche Verst'#228'rkung:'
+    end
+    object LabelGain2: TLabel
+      Left = 79
+      Top = 70
+      Width = 98
+      Height = 13
+      Caption = 'dB (-12,0 ... 12,0 dB)'
+    end
     object CheckBoxReplayGain: TCheckBox
       Left = 8
       Top = 24
@@ -243,6 +257,28 @@ object FormAudioCDOptions: TFormAudioCDOptions
       Height = 17
       Caption = 'ReplayGain anwenden'
       TabOrder = 0
+      OnClick = RadioButtonClick
+    end
+    object EditGain: TEdit
+      Left = 28
+      Top = 67
+      Width = 33
+      Height = 21
+      ReadOnly = True
+      TabOrder = 2
+      Text = '0'
+    end
+    object UpDownGain: TUpDown
+      Left = 61
+      Top = 67
+      Width = 12
+      Height = 21
+      Associate = EditGain
+      Min = -120
+      Max = 120
+      TabOrder = 1
+      TabStop = True
+      OnClick = UpDownGainClick
     end
   end
 end

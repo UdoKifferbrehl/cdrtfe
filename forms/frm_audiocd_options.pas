@@ -1,15 +1,15 @@
-{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Front End
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_audiocd_options.pas: Audio-CD: Optionen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2010
+  letzte Änderung  28.02.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.  
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
 }
 
@@ -20,7 +20,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ExtCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_settings, cl_lang, c_frametopbanner;
+     cl_settings, cl_lang, c_frametopbanner, ComCtrls;
 
 type
   TFormAudioCDOptions = class(TForm)
@@ -49,9 +49,14 @@ type
     FrameTopBanner1: TFrameTopBanner;
     GroupBoxReplayGain: TGroupBox;
     CheckBoxReplayGain: TCheckBox;
+    EditGain: TEdit;
+    UpDownGain: TUpDown;
+    LabelGain: TLabel;
+    LabelGain2: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure RadioButtonClick(Sender: TObject);
+    procedure UpDownGainClick(Sender: TObject; Button: TUDBtnType);
   private
     { Private declarations }
     FSettings: TSettings;
@@ -63,7 +68,7 @@ type
   public
     { Public declarations }
     property Lang: TLang read FLang write FLang;
-    property Settings: TSettings read FSettings write FSettings;    
+    property Settings: TSettings read FSettings write FSettings;
   end;
 
 { var }
@@ -121,6 +126,8 @@ begin
       RadioButtonRaw16.Checked := True;
     end;
     CheckBoxOverburn.Checked := Overburn;
+    UpDownGain.Position := Gain;
+    UpDownGainClick(UpDownGain, btNext);
   end;
 end;
 
@@ -156,6 +163,7 @@ begin
       RawMode := 'raw16';
     end;
     OverBurn := CheckBoxOverburn.Checked;
+    Gain := UpDownGain.Position;
   end;
 end;
 
@@ -195,6 +203,10 @@ begin
     CheckBoxMulti.Enabled := True;
   begin
   end;
+  UpDownGain.Enabled := CheckBoxReplayGain.Checked;
+  EditGain.Enabled := CheckBoxReplayGain.Checked;
+  LabelGain.Enabled := CheckBoxReplayGain.Checked;
+  LabelGain2.Enabled := CheckBoxReplayGain.Checked;
 end;
 
 
@@ -242,5 +254,24 @@ procedure TFormAudioCDOptions.RadioButtonClick(Sender: TObject);
 begin
   CheckControls(Sender);
 end;
+
+
+{ UpDown-Events -------------------------------------------------------------- }
+
+{ OnClick ----------------------------------------------------------------------
+
+  Wert für Verstärkung ändern.                                                 }
+
+procedure TFormAudioCDOptions.UpDownGainClick(Sender: TObject;
+                                              Button: TUDBtnType);
+begin
+  Assert(Sender is TUpDown);
+  with (Sender as TUpDown) do
+  begin
+    Assert(Associate is TEdit);
+    (Associate as TEdit).Text := FloatToStrF(Position / 10, ffNumber, 3, 1);
+  end;
+end;
+
 
 end.
