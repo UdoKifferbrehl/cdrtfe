@@ -1,4 +1,4 @@
-{ $Id: cl_logwindow.pas,v 1.1 2010/01/11 06:37:38 kerberos002 Exp $
+{ $Id: cl_logwindow.pas,v 1.2 2010/03/16 16:23:06 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -6,7 +6,7 @@
 
   Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  16.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -467,6 +467,7 @@ const TotalSectors: Integer = 0;
       OldProgress : Extended = 0;
       TotalSize   : Integer = 0;
       SumWritten  : Integer = 0;
+      OldSector   : Integer = 0;
 {$J-}
 var Temp    : string;
     Progress: string;
@@ -551,11 +552,16 @@ begin
   begin
     Delete(Temp, 1, 4);
     TotalSectors := StrToIntDef(Trim(Temp), 1);
+    OldSector := 0;
   end else
   if Pos('addr:', Temp) = 1 then
   begin
     ia := StrToIntDef(Trim(Copy(Temp, 6, Pos('cnt', Temp) - 6)), 0);
-    Progress := 'R: ' + FormatFloat('##0%', (ia / TotalSectors) *100)
+    if ia > OldSector then
+    begin
+      Progress := 'R: ' + FormatFloat('##0%', (ia / TotalSectors) *100);
+      OldSector := ia;
+    end;
   end else
   {ProgressBar sichtbar machen}
   if Pos('Starting new track', Temp) = 1 then
