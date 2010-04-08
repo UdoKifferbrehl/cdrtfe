@@ -4,7 +4,7 @@
 
   Copyright (c) 2008-2010 Oliver Valencia, Fabrice Tiercelin
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  08.04.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -82,6 +82,7 @@ begin
     JPEGImage.Free;
   end;
   LabelVersion.Caption := GetFileVersionString(Application.ExeName);
+  SetFont(Self);
   InitShowSplash;
 end;
 
