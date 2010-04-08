@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  21.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,7 +59,7 @@ type TVerificationThread = class(TThread)
        FLine        : string;            // Zeile, die ausgegeben werden soll
        FPBPos       : Integer;           // Position des PorgressBars
        FPBTotalPos  : Integer;           // Gesamtfortschritt
-       {Variablen für Vergleiche (Daten-/XCD}
+       {Variablen für Vergleiche (Daten-/XCD/Image)}
        FDevice      : string;
        FDrive       : string;
        FAutoExec    : Boolean;           // True, wenn automatisches Brennen
@@ -68,6 +68,7 @@ type TVerificationThread = class(TThread)
        FXCD         : Boolean;
        FXCDExt      : string;
        FXCDKeepExt  : Boolean;
+       FISOImage    : Boolean;
        {Variablen für das Aufspüren von Duplikaten}
        FDupSize     : Int64;
        {mehrfach verwendete Variablen}
@@ -82,9 +83,11 @@ type TVerificationThread = class(TThread)
        procedure FindDuplicateFilesInit;
        procedure ReloadMedium;
        procedure Verify(const Drive: string);
+       procedure VerifyISOImage(const Drive: string);
        procedure VerifyInit;
        function CompareFiles(const FileName1, FileName2: string): Boolean;
        function CompareForm2Files(const FileName1, FileName2: string): Boolean;
+       function CompareISOImageDisc(const ISOFile: string): Boolean;
        function GetFileCRC32(const FileName: string; var CRC32: LongInt): Boolean;
        {$IFNDEF BitwiseVerify}
        function GetForm2FileCRC32(const FileName1, FileName2: string; var CRC32: LongInt): Boolean;
@@ -112,6 +115,7 @@ type TVerificationThread = class(TThread)
        property XCDExt: string write FXCDExt;
        property XCDKeepExt: Boolean write FXCDKeepExt;
        property Drive: string write FDrive;
+       property ISOImage: Boolean write FISOImage;
        {Properties für das Aufspüren von Duplikaten}
      end;
 
@@ -166,7 +170,8 @@ begin
   case FAction of
     cVerify,
     cVerifyXCD,
-    cVerifyDVDVideo: ID := 'V';
+    cVerifyDVDVideo,
+    cVerifyISOImage: ID := 'V';
     cFindDuplicates: ID := 'D';
     cCreateInfoFile: ID := 'X';
   end;
@@ -523,6 +528,74 @@ begin
   end;
 end;
 
+{ CompareISOImageDisc ----------------------------------------------------------
+
+  CompareISOImageDisc führt einen bitweisen Vergleich des angegebenen ISO-Images
+  mit der geschriebenen Disk durch und liefert als Rückgabewert True, wenn das
+  Image mit der Disk übereinstimmt.                                            }
+
+function TVerificationThread.CompareISOImageDisc(const ISOFile: string): Boolean;
+var File1         : TFileStream;
+    DriveRoot     : string;
+    p1, p2        : Pointer;
+    FSize1, FSize2: Int64;
+    BSize         : Integer;
+    NBytes        : Integer;  //Number of bytes to read
+    RBytes        : LongWord; //Number of Bytes read
+    CDHandle      : THandle;
+begin
+  File1 := nil;
+  DriveRoot := Copy(FDrive, 1, 2);
+  CDHandle := INVALID_HANDLE_VALUE;
+  Result := True;
+  BSize := cBufSize;
+  GetMem(p1, BSize);
+  GetMem(p2, BSize);
+  try
+    try
+      File1 := TFileStream.Create(ISOFile, fmOpenRead or fmShareDenyNone);
+      FSize1 := GetFileSize(ISOFile);
+      FSize2 := FSize1;
+      CDHandle := CreateFile(PChar('\\.\' + DriveRoot), GENERIC_READ, 0, nil,
+                             OPEN_EXISTING,
+                             FILE_ATTRIBUTE_NORMAL or FILE_FLAG_SEQUENTIAL_SCAN,
+                             0);
+      if CDHandle = INVALID_HANDLE_VALUE then
+      begin
+        FLine := 'Invalid Handle';
+        Synchronize(DAddLine);
+      end;
+      if (FSize1 > 0) then
+      begin
+        while (FSize1 <> 0) and Result and not Terminated do
+        begin
+          if FSize1 > BSize then NBytes := BSize else NBytes := LoComp(FSize1);
+          FSize1 := FSize1 - NBytes;
+          File1.ReadBuffer(p1^, NBytes);
+          ReadFile(CDHandle, p2^, NBytes, RBytes, nil);
+
+          Result := Result and CompareBufferA(p1, p2, NBytes);
+          
+          FPBPos := Round(((FSize2 - FSize1) / FSize2) * 100);
+          FPBTotalPos := FPBPos;
+          Synchronize(DSetProgressBar);
+        end;
+      end else
+      begin
+        Result := (FSize1 = 0) and (FSize2 = 0);
+      end;
+      FSizeVerified := FSizeVerified + FSize2;
+    except
+      Result := False;
+    end;
+  finally
+    File1.Free;
+    if CDHandle <> INVALID_HANDLE_VALUE then CloseHandle(CDHandle);
+    FreeMem(p1, BSize);
+    FreeMem(p2, BSize)
+  end;
+end;
+
 { GetFileCRC32 -----------------------------------------------------------------
 
   GetFileCRC32 berechnet den CRC32-Wert einer Datei.
@@ -790,6 +863,57 @@ begin
   {$ENDIF}
 end;
 
+{ VerifyISOImage ---------------------------------------------------------------
+
+  Eigentliche Aufgabe von TVerificationThread: Vergleichen.
+  Diese Prozedur vergleicht die Disk mit dem ISO-Image.                        }
+
+procedure TVerificationThread.VerifyISOImage;
+var ISOFile               : string;
+    ErrorCount            : Integer;
+    Ok                    : Boolean;
+    {$IFDEF ShowVerifyTime}
+    TimeCount             : TTimeCount;
+    {$ENDIF}
+begin
+  {$IFDEF ShowVerifyTime}
+  TimeCount := TTimeCount.Create; TimeCount.StartTimeCount;
+  {$ENDIF}
+  ErrorCount := 0;
+  ISOFile := FVerifyList[0];
+  FLine := FLang.GMS('mverify01') + '   1/1';
+  Synchronize(DStatusBarPanel0);
+  FLine := ISOFile;
+  Synchronize(DStatusBarPanel1);
+  Ok := CompareISOImageDisc(ISOFile);
+  if not Ok and not Terminated then
+  begin
+    ErrorCount := ErrorCount + 1;
+  end;
+  if ErrorCount > 0 then
+  begin
+    FLine := '';
+    Synchronize(DAddLine);
+  end;
+  FLine := Format(FLang.GMS('mverify02'), [ErrorCount]);
+  Synchronize(DAddLine);
+  FLine := '';
+  Synchronize(DAddLine);
+  if Terminated {FTerminate} then
+  begin
+    FLine := FLang.GMS('mverify03');
+    Synchronize(DAddLine);
+    FLine := '';
+    Synchronize(DAddLine);
+  end;
+  {$IFDEF ShowVerifyTime}
+  TimeCount.StopTimeCount;
+  FLine := TimeCount.TimeAsString;
+  Synchronize(DAddLine);
+  TimeCount.Free;
+  {$ENDIF}
+ end;
+
 { VerifyInit -------------------------------------------------------------------
 
   Feststellen, welches Laufwerk das richtige ist und den Vergleich starten.    }
@@ -818,7 +942,7 @@ begin
       Synchronize(DAddLine);
       FLine := '';
       Synchronize(DAddLine);
-      Verify(Drive);
+      if not FISOImage then Verify(Drive) else VerifyISOImage(Drive);
     end;
   end else
   begin
@@ -1067,6 +1191,7 @@ begin
   FXCD := False;
   FXCDExt := '';
   FXCDKeepExt := True;
+  FISOImage := False;
   FDupSize := 0;
   FSizeVerified := 0;
   inherited Create(Suspended);
@@ -1105,6 +1230,5 @@ begin
     Thread.Terminate; //Thread.TerminateThread := True;
   end;
 end;
-
 
 end.

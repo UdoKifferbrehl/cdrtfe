@@ -1,13 +1,13 @@
-{ $Id: const_tabsheets.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: const_tabsheets.pas,v 1.2 2010/04/08 13:38:31 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   const_tabsheets.pas: Konstanten-Deklaration für TabSheets
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.05.2009
+  letzte Änderung  21.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,6 +40,7 @@ const {für TSettings.General.Choice und TAction}
       cFindDuplicates = 24;
       cCreateInfoFile = 25;
       cVerifyDVDVideo = 26;
+      cVerifyISOImage = 27;
       cNoAction       = 0;
 
       {für TSettings.General.TabFrmSettings}

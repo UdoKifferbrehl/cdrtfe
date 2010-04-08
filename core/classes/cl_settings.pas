@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.02.2010
+  letzte Änderung  21.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -409,6 +409,7 @@ type { GUI-Settings, Flags und Hilfsvariablen }
        RAW     : Boolean;
        RAWMode : string;
        CDText  : Boolean;
+       Verify  : Boolean;
      end;
 
      { Einstellungen: Image einlesen }
@@ -942,6 +943,7 @@ begin
     RAW      := False;
     RAWMode  := 'raw96r';
     CDText   := False;
+    Verify   := False;
   end;
 
   {Image einlesen}
@@ -1508,6 +1510,7 @@ var PF     : TIniFile; // ProjectFile
       WriteBool(Section, 'RAW', RAW);
       WriteString(Section, 'RAWMode', RAWMode);
       WriteBool(Section, 'CDText', CDText);
+      WriteBool(Section, 'Verify', Verify);
     end;
 
     {Image einlesen}
@@ -1974,6 +1977,7 @@ var PF     : TIniFile; // ProjectFile
       RAW := ReadBool(Section, 'RAW', False);
       RAWMode := ReadString(Section, 'RAWMode', 'raw96r');
       CDText := ReadBool(Section, 'CDText', False);
+      Verify := ReadBool(Section, 'Verify', False);
     end;
     ProgressBarUpdate(10);
 

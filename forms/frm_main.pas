@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.01.2009
+  letzte Änderung  08.04.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -281,6 +281,7 @@ type
     ProgressBarTotal: TProgressBar;
     MainMenuCdrtfeIni: TMenuItem;
     N6: TMenuItem;
+    CheckBoxISOVerify: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -763,6 +764,15 @@ begin
     FAction.Action := cCDImage;
     FAction.StartAction;
   end else
+  if (FAction.LastAction = cCDImage) and FSettings.Image.Verify  and
+     not FSettings.Cdrecord.Dummy then
+  begin
+    if LowerCase(ExtractFileExt(FSettings.Image.IsoPath)) = cExtISO then
+    begin
+      FAction.Action := cVerifyISOImage;
+      FAction.StartAction;
+    end;
+  end else
   {1:1-Kopie (Audio-CD): Nach dem Auslesen sofort schreiben}
   if (FAction.LastAction = cDAE) and FSettings.General.CDCopy then
   begin
@@ -1139,6 +1149,7 @@ begin
     RadioButtonImageTAO.Checked    := TAO;
     RadioButtonImageDAO.Checked    := DAO;
     RadioButtonImageRAW.Checked    := RAW;
+    CheckBoxISOVerify.Checked      := Verify;
     if RawMode = 'raw96r' then
     begin
       RadioButtonImageRaw96r.Checked := True;
@@ -1300,7 +1311,8 @@ begin
     IsoPath    := EditImageIsoPath.Text;
     TAO        := RadioButtonImageTAO.Checked;
     DAO        := RadioButtonImageDAO.Checked;
-    RAW        := RadioButtonImageRAW.Checked;                          
+    RAW        := RadioButtonImageRAW.Checked;
+    Verify     := CheckBoxISOVerify.Checked;                
     if RadioButtonImageRaw96r.Checked then
     begin
       RawMode := 'raw96r';
@@ -3661,6 +3673,7 @@ procedure TForm1.CheckControls;
           CheckBoxImageClone.Enabled := False;
         end;
       end;
+      CheckBoxISOVerify.Enabled := True;
     end else
     begin
       {Sonderfall: CUE-Image; Schreibmodus festgelegt, da cdrdao verwendet wird}
@@ -3677,6 +3690,7 @@ procedure TForm1.CheckControls;
       end;
       CheckBoxImageOverburn.Enabled := True;
       CheckBoxImageClone.Enabled := False;
+      CheckBoxISOVerify.Enabled := False;
     end;
     {Workaround for odd RadioButton behaviour}
     if FImageTabFirstWrite and Form1.Active and
@@ -4638,7 +4652,7 @@ begin
   {$ENDIF}
   {$IFDEF TestVerify}
   SendMessage(Self.Handle, WM_ButtonsOff, 0, 0);
-  FAction.Action := cVerify{XCD};
+  FAction.Action := cVerifyISOImage{XCD};
   FAction.StartAction;
   {$ENDIF}
   {$IFDEF AddCDText}
@@ -6417,7 +6431,8 @@ procedure TForm1.MiscPopupMenuPopup(Sender: TObject);
 begin
   if ((Sender as TPopupMenu).PopupComponent = CheckBoxDataCDVerify) or
      ((Sender as TPopupMenu).PopupComponent = CheckBoxXCDVerify) or
-     ((Sender as TPopupMenu).PopupComponent = CheckBoxDVDVideoVerify) then
+     ((Sender as TPopupMenu).PopupComponent = CheckBoxDVDVideoVerify) or
+     ((Sender as TPopupMenu).PopupComponent = CheckBoxISOVerify) then
   begin
     MiscPopupVerify.Visible := True;
     MiscPopupClearOutput.Visible := False;
@@ -6478,6 +6493,13 @@ begin
   if (FSettings.General.Choice = cDVDVideo) and InputOk then
   begin
     FAction.Action := cVerifyDVDVideo;
+    FAction.Reload := False;
+    FAction.StartAction;
+  end;
+  if (FSettings.General.Choice = cCDImage) and InputOk and
+     (LowerCase(ExtractFileExt(FSettings.Image.IsoPath)) = cExtISO) then
+  begin
+    FAction.Action := cVerifyISOImage;
     FAction.Reload := False;
     FAction.StartAction;
   end;

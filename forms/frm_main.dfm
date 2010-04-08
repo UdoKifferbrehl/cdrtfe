@@ -61,7 +61,7 @@ object Form1: TForm1
     Top = 8
     Width = 546
     Height = 305
-    ActivePage = TabSheet1
+    ActivePage = TabSheet7
     Anchors = [akLeft, akTop, akRight, akBottom]
     MultiLine = True
     TabOrder = 0
@@ -356,10 +356,6 @@ object Form1: TForm1
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -553,10 +549,6 @@ object Form1: TForm1
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -743,7 +735,7 @@ object Form1: TForm1
             Left = 0
             Top = 118
             Width = 294
-            Height = 136
+            Height = 117
             Align = alClient
             Columns = <
               item
@@ -775,7 +767,6 @@ object Form1: TForm1
             OnDragDrop = XCDEListView1DragDrop
             OnDragOver = XCDEListView1DragOver
             OnKeyDown = ListViewKeyDown
-            ExplicitHeight = 117
           end
         end
       end
@@ -865,10 +856,6 @@ object Form1: TForm1
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'CD-RW'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -925,10 +912,6 @@ object Form1: TForm1
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'CD-Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1003,10 +986,6 @@ object Form1: TForm1
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1168,10 +1147,6 @@ object Form1: TForm1
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'CD-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1366,7 +1341,7 @@ object Form1: TForm1
           object CheckBoxImageOverburn: TCheckBox
             Left = 16
             Top = 168
-            Width = 153
+            Width = 105
             Height = 17
             Caption = #220'berbrennen'
             TabOrder = 6
@@ -1386,6 +1361,15 @@ object Form1: TForm1
             Height = 17
             Caption = 'CD-Text'
             TabOrder = 8
+          end
+          object CheckBoxISOVerify: TCheckBox
+            Left = 128
+            Top = 168
+            Width = 113
+            Height = 17
+            Caption = 'Verify'
+            PopupMenu = MiscPopupMenu
+            TabOrder = 9
           end
         end
         object RadioButtonImageRead: TRadioButton
@@ -1419,10 +1403,6 @@ object Form1: TForm1
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1570,10 +1550,6 @@ object Form1: TForm1
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)

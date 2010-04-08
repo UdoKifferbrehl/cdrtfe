@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.02.2010
+  letzte Änderung  21.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -2308,6 +2308,10 @@ begin
                        Device := FSettings.DVDVideo.Device;
                        FData.CreateVerifyList(FVList, cDVDVideo);
                      end;
+    cVerifyISOImage: begin
+                       Device := FSettings.Image.Device;
+                       FVList.Add(FSettings.Image.IsoPath);
+                     end;
   end;
   Drive := FDevices.GetDriveLetter(Device);
   {Thread starten}
@@ -2322,6 +2326,10 @@ begin
     FVerificationThread.XCD := True;
     FVerificationThread.XCDExt := FSettings.XCD.Ext;
     FVerificationThread.XCDKeepExt := FSettings.XCD.KeepExt;
+  end;
+  if Action = cVerifyISOImage then
+  begin
+    FVerificationThread.ISOImage := True;
   end;
   FVerificationThread.StatusBar := FStatusBar;
   FVerificationThread.AutoExec := FSettings.CmdLineFlags.ExecuteProject;
@@ -2732,7 +2740,8 @@ begin
     cFixCD         : WriteTOC;
     cVerify,
     cVerifyXCD,
-    cVerifyDVDVideo: StartVerification(TempAction);
+    cVerifyDVDVideo,
+    cVerifyISOImage: StartVerification(TempAction);
   end;
 end;
 
