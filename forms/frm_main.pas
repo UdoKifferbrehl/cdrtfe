@@ -765,7 +765,7 @@ begin
     FAction.StartAction;
   end else
   if (FAction.LastAction = cCDImage) and FSettings.Image.Verify  and
-     not FSettings.Cdrecord.Dummy then
+     not FSettings.Cdrecord.Dummy and not FSettings.General.ImageRead then
   begin
     if LowerCase(ExtractFileExt(FSettings.Image.IsoPath)) = cExtISO then
     begin
