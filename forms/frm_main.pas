@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.04.2010
+  letzte Änderung  16.04.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,7 +26,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
-     DropTarget, DropSource,
+     DropTarget, DropSource, VistaAltFixUnit,
      c_filebrowser,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
@@ -3673,7 +3673,6 @@ procedure TForm1.CheckControls;
           CheckBoxImageClone.Enabled := False;
         end;
       end;
-      CheckBoxISOVerify.Enabled := True;
     end else
     begin
       {Sonderfall: CUE-Image; Schreibmodus festgelegt, da cdrdao verwendet wird}
@@ -4230,6 +4229,8 @@ procedure TForm1.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
+  {Fix für Win7-Vista-Alt-Bug}
+  TVistaAltFix.Create(Self);
   FImageTabFirstShow   := True;
   FImageTabFirstWrite  := True;
   FCheckingControls    := False;
