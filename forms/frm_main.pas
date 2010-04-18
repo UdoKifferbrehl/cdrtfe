@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.04.2010
+  letzte Änderung  17.04.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -469,6 +469,7 @@ type
     procedure LoadProject(const ListsOnly: Boolean);
     procedure SaveProject(const ListsOnly: Boolean);
     procedure SaveWinPos;
+    procedure SetGlobalWriter;
     procedure SetHelpFile;
     procedure SetSettings;
     procedure SetWinPos;
@@ -3617,7 +3618,7 @@ procedure TForm1.CheckControls;
         RadioButtonImageRead.Checked and FSettings.FileFlags.ReadcdOk;
     end;
     CheckBoxReadCDWriteCopy.Enabled :=
-      RadioButtonImageRead.Checked and FSettings.FileFlags.ReadcdOk;    
+      RadioButtonImageRead.Checked and FSettings.FileFlags.ReadcdOk;
     {Sektoren}
     if RadioButtonImageRead.Checked then
     begin
@@ -3750,6 +3751,25 @@ begin
   end;
   CheckControlsSpeeds;
   FCheckingControls := False;  
+end;
+
+{ SetGlobalWriter --------------------------------------------------------------
+
+  SetGlobalWriter sorgt dafür, daß bei allen Projekten das aktuelle Laufwerk
+  eingetellt wird (sofern es sich um einen Brenner handelt).                   }
+
+procedure TForm1.SetGlobalWriter;
+var ActivePage: Byte;
+    CurrDrive : Byte;
+    i         : Byte;
+begin
+  ActivePage := GetActivePage;
+  CurrDrive := FSettings.General.TabSheetDrive[ActivePage];
+  if (ActivePage <> cCDInfos) and (ActivePage <> cDAE) then
+  begin
+    for i := 1 to TabSheetCount do
+      FSettings.General.TabSheetDrive[i] := CurrDrive;
+  end;
 end;
 
 { SetButtons -------------------------------------------------------------------
@@ -4703,6 +4723,7 @@ procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
 begin
   case Key of
     VK_F12: ToggleStayOnTopState;
+    VK_F10: if ssCtrl in Shift then begin SetGlobalWriter; Key := 0; end;
   end;
 end;
 
