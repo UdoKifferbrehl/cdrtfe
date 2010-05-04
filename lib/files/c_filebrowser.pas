@@ -1,10 +1,10 @@
-{ $Id: c_filebrowser.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: c_filebrowser.pas,v 1.2 2010/05/04 09:59:31 kerberos002 Exp $
 
   c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
 
   Copyright (c) 2009-2010 Oliver Valencia
 
-  letzte Änderung  05.01.2010
+  letzte Änderung  04.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -158,6 +158,7 @@ end;
 
 procedure TFrameFileBrowser.Init;
 begin
+  Self.TabStop := False;
   Self.Color := clBtnFace;
   Self.Align := alClient;
   Label1.Caption := FLabelCaption;
