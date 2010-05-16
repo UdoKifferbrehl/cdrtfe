@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.04.2010
+  letzte Änderung  16.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1181,7 +1181,8 @@ end;
   SetSettings übernimmt die Einstellungen der Controls in FSettings.           }
 
 procedure TForm1.SetSettings;
-var i: Integer;
+var i   : Integer;
+    Temp: string;
 
   {Der Übersichtlichkeit wegen wurde die Bestimmung des gewählten Laufwerks und
    der Geschwindigkeit in eigene Funktionen ausgelagert.}
@@ -1280,17 +1281,18 @@ begin
     Device     := GetDevice(cDAE);
     Speed      := GetSpeed(cDAE);
     {ausgwählte Tracks merken}
-    Tracks := '';
+    Temp := '';
     for i := 0 to (DAEListView.Items.Count - 1) do
     begin
       if DAEListView.Items[i].Selected then
       begin
-        Tracks := Tracks + IntToStr(i + 1) + ',';
+        Temp := Temp + IntToStr(i + 1) + ',';
       end;
     end;
     {Letztes ',' entfernen, da sich TStringlist.Commatext je nach Compiler
      unterschiedlich verhält}
-    Delete(Tracks, Length(Tracks), 1);
+    Delete(Temp, Length(Temp), 1);
+    Tracks := Temp;
   end;
   {Image}
   FSettings.General.ImageRead := RadioButtonImageRead.Checked;
@@ -1513,7 +1515,7 @@ begin
     {Anmerkung: Erlaubt UDF wirklich beliebig tief liegende Ordner?}
     CheckFolder := not (ISODeepDir or (ISOLevel and (ISOLevelNr = 4)) or UDF);
   end;
-  FData.CheckDataCDFS(Path, FSettings.GetMaxFileNameLength, CheckFolder,
+  FData.CheckDataCDFS(Path, FSettings.DataCD.GetMaxFileNameLength, CheckFolder,
                       CheckAccess);
   {$IFDEF DebugErrorLists}
   FormDebug.Memo2.Lines.Assign(FData.ErrorListFiles);
@@ -5474,7 +5476,7 @@ begin
   if Node.Parent <> nil then {Folder}
   begin
     Path := GetPathFromNode(Node);
-    FData.RenameFolder(Path, S, FSettings.GetMaxFileNameLength,
+    FData.RenameFolder(Path, S, FSettings.DataCD.GetMaxFileNameLength,
                        FSettings.General.Choice);
     ErrorCode := FData.LastError;
     if ErrorCode = PD_NoError then
@@ -5612,7 +5614,7 @@ begin
   begin
     Path := GetPathFromNode(CDETreeView.Selected);
     FData.RenameFileByIndex(Item.Index - Offset, Path, S,
-                            FSettings.GetMaxFileNameLength,
+                            FSettings.DataCD.GetMaxFileNameLength,
                             FSettings.General.Choice);
     ErrorCode := FData.LastError;
     if ErrorCode = PD_NoError then

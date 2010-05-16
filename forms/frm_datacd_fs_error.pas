@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  16.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -131,7 +131,7 @@ begin
   ButtonIgnore.Visible := True;
 
   {maximale Länge entsprechend den Einstellungen feststelle}
-  FMaxLength := FSettings.GetMaxFileNameLength;
+  FMaxLength := FSettings.DataCD.GetMaxFileNameLength;
 
   {wieviele Namen müssen geändert werden?}
   Label1.Caption := Format(FLang.GMS('m502'), [FMaxLength]);
@@ -480,7 +480,7 @@ begin
   SplitString(Temp, ':', Path, Temp);
   if LastDelimiter('/', Path) = Length(Path) then      // Ordner
   begin
-    FData.RenameFolder(Path, S, FSettings.GetMaxFileNameLength,
+    FData.RenameFolder(Path, S, FSettings.DataCD.GetMaxFileNameLength,
                        FSettings.General.Choice);
     ErrorCode := FData.LastError;
     if ErrorCode = PD_NoError then

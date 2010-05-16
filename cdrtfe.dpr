@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  16.05.2010
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -54,6 +54,27 @@ uses
   frm_splash_screen in 'forms\frm_splash_screen.pas' {FormSplashScreen},
   cl_lang in 'core\classes\cl_lang.pas',
   cl_settings in 'core\classes\cl_settings.pas',
+  cl_abstractbase in 'core\classes\cl_abstractbase.pas',
+  cl_settings_general in 'core\classes\cl_settings_general.pas',
+  cl_settings_winpos in 'core\classes\cl_settings_winpos.pas',
+  cl_settings_fileexplorer in 'core\classes\cl_settings_fileexplorer.pas',
+  cl_settings_cmdlineflags in 'core\classes\cl_settings_cmdlineflags.pas',
+  cl_settings_fileflags in 'core\classes\cl_settings_fileflags.pas',
+  cl_settings_environment in 'core\classes\cl_settings_environment.pas',
+  cl_settings_drives in 'core\classes\cl_settings_drives.pas',
+  cl_settings_hacks in 'core\classes\cl_settings_hacks.pas',
+  cl_settings_cdrdao in 'core\classes\cl_settings_cdrdao.pas',
+  cl_settings_cdrecord in 'core\classes\cl_settings_cdrecord.pas',
+  cl_settings_datacd in 'core\classes\cl_settings_datacd.pas',
+  cl_settings_audiocd in 'core\classes\cl_settings_audiocd.pas',
+  cl_settings_xcd in 'core\classes\cl_settings_xcd.pas',
+  cl_settings_cdrw in 'core\classes\cl_settings_cdrw.pas',
+  cl_settings_cdinfo in 'core\classes\cl_settings_cdinfo.pas',
+  cl_settings_dae in 'core\classes\cl_settings_dae.pas',
+  cl_settings_image in 'core\classes\cl_settings_image.pas',
+  cl_settings_readcd in 'core\classes\cl_settings_readcd.pas',
+  cl_settings_videocd in 'core\classes\cl_settings_videocd.pas',
+  cl_settings_dvdvideo in 'core\classes\cl_settings_dvdvideo.pas',
   cl_cd in 'core\classes\cl_cd.pas',
   cl_projectdata in 'core\classes\cl_projectdata.pas',
   cl_action in 'core\classes\cl_action.pas',
