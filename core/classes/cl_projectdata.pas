@@ -2,10 +2,10 @@
 
   cl_projectdata.pas:
 
-  Copyright (c) 2004-2009 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  18.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -109,8 +109,10 @@ unit cl_projectdata;
 
 interface
 
-uses Forms, Classes, SysUtils, FileCtrl, ComCtrls,
-     cl_cd, cl_lang, f_cdtext, f_largeint, const_core, userevents;
+uses Forms, Classes, SysUtils, ComCtrls,
+     cl_projectdata_datacd, cl_projectdata_audiocd, cl_projectdata_xcd,
+     cl_projectdata_videocd, cl_projectdata_dvdvideo, cl_projectdata_dae,
+     cl_lang, f_cdtext, const_core, userevents;
 
 const PD_NoError = 0;          {Fehlercodes}
       PD_FolderNotUnique = 1;
@@ -264,7 +266,7 @@ procedure ExtractTrackInfoFromEntry(const Entry: string; var Name, Path: string;
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     f_filesystem, f_strings, f_stringlist, const_tabsheets;
+     f_strings, f_stringlist, const_tabsheets;
 
 { TProjectData --------------------------------------------------------------- }
 
@@ -1643,7 +1645,8 @@ end;
   Ziel-Dateiname, Quell-Dateiname (inkl.Pfad) und Dateilgröße auf. Eigentlich
   müßte diese Prozedur eine Methode der entsprechenden Pfadlisten-Objekte sein,
   aber der Einfachheit halber wird sie von cl_projectdata.pas zu Verfügung
-  gestellt, damit cl_cd.pas nicht in frm_main.pas eingebunden werden muß.      }
+  gestellt, damit Units, die die Objekte deklarieren nicht in frm_main.pas
+  eingebunden werden muß.                                                      }
 
 procedure ExtractFileInfoFromEntry(const Entry: string;
                                    var Name, Path: string;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  18.05.2010
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -75,8 +75,13 @@ uses
   cl_settings_readcd in 'core\classes\cl_settings_readcd.pas',
   cl_settings_videocd in 'core\classes\cl_settings_videocd.pas',
   cl_settings_dvdvideo in 'core\classes\cl_settings_dvdvideo.pas',
-  cl_cd in 'core\classes\cl_cd.pas',
   cl_projectdata in 'core\classes\cl_projectdata.pas',
+  cl_projectdata_xcd in 'core\classes\cl_projectdata_xcd.pas',
+  cl_projectdata_audiocd in 'core\classes\cl_projectdata_audiocd.pas',
+  cl_projectdata_dae in 'core\classes\cl_projectdata_dae.pas',
+  cl_projectdata_datacd in 'core\classes\cl_projectdata_datacd.pas',
+  cl_projectdata_dvdvideo in 'core\classes\cl_projectdata_dvdvideo.pas',
+  cl_projectdata_videocd in 'core\classes\cl_projectdata_videocd.pas',
   cl_action in 'core\classes\cl_action.pas',
   cl_cdrtfedata in 'core\common\cl_cdrtfedata.pas',
   cl_cmdlineparser in 'core\common\cl_cmdlineparser.pas',

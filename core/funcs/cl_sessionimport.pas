@@ -4,7 +4,7 @@
 
   Copyright (c) 2008-2010 Oliver Valencia
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  18.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -74,8 +74,8 @@ type TGetFileSysMode = (gfsmPVD, gfsmISO, gfsmRR, gfsmJoliet);
 implementation
 
 uses f_logfile, cl_cdrtfedata, cl_lang, f_getdosoutput, f_helper, f_strings,
-     f_filesystem, cl_cd, f_window, f_locations, const_locations, const_common,
-     c_frametopbanner;
+     f_filesystem, cl_projectdata_datacd, f_window, f_locations,
+     const_locations, const_common, c_frametopbanner;
 
 const SearchDir    : string = 'Directory listing of ';
       SearchDirID  : string = 'd---------';
