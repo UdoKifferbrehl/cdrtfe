@@ -1,4 +1,4 @@
-{ $Id: const_tabsheets.pas,v 1.2 2010/04/08 13:38:31 kerberos002 Exp $
+{ $Id: const_tabsheets.pas,v 1.3 2010/05/20 14:38:10 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.03.2010
+  letzte Änderung  20.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,7 +21,9 @@ unit const_tabsheets;
 
 interface
 
-const {für TSettings.General.Choice und TAction}
+const TabSheetCount = 9;
+
+      {für TSettings.General.Choice und TAction}
       cDataCD         = 1;
       cAudioCD        = 2;
       cXCD            = 3;

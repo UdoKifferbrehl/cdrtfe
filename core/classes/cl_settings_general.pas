@@ -1,4 +1,4 @@
-{ $Id: cl_settings_general.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_general.pas,v 1.2 2010/05/20 14:38:10 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  20.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -68,9 +68,7 @@ unit cl_settings_general;
 
 interface
 
-uses Classes, IniFiles, SysUtils, cl_abstractbase;
-
-const TabSheetCount = 9;
+uses Classes, IniFiles, SysUtils, cl_abstractbase, const_tabsheets;
 
 type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
 
@@ -161,8 +159,6 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
      end;
 
 implementation
-
-uses const_tabsheets;
 
 { TGeneralSettings ----------------------------------------------------------- }
 
