@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.05.2010
+  letzte Änderung  23.05.2010
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -53,8 +53,8 @@ uses
   frm_dae_options in 'forms\frm_dae_options.pas' {FormDAEOptions},
   frm_splash_screen in 'forms\frm_splash_screen.pas' {FormSplashScreen},
   cl_lang in 'core\classes\cl_lang.pas',
-  cl_settings in 'core\classes\cl_settings.pas',
   cl_abstractbase in 'core\classes\cl_abstractbase.pas',
+  cl_settings in 'core\classes\cl_settings.pas',
   cl_settings_general in 'core\classes\cl_settings_general.pas',
   cl_settings_winpos in 'core\classes\cl_settings_winpos.pas',
   cl_settings_fileexplorer in 'core\classes\cl_settings_fileexplorer.pas',
@@ -76,13 +76,25 @@ uses
   cl_settings_videocd in 'core\classes\cl_settings_videocd.pas',
   cl_settings_dvdvideo in 'core\classes\cl_settings_dvdvideo.pas',
   cl_projectdata in 'core\classes\cl_projectdata.pas',
-  cl_projectdata_xcd in 'core\classes\cl_projectdata_xcd.pas',
-  cl_projectdata_audiocd in 'core\classes\cl_projectdata_audiocd.pas',
-  cl_projectdata_dae in 'core\classes\cl_projectdata_dae.pas',
   cl_projectdata_datacd in 'core\classes\cl_projectdata_datacd.pas',
+  cl_projectdata_xcd in 'core\classes\cl_projectdata_xcd.pas',
   cl_projectdata_dvdvideo in 'core\classes\cl_projectdata_dvdvideo.pas',
+  cl_projectdata_audiocd in 'core\classes\cl_projectdata_audiocd.pas',
   cl_projectdata_videocd in 'core\classes\cl_projectdata_videocd.pas',
+  cl_projectdata_dae in 'core\classes\cl_projectdata_dae.pas',
+  cl_abstractbaseaction in 'core\classes\cl_abstractbaseaction.pas',
   cl_action in 'core\classes\cl_action.pas',
+  cl_action_cdinfo in 'core\classes\cl_action_cdinfo.pas',
+  cl_action_fixate in 'core\classes\cl_action_fixate.pas',
+  cl_action_erase in 'core\classes\cl_action_erase.pas',
+  cl_action_daereadtoc in 'core\classes\cl_action_daereadtoc.pas',
+  cl_action_daegrabtracks in 'core\classes\cl_action_daegrabtracks.pas',
+  cl_action_image in 'core\classes\cl_action_image.pas',
+  cl_action_audiocd in 'core\classes\cl_action_audiocd.pas',
+  cl_action_videocd in 'core\classes\cl_action_videocd.pas',
+  cl_action_dvdvideo in 'core\classes\cl_action_dvdvideo.pas',
+  cl_action_datacd in 'core\classes\cl_action_datacd.pas',
+  cl_action_xcd in 'core\classes\cl_action_xcd.pas',
   cl_cdrtfedata in 'core\common\cl_cdrtfedata.pas',
   cl_cmdlineparser in 'core\common\cl_cmdlineparser.pas',
   cl_devices in 'core\common\cl_devices.pas',

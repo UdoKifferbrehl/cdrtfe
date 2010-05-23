@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  23.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4385,6 +4385,7 @@ begin
       FAction.FormHandle := Self.Handle;
       FAction.OnMessageShow := MessageShow;
       FAction.OnUpdatePanels := UpdatePanels;
+      FAction.Init;
     end;
     {falls der Aufruf mit /hide erfolgte, Hauptfenster verstecken}
     if FSettings.CmdLineFlags.Hide then

@@ -1,10 +1,10 @@
-{ $Id: f_strings.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_strings.pas,v 1.2 2010/05/23 18:51:56 kerberos002 Exp $
 
   f_strings.pas: String-Funktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  22.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -32,6 +32,7 @@
     StringRight(const Source, Delimiter: string): string;
     StrToFloatDef(const S: string; Default: Extended): Extended
     TryUTF8ToAnsi(const S: string): string
+    UnescapeString(s: string): string
     UnQuote(const S: string): string
 
 }
@@ -66,6 +67,7 @@ function StringLeft(const Source, Delimiter: string): string;
 function StringRight(const Source, Delimiter: string): string;
 function StrToFloatDef(const S: string; Default: Extended): Extended;
 function TryUTF8ToAnsi(const S: string): string;
+function UnescapeString(s: string): string;
 function UnQuote(const S: string): string;
 procedure SplitString(Source, Delimiter: string; var Target1, Target2: string);
 procedure SizeToStringSetUnits(const B, KiB, MiB, GiB: string);
@@ -338,6 +340,22 @@ function TryUTF8ToAnsi(const s: string): string;
 begin
   Result := UTF8ToAnsi(s);
   if Result = '' then Result := s;
+end;
+
+{ UnescapeString ---------------------------------------------------------------
+
+  UnescapeString entfernt Anführungszeichen am Anfang und Ende sowie '\' als
+  Esacpe-Zeichen.                                                              }
+
+function UnescapeString(s: string): string;
+begin
+  if Pos('''', s) = 1 then Delete(s, 1, 1);
+  if s[Length(s)] = '''' then Delete(s, Length(s), 1);
+  while Pos('\', s) > 0 do
+  begin
+    Delete(s, Pos('\', s), 1);
+  end;
+  Result := s;
 end;
 
 end.

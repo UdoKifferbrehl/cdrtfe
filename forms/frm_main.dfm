@@ -1806,7 +1806,7 @@ object Form1: TForm1
     end
     object ButtonAbort: TButton
       Left = 102
-      Top = 96
+      Top = 95
       Width = 75
       Height = 25
       Caption = 'Abbrechen!'
