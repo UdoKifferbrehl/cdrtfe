@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.05.2010
+  letzte Änderung  25.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -741,7 +741,8 @@ begin
   FAction.CleanUp(2);  
   {Thread zu Vergleichen der Dateien starten}
   if (FAction.LastAction = cDataCD) and FSettings.DataCD.Verify  and
-     not (FSettings.DataCD.ImageOnly or FSettings.Cdrecord.Dummy) then
+     not ((FSettings.DataCD.ImageOnly and not FSettings.DataCD.OnTheFly)
+          or FSettings.Cdrecord.Dummy) then
   begin
     FAction.Action := cVerify;
     FAction.StartAction;
@@ -753,7 +754,8 @@ begin
     FAction.StartAction;
   end else
   if (FAction.LastAction = cDVDVideo) and FSettings.DVDVideo.Verify  and
-     not (FSettings.DVDVideo.ImageOnly or FSettings.Cdrecord.Dummy) then
+     not ((FSettings.DVDVideo.ImageOnly and not FSettings.DVDVideo.OnTheFly)
+          or FSettings.Cdrecord.Dummy) then
   begin
     FAction.Action := cVerifyDVDVideo;
     FAction.StartAction;
