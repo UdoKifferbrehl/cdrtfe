@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.03.2010
+  letzte Änderung  26.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -640,37 +640,51 @@ end;
   diese Datei fehlen, bleiben die Stringproperties unverändert.                }
 
 procedure TLang.SetFormLang(Form: TForm);
-var j, k    : Integer;
-    FormName: string;
-    Name    : string;
-    Value   : string;
-    C       : TComponent;
-begin
-  if FLangFileFound then
+
+  procedure LoadComps(Comp: TComponent; Prefix: string);
+  var j, k        : Integer;
+      CurrCompName: string;
+      CurrCompCap : string;
+      CurrCompHint: string;
+      Name        : string;
+      Value       : string;
+      C           : TComponent;
   begin
-    FormName := Form.Name;
+    if (Comp is TForm) then
+    begin
+      CurrCompName := (Comp as TForm).Name;
+      CurrCompCap  := (Comp as TForm).Caption;
+      CurrCompHint := (Comp as TForm).Hint;
+    end else
+    if (Comp is TFrame) then
+    begin
+      CurrCompName := (Comp as TFrame).Name;
+      CurrCompCap  := '';
+      CurrCompHint := (Comp as TFrame).Hint;
+    end;
+    CurrCompName := Prefix + CurrCompName;
     {Form.Caption}
-    Name := FormName + '.Caption';
+    Name := CurrCompName + '.Caption';
     Value := FComponentStrings.Values[Name];
     if Value <> '' then
     begin
-      Form.Caption := Value;
+      if (Comp is TForm) then (Comp as TForm).Caption := Value;
     end;
     {Form.Hint}
-    Name := FormName + '.Hint';
+    Name := CurrCompName + '.Hint';
     Value := FComponentStrings.Values[Name];
     if Value <> '' then
     begin
       Form.Hint := Value;
     end;
     {jetzt die Komponenten des Forms}
-    for j := 0 to Form.ComponentCount - 1 do
+    for j := 0 to C.ComponentCount - 1 do
     begin
-      C := Form.Components[j];
+      C := Comp.Components[j];
       {C.Caption}
       if PropertyExists(C, 'Caption') then
       begin
-        Name := FormName + '.' + C.Name + '.Caption';
+        Name := CurrCompName + '.' + C.Name + '.Caption';
         Value := FComponentStrings.Values[Name];
         if Value <> '' then
         begin
@@ -680,7 +694,7 @@ begin
       {C.Hint}
       if PropertyExists(C, 'Hint') then
       begin
-        Name := FormName + '.' + C.Name + '.Hint';
+        Name := CurrCompName + '.' + C.Name + '.Hint';
         Value := FComponentStrings.Values[Name];
         if Value <> '' then
         begin
@@ -693,7 +707,7 @@ begin
       {C.Title}
       if PropertyExists(C, 'Title') then
       begin
-        Name := FormName + '.' + C.Name + '.Title';
+        Name := CurrCompName + '.' + C.Name + '.Title';
         Value := FComponentStrings.Values[Name];
         if Value <> '' then
         begin
@@ -703,7 +717,7 @@ begin
       {C.DisplayLabel}
       if PropertyExists(C, 'DisplayLabel') then
       begin
-        Name := FormName + '.' + C.Name + '.DisplayLabel';
+        Name := CurrCompName + '.' + C.Name + '.DisplayLabel';
         Value := FComponentStrings.Values[Name];
         if Value <> '' then
         begin
@@ -713,7 +727,7 @@ begin
       {C.Filter}
       if PropertyExists(C, 'Filter') then
       begin
-        Name := FormName + '.' + C.Name + '.Filter';
+        Name := CurrCompName + '.' + C.Name + '.Filter';
         Value := FComponentStrings.Values[Name];
         if Value <> '' then
         begin
@@ -727,7 +741,7 @@ begin
         begin
           for k := 0 to (C as TMemo).Lines.Count - 1 do
           begin
-            Name := FormName + '.' + C.Name + '.Lines' + IntToStr(k);
+            Name := CurrCompName + '.' + C.Name + '.Lines' + IntToStr(k);
             Value := FComponentStrings.Values[Name];
             if Value <> '' then
             begin
@@ -743,7 +757,7 @@ begin
         begin
           for k := 0 to (C as TListBox).Items.Count - 1 do
           begin
-            Name := FormName + '.' + C.Name + '.Items' + IntToStr(k);
+            Name := CurrCompName + '.' + C.Name + '.Items' + IntToStr(k);
             Value := FComponentStrings.Values[Name];
             if Value <> '' then
             begin
@@ -756,7 +770,7 @@ begin
           begin
             for k := 0 to (C as TComboBox).Items.Count - 1 do
             begin
-              Name := FormName + '.' + C.Name + '.Items' + IntToStr(k);
+              Name := CurrCompName + '.' + C.Name + '.Items' + IntToStr(k);
               Value := FComponentStrings.Values[Name];
               if Value <> '' then
               begin
@@ -773,7 +787,7 @@ begin
         begin
           for k := 0 to (C as TListView).Columns.Count - 1 do
           begin
-            Name := FormName + '.' + C.Name + '.Columns' + IntToStr(k) +
+            Name := CurrCompName + '.' + C.Name + '.Columns' + IntToStr(k) +
                     '.Caption';
             Value := FComponentStrings.Values[Name];
             if Value <> '' then
@@ -783,9 +797,15 @@ begin
           end;
         end;
       end;
-      {auf weitere Properties kann verzichtet werden, da sie in cdrtfe nicht
-       verwendet werden}
+      {C ist ein Frame}
+      if (C is TFrame) then LoadComps(C, CurrCompName + '.');
     end;
+  end;
+
+begin
+  if FLangFileFound then
+  begin
+    LoadComps(Form, '');
   end;
 end;
 
@@ -877,26 +897,40 @@ end;
 
 procedure ExportStringProperties;
 var OutFile: TIniFile;
-    i: Integer;
+    i      : Integer;
 
   {lokale Prozedur von ExportProperties}
-  procedure SaveForm(Comp: TComponent);
-  var j, k    : Integer;
-      Section : string;
-      FormName: string;
-      Name    : string;
-      Value   : string;
-      C       : TComponent;
+  procedure SaveComps(Comp: TComponent; Prefix: string);
+  var j, k        : Integer;
+      Section     : string;
+      CurrCompName: string;
+      CurrCompCap : string;
+      CurrCompHint: string;
+      Name        : string;
+      Value       : string;
+      C           : TComponent;
   begin
     Section := 'Lang1';
-    FormName := (Comp as TForm).Name;
+    if (Comp is TForm) then
+    begin
+      CurrCompName := (Comp as TForm).Name;
+      CurrCompCap  := (Comp as TForm).Caption;
+      CurrCompHint := (Comp as TForm).Hint;
+    end else
+    if (Comp is TFrame) then
+    begin
+      CurrCompName := (Comp as TFrame).Name;
+      CurrCompCap  := '';
+      CurrCompHint := (Comp as TFrame).Hint;
+    end;
+    CurrCompName := Prefix + CurrCompName;
     {Form.Caption}
-    Name := FormName + '.Caption';
-    Value := (Comp as TForm).Caption;
+    Name := CurrCompName + '.Caption';
+    Value := CurrCompCap;
     if Value <> '' then OutFile.WriteString(Section, Name, Value);
     {Form.Hint}
-    Name := FormName + '.Hint';
-    Value := (Comp as TForm).Hint;
+    Name := CurrCompName + '.Hint';
+    Value := CurrCompHint;
     if Value <> '' then OutFile.WriteString(Section, Name, Value);
     {jetzt die Komponenten des Forms}
     for j := 0 to Comp.ComponentCount - 1 do
@@ -905,35 +939,35 @@ var OutFile: TIniFile;
       {C.Caption}
       if PropertyExists(C, 'Caption') then
       begin
-        Name := FormName + '.' + C.Name + '.Caption';
+        Name := CurrCompName + '.' + C.Name + '.Caption';
         Value := GetCompProp(C, 'Caption');
         if Value <> '' then OutFile.WriteString(Section, Name, Value);
       end;
       {C.Hint}
       if PropertyExists(C, 'Hint') then
       begin
-        Name := FormName + '.' + C.Name + '.Hint';
+        Name := CurrCompName + '.' + C.Name + '.Hint';
         Value := GetCompProp(C, 'Hint');
         if Value <> '' then OutFile.WriteString(Section, Name, Value);
       end;
       {C.Title}
       if PropertyExists(C, 'Title') then
       begin
-        Name := FormName + '.' + C.Name + '.Title';
+        Name := CurrCompName + '.' + C.Name + '.Title';
         Value := GetCompProp(C, 'Title');
         if Value <> '' then OutFile.WriteString(Section, Name, Value);
       end;
       {C.DisplayLabel}
       if PropertyExists(C, 'DisplayLabel') then
       begin
-        Name := FormName + '.' + C.Name + '.DisplayLabel';
+        Name := CurrCompName + '.' + C.Name + '.DisplayLabel';
         Value := GetCompProp(C, 'DisplayLabel');
         if Value <> '' then OutFile.WriteString(Section, Name, Value);
       end;
       {C.Filter}
       if PropertyExists(C, 'Filter') then
       begin
-        Name := FormName + '.' + C.Name + '.Filter';
+        Name := CurrCompName + '.' + C.Name + '.Filter';
         Value := GetCompProp(C, 'Filter');
         if Value <> '' then OutFile.WriteString(Section, Name, Value);
       end;
@@ -944,7 +978,7 @@ var OutFile: TIniFile;
         begin
           for k := 0 to (C as TMemo).Lines.Count - 1 do
           begin
-            Name := FormName + '.' + C.Name + '.Lines' + IntToStr(k);
+            Name := CurrCompName + '.' + C.Name + '.Lines' + IntToStr(k);
             Value := (C as TMemo).Lines[k];
             if Value <> '' then OutFile.WriteString(Section, Name, Value);
           end;
@@ -957,7 +991,7 @@ var OutFile: TIniFile;
         begin
           for k := 0 to (C as TListBox).Items.Count - 1 do
           begin
-            Name := FormName + '.' + C.Name + '.Items' + IntToStr(k);
+            Name := CurrCompName + '.' + C.Name + '.Items' + IntToStr(k);
             Value := (C as TListBox).Items[k];
             if Value <> '' then OutFile.WriteString(Section, Name, Value);
           end;
@@ -967,7 +1001,7 @@ var OutFile: TIniFile;
           begin
             for k := 0 to (C as TComboBox).Items.Count - 1 do
             begin
-              Name := FormName + '.' + C.Name + '.Items' + IntToStr(k);
+              Name := CurrCompName + '.' + C.Name + '.Items' + IntToStr(k);
               Value := (C as TComboBox).Items[k];
               if Value <> '' then OutFile.WriteString(Section, Name, Value);
             end;
@@ -981,15 +1015,15 @@ var OutFile: TIniFile;
         begin
           for k := 0 to (C as TListView).Columns.Count - 1 do
           begin
-            Name := FormName + '.' + C.Name + '.Columns' + IntToStr(k) +
+            Name := CurrCompName + '.' + C.Name + '.Columns' + IntToStr(k) +
                     '.Caption';
             Value := (C as TListView).Columns[k].Caption;
             if Value <> '' then OutFile.WriteString(Section, Name, Value);
           end;
         end;
       end;
-      {auf weitere Properties kann verzichtet werden, da sie in cdrtfe nicht
-       verwendet werden}
+      {C ist ein Frame}
+      if (C is TFrame) then SaveComps(C, CurrCompName + '.');
     end;
   end;
 
@@ -999,7 +1033,7 @@ begin
   begin
     if (Application.Components[i] is TForm) then
     begin
-      SaveForm(Application.Components[i]);
+      SaveComps(Application.Components[i], '');
     end;
   end;
   OutFile.Free;
