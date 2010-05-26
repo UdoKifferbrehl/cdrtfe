@@ -1,4 +1,4 @@
-{ $Id: cl_action.pas,v 1.6 2010/05/23 18:51:55 kerberos002 Exp $
+{ $Id: cl_action.pas,v 1.7 2010/05/26 10:52:44 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.05.2010
+  letzte Änderung  26.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -143,13 +143,17 @@ end;
 procedure TCDAction.SetEjectDrive;
 begin
   case LastAction of
-    cDataCD  : FEjectDevice := FSettings.DataCD.Device;  
-    cAudioCD : FEjectDevice := FSettings.AudioCD.Device;
-    cXCD     : FEjectDevice := FSettings.XCD.Device;
-    cCDImage : FEjectDevice := FSettings.Image.Device;
-    cDVDVideo: FEjectDevice := FSettings.DVDVideo.Device;
-    cVideoCD : FEjectDevice := FSettings.VideoCD.Device;
-    cCDRW    : FEjectDevice := FSettings.CDRW.Device;    
+    cDataCD        : FEjectDevice := FSettings.DataCD.Device;
+    cAudioCD       : FEjectDevice := FSettings.AudioCD.Device;
+    cXCD           : FEjectDevice := FSettings.XCD.Device;
+    cCDImage       : FEjectDevice := FSettings.Image.Device;
+    cDVDVideo      : FEjectDevice := FSettings.DVDVideo.Device;
+    cVideoCD       : FEjectDevice := FSettings.VideoCD.Device;
+    cCDRW          : FEjectDevice := FSettings.CDRW.Device;
+    cVerify        : FEjectDevice := FSettings.DataCD.Device;
+    cVerifyXCD     : FEjectDevice := FSettings.XCD.Device;
+    cVerifyDVDVideo: FEjectDevice := FSettings.DVDVideo.Device;
+    cVerifyISOImage: FEjectDevice := FSettings.Image.Device;
   end;
 end;
 
