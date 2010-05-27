@@ -1,16 +1,16 @@
-{ $Id: c_frametopbanner.pas,v 1.3 2010/01/11 06:37:38 kerberos002 Exp $
+{ $Id: c_frametopbanner.pas,v 1.4 2010/05/27 19:32:33 kerberos002 Exp $
 
   c_frametopbanner: Komponente zur Darstellung eines Banners
 
-  Copyright (c) 2009 Oliver Valencia
+  Copyright (c) 2009-2010 Oliver Valencia
 
-  letzte Änderung  10.08.2009
+  letzte Änderung  27.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
   Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
-  c_frametopbanner implementiert eine Komponente auf Basis einer TFrames, mit
+  c_frametopbanner implementiert eine Komponente auf Basis eines TFrames, mit
   der eine Art Banner dargestellt werden kann.
 
 
@@ -30,10 +30,9 @@ interface
 
 {$I directives.inc}
 
-uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls,
-  {$IFDEF UseImagingLib}ImagingComponents{$ELSE}jpeg{$ENDIF};
+uses {$IFDEF UseImagingLib}ImagingComponents,{$ELSE}jpeg,{$ENDIF}
+     Classes, Graphics, Forms, ExtCtrls, StdCtrls, Controls;
+
 
 type
   TFrameTopBanner = class(TFrame)
