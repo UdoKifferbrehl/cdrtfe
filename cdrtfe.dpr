@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.05.2010
+  letzte Änderung  31.05.2010
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -38,7 +38,7 @@ program cdrtfe;
 uses
   Forms,
   f_logfile in 'lib\misc\f_logfile.pas',
-  frm_main in 'forms\frm_main.pas' {Form1},
+  frm_main in 'forms\frm_main.pas' {CdrtfeMainForm},
   frm_datacd_fs in 'forms\frm_datacd_fs.pas' {FormDataCDFS},
   frm_datacd_options in 'forms\frm_datacd_options.pas' {FormDataCDOptions},
   frm_settings in 'forms\frm_settings.pas' {FormSettings},
@@ -180,8 +180,8 @@ begin
   if not IsAlreadyRunning then FormSplashScreen.ShowEx;
   Application.Initialize;
   FormSplashScreen.UpdateEx;
-  {$IFDEF WriteLogfile} AddLog('Application.CreateForm1' + CRLF, 0); {$ENDIF}
-  Application.CreateForm(TForm1, Form1);
+  {$IFDEF WriteLogfile} AddLog('Application.CdrtfeMainForm' + CRLF, 0); {$ENDIF}
+    Application.CreateForm(TCdrtfeMainForm, CdrtfeMainForm);
   FormSplashScreen.HideEx;
   FormSplashScreen.Free;
   {$IFDEF WriteLogfile} AddLog('Application.Run' + CRLF, 0); {$ENDIF}
