@@ -1,4 +1,4 @@
-object Form1: TForm1
+object CdrtfeMainForm: TCdrtfeMainForm
   Left = 199
   Top = 114
   HelpContext = 1100
@@ -356,6 +356,10 @@ object Form1: TForm1
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -549,6 +553,10 @@ object Form1: TForm1
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -856,6 +864,10 @@ object Form1: TForm1
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'CD-RW'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -912,6 +924,10 @@ object Form1: TForm1
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'CD-Infos'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -986,6 +1002,10 @@ object Form1: TForm1
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1147,6 +1167,10 @@ object Form1: TForm1
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'CD-Image'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1403,6 +1427,10 @@ object Form1: TForm1
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1550,6 +1578,10 @@ object Form1: TForm1
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         538
         277)

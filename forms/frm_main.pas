@@ -1,11 +1,11 @@
 { cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
-  frm_main.pas: Hauptfenster                   
+  frm_main.pas: Hauptfenster
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.05.2010
+  letzte Änderung  31.05.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -34,7 +34,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      usermessages, const_core;
 
 type
-  TForm1 = class(TForm)
+  TCdrtfeMainForm = class(TForm)
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     OpenDialog1: TOpenDialog;
@@ -565,7 +565,7 @@ type
     { Public declarations }
   end;
 
-var Form1: TForm1;
+var CdrtfeMainForm: TCdrtfeMainForm;
 
 implementation
 
@@ -600,7 +600,7 @@ var DeviceChangeNotifier: TDeviceChangeNotifier;
   Nimmt Dateinamen entgegen und fügt sie der aktuellen Dateiliste hinzu, wenn
   WM_COPYDATA empfangen wird.                                                  }
 
-procedure TForm1.WMCopyData(var Msg: TWMCopyData);
+procedure TCdrtfeMainForm.WMCopyData(var Msg: TWMCopyData);
 var temp: PChar;
     FolderAdded: Boolean;
 begin
@@ -616,7 +616,7 @@ end;
   WMDROPFILES nimmt Datei- und Verzeichnisnamen entgegen, wenn per Drag-and-Drop
   diese aus dem Explorer auf cdrtfe gezogen werden.                            }
 
-procedure TForm1.WMDROPFILES (var Msg: TMessage);
+procedure TCdrtfeMainForm.WMDROPFILES (var Msg: TMessage);
 var i, Anzahl, Size: Integer;
     Dateiname      : PChar;
     Filename       : string;
@@ -626,7 +626,7 @@ begin
   inherited;
   FileList := TStringList.Create;
   FolderAdded := False;
-  Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
+  Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
   {Wieviele Objekte wurden auf cdrtfe gezogen?}
   Anzahl := DragQueryFile(Msg.WParam, $FFFFFFFF, nil, 0);
   for i := 0 to (Anzahl - 1) do
@@ -659,12 +659,12 @@ end;
   Ermöglichen das (De-)Aktivieren der Buttons aus einer anderen Klasse  heraus,
   ohne direkten Zugriff auf die Controls.                                      }
 
-procedure TForm1.WMButtonsOff(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMButtonsOff(var Msg: TMessage);
 begin
   SetButtons(oOff);
 end;
 
-procedure TForm1.WMButtonsOn(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMButtonsOn(var Msg: TMessage);
 begin
   SetButtons(oOn);
 end;
@@ -674,7 +674,7 @@ end;
   Wenn WM_FTerminated empfangen wird, ist der Thread, der Dateiduplikate sucht
   beendet worden.                                                              }
 
-procedure TForm1.WMFTerminated(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMFTerminated(var Msg: TMessage);
 begin
   {$IFDEF DebugFindDups}
   SendMessage(Handle, WM_VTerminated, 0, 0);
@@ -703,7 +703,7 @@ end;
   Wenn WM_ITerminated empfangen wird, ist der Thread, der die XCD-Info-Datei
   erstellt, beendet worden.                                                    }
 
-procedure TForm1.WMITerminated(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMITerminated(var Msg: TMessage);
 begin
   {$IFDEF DebugCreateInfoFile}
   SendMessage(Handle, WM_VTerminated, 0, 0);
@@ -729,7 +729,7 @@ end;
 
   Wenn WM_TTerminated empfangen wird, ist der zweite Thread beendet worden.    }
 
-procedure TForm1.WMTTerminated(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMTTerminated(var Msg: TMessage);
 begin
   {$IFDEF ShowCmdError}
   FExitCode := Msg.wParam;
@@ -793,7 +793,7 @@ end;
   Wenn WM_VTerminated empfangen wird, ist der dritte Thread beendet bzw. gar
   nicht gestartet worden.                                                      }
 
-procedure TForm1.WMVTerminated(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMVTerminated(var Msg: TMessage);
 var LogFile: string;
 begin                           
   {$IFDEF ShowExecutionTime}
@@ -839,33 +839,33 @@ end;
   Wenn eine dieser Messages empfangen wird, ist die entsprechende Registerkarte
   in den Vordergrund zu bringen.                                               }
 
-procedure TForm1.WMActivateDataTab(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMActivateDataTab(var Msg: TMessage);
 begin
   ActivateTab(cDataCD);
 end;
 
-procedure TForm1.WMActivateAudioTab(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMActivateAudioTab(var Msg: TMessage);
 begin
   ActivateTab(cAudioCD);
 end;
 
-procedure TForm1.WMActivateXcdTab(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMActivateXcdTab(var Msg: TMessage);
 begin
   ActivateTab(cXCD);
 end;
 
-procedure TForm1.WMActivateVcdTab(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMActivateVcdTab(var Msg: TMessage);
 begin
   ActivateTab(cVideoCD);
 end;
 
-procedure TForm1.WMActivateImgTab(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMActivateImgTab(var Msg: TMessage);
 begin
   ActivateTab(cCDImage);
   RadioButtonImageWrite.Checked := True;
 end;
 
-procedure TForm1.WMActivateDVDTab(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMActivateDVDTab(var Msg: TMessage);
 begin
   ActivateTab(cDVDVideo);
 end;
@@ -875,7 +875,7 @@ end;
   Wird diese Message empfangen, soll die Anzeige der Statusinformationen
   aktualisiert werden.                                                         }
 
-procedure TForm1.WMUpdateGauges(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMUpdateGauges(var Msg: TMessage);
 begin
   UpdateGauges;
 end;
@@ -884,10 +884,10 @@ end;
 
   Wenn WM_EXECUTE empfangen wird, soll automatisch gestartet werden.           }
 
-procedure TForm1.WMExecute(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMExecute(var Msg: TMessage);
 begin
   FSettings.CmdLineFlags.ExecuteProject := True;
-  Form1.Activate;
+  Self.Activate;
 end;
 
 { WMExitAfterExecute -----------------------------------------------------------
@@ -895,7 +895,7 @@ end;
   Wenn WM_ExitAfterExecute empfangen wird, soll cdrtfe nach dem automatischen
   Start beendet werden.                                                        }
 
-procedure TForm1.WMExitAfterExecute(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMExitAfterExecute(var Msg: TMessage);
 begin
   FSettings.CmdLineFlags.ExitAfterExecution := True;
 end;
@@ -905,7 +905,7 @@ end;
   Wenn WM_WriteLog empfangen wird, soll eine Log-Datei angelegt werden, die alle
   Ausgabe der Konsolenprogramme enthält.                                       }
 
-procedure TForm1.WMWriteLog(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMWriteLog(var Msg: TMessage);
 begin
   FSettings.CmdLineFlags.WriteLogFile := True;
 end;
@@ -914,7 +914,7 @@ end;
 
   Wird WM_CheckDataFS empfangen, soll das Dateisystem der CD geprüft werden.   }
 
-procedure TForm1.WMCheckDataFS(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMCheckDataFS(var Msg: TMessage);
 begin
   CheckDataCDFS(False);
 end;
@@ -923,7 +923,7 @@ end;
 
   Wird WM_Minimize empfangen, soll das Hauptfenster minimiert werden.   }
 
-procedure TForm1.WMMinimize(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMMinimize(var Msg: TMessage);
 begin
   FSettings.CmdLineFlags.Minimize := True;
 end;
@@ -933,7 +933,7 @@ end;
   Wird WM_DriveSettings empfangen, haben sich Einstellungen für die Laufwerke
   geändert.                                                                    }
 
-procedure TForm1.WMDriveSettings(var Msg: TMessage);
+procedure TCdrtfeMainForm.WMDriveSettings(var Msg: TMessage);
 begin
   {$IFDEF WRiteLogFile} AddLogCode(1057); {$ENDIF}
   if Msg.WParam = wmwpDrvSetSCSIChange then
@@ -954,17 +954,17 @@ end;
 
   InitDropTargets initialisiert die DropFileTarget-Komponenten.                }
 
-procedure TForm1.InitDropTargets;
+procedure TCdrtfeMainForm.InitDropTargets;
 begin
   {CDETreeView}
-  DropFileTargetCDETreeView := TDropFileTarget.Create(Form1);
+  DropFileTargetCDETreeView := TDropFileTarget.Create(Self);
   DropFileTargetCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
   DropFileTargetCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
   DropFileTargetCDETreeView.OnLeave := DropFileTargetTreeViewLeave;
   DropFileTargetCDETreeView.Dragtypes := [dtCopy];
   DropFileTargetCDETreeView.Register(CDETreeView);
   {XCDETreeView}
-  DropFileTargetXCDETreeView := TDropFileTarget.Create(Form1);
+  DropFileTargetXCDETreeView := TDropFileTarget.Create(Self);
   DropFileTargetXCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
   DropFileTargetXCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
   DropFileTargetXCDETreeView.OnLeave := DropFileTargetTreeViewLeave;
@@ -976,7 +976,7 @@ end;
 
   FreeDropTargets gibt die DropFileTarget-Komponenten wieder frei.             }
 
-procedure TForm1.FreeDropTargets;
+procedure TCdrtfeMainForm.FreeDropTargets;
 begin
   DropFileTargetCDETreeView.UnregisterAll;
   DropFileTargetXCDETreeView.UnregisterAll;  
@@ -988,7 +988,7 @@ end;
 
   regelt das Verhalten bei OLE-DragOver-Ereignissen.                           }
 
-procedure TForm1.DropFileTargetTreeViewDragOver(Sender: TObject;
+procedure TCdrtfeMainForm.DropFileTargetTreeViewDragOver(Sender: TObject;
                                                 ShiftState: TShiftState;
                                                 Point: TPoint;
                                                 var Effect: Integer);
@@ -1034,7 +1034,7 @@ end;
 
   regelt das Verhalten bei OLE-Drop-Ereignissen.                               }
 
-procedure TForm1.DropFileTargetTreeViewDrop(Sender: TObject;
+procedure TCdrtfeMainForm.DropFileTargetTreeViewDrop(Sender: TObject;
                                             ShiftState: TShiftState;
                                             Point: TPoint; var Effect: Integer);
 var FolderAdded: Boolean;
@@ -1044,7 +1044,7 @@ var FolderAdded: Boolean;
     // OldNode    : TTreeNode;
 begin
   FolderAdded := False;
-  Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
+  Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
   {aktuellen Knoten bestimmen}
   Tree := ((Sender as TDropFileTarget).Target as TTreeView);;
   SelectRootIfNoneSelected(Tree);
@@ -1067,7 +1067,7 @@ begin
   AddToPathlistSort(FolderAdded);
 end;
 
-procedure TForm1.DropFileTargetTreeViewLeave(Sender: TObject);
+procedure TCdrtfeMainForm.DropFileTargetTreeViewLeave(Sender: TObject);
 begin
   CDETreeView.DropTarget := nil;
   XCDETreeView.DropTarget := nil;
@@ -1081,7 +1081,7 @@ end;
   GetSettings setzt die Controls des Fensters entsprechend den Daten in
   FSettings.                                                                   }
 
-procedure TForm1.GetSettings;
+procedure TCdrtfeMainForm.GetSettings;
 var i: Integer;
 begin
   {allgemein}
@@ -1182,7 +1182,7 @@ end;
 
   SetSettings übernimmt die Einstellungen der Controls in FSettings.           }
 
-procedure TForm1.SetSettings;
+procedure TCdrtfeMainForm.SetSettings;
 var i   : Integer;
     Temp: string;
 
@@ -1358,7 +1358,7 @@ end;
   InputOk überprüft die eingaben auf Gültigkeit bzw. ob alle nötigen Infos
   vorhanden sind.                                                              }
 
-function TForm1.InputOk: Boolean;
+function TCdrtfeMainForm.InputOk: Boolean;
 begin
   Result := CheckProject(FData, FSettings, FLang);
 end;
@@ -1368,11 +1368,11 @@ end;
   SaveProject speichert die aktuellen Einstellungen und Dateilisten oder nur die
   Dateilisten, wenn ListsOnly = True. Aufruf erfolgt vom Hauptmenü aus.        }
 
-procedure TForm1.SaveProject(const ListsOnly: Boolean);
+procedure TCdrtfeMainForm.SaveProject(const ListsOnly: Boolean);
 var DialogID: TDialogID;
 begin
   if not ListsOnly then SetSettings;
-  SaveDialog1 := TSaveDialog.Create(Form1);
+  SaveDialog1 := TSaveDialog.Create(Self);
   if not ListsOnly then
   begin
     DialogID := DIDLoadProject;
@@ -1408,11 +1408,11 @@ end;
   LoadProject lädt Einstellungen und Dateilisten oder nur die Dateilisten, wenn
   ListsOnly = True. Aufruf erfolgt vom Hauptmenü aus.                          }
 
-procedure TForm1.LoadProject(const ListsOnly: Boolean);
+procedure TCdrtfeMainForm.LoadProject(const ListsOnly: Boolean);
 var i       : Byte;
     DialogID: TDialogID;
 begin
-  OpenDialog1 := TOpenDialog.Create(Form1);
+  OpenDialog1 := TOpenDialog.Create(Self);
   if not ListsOnly then
   begin
     DialogID := DIDLoadProject;
@@ -1471,7 +1471,7 @@ end;
   dem kann diese Prozedur als Event-Handler für TProjectData und andere Objekte
   dienen.                                                                      }
 
-procedure TForm1.HandleError(const ErrorCode: Byte; const Name: string);
+procedure TCdrtfeMainForm.HandleError(const ErrorCode: Byte; const Name: string);
 begin
   with TLogWin.Inst do
   begin
@@ -1498,7 +1498,7 @@ end;
   CheckDataCDFS überprüft das Dateisystem der Daten-CD auf zu lange Dateinamen
   und zu tief liegende Ordner.                                                 }
 
-procedure TForm1.CheckDataCDFS(const CheckAccess: Boolean);
+procedure TCdrtfeMainForm.CheckDataCDFS(const CheckAccess: Boolean);
 var OldStatusText    : string;
     Path             : string;
     CheckFolder      : Boolean;
@@ -1507,8 +1507,8 @@ begin
   {$IFDEF ShowTimeCheckFS}
   TC.StartTimeCount;
   {$ENDIF}
-  OldStatusText := Form1.StatusBar.Panels[0].Text;
-  Form1.StatusBar.Panels[0].Text := FLang.GMS('m118');
+  OldStatusText := Self.StatusBar.Panels[0].Text;
+  Self.StatusBar.Panels[0].Text := FLang.GMS('m118');
   {zu überprüfenden Ordner ermitteln}
   Path := GetPathFromNode(CDETreeView.Selected);
   {Verzeichnistiefe prüfen?}
@@ -1588,7 +1588,7 @@ begin
       FormDataCDFSError.Release;
     end;
   end;
-  Form1.StatusBar.Panels[0].Text := OldStatusText;
+  Self.StatusBar.Panels[0].Text := OldStatusText;
   {$IFDEF ShowTimeCheckFS}
   TC.StopTimeCount;
   TLogWin.Inst.Add('check FS  : ' + TC.TimeAsString);
@@ -1602,7 +1602,7 @@ end;
   auftretende Fehler werden direkt im Memo angezeigt und nicht über eine eigene
   Message-Box.                                                                 }
 
-procedure TForm1.AddToPathList(const FileName: string);
+procedure TCdrtfeMainForm.AddToPathList(const FileName: string);
 var Path: string;
 begin
   {sicherstellen, daß ein Knoten selektiert ist, und Pfad bestimmen}
@@ -1639,7 +1639,7 @@ end;
   AddToPathlistSort sortiert die Dateilisten, nachdem über AddToPathlist Dateien
   hinzugefügt wurden. Außerdem wird das GUI aktualisiert.                      }
 
-procedure TForm1.AddToPathlistSort(const FolderAdded: Boolean);
+procedure TCdrtfeMainForm.AddToPathlistSort(const FolderAdded: Boolean);
 var Path: string;
 begin
   {Ordner sortieren}
@@ -1682,7 +1682,7 @@ end;
   UserAddFile fügt eine Datei hinzu, wenn die Aktion über das GUI ausgelöst
   wurde.                                                                       }
 
-procedure TForm1.UserAddFile(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserAddFile(Tree: TTreeView);
 var i        : Integer;
     Path     : string;
     ErrorCode: Byte;
@@ -1691,38 +1691,38 @@ begin
   DialogID := DIDDummy;
   {sicherstellen, daß ein Knoten im Tree-View selektiert ist}
   SelectRootIfNoneSelected(Tree);
-  Form1.OpenDialog1 := TOpenDialog.Create(Form1);
+  Self.OpenDialog1 := TOpenDialog.Create(Self);
   case FSettings.General.Choice of
     cDataCD: begin
-               Form1.OpenDialog1.Title := FLang.GMS('m103');
+               Self.OpenDialog1.Title := FLang.GMS('m103');
                DialogID := DIDDataCDFile;
              end;
     cXCD   : begin
                if FSettings.General.XCDAddMovie then
                begin
-                 Form1.OpenDialog1.Title := FLang.GMS('m105');
-                 Form1.OpenDialog1.Filter := FLang.GMS('f005');
+                 Self.OpenDialog1.Title := FLang.GMS('m105');
+                 Self.OpenDialog1.Filter := FLang.GMS('f005');
                  DialogID := DIDXCDFile2;
                end else
                begin
-                 Form1.OpenDialog1.Title := FLang.GMS('m103');
+                 Self.OpenDialog1.Title := FLang.GMS('m103');
                  DialogID := DIDXCDFile;
                end;
              end;
   end;
-  Form1.OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
-  Form1.OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
-  if Form1.OpenDialog1.Execute then
+  Self.OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
+  Self.OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
+  if Self.OpenDialog1.Execute then
   begin
-    Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
+    Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
     {Flag setzen, wenn 'normale' Dateien als Form2-Dateien ausgewählt werden}
-    if Form1.OpenDialog1.FilterIndex > 1 then
+    if Self.OpenDialog1.FilterIndex > 1 then
     begin
       FData.AddAsForm2 := True;
     end;
     {Pfad des gewählten Knotens feststellen}
     Path := GetPathFromNode(Tree.Selected);
-    for i :=0 to Form1.OpenDialog1.Files.Count - 1 do
+    for i :=0 to Self.OpenDialog1.Files.Count - 1 do
     begin
       FData.AddToPathlist(OpenDialog1.Files[i], Path, FSettings.General.Choice);
       ErrorCode := FData.LastError;
@@ -1741,7 +1741,7 @@ begin
     end;
     UpdateGauges;
   end;
-  Form1.OpenDialog1.Free;
+  Self.OpenDialog1.Free;
   {XCD-Flags zurücksetzen}
   if FSettings.General.Choice = cXCD then
   begin
@@ -1755,7 +1755,7 @@ end;
   UserAddFolder fügt einen Ordner hinzu, wenn die Aktion über das GUI aus-
   gelöst wurde.                                                                }
 
-procedure TForm1.UserAddFolder(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserAddFolder(Tree: TTreeView);
 var Dir        : string;
     Name       : string;
     Path       : string;
@@ -1778,11 +1778,11 @@ begin
   {$IFDEF MultipleFolderBrowsing}
   Dir := ChooseMultipleFolders(FLang.GMS('g002'), FLang.GMS('g013'),
                                FLang.GMS('g012'), FLang.GMS('mlang02'),
-                               FLang.GMS('mlang03'), Form1.Handle, PathList,
+                               FLang.GMS('mlang03'), Self.Handle, PathList,
                                StartFolder);
   Count := PathList.Count;
   {$ELSE}
-  Dir := ChooseDir(FLang.GMS('g002'), StartFolder, Form1.Handle);
+  Dir := ChooseDir(FLang.GMS('g002'), StartFolder, Self.Handle);
   Count := 1;
   {$ENDIF}
   CacheFolderName(DialogID, Dir);
@@ -1799,7 +1799,7 @@ begin
       TC.StartTimeCount;
       {$ENDIF}
       Path := GetPathFromNode(Tree.Selected);
-      Form1.StatusBar.Panels[0].Text := FLang.GMS('m117');
+      Self.StatusBar.Panels[0].Text := FLang.GMS('m117');
       {$IFDEF DebugAddFiles}
       Deb('', 3);
       Deb('calling AddToPathlist: add folder ' + Dir + '; Choice is: ' +
@@ -1832,7 +1832,7 @@ end;
   Nach dem Hinzufügen eines Ordners muß die Baumstruktur auf den neuesten Stand
   gebraht werden.                                                              }
 
-procedure TForm1.UserAddFolderUpdateTree(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserAddFolderUpdateTree(Tree: TTreeView);
 var Path: string;
     Node: TTreeNode;
 begin
@@ -1852,7 +1852,7 @@ end;
   UserDeleteFile entfernt die im List-View selektierten Dateien aus dem ListView
   und der Dateiliste des TreeViews.                                            }
 
-procedure TForm1.UserDeleteFile(Tree: TTreeView; View: TListView);
+procedure TCdrtfeMainForm.UserDeleteFile(Tree: TTreeView; View: TListView);
 var i       : Integer;
     Offset  : Integer;
     Meldung : string;
@@ -1954,7 +1954,7 @@ end;
   UserDeleteFolder entfernt den ausgewählten Ordner aus der Zusammenstellung
   Daten-CD bzw. XCD, es sei denn, es handelt sich um das Wurzelverzeichnis.    }
 
-procedure TForm1.UserDeleteFolder(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserDeleteFolder(Tree: TTreeView);
 var i: Integer;
     Meldung: string;
     Path: string;
@@ -1985,7 +1985,7 @@ end;
 
   UserDeleteAll löscht alle hinzugefügten Dateien und Ordner.                  }
 
-procedure TForm1.UserDeleteAll(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserDeleteAll(Tree: TTreeView);
 var i: Integer;
 begin
   if not FSettings.General.NoConfirm then
@@ -2021,7 +2021,8 @@ end;
 
   UerMoveFile verschiebt Dateien aus einem Verzeichnis in ein anderes.         }
 
-procedure TForm1.UserMoveFile(SourceNode, DestNode: TTreeNode; View: TListView);
+procedure TCdrtfeMainForm.UserMoveFile(SourceNode, DestNode: TTreeNode;
+                                       View: TListView);
 var i          : Integer;
     Offset     : Integer;
     ErrorCode  : Byte;
@@ -2088,7 +2089,7 @@ end;
 
   UerMoveFolder verschiebt einen Ordner in einen anderen.                      }
 
-procedure TForm1.UserMoveFolder(SourceNode, DestNode: TTreeNode);
+procedure TCdrtfeMainForm.UserMoveFolder(SourceNode, DestNode: TTreeNode);
 var SourcePath, DestPath: string;
     ErrorCode: Byte;
 begin
@@ -2126,7 +2127,7 @@ end;
   Eine Datei umbenennen. Die eigentliche Auswertung wird im onEdited-Handler
   vorgenommen.                                                                 }
 
-procedure TForm1.UserRenameFile(View: TListView);
+procedure TCdrtfeMainForm.UserRenameFile(View: TListView);
 begin
   if View.Selected <> nil then
   begin
@@ -2139,7 +2140,7 @@ end;
   UserRenameFolderByKey reagiert auf die Taste F2 und löst das Umbenennen des
   CD-Lables oder eines Ordner aus.                                             }
 
-procedure TForm1.UserRenameFolderByKey(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserRenameFolderByKey(Tree: TTreeView);
 begin
   if Tree.Selected = Tree.Items[0] then
   begin
@@ -2154,7 +2155,7 @@ end;
 
   Das Label der CD festelgen.                                                  }
 
-procedure TForm1.UserSetCDLabel(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserSetCDLabel(Tree: TTreeView);
 begin
   if Tree.Items[0] <> nil then
   begin
@@ -2167,7 +2168,7 @@ end;
   Einen Ordner umbenennen. Die eigentliche Auswertung wird im onEdited-Handler
   vorgenommen.                                                                 }
 
-procedure TForm1.UserRenameFolder(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserRenameFolder(Tree: TTreeView);
 begin
   if Tree.Selected <> Tree.Items[0] then
   begin
@@ -2183,7 +2184,7 @@ end;
   Mit Force=True wird die Sortierung der Ordner erzwungen, auch wenn der
   aktuelle Ordner auf gleicher Ebene liegt, wie der umbenannte.                }
 
-procedure TForm1.UserSort(Force: Boolean);
+procedure TCdrtfeMainForm.UserSort(Force: Boolean);
 var Node: TTreeNode;
 begin
   if FData.DataCDFilesToSort then
@@ -2202,7 +2203,7 @@ begin
   begin
     Node := GetNodeFromPath(CDETreeView.Items[0],
                             FData.DataCDFoldersToSortParent);
-    if (Form1.CDETreeView.Selected.Parent <> Node) or Force then
+    if (Self.CDETreeView.Selected.Parent <> Node) or Force then
     begin
       {$IFDEF DebugSort}
       with FormDebug.Memo3.Lines do
@@ -2221,7 +2222,7 @@ begin
   begin
     Node := GetNodeFromPath(XCDETreeView.Items[0],
                             FData.XCDFoldersToSortParent);
-    if (Form1.XCDETreeView.Selected.Parent <> Node) or Force then
+    if (Self.XCDETreeView.Selected.Parent <> Node) or Force then
     begin
       {$IFDEF DebugSort}
       with FormDebug.Memo3.Lines do
@@ -2242,7 +2243,7 @@ end;
 
   Einen neuen Ordner anlegen.                                                  }
 
-procedure TForm1.UserNewFolder(Tree: TTreeView);
+procedure TCdrtfeMainForm.UserNewFolder(Tree: TTreeView);
 var Path: string;
     Name: string;
     Node: TTreeNode;
@@ -2269,16 +2270,16 @@ end;
   UserAddTrack fügt eine Audio-Datei oder eine MPEG-Datei zur Trackliste hinzu.
   Ausgelöst über GUI.                                                          }
 
-procedure TForm1.UserAddTrack;
+procedure TCdrtfeMainForm.UserAddTrack;
 var i       : Integer;
     DialogID: TDialogID;
     FileList: TStringList;
 begin
   DialogID := DIDDummy;
   FileList := TStringList.Create;
-  with Form1 do
+  with Self do
   begin
-    OpenDialog1 := TOpenDialog.Create(Form1);
+    OpenDialog1 := TOpenDialog.Create(Self);
     case FSettings.General.Choice of
       cAudioCD: begin
                   DialogID := DIDAudioCDTrack;
@@ -2297,7 +2298,7 @@ begin
     OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
     if OpenDialog1.Execute then
     begin
-      Form1.StatusBar.Panels[0].Text := FLang.GMS('m116');
+      Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
       FileList.Assign(OpenDialog1.Files);
       FileList.Sort;
       for i := 0 to FileList.Count - 1 do
@@ -2322,7 +2323,8 @@ end;
   UserMoveTrack verschiebt einen Audio-Track um eine Position nach oben bzw.
   unten.                                                                       }
 
-procedure TForm1.UserMoveTrack(List: TListView; const Direction: TDirection);
+procedure TCdrtfeMainForm.UserMoveTrack(List: TListView;
+                                        const Direction: TDirection);
 var TempItem: TListItem;
     Index: Integer;
     {$IFDEF DebugFileLists}
@@ -2381,7 +2383,7 @@ end;
 
   UserOpenFile öffnet eine Datei oder einen Track.                             }
 
-procedure TForm1.UserOpenFile(List: TListView);
+procedure TCdrtfeMainForm.UserOpenFile(List: TListView);
 var Item: TListItem;
     Tree: TTreeView;
     Path: string;
@@ -2426,7 +2428,7 @@ end;
 
   UserImp0rtCD importiert die vorhandenen Sessions einer eingelegten CD.       }
 
-procedure TForm1.UserImportCD;
+procedure TCdrtfeMainForm.UserImportCD;
 var Index          : Integer;
     DeviceID       : string;
     Drive          : string;
@@ -2489,7 +2491,8 @@ end;
   Wenn Choice = 2 ist, werden die Dateien in den AudioListView eingefügt. Dabei
   werden Name, Länge, Größe und Herkunft angezeigt.                            }
 
-procedure TForm1.AddItemToListView(const Item: string; ListView: TListView);
+procedure TCdrtfeMainForm.AddItemToListView(const Item: string;
+                                            ListView: TListView);
 var NewItem    : TListItem;
     IconIndex  : Integer;
     Size       : Int64;
@@ -2562,7 +2565,8 @@ end;
   Wichtig: ListView.Tag enthält die Anzahl der Unterordner. Nötig zur Bestimmung
            des korrekten Indexes bei selektierten Dateien.                     }
 
-procedure TForm1.ShowFolderContent(const Tree: TTreeView; ListView: TListView);
+procedure TCdrtfeMainForm.ShowFolderContent(const Tree: TTreeView;
+                                            ListView: TListView);
 var i         : Integer;
     Temp      : string;
     Path      : string;
@@ -2664,7 +2668,7 @@ end;
 
   ShowTrack aktualisiert die Anzeige der ausgwählten Audio-Tracks.             }
 
-procedure TForm1.ShowTracks;
+procedure TCdrtfeMainForm.ShowTracks;
 var i: Integer;
     FileList: TStringList;
     ListView: TListView;
@@ -2703,7 +2707,7 @@ end;
 
   ShowTrackDAE aktualisiert die Anzeige der auf der CD vorhandenen Tracks.     }
 
-procedure TForm1.ShowTracksDAE;
+procedure TCdrtfeMainForm.ShowTracksDAE;
 var i        : Integer;
     TrackList: TStringList;
     NewItem  : TListItem;
@@ -2750,7 +2754,7 @@ end;
   speichert die aktuelle Position und Größe des Hauptfenster in FSettings.WinPos
   ab.                                                                          }
 
-procedure TForm1.SaveWinPos;
+procedure TCdrtfeMainForm.SaveWinPos;
 var i, j: Integer;
 begin
   with FSettings.WinPos do
@@ -2782,7 +2786,7 @@ end;
   sofern Werte vorhanden sind, wird die Größe und Posiiton des Hauptfensters
   angepaßt.                                                                    }
 
-procedure TForm1.SetWinPos;
+procedure TCdrtfeMainForm.SetWinPos;
 var i, j: Integer;
 begin
   {falls vorhanden, alte Größe und Position wiederherstellen}
@@ -2831,9 +2835,9 @@ end;
 
   ActivateTab zeigt das gewünschte TabSheet an.                                }
 
-procedure TForm1.ActivateTab(const PageToActivate: Byte);
+procedure TCdrtfeMainForm.ActivateTab(const PageToActivate: Byte);
 begin
-  Form1.PageControl1.ActivePage := Form1.PageControl1.Pages[PageToActivate - 1];
+  Self.PageControl1.ActivePage := Self.PageControl1.Pages[PageToActivate - 1];
   PageControl1Change(PageControl1);
 end;
 
@@ -2843,16 +2847,16 @@ end;
   Daten-CD: 1, Audio-CD: 2, XCD: 3, CD-RW: 4, CD-Infos: 5, DAE: 6, CD Image: 7,
   (S)Vide CD: 8, DVD Video: 9.}
 
-function TForm1.GetActivePage: Byte;
+function TCdrtfeMainForm.GetActivePage: Byte;
 begin
-  Result := Form1.PageControl1.ActivePage.PageIndex + 1;
+  Result := Self.PageControl1.ActivePage.PageIndex + 1;
 end;
 
 { GetCurrentListView -----------------------------------------------------------
 
   GetCurrentListView gibt eine Referenz auf den aktuelle ListView zurück.      }
 
-function TForm1.GetCurrentListView(Sender: TObject): TListView;
+function TCdrtfeMainForm.GetCurrentListView(Sender: TObject): TListView;
 begin
   case FSettings.General.Choice of
     cDataCD : Result := CDEListView;
@@ -2868,7 +2872,7 @@ end;
 
   GetCurrentTreeView gibt eine Referent auf den aktuellen TreeView zurück.     }
 
-function TForm1.GetCurrentTreeView: TTreeView;
+function TCdrtfeMainForm.GetCurrentTreeView: TTreeView;
 begin
   case FSettings.General.Choice of
     cDataCD: Result := CDETreeView;
@@ -2883,7 +2887,7 @@ end;
   UpdateGauges aktualisiert in Abhängigkeit des aktives TabSheets die
   Anzeige für Gesamtgröße der ausgewählten Dateien bzw. Gesamtspielzeit.       }
 
-procedure TForm1.UpdateGauges;
+procedure TCdrtfeMainForm.UpdateGauges;
 var FileCount, FolderCount, TrackCount: Integer;
     CDSize: Int64;
     CDTime: Extended;
@@ -2962,7 +2966,7 @@ end;
 
   SpaceMeter aktualisieren.                                                    }
 
-procedure TForm1.UpdateSpaceMeter(Size, Time: Integer);
+procedure TCdrtfeMainForm.UpdateSpaceMeter(Size, Time: Integer);
 begin
   if FSettings.General.SpaceMeter then
   begin
@@ -2997,7 +3001,7 @@ end;
 
   zeigt, wenn gewünscht, die Anzahl von Datein im TaskBar-Eintrag an.          }
 
-procedure TForm1.UpdateTaskBarEntry(s: string);
+procedure TCdrtfeMainForm.UpdateTaskBarEntry(s: string);
 {J+}
 const Title: string = '';
 {J-}
@@ -3015,7 +3019,7 @@ end;
   UpdateOptionPanel aktualisiert die Anzeige der aktivierten Optionen auf dem
   jeweiligen Panel.                                                            }
 
-procedure TForm1.UpdateOptionPanel;
+procedure TCdrtfeMainForm.UpdateOptionPanel;
 var Temp: string;
 
   {lokale Prozedure zum Verändern der Labels}
@@ -3160,7 +3164,7 @@ end;
 
   direkter Wechsel zum FileExplorer und zurück.                                }
 
-procedure TForm1.SpecialTab;
+procedure TCdrtfeMainForm.SpecialTab;
 begin
   if FFileExplorerShowing then
   begin
@@ -3182,7 +3186,7 @@ end;
 
   Der FileExlorer wird je nach übergebenem Wert ein- bzw. abgeschaltet.        }
 
-procedure TForm1.ToggleFileExplorer(const Status: Boolean);
+procedure TCdrtfeMainForm.ToggleFileExplorer(const Status: Boolean);
 var FileExplorerHeight: Integer;
 begin
   FileExplorerHeight := FSettings.FileExplorer.Height + 8;
@@ -3213,7 +3217,7 @@ end;
 
   Das Ausgabefenster zeigen oder beenden.                                      }
 
-procedure TForm1.ToggleOutputWindow(const Status: Boolean);
+procedure TCdrtfeMainForm.ToggleOutputWindow(const Status: Boolean);
 var FormOutput: TFormOutput;
 begin
   FormOutput := TFormOutput.Create(nil);
@@ -3234,7 +3238,7 @@ end;
   Option umgeschaltet werden.                                                  }
 
 {$IFDEF AllowToggle}
-procedure TForm1.ToggleOptions(Sender: TObject);
+procedure TCdrtfeMainForm.ToggleOptions(Sender: TObject);
 var L: TLabel;
 begin
   {Damit die Einstellungen der Checkboxen auf dem Hauptformular nicht verloren
@@ -3478,7 +3482,7 @@ end;
   CheckControlsSpeed sorgt dafür, daß jeweils die richtige Speedliste den
   Laufwerken zugeordnet wird.                                                  }
 
-procedure TForm1.CheckControlsSpeeds;
+procedure TCdrtfeMainForm.CheckControlsSpeeds;
 var RWFlag: string;
 begin
   if FSettings.General.DetectSpeeds then
@@ -3513,7 +3517,7 @@ end;
   CheckControls sorgt dafür, daß bei den Controls keine inkonsistenten
   Einstellungen vorkommen.                                                     }
 
-procedure TForm1.CheckControls;
+procedure TCdrtfeMainForm.CheckControls;
 
   {lokale Prozeduren nur der Übersicht wegen.}
   procedure SetDrives(DeviceList: TStringList);
@@ -3697,7 +3701,7 @@ procedure TForm1.CheckControls;
       CheckBoxISOVerify.Enabled := False;
     end;
     {Workaround for odd RadioButton behaviour}
-    if FImageTabFirstWrite and Form1.Active and
+    if FImageTabFirstWrite and Self.Active and
        RadioButtonImageWrite.Checked then
     begin
       FImageTabFirstWrite := False;
@@ -3762,7 +3766,7 @@ end;
   SetGlobalWriter sorgt dafür, daß bei allen Projekten das aktuelle Laufwerk
   eingetellt wird (sofern es sich um einen Brenner handelt).                   }
 
-procedure TForm1.SetGlobalWriter;
+procedure TCdrtfeMainForm.SetGlobalWriter;
 var ActivePage: Byte;
     CurrDrive : Byte;
     i         : Byte;
@@ -3783,7 +3787,7 @@ end;
   Zusätzlich wird hier das Flag für laufende Prozesse gesetzt und gegebenenfalls
   der Bildschirmschoner deaktiviert.                                           }
 
-procedure TForm1.SetButtons(const Status: TOnOff);
+procedure TCdrtfeMainForm.SetButtons(const Status: TOnOff);
 {$J+}
 const Title: string = '';
 {$J-}
@@ -3823,7 +3827,7 @@ end;
   aus.                                                                         }
 
 {$IFDEF ShowCmdError}
-procedure TForm1.CheckExitCode;
+procedure TCdrtfeMainForm.CheckExitCode;
 begin
   if FExitCode = 142 then
     {ProDVD-Lizenz-Fehler}
@@ -3839,7 +3843,7 @@ end;
 
   StayOnTop-Status umschalten.                                                 }
 
-procedure TForm1.ToggleStayOnTopState;
+procedure TCdrtfeMainForm.ToggleStayOnTopState;
 begin
   StayOnTopState := not StayOnTopState;
   WindowStayOnTop(Self.Handle, StayOnTopState);
@@ -3853,7 +3857,7 @@ end;
   buttons werden geladen, die ImageListen an die Tree- und ListViews zugewiesen
   und Drag-and-Drop wird zugelassen.                                           }
 
-procedure TForm1.InitMainform;
+procedure TCdrtfeMainForm.InitMainform;
 var GlyphArray    : TGlyphArray;
 
   {lokale Prozedur zum Registrieren der Label-OnClick-Eventhandler}
@@ -3863,11 +3867,11 @@ var GlyphArray    : TGlyphArray;
       j: Integer;
       Panel: TPanel;
   begin
-    for i := 0 to Form1.ComponentCount - 1 do
+    for i := 0 to Self.ComponentCount - 1 do
     begin
-      if Form1.Components[i] is TPanel then
+      if Self.Components[i] is TPanel then
       begin
-        Panel := Form1.Components[i] as TPanel;
+        Panel := Self.Components[i] as TPanel;
         if (Panel = PanelDataCDOptions) or
            (Panel = PanelAudioCDOptions) or
            (Panel = PanelXCDOptions) or
@@ -3957,16 +3961,16 @@ var GlyphArray    : TGlyphArray;
 begin
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
-  DragAcceptFiles(Form1.Handle, true);
+  DragAcceptFiles(Self.Handle, true);
   {Constraints für minimale Fenstergröße}
   if (Screen.PixelsPerInch <= 96) then
   begin
-    Form1.Constraints.MinWidth := dWidth;
-    Form1.Constraints.MinHeight := dHeight;
+    Self.Constraints.MinWidth := dWidth;
+    Self.Constraints.MinHeight := dHeight;
   end else
   begin
-    Form1.Constraints.MinWidth := dWidthBigFont;
-    Form1.Constraints.MinHeight := dHeightBigFont;  
+    Self.Constraints.MinWidth := dWidthBigFont;
+    Self.Constraints.MinHeight := dHeightBigFont;  
   end;
   {Bitmaps für die Glyphs laden}
   InitGlyphArray(GlyphArray);
@@ -3998,12 +4002,12 @@ end;
 
   initialiert die Anzeige für den genutzten Speicher auf einer Disk.           }
 
-procedure TForm1.InitSpaceMeter;
+procedure TCdrtfeMainForm.InitSpaceMeter;
 begin
   SpaceMeter := TSpaceMeter.Create(Self);
   SpaceMeter.Font := Self.Font;
   SpaceMeter.Captions := FLang.GMS('g014');
-  SpaceMeter.Init(Form1, StatusBar.Top - 34, 8, 545, 30,
+  SpaceMeter.Init(Self, StatusBar.Top - 34, 8, 545, 30,
                   [akLeft, akRight, akBottom]);
   SpaceMeter.OnSpaceMeterTypeChange := SpaceMeterTypeChange;
 end;
@@ -4012,7 +4016,7 @@ end;
 
   einen bestimmten Tree-View initialisieren.                                   }
 
-procedure TForm1.InitTreeView(Tree: TTreeView; const Choice: Byte);
+procedure TCdrtfeMainForm.InitTreeView(Tree: TTreeView; const Choice: Byte);
 var i: Byte;
 begin
   {hier muß FSettings.General.Choice temporär gesetzt werden, um sicherzu-
@@ -4040,7 +4044,7 @@ end;
 
   InitTreeViews initialisiert alle Tree-Views.                                 }
 
-procedure TForm1.InitTreeViews;
+procedure TCdrtfeMainForm.InitTreeViews;
 begin
   InitTreeView(CDETreeView, cDataCD);
   InitTreeView(XCDETreeView, cXCD);
@@ -4050,14 +4054,14 @@ end;
 
   Workaround for odd behaviour when changing to radio buttons via Tab.         }
 
-procedure TForm1.ImageTabInitRadioButtons;
+procedure TCdrtfeMainForm.ImageTabInitRadioButtons;
 var TAO, DAO, RAW: Boolean;
     Ok           : Boolean;
     OldControl   : TWinControl;
 begin
   Ok := RadioButtonImageTAO.Enabled and RadioButtonImageDAO.Enabled and
         RadioButtonImageRAW.Enabled;
-  if Ok and Form1.Active and (PageControl1.ActivePage = TabSheet7) and
+  if Ok and Self.Active and (PageControl1.ActivePage = TabSheet7) and
      RadioButtonImageWrite.Checked then
   begin
     OldControl := ActiveControl;
@@ -4082,19 +4086,19 @@ end;
 
 { DeviceArrival/DeviceRemoval ------------------------------------------------ }
 
-procedure TForm1.DeviceArrival(Drive: string);
+procedure TCdrtfeMainForm.DeviceArrival(Drive: string);
 begin
   // TLogWin.Inst.Add('Arrival: ' + Drive);
-  if Form1.FSettings.General.DetectSpeeds then
+  if Self.FSettings.General.DetectSpeeds then
   begin
-    Form1.UpdatePanels('<>', Form1.FLang.GMS('m124'));
-    Form1.FDevices.UpdateSpeedLists(Drive);
-    Form1.CheckControlsSpeeds;
-    Form1.UpdatePanels('<>', '');
+    Self.UpdatePanels('<>', Self.FLang.GMS('m124'));
+    Self.FDevices.UpdateSpeedLists(Drive);
+    Self.CheckControlsSpeeds;
+    Self.UpdatePanels('<>', '');
   end;
 end;
 
-procedure TForm1.DeviceRemoval(Drive: string);
+procedure TCdrtfeMainForm.DeviceRemoval(Drive: string);
 begin
   // TLogWin.Inst.Add('Removal: ' + Drive);
 end;
@@ -4103,7 +4107,7 @@ end;
 
   wird ausgelöst, wenn im FileBrowser eine Auswahl getroffen wurde.            }
 
-procedure TForm1.FileBrowserSelected(Sender: TObject);
+procedure TCdrtfeMainForm.FileBrowserSelected(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD,
@@ -4119,7 +4123,7 @@ end;
 
   Reaktionen auf das LangChange-Event.                                         }
 
-procedure TForm1.LangChange;
+procedure TCdrtfeMainForm.LangChange;
 
   procedure SetLangFileBrowser;
   begin
@@ -4148,7 +4152,7 @@ end;
   auf die Form1.Controls zuzugreifen.
   Wahscheinlich gibt es eine bessere oder elegantere Methode. ;-)              }
 
-procedure TForm1.MessageShow(const s: string);
+procedure TCdrtfeMainForm.MessageShow(const s: string);
 begin
   TLogWin.Inst.Add(s);
 end;
@@ -4159,7 +4163,7 @@ end;
   an. Wenn der String den Inhalt '<>' haben sollte, wird der Panel-Text nicht
   geändert.                                                                    }
 
-procedure TForm1.UpdatePanels(const s1, s2: string);
+procedure TCdrtfeMainForm.UpdatePanels(const s1, s2: string);
 begin
   if s1 <> '<>' then StatusBar.Panels[0].Text := s1;
   if s2 <> '<>' then StatusBar.Panels[1].Text := s2;
@@ -4169,7 +4173,7 @@ end;
 
   liefert den entsprechenden ProgresBar.                                       }
 
-function TForm1.GetProgressBar(const PB: Integer): TProgressBar;
+function TCdrtfeMainForm.GetProgressBar(const PB: Integer): TProgressBar;
 begin
   case PB of
     1: Result := ProgressBar;       // lower ProgressBar
@@ -4183,7 +4187,8 @@ end;
 
   ProgressBar in den Marquee-Modus versetzen.                                  }
 
-procedure TForm1.ProgressBarDoMarquee(const PB: Integer; const Active: Boolean);
+procedure TCdrtfeMainForm.ProgressBarDoMarquee(const PB: Integer;
+                                               const Active: Boolean);
 var Bar: TProgressBar;
 begin
   Bar := GetProgressBar(PB);
@@ -4194,7 +4199,7 @@ end;
 
   ProgressBarHide macht den Progress-Bar unsichtbar.                           }
 
-procedure TForm1.ProgressBarHide(const PB: Integer);
+procedure TCdrtfeMainForm.ProgressBarHide(const PB: Integer);
 var Bar: TProgressBar;
 begin
   Bar := GetProgressBar(PB);
@@ -4206,7 +4211,7 @@ end;
   ProgressBarReset setzt ProgressBar.Position auf Null, ProgressBar.Max auf
   Max und ProgressBar.Visible auf True.                                        }
 
-procedure TForm1.ProgressBarShow(const PB, Max: Integer);
+procedure TCdrtfeMainForm.ProgressBarShow(const PB, Max: Integer);
 var Bar: TProgressBar;
 begin
   Bar := GetProgressBar(PB);
@@ -4223,7 +4228,7 @@ end;
   ProgressBarReset setzt StatusBar.Position auf FSettings.Shared.
   ProgressBarPosition.                                                         }
 
-procedure TForm1.ProgressBarUpdate(const PB, Position: Integer);
+procedure TCdrtfeMainForm.ProgressBarUpdate(const PB, Position: Integer);
 var Bar: TProgressBar;
 begin
   Bar := GetProgressBar(PB);
@@ -4234,7 +4239,7 @@ end;
 
   Speichert den neues Disk-Type des SpaceMeters.                               }
 
-procedure TForm1.SpaceMeterTypeChange;
+procedure TCdrtfeMainForm.SpaceMeterTypeChange;
 begin
   FSettings.General.TabSheetSMType[FSettings.General.Choice] :=
                                                    Integer(SpaceMeter.DiskType);
@@ -4249,7 +4254,7 @@ end;
   Diese Prozedur wird beim Erzeugen des Fensters abgearbeitet. Hier werden not-
   wendige Initialisierungen vorgenommen.                                       }
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TCdrtfeMainForm.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
@@ -4311,10 +4316,10 @@ begin
   FCmdLineParser := TCmdLineParser.Create;
   FCmdLineParser.Settings := FSettings;
   FCmdLineParser.Data := FData;
-  FCmdLineParser.FormCaption := Form1.Caption;
+  FCmdLineParser.FormCaption := Self.Caption;
   FCmdLineParser.ParseCommandLine;
   {jetzt auf eine bereits laufende Instanz prüfen}
-  if IsFirstInstance(DummyHandle, 'TForm1', Form1.Caption) then
+  if IsFirstInstance(DummyHandle, 'TCdrtfeMainForm', Self.Caption) then
   begin {die aktuelle Instanz ist die erste}
     {Image-Listen erzeugen}
     FImageLists := TImageLists.Create(Self);
@@ -4382,8 +4387,8 @@ begin
       FAction.Devices := FDevices;
       FAction.Settings := FSettings;
       FAction.Lang := FLang;
-      FAction.ProgressBar := Form1.ProgressBar;
-      FAction.StatusBar := Form1.StatusBar;
+      FAction.ProgressBar := Self.ProgressBar;
+      FAction.StatusBar := Self.StatusBar;
       FAction.FormHandle := Self.Handle;
       FAction.OnMessageShow := MessageShow;
       FAction.OnUpdatePanels := UpdatePanels;
@@ -4419,7 +4424,7 @@ end;
 
   Hier werden die in FormCreate erzeugten Objekte wieder freigegeben.          }
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TCdrtfeMainForm.FormDestroy(Sender: TObject);
 begin
   {$IFDEF WriteLogfile} AddLogCode(1052); {$ENDIF}
   if not FInstanceTermination then FreeDropTargets;
@@ -4452,7 +4457,7 @@ end;
   Hier werden Dinge erledigt, die vor dem ersten Anzeigen des Fensters nötig
   sind, aber in FormCreate noch nicht ausgeführt werden können.                }
 
-procedure TForm1.FormShow(Sender: TObject);
+procedure TCdrtfeMainForm.FormShow(Sender: TObject);
 var i: Byte;
     OldChoice: Byte;
 begin
@@ -4505,7 +4510,7 @@ end;
   Der automatische Brennvorgang wird erst hier ausgelöst, damit das Fenster
   auch ganz sicher zu sehen ist.                                               }
 
-procedure TForm1.FormActivate(Sender: TObject);
+procedure TCdrtfeMainForm.FormActivate(Sender: TObject);
 begin
   {$IFDEF WriteLogfile} AddLogCode(1054); {$ENDIF}
   if FSettings.CmdLineFlags.ExecuteProject then
@@ -4540,7 +4545,7 @@ end;
   Größenänderung des Hauptfensters, ursprünglich Mod by Oli. Sonderbehandlung
   für die Speedbuttons auf TabSheet3 (XCD).                                    }
 
-procedure TForm1.FormResize(Sender: TObject);
+procedure TCdrtfeMainForm.FormResize(Sender: TObject);
 var TSHeight                 : Integer;
     CanShowFileExplorer      : Boolean;
     ShouldNotShowFileExplorer: Boolean;
@@ -4593,7 +4598,7 @@ end;
 
   prüft, ob noch ein Prozess läuft. Falls ja, wird der User darauf hingewiese. }
 
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TCdrtfeMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if FSettings.Environment.ProcessRunning then
     CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
@@ -4605,7 +4610,7 @@ end;
   In FormClose werden die Einstellungen gespeichert, sofern die automatische
   Speicheung beim Beenden aktiviert ist.                                       }
 
-procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TCdrtfeMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   {$IFDEF WriteLogfile} AddLogCode(1055); {$ENDIF}
   {Einstellungen speichern}
@@ -4617,7 +4622,7 @@ begin
   end;
 end;
 
-procedure TForm1.FormDblClick(Sender: TObject);
+procedure TCdrtfeMainForm.FormDblClick(Sender: TObject);
 {$IFDEF CreateAllForms}
 var FormDataCDOptions : TFormDataCDOptions;
     FormDataCDFS      : TFormDataCDFS;
@@ -4723,7 +4728,7 @@ end;
 
   globale Tasten.                                                              }
 
-procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.FormKeyDown(Sender: TObject; var Key: Word;
                              Shift: TShiftState);
 begin
   case Key of
@@ -4736,7 +4741,7 @@ end;
 
   nimmt die eigentlich Auswertung der Tastenkombination vor.                   }
 
-procedure TForm1.HandleKeyboardShortcut(const Key: Word);
+procedure TCdrtfeMainForm.HandleKeyboardShortcut(const Key: Word);
 
   procedure HKSAddFiles;
   begin
@@ -4830,7 +4835,7 @@ end;
 
 { Button 'Start' }
 
-procedure TForm1.ButtonStartClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonStartClick(Sender: TObject);
 begin
   {$IFDEF ShowExecutionTime}
   TC2.StartTimeCount;
@@ -4849,7 +4854,7 @@ end;
 
 { Button 'Beenden' }
 
-procedure TForm1.ButtonCancelClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonCancelClick(Sender: TObject);
 begin
   Self.Close;
   //Application.Terminate;
@@ -4857,7 +4862,7 @@ end;
 
 { Data-CD: Options file system }
 
-procedure TForm1.ButtonDataCDOptionsFSClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDataCDOptionsFSClick(Sender: TObject);
 var FormDataCDFS: TFormDataCDFS;
 begin
   FormDataCDFS := TFormDataCDFS.Create(nil);
@@ -4873,7 +4878,7 @@ end;
 
 { Data-CD: Options CD }
 
-procedure TForm1.ButtonDataCDOptionsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDataCDOptionsClick(Sender: TObject);
 var FormDataCDOptions: TFormDataCDOptions;
 begin
   FormDataCDOptions := TFormDataCDOptions.Create(nil);
@@ -4889,7 +4894,7 @@ end;
 
 { Audio-CD: Options }
 
-procedure TForm1.ButtonAudioCDOptionsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonAudioCDOptionsClick(Sender: TObject);
 var FormAudioCDOptions: TFormAudioCDOptions;
 begin
   FormAudioCDOptions := TFormAudioCDOptions.Create(nil);
@@ -4905,7 +4910,7 @@ end;
 
 { Audio-CD: Track Options}
 
-procedure TForm1.ButtonAudioCDTracksClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonAudioCDTracksClick(Sender: TObject);
 var FormAudioCDTracks: TFormAudioCDTracks;
 begin
   FormAudioCDTracks := TFormAudioCDTracks.Create(nil);
@@ -4921,7 +4926,7 @@ end;
 
 { XCD: Options }
 
-procedure TForm1.ButtonXCDOptionsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonXCDOptionsClick(Sender: TObject);
 var FormXCDOptions: TFormXCDOptions;
 begin
   FormXCDOptions := TFormXCDOptions.Create(nil);
@@ -4937,7 +4942,7 @@ end;
 
 { DAE: Select path }
 
-procedure TForm1.ButtonDAESelectPathClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDAESelectPathClick(Sender: TObject);
 var dir: string;
 begin
   dir := ChooseDir(Flang.GMS('g002'), '', Self.Handle);
@@ -4949,7 +4954,7 @@ end;
 
 { DAE: Read TOC }
 
-procedure TForm1.ButtonDAEReadTocClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDAEReadTocClick(Sender: TObject);
 begin
   SetSettings;
   FAction.Action := cDAEReadTOC;
@@ -4959,7 +4964,7 @@ end;
 
 { DAE: Options }
 
-procedure TForm1.ButtonDAEOptionsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDAEOptionsClick(Sender: TObject);
 var FormDAEOptions: TFormDAEOptions;
 begin
   FormDAEOptions := TFormDAEOptions.Create(nil);
@@ -4975,11 +4980,11 @@ end;
 
 { Image: Select path }
 
-procedure TForm1.ButtonReadCDSelectPathClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonReadCDSelectPathClick(Sender: TObject);
 var DialogID: TDialogID;
 begin
   DialogID := DIDSaveImage;
-  SaveDialog1 := TSaveDialog.Create(Form1);
+  SaveDialog1 := TSaveDialog.Create(Self);
   SaveDialog1.Title := FLang.GMS('m102');
   SaveDialog1.DefaultExt := 'iso';
   SaveDialog1.Filter := FLang.GMS('f002');
@@ -4995,11 +5000,11 @@ end;
 
 { Image: Select ISO-/CUE-Image }
 
-procedure TForm1.ButtonImageSelectPathClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonImageSelectPathClick(Sender: TObject);
 var DialogID: TDialogID;
 begin
   DialogID := DIDCDImage;
-  OpenDialog1 := TOpenDialog.Create(Form1);
+  OpenDialog1 := TOpenDialog.Create(Self);
   OpenDialog1.Title := FLang.GMS('m101');
   OpenDialog1.InitialDir := GetCachedFolderName(DialogID);
   if (FSettings.FileFlags.CdrdaoOk or FSettings.Cdrecord.CanWriteCueImage) then
@@ -5020,7 +5025,7 @@ end;
 
 { DVD Video: Select source dir }
 
-procedure TForm1.ButtonDVDVideoSelectPathClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDVDVideoSelectPathClick(Sender: TObject);
 var Dir: string;
 begin
   Dir := ChooseDir(Flang.GMS('g002'), GetCachedFolderName(DIDVideoDVDFolder),
@@ -5035,7 +5040,7 @@ end;
 
 { DVD Video: Options }
 
-procedure TForm1.ButtonDVDVideoOptionsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonDVDVideoOptionsClick(Sender: TObject);
 var FormDataCDOptions: TFormDataCDOptions;
 begin
   FormDataCDOptions := TFormDataCDOptions.Create(nil);
@@ -5051,7 +5056,7 @@ end;
 
 { Video CD: Options }
 
-procedure TForm1.ButtonVideoCDOptionsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonVideoCDOptionsClick(Sender: TObject);
 var FormVideoCDOptions: TFormVideoCDOptions;
 begin
   FormVideoCDOptions := TFormVideoCDOptions.Create(nil);
@@ -5067,14 +5072,14 @@ end;
 
 { cdrtfe Settings }
 
-procedure TForm1.ButtonSettingsClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonSettingsClick(Sender: TObject);
 begin
   MainMenuSettingsClick(nil);
 end;
 
 { Abort action }
 
-procedure TForm1.ButtonAbortClick(Sender: TObject);
+procedure TCdrtfeMainForm.ButtonAbortClick(Sender: TObject);
 begin
   FAction.AbortAction;
 end;
@@ -5084,42 +5089,42 @@ end;
 
 { Datei/Schließen }
 
-procedure TForm1.MainMenuCloseClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuCloseClick(Sender: TObject);
 begin
   Application.Terminate;
 end;
 
 { Projekt/Projekt laden }
 
-procedure TForm1.MainMenuLoadProjectClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuLoadProjectClick(Sender: TObject);
 begin
   LoadProject(False);
 end;
 
 { Projekt/Projekt speichern }
 
-procedure TForm1.MainMenuSaveProjectClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuSaveProjectClick(Sender: TObject);
 begin
   SaveProject(False);
 end;
 
 { Projekt/Dateiliste laden }
 
-procedure TForm1.MainMenuLoadFileListClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuLoadFileListClick(Sender: TObject);
 begin
   LoadProject(True);
 end;
 
 { Projekt/Dateiliste speichern }
 
-procedure TForm1.MainMenuSaveFileListClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuSaveFileListClick(Sender: TObject);
 begin
   SaveProject(True);
 end;
 
 { Pojekt/Standardeinstellungen }
 
-procedure TForm1.MainMenuReloadDefaultsClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuReloadDefaultsClick(Sender: TObject);
 var Temp: Byte;
 begin
   Temp := FSettings.General.Choice;
@@ -5134,7 +5139,7 @@ end;
 
 { Projekt/Reset cdrtfe }
 
-procedure TForm1.MainMenuResetClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuResetClick(Sender: TObject);
 var i   : Integer;
     Tree: TTreeView;
     List: TListView;
@@ -5182,7 +5187,7 @@ end;
 { Ansicht/Dateiexplorer }
 
 
-procedure TForm1.MainMenuToggleFileExplorerClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuToggleFileExplorerClick(Sender: TObject);
 begin
   if FFileExplorerShowing then
   begin
@@ -5195,7 +5200,7 @@ end;
 
 { Ansicht/Ausgabefenster }
 
-procedure TForm1.MainMenuShowOutputWindowClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuShowOutputWindowClick(Sender: TObject);
 begin
   if FOutputWindowShowing then
   begin
@@ -5208,14 +5213,14 @@ end;
 
 { Extras/Sprache ändern }
 
-procedure TForm1.MainMenuSetLangClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuSetLangClick(Sender: TObject);
 begin
   FLang.SelectLanguage;
 end;
 
 { Extras/Einstellungen }
 
-procedure TForm1.MainMenuSettingsClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuSettingsClick(Sender: TObject);
 var FormSettings: TFormSettings;
 begin
   SetSettings;
@@ -5225,7 +5230,7 @@ begin
     FormSettings.Settings := FSettings;
     FormSettings.Lang := FLang;
     FormSettings.FormHandle := Self.Handle;
-    FormSettings.OnMessageShow := Form1.MessageShow;
+    FormSettings.OnMessageShow := Self.MessageShow;
     FormSettings.ShowModal;
   finally
     FormSettings.Release;
@@ -5235,7 +5240,7 @@ end;
 
 { Extras/cdrtfe.ini }
 
-procedure TForm1.MainMenuCdrtfeIniClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuCdrtfeIniClick(Sender: TObject);
 begin
   if FileExists(FSettings.General.IniFile) then
     ShlExecute('', FSettings.General.IniFile);
@@ -5243,12 +5248,12 @@ end;
 
 { ?/Info }
 
-procedure TForm1.MainMenuHelpClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuHelpClick(Sender: TObject);
 begin
   Application.HelpContext(1000);
 end;
 
-procedure TForm1.MainMenuInfoClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuInfoClick(Sender: TObject);
 var AboutBox: TFormAbout;
 begin
   AboutBox := TFormAbout.Create(nil);
@@ -5268,14 +5273,14 @@ end;
   Bei jedem Wechsel der aktiven Registerkarte müssen die Controls entsprechend
   (de-)aktiviert werden. Außerdem muß Choice aktualisiert werden.              }
 
-procedure TForm1.PageControl1Change(Sender: TObject);
+procedure TCdrtfeMainForm.PageControl1Change(Sender: TObject);
 begin
   FSettings.General.Choice := GetActivePage;
   CheckControls;
   UpdateGauges;
   UpdateOptionPanel;
   {Workaround for odd RadioButton behaviour}
-  if FImageTabFirstShow and Form1.Active and
+  if FImageTabFirstShow and Self.Active and
      (PageControl1.ActivePage = TabSheet7) then
   begin
     ImageTabInitRadioButtons;
@@ -5294,7 +5299,7 @@ end;
   Dateilisten des alten Knotens neu sortiert, sofern dort Dateien umbenannt
   wurden. Ebenso wird falls nötig der TreeView neu sortiert.                   }
 
-procedure TForm1.TreeViewChange(Sender: TObject; Node: TTreeNode);
+procedure TCdrtfeMainForm.TreeViewChange(Sender: TObject; Node: TTreeNode);
 begin
   UserSort(False);
   if (Sender as TTreeView) = CDETreeView then
@@ -5314,7 +5319,7 @@ end;
   zu versehen. Immer, wenn ein Knoten expandiert wird, erhalten die direkt
   untergeordneten Knoten die Icon-Indizes.                                     }
 
-procedure TForm1.TreeViewExpanding(Sender: TObject; Node: TTreeNode;
+procedure TCdrtfeMainForm.TreeViewExpanding(Sender: TObject; Node: TTreeNode;
                                    var AllowExpansion: Boolean);
 var TempNode: TTreeNode;
 begin
@@ -5345,7 +5350,7 @@ end;
   OnMouseDown sorgt dafür, daß auch bei einem Rechtsklick das Item selektiert
   wird.                                                                        }
 
-procedure TForm1.TreeViewMouseDown(Sender: TObject; Button: TMouseButton;
+procedure TCdrtfeMainForm.TreeViewMouseDown(Sender: TObject; Button: TMouseButton;
                                    Shift: TShiftState; X, Y: Integer);
 var Node: TTreeNode;
 begin
@@ -5364,7 +5369,7 @@ end;
   Ein Objekt wird auf den Tree-View gezogen. Drop nur zulassen, wenn es aus
   dem Tree-View selbst oder aus einem List-View stammt.                        }
 
-procedure TForm1.TreeViewDragOver(Sender, Source: TObject; X, Y: Integer;
+procedure TCdrtfeMainForm.TreeViewDragOver(Sender, Source: TObject; X, Y: Integer;
                                   State: TDragState; var Accept: Boolean);
 var Tree     : TTreeView;
     Node     : TTreeNode;
@@ -5405,7 +5410,7 @@ end;
 
   Ein Objekt wird auf den Tree-View fallengelassen.                            }
 
-procedure TForm1.TreeViewDragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TCdrtfeMainForm.TreeViewDragDrop(Sender, Source: TObject; X, Y: Integer);
 var SourceNode: TTreeNode;
     DestNode: TTreeNode;
 begin
@@ -5449,7 +5454,7 @@ end;
 
   Tastatur-Events.                                                             }
 
-procedure TForm1.TreeViewKeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.TreeViewKeyDown(Sender: TObject; var Key: Word;
                                  Shift: TShiftState);
 var Tree: TTreeView;
 begin
@@ -5470,7 +5475,7 @@ end;
   Tree-Views handelte, müssen alle Knoten auf gleicher Ebene sortiert
   werden.                                                                      }
 
-procedure TForm1.TreeViewEdited(Sender: TObject; Node: TTreeNode;
+procedure TCdrtfeMainForm.TreeViewEdited(Sender: TObject; Node: TTreeNode;
                                 var S: String);
 var Temp: string;
     Path: string;
@@ -5554,7 +5559,7 @@ end;
 
   Maus-Event: Doppelklick öffnet Track.                                        }
 
-procedure TForm1.ListViewDblClick(Sender: TObject);
+procedure TCdrtfeMainForm.ListViewDblClick(Sender: TObject);
 begin
   if FSettings.General.AllowDblClick or
      ItemIsFolder((Sender as TListView).Selected) then
@@ -5565,7 +5570,7 @@ end;
 
   Tastatur-Events.                                                             }
 
-procedure TForm1.ListViewKeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.ListViewKeyDown(Sender: TObject; var Key: Word;
                                  Shift: TShiftState);
 var List: TListView;
     Tree: TTreeView;
@@ -5603,7 +5608,7 @@ end;
 
   Ein Dateiname wurde geändert.                                                }
 
-procedure TForm1.ListViewEdited(Sender: TObject; Item: TListItem;
+procedure TCdrtfeMainForm.ListViewEdited(Sender: TObject; Item: TListItem;
                                 var S: String);
 var Temp     : string;
     Path     : string;
@@ -5675,7 +5680,7 @@ end;
 
   entgegenmehmen von Dateien und Ordnern vom FileExplorer.                     }
 
-procedure TForm1.CDEListViewDragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TCdrtfeMainForm.CDEListViewDragDrop(Sender, Source: TObject; X, Y: Integer);
 var Tree       : TShellTreeView;
     List       : TShellListView;
     Folder     : TShellFolder;
@@ -5715,7 +5720,7 @@ end;
 
   entgegenmehmen von Dateien und Ordnern vom FileExplorer.                     }
 
-procedure TForm1.CDEListViewDragOver(Sender, Source: TObject; X, Y: Integer;
+procedure TCdrtfeMainForm.CDEListViewDragOver(Sender, Source: TObject; X, Y: Integer;
                                      State: TDragState; var Accept: Boolean);
 begin
   Accept := (Source is TShellListView) or (Source is TShellTreeView);
@@ -5726,7 +5731,7 @@ end;
   verschieben von Dateien von Datei-List zur Movie-Liste und umgekehrt. Gilt nur
   für XCD.                                                                     }
 
-procedure TForm1.XCDEListView1DragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TCdrtfeMainForm.XCDEListView1DragDrop(Sender, Source: TObject; X, Y: Integer);
 var Path: string;
     i: Integer;
 begin
@@ -5759,7 +5764,7 @@ end;
 
   es sollen nur Dateien akzeptiert werden. Keine Ordner. Nur XCD.              }
 
-procedure TForm1.XCDEListView1DragOver(Sender, Source: TObject; X, Y: Integer;
+procedure TCdrtfeMainForm.XCDEListView1DragOver(Sender, Source: TObject; X, Y: Integer;
                                        State: TDragState; var Accept: Boolean);
 begin
   Accept := (Source is TShellListView) or (Source is TShellTreeView) or
@@ -5771,7 +5776,7 @@ end;
   Der Mode2CDMaker unterstütz zur Zeit die Änderung vo Dateinamen nicht. Daher
   dürfen die Dateinamen nicht geändert werden.                                 }
 
-procedure TForm1.XCDEListView1Editing(Sender: TObject; Item: TListItem;
+procedure TCdrtfeMainForm.XCDEListView1Editing(Sender: TObject; Item: TListItem;
                                       var AllowEdit: Boolean);
 begin
   AllowEdit := False;
@@ -5781,7 +5786,7 @@ end;
 
   Bei Audio-CD spielt der Dateiname keine Rolle, also kein Editieren.          }
 
-procedure TForm1.AudioListViewEditing(Sender: TObject; Item: TListItem;
+procedure TCdrtfeMainForm.AudioListViewEditing(Sender: TObject; Item: TListItem;
                                       var AllowEdit: Boolean);
 begin
   AllowEdit := False;
@@ -5791,7 +5796,7 @@ end;
 
   Tastatur-Events: Hinzufügen, Löschen und Bewegen von Tracks.                 }
 
-procedure TForm1.AudioListViewKeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.AudioListViewKeyDown(Sender: TObject; var Key: Word;
                                       Shift: TShiftState);
 begin
   case Key of
@@ -5813,7 +5818,7 @@ end;
 
   Bei Audio-CD spielt der Dateiname keine Rolle, also kein Editieren.          }
 
-procedure TForm1.DAEListViewEditing(Sender: TObject; Item: TListItem;
+procedure TCdrtfeMainForm.DAEListViewEditing(Sender: TObject; Item: TListItem;
                                     var AllowEdit: Boolean);
 begin
   AllowEdit := False;
@@ -5823,7 +5828,7 @@ end;
 
   Tastatur-Events: Alle Tracks markieren.                                      }
 
-procedure TForm1.DAEListViewKeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.DAEListViewKeyDown(Sender: TObject; var Key: Word;
                                     Shift: TShiftState);
 begin
   case Key of
@@ -5838,7 +5843,7 @@ end;
 
   Bei Video-CD spielt der Dateiname keine Rolle, also kein Editieren.          }
 
-procedure TForm1.VideoListViewEditing(Sender: TObject; Item: TListItem;
+procedure TCdrtfeMainForm.VideoListViewEditing(Sender: TObject; Item: TListItem;
                                       var AllowEdit: Boolean);
 begin
   AllowEdit := False;
@@ -5848,7 +5853,7 @@ end;
 
   Tastatur-Events: Löschen und Bewegen von Tracks.                             }
 
-procedure TForm1.VideoListViewKeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.VideoListViewKeyDown(Sender: TObject; var Key: Word;
                                       Shift: TShiftState);
 begin
   case Key of
@@ -5871,7 +5876,7 @@ end;
 
 { Data-CD: Add file }
 
-procedure TForm1.CDESpeedButton1Click(Sender: TObject);
+procedure TCdrtfeMainForm.CDESpeedButton1Click(Sender: TObject);
 begin
   UserAddFile(CDETreeView);
   ShowFolderContent(CDETreeView, CDEListView);
@@ -5879,28 +5884,28 @@ end;
 
 { Data-CD: Add folder }
 
-procedure TForm1.CDESpeedButton2Click(Sender: TObject);
+procedure TCdrtfeMainForm.CDESpeedButton2Click(Sender: TObject);
 begin
   UserAddFolder(CDETreeView);
 end;
 
 { Data-CD: Delete file }
 
-procedure TForm1.CDESpeedButton3Click(Sender: TObject);
+procedure TCdrtfeMainForm.CDESpeedButton3Click(Sender: TObject);
 begin
   UserDeleteFile(CDETreeView, CDEListView);
 end;
 
 { Data-CD: Delete folder }
 
-procedure TForm1.CDESpeedButton4Click(Sender: TObject);
+procedure TCdrtfeMainForm.CDESpeedButton4Click(Sender: TObject);
 begin
   UserDeleteFolder(CDETreeView);
 end;
 
 { Data-CD: Delete all }
 
-procedure TForm1.CDESpeedButton5Click(Sender: TObject);
+procedure TCdrtfeMainForm.CDESpeedButton5Click(Sender: TObject);
 begin
   UserDeleteAll(CDETreeView);
   {mit einem neuen Projekt sollen auch die alten Ausnahmen gelöscht werden}
@@ -5911,7 +5916,7 @@ end;
 
 { Data-CD: Check filesystem }
 
-procedure TForm1.Sheet1SpeedButtonCheckFSClick(Sender: TObject);
+procedure TCdrtfeMainForm.Sheet1SpeedButtonCheckFSClick(Sender: TObject);
 var Node: TTreeNode;
     Path: string;
 begin
@@ -5937,7 +5942,7 @@ end;
 
 { XCD: Add file}
 
-procedure TForm1.XCDESpeedButton1Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton1Click(Sender: TObject);
 begin
   UserAddFile(XCDETreeView);
   ShowFolderContent(XCDETreeView, XCDEListView1);
@@ -5945,21 +5950,21 @@ end;
 
 { XCD: Add folder}
 
-procedure TForm1.XCDESpeedButton2Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton2Click(Sender: TObject);
 begin
   UserAddFolder(XCDETreeView);
 end;
 
 { XCD: Delete file }
 
-procedure TForm1.XCDESpeedButton3Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton3Click(Sender: TObject);
 begin
   UserDeleteFile(XCDETreeView, XCDEListView1);
 end;
 
 { XCD: Add movie }
 
-procedure TForm1.XCDESpeedButton4Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton4Click(Sender: TObject);
 begin
   FSettings.General.XCDAddMovie := True;
   UserAddFile(XCDETreeView);
@@ -5968,35 +5973,35 @@ end;
 
 { XCD: Delete movie }
 
-procedure TForm1.XCDESpeedButton5Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton5Click(Sender: TObject);
 begin
   UserDeleteFile(XCDETreeView, XCDEListView2);
 end;
 
 { XCD: Delete folder }
 
-procedure TForm1.XCDESpeedButton6Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton6Click(Sender: TObject);
 begin
   UserDeleteFolder(XCDETreeView);
 end;
 
 { XCD: Delete all }
 
-procedure TForm1.XCDESpeedButton7Click(Sender: TObject);
+procedure TCdrtfeMainForm.XCDESpeedButton7Click(Sender: TObject);
 begin
   UserDeleteAll(XCDETreeView);
 end;
 
 { Audio-CD: Add track }
 
-procedure TForm1.AudioSpeedButton1Click(Sender: TObject);
+procedure TCdrtfeMainForm.AudioSpeedButton1Click(Sender: TObject);
 begin
   UserAddTrack;
 end;
 
 { Audio-CD: Move track up }
 
-procedure TForm1.AudioSpeedButton2Click(Sender: TObject);
+procedure TCdrtfeMainForm.AudioSpeedButton2Click(Sender: TObject);
 begin
   if AudioListView.Items.Count > 0 then
   begin
@@ -6006,7 +6011,7 @@ end;
 
 { Audio-CD: Move track down }
 
-procedure TForm1.AudioSpeedButton3Click(Sender: TObject);
+procedure TCdrtfeMainForm.AudioSpeedButton3Click(Sender: TObject);
 begin
   if AudioListView.Items.Count > 0 then
   begin
@@ -6016,21 +6021,21 @@ end;
 
 { Audio-CD: Delete track}
 
-procedure TForm1.AudioSpeedButton4Click(Sender: TObject);
+procedure TCdrtfeMainForm.AudioSpeedButton4Click(Sender: TObject);
 begin
   UserDeleteFile(nil, AudioListView);
 end;
 
 { Video-CD: Add track }
 
-procedure TForm1.VideoSpeedButton1Click(Sender: TObject);
+procedure TCdrtfeMainForm.VideoSpeedButton1Click(Sender: TObject);
 begin
   UserAddTrack;
 end;
 
 { Video-CD: Move track up }
 
-procedure TForm1.VideoSpeedButton2Click(Sender: TObject);
+procedure TCdrtfeMainForm.VideoSpeedButton2Click(Sender: TObject);
 begin
   if VideoListView.Items.Count > 0 then
   begin
@@ -6040,7 +6045,7 @@ end;
 
 { Video-CD: Move track down }
 
-procedure TForm1.VideoSpeedButton3Click(Sender: TObject);
+procedure TCdrtfeMainForm.VideoSpeedButton3Click(Sender: TObject);
 begin
   if VideoListView.Items.Count > 0 then
   begin
@@ -6050,14 +6055,14 @@ end;
 
 { Video-CD: Delete track}
 
-procedure TForm1.VideoSpeedButton4Click(Sender: TObject);
+procedure TCdrtfeMainForm.VideoSpeedButton4Click(Sender: TObject);
 begin
   UserDeleteFile(nil, VideoListView);
 end;
 
 { Fix CD }
 
-procedure TForm1.SpeedButtonFixCDClick(Sender: TObject);
+procedure TCdrtfeMainForm.SpeedButtonFixCDClick(Sender: TObject);
 begin
   SetSettings;
   FSettings.Cdrecord.FixDevice := FDevices.CDWriter.Values[
@@ -6082,7 +6087,7 @@ end;
   selektierten Knotens werden die nicht gewünschten Einträge des Menüs
   ausgeblenden.                                                                }
 
-procedure TForm1.CDETreeViewPopupMenuPopup(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupMenuPopup(Sender: TObject);
 var Node: TTreeNode;
     Root: TTreeNode;
     Temp: Boolean;
@@ -6133,7 +6138,7 @@ end;
 
 { Data-CD, XCD: Set CD label }
 
-procedure TForm1.CDETreeViewPopupSetCDLabelClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupSetCDLabelClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: UserSetCDLabel(CDETreeView);
@@ -6143,7 +6148,7 @@ end;
 
 { Data-CD, XCD: Add folder }
 
-procedure TForm1.CDETreeViewPopupAddFolderClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupAddFolderClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -6157,7 +6162,7 @@ end;
 
 { Data-CD, XCD: Add file }
 
-procedure TForm1.CDETreeViewPopupAddFileClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupAddFileClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -6173,7 +6178,7 @@ end;
 
 { Data-CD, XCD: Delete folder }
 
-procedure TForm1.CDETreeViewPopupDeleteFolderClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupDeleteFolderClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -6187,7 +6192,7 @@ end;
 
 { Data-CD, XCD: Rename folder }
 
-procedure TForm1.CDETreeViewPopupRenameFolderClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupRenameFolderClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -6201,14 +6206,14 @@ end;
 
 { Data-CD, XCD: Create new folder }
 
-procedure TForm1.CDETreeViewPopupNewFolderClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupNewFolderClick(Sender: TObject);
 begin
   UserNewFolder(GetCurrentTreeView);
 end;
 
 { Data-CD: Multisession-CD importieren}
 
-procedure TForm1.CDETreeViewPopupImportClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDETreeViewPopupImportClick(Sender: TObject);
 begin
   UserImportCD;
 end;
@@ -6225,7 +6230,7 @@ end;
   in Abhängigkeit des List-Views, und der Anzahl der selektierten Dateien werden
   Menü-Einträge ein- bzw. ausgeblendet.                                        }
 
-procedure TForm1.CDEListViewPopupMenuPopup(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupMenuPopup(Sender: TObject);
 var ListView   : TListView;
     OpenVisible: Boolean;
 begin
@@ -6280,7 +6285,7 @@ end;
 
 { Data-CD, XCD: Add file }
 
-procedure TForm1.CDEListViewPopupAddFileClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupAddFileClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -6296,14 +6301,14 @@ end;
 
 { Data-CD, XCD: Add folder }
 
-procedure TForm1.CDEListViewPopupAddFolderClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupAddFolderClick(Sender: TObject);
 begin
   CDETreeViewPopupAddFolderClick(Sender);
 end;
 
 { XCD: Add file as Form2 file }
 
-procedure TForm1.CDEListViewPopupAddMovieClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupAddMovieClick(Sender: TObject);
 begin
   FSettings.General.XCDAddMovie := True;
   UserAddFile(XCDETreeView);
@@ -6312,7 +6317,7 @@ end;
 
 { Data-CD: Rename file }
 
-procedure TForm1.CDEListViewPopupRenameFileClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupRenameFileClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: begin
@@ -6324,7 +6329,7 @@ end;
 
 { Data-CD, XCD: Delete file }
 
-procedure TForm1.CDEListViewPopupDeleteFileClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupDeleteFileClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: UserDeleteFile(CDETreeView, CDEListView);
@@ -6335,14 +6340,14 @@ end;
 
 { Data-CD, XCD, New folder }
 
-procedure TForm1.CDEListViewPopupNewFolderClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupNewFolderClick(Sender: TObject);
 begin
   UserNewFolder(GetCurrentTreeView);
 end;
 
 { Data-CD, XCD: Open file }
 
-procedure TForm1.CDEListViewPopupOpenClick(Sender: TObject);
+procedure TCdrtfeMainForm.CDEListViewPopupOpenClick(Sender: TObject);
 begin 
   UserOpenFile(GetCurrentListView(CDEListViewPopupMenu.PopupComponent));
 end;
@@ -6352,7 +6357,7 @@ end;
   in Abhängigkeit der Anzahl der Tracks werden die Menü-Einträge ein- bzw.
   ausgeblendet.                                                                }
 
-procedure TForm1.AudioListViewPopupMenuPopup(Sender: TObject);
+procedure TCdrtfeMainForm.AudioListViewPopupMenuPopup(Sender: TObject);
 var ListView   : TListView;
     PlayVisible: Boolean;
 begin
@@ -6397,14 +6402,14 @@ end;
 
 { Audio-/Video-CD: Add track }
 
-procedure TForm1.AudioListViewPopupAddTrackClick(Sender: TObject);
+procedure TCdrtfeMainForm.AudioListViewPopupAddTrackClick(Sender: TObject);
 begin
   UserAddTrack;
 end;
 
 { Audio-/Video-CD: Delete track }
 
-procedure TForm1.AudioListViewPopupDeleteTrackClick(Sender: TObject);
+procedure TCdrtfeMainForm.AudioListViewPopupDeleteTrackClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cAudioCD: UserDeleteFile(nil, AudioListView);
@@ -6414,7 +6419,7 @@ end;
 
 { Audio-CD: Move track up }
 
-procedure TForm1.AudioListViewPopupMoveUpClick(Sender: TObject);
+procedure TCdrtfeMainForm.AudioListViewPopupMoveUpClick(Sender: TObject);
 var ListView: TListView;
 begin
   ListView := GetCurrentListView(Sender);
@@ -6426,7 +6431,7 @@ end;
 
 { Audio-CD: Move track down }
 
-procedure TForm1.AudioListViewPopupMoveDownClick(Sender: TObject);
+procedure TCdrtfeMainForm.AudioListViewPopupMoveDownClick(Sender: TObject);
 var ListView: TListView;
 begin
   ListView := GetCurrentListView(Sender);
@@ -6438,7 +6443,7 @@ end;
 
 { Audio-CD: Play track}
 
-procedure TForm1.AudioListViewPopupPlayClick(Sender: TObject);
+procedure TCdrtfeMainForm.AudioListViewPopupPlayClick(Sender: TObject);
 begin
   UserOpenFile(GetCurrentListView(AudioListViewPopupMenu.PopupComponent));
 end;
@@ -6454,7 +6459,7 @@ end;
   in Abhängigkeit des List-Views, und der Anzahl der selektierten Dateien werden
   Menü-Einträge ein- bzw. ausgeblendet.                                        }
 
-procedure TForm1.MiscPopupMenuPopup(Sender: TObject);
+procedure TCdrtfeMainForm.MiscPopupMenuPopup(Sender: TObject);
 begin
   if ((Sender as TPopupMenu).PopupComponent = CheckBoxDataCDVerify) or
      ((Sender as TPopupMenu).PopupComponent = CheckBoxXCDVerify) or
@@ -6487,7 +6492,7 @@ end;
 
 { Verify }
 
-procedure TForm1.MiscPopupVerifyClick(Sender: TObject);
+procedure TCdrtfeMainForm.MiscPopupVerifyClick(Sender: TObject);
 var OTF: Boolean;
     XCDPath: string;
 begin
@@ -6537,18 +6542,18 @@ end;
 
 { Clear output }
 
-procedure TForm1.MiscPopupClearOutputClick(Sender: TObject);
+procedure TCdrtfeMainForm.MiscPopupClearOutputClick(Sender: TObject);
 begin
   TLogWin.Inst.Clear;
 end;
 
 { Save log }
 
-procedure TForm1.MiscPopupSaveOutputClick(Sender: TObject);
+procedure TCdrtfeMainForm.MiscPopupSaveOutputClick(Sender: TObject);
 var DialogID: TDialogID;
 begin
   DialogID := DIDSaveLog;
-  SaveDialog1 := TSaveDialog.Create(Form1);
+  SaveDialog1 := TSaveDialog.Create(Self);
   SaveDialog1.DefaultExt := 'txt';
   SaveDialog1.Filter := '(*.txt)|*.txt';
   SaveDialog1.InitialDir := GetCachedFolderName(DialogID);
@@ -6563,13 +6568,13 @@ end;
 
 { Load/Eject Disk }
 
-procedure TForm1.MiscPopupEjectClick(Sender: TObject);
+procedure TCdrtfeMainForm.MiscPopupEjectClick(Sender: TObject);
 begin
   EjectDisk(FDevices.CDDevices.Values[ComboBoxDrives.Items[
                                        ComboBoxDrives.ItemIndex]]);
 end;
 
-procedure TForm1.MiscPopupLoadClick(Sender: TObject);
+procedure TCdrtfeMainForm.MiscPopupLoadClick(Sender: TObject);
 begin
   LoadDisk(FDevices.CDDevices.Values[ComboBoxDrives.Items[
                                       ComboBoxDrives.ItemIndex]]);
@@ -6585,7 +6590,7 @@ end;
 
   Diese Prozedur wird auch für das OnClick-Event der Radio-Buttuns verwendet.  }
 
-procedure TForm1.CheckBoxClick(Sender: TObject);
+procedure TCdrtfeMainForm.CheckBoxClick(Sender: TObject);
 begin
   if not FCheckingControls then CheckControls;
 end;
@@ -6597,7 +6602,7 @@ end;
 
   allgemein: nach Enter soll zum nächsten Control gewechselt werden.           }
 
-procedure TForm1.EditKeyPress(Sender: TObject; var Key: Char);
+procedure TCdrtfeMainForm.EditKeyPress(Sender: TObject; var Key: Char);
 var C: TControl;
 begin
   C := Sender as TControl;
@@ -6648,7 +6653,7 @@ end;
   Wenn das EditImageIsoPath verlassen wird, müssen in Abhänigkeit der Datei-
   endung des Images die Controls angepaßt werden.                              }
 
-procedure TForm1.EditExit(Sender: TObject);
+procedure TCdrtfeMainForm.EditExit(Sender: TObject);
 begin
   if (Sender as TEdit) = EditImageIsoPath then
   begin
@@ -6660,7 +6665,7 @@ end;
 
   Labels dürfen max. 32 Zeichen lang sein.                                     }
 
-procedure TForm1.EditChange(Sender: TObject);
+procedure TCdrtfeMainForm.EditChange(Sender: TObject);
 begin
   if (Sender as TEdit) = EditDVDVideoVolID then
   begin
@@ -6679,7 +6684,7 @@ end;
   Bei Doppelklick auf das Edit für das DVD-Video-Label soll der Name übernommen
   werden.                                                                      }
 
-procedure TForm1.EditDblClick(Sender: TObject);
+procedure TCdrtfeMainForm.EditDblClick(Sender: TObject);
 var Temp: string;
 begin
   Temp := EditDVDVideoSourcePath.Text;
@@ -6695,7 +6700,7 @@ end;
   Die ausgewählten Laufwerke sollen für jedes Tab-Sheet getrennt gespeichert
   werden. Ebenso die Geschwindigkeit.                                          }
 
-procedure TForm1.ComboBoxChange(Sender: TObject);
+procedure TCdrtfeMainForm.ComboBoxChange(Sender: TObject);
 begin
   if (Sender as TComboBox) = ComboBoxDrives then
   begin
@@ -6720,7 +6725,7 @@ end;
   Prozedur.                                                                    }
                                                              
 {$IFDEF AllowToggle}
-procedure TForm1.LabelClick(Sender: TObject);
+procedure TCdrtfeMainForm.LabelClick(Sender: TObject);
 begin
   ToggleOptions(Sender);
 end;
@@ -6732,8 +6737,8 @@ end;
   auf ihnen ist.                                                               }
 
 {$IFDEF MouseOverLabelHighlight}
-procedure TForm1.LabelMouseMove(Sender: TObject; Shift: TShiftState;
-                                X, Y: Integer);
+procedure TCdrtfeMainForm.LabelMouseMove(Sender: TObject; Shift: TShiftState;
+                                         X, Y: Integer);
 begin
   (Sender as TLabel).Color := clInactiveCaptionText;
 end;
@@ -6747,8 +6752,8 @@ end;
   Setzt die Markierung eines Labels zurück, wenn es verlassen wird.            }
 
 {$IFDEF MouseOverLabelHighlight}
-procedure TForm1.PanelMouseMove(Sender: TObject; Shift: TShiftState;
-                                X, Y: Integer);
+procedure TCdrtfeMainForm.PanelMouseMove(Sender: TObject; Shift: TShiftState;
+                                         X, Y: Integer);
 var Panel: TPanel;
     i: Integer;
 begin
@@ -6771,7 +6776,7 @@ end;
   Wird ausgeführt, wenn die 1.5 Sekunden Verzögerung für ein TreeNode-Expand
   vertrichen ist.                                                              }
 
-procedure TForm1.TimerNodeExpandTimer(Sender: TObject);
+procedure TCdrtfeMainForm.TimerNodeExpandTimer(Sender: TObject);
 begin
   ExpandNodeDelayed(nil, True);
 end;
@@ -6783,7 +6788,7 @@ end;
 
   gesamten Text markieren.                                                     }
 
-procedure TForm1.Memo1KeyDown(Sender: TObject; var Key: Word;
+procedure TCdrtfeMainForm.Memo1KeyDown(Sender: TObject; var Key: Word;
                               Shift: TShiftState);
 begin
   if (ssCtrl in Shift) and (Key = Ord('A')) then
@@ -6800,10 +6805,10 @@ end;
   initialisiert die Actions. Action werden benötigt, da im OnKeyDown-Event des
   Hauptfensters immer ein Beep erzeugt wird, bei Actions jedoch nicht.         }
 
-procedure TForm1.InitActions;
+procedure TCdrtfeMainForm.InitActions;
 begin
   {ActionList erstellen}
-  ActionList := TActionList.Create(Form1);
+  ActionList := TActionList.Create(Self);
   {Actions erstellen - Dateien/Tracks hinzufügen}
   ActionUserAddFile := TAction.Create(ActionList);
   ActionUserAddFile.ShortCut := ShortCut($4F{VK_O}, [ssAlt]);
@@ -6856,52 +6861,52 @@ begin
   ActionUserSpecialTab.ActionList := ActionList;
 end;
 
-procedure TForm1.ActionUserAddFileExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserAddFileExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($4F);
 end;
 
-procedure TForm1.ActionUserAddFileForm2Execute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserAddFileForm2Execute(Sender: TObject);
 begin
   HandleKeyboardShortcut($56);
 end;
 
-procedure TForm1.ActionUserAddFolderExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserAddFolderExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($49);
 end;
 
-procedure TForm1.ActionUserDeleteAllExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserDeleteAllExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut(VK_DELETE);
 end;
 
-procedure TForm1.ActionUserTrackUpExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserTrackUpExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut(VK_UP);
 end;
 
-procedure TForm1.ActionUserTrackDownExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserTrackDownExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut(VK_DOWN);
 end;
 
-procedure TForm1.ActionUserToggleFileExplorerExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserToggleFileExplorerExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($45);
 end;
 
-procedure TForm1.ActionUserSettingsExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserSettingsExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($53);
 end;
 
-procedure TForm1.ActionUserShowOutputWindowExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserShowOutputWindowExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($4C);
 end;
 
-procedure TForm1.ActionUserSpecialTabExecute(Sender: TObject);
+procedure TCdrtfeMainForm.ActionUserSpecialTabExecute(Sender: TObject);
 begin
     HandleKeyboardShortcut($51);
 end;
@@ -6912,7 +6917,7 @@ end;
 
   sorgt für das verzögerte Öffnen der TreeNodes.                               }
 
-procedure TForm1.ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
+procedure TCdrtfeMainForm.ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
 const {$J+} NodeToExpand: TTreeNode = nil; {$J-}
 var MousePos: TPoint;
     Control : TWinControl;
@@ -6952,7 +6957,7 @@ end;
 
   Pfad zur Hilfe-Datei abhängig von der gewählten Sprache setzen.              }
 
-procedure TForm1.SetHelpFile;
+procedure TCdrtfeMainForm.SetHelpFile;
 {$IFDEF Delphi2005Up}
 var HelpFileName: string;
     HelpPath    : string;
@@ -6981,8 +6986,8 @@ initialization
   ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
   DeviceChangeNotifier := TDeviceChangeNotifier.Create(nil);
-  DeviceChangeNotifier.OnDiskInserted := Form1.DeviceArrival;
-  DeviceChangeNotifier.OnDiskRemoved := Form1.DeviceRemoval;
+  DeviceChangeNotifier.OnDiskInserted := CdrtfeMainForm.DeviceArrival;
+  DeviceChangeNotifier.OnDiskRemoved := CdrtfeMainForm.DeviceRemoval;
   {$IFDEF ShowDebugWindow}
   FormDebug := TFormDebug.Create(nil);
   FormDebug.Top := 0;
