@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.05.2010
+  letzte Änderung  03.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3970,7 +3970,7 @@ begin
   end else
   begin
     Self.Constraints.MinWidth := dWidthBigFont;
-    Self.Constraints.MinHeight := dHeightBigFont;  
+    Self.Constraints.MinHeight := dHeightBigFont;
   end;
   {Bitmaps für die Glyphs laden}
   InitGlyphArray(GlyphArray);
@@ -3996,6 +3996,9 @@ begin
   InitLVArray;
   {FileBroser}
   InitFileBrowser;
+  {Device-Events}
+  DeviceChangeNotifier.OnDiskInserted := Self.DeviceArrival;
+  DeviceChangeNotifier.OnDiskRemoved := Self.DeviceRemoval;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------
@@ -6986,8 +6989,6 @@ initialization
   ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
   DeviceChangeNotifier := TDeviceChangeNotifier.Create(nil);
-  DeviceChangeNotifier.OnDiskInserted := CdrtfeMainForm.DeviceArrival;
-  DeviceChangeNotifier.OnDiskRemoved := CdrtfeMainForm.DeviceRemoval;
   {$IFDEF ShowDebugWindow}
   FormDebug := TFormDebug.Create(nil);
   FormDebug.Top := 0;
