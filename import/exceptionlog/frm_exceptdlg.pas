@@ -1,4 +1,4 @@
-{ $Id: frm_exceptdlg.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $
+{ $Id: frm_exceptdlg.pas,v 1.3 2010/06/11 11:34:48 kerberos002 Exp $
 
   frm_exceptdlg.pas:
 
@@ -23,7 +23,7 @@
   Show call stack and other information when an exception occurs. Based on the
   JEDI Code Library (JCL).
 
-  Last modified: 2007/01/27
+  Last modified: 2010/06/11
 
 }
 
@@ -89,7 +89,7 @@ implementation
 
 {$R *.dfm}
 
-uses JCLStrings, f_strings, f_window;
+uses JCLStrings, f_strings, f_window, f_filesystem;
 
 { TExceptionDialog - private }
 
@@ -279,6 +279,7 @@ begin
   SaveDialog1.Title := 'Save report';
   SaveDialog1.DefaultExt := '.log';
   SaveDialog1.FileName := FDefaultFileName;
+  SaveDialog1.InitialDir := GetShellFolder(CSIDL_DESKTOP);
   SaveDialog1.Options := [ofOverwritePrompt,ofHideReadOnly];
   if SaveDialog1.Execute then
   begin

@@ -21,7 +21,7 @@
   Get call stack and other information when an exception occurs. Based on the
   JEDI Code Library (JCL).
 
-  Last modified: 2009/06/13
+  Last modified: 2010/06/11
 
 }
 
@@ -200,7 +200,7 @@ end;
 
 function TExceptionLog.GetDefaultFileName: string;
 begin
-  Result := PathExtractFileDirFixed(ParamStr(0)) +
+  Result := // PathExtractFileDirFixed(ParamStr(0)) +
               PathExtractFileNameNoExt(ParamStr(0)) + '_err.log';
 end;
 
