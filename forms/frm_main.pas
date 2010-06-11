@@ -4554,47 +4554,49 @@ var TSHeight                 : Integer;
     ShouldNotShowFileExplorer: Boolean;
     FileExplorerHeight       : Integer;
 begin
-  {Resize bei kleiner Schriftart}
-  if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
+  if not (csDestroying in ComponentState) then
   begin
-    {Höhe des aktuellen TabSheets}
-    TSHeight := PageControl1.ActivePage.Height;
-    {TabSheet3}
-    PanelXCD.Top := TSHeight - 101;
-    PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
-    PanelXCDView.Width := XCDESpeedButton1.Left - 15;
-    XCDETreeView.Height := PanelXCD.Top - 15;
-    XCDEListView1.Height := (PanelXCDViewRight.Height -
-                             SplitterXCDHorizontal.Height) div 2;
-    XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
-    XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
-  end else
-  {Resize mit großer Schriftart}
-  if (Screen.PixelsPerInch > 96) and not Application.Terminated then
-  begin
-    {Höhe des aktuellen TabSheets}
-    TSHeight := PageControl1.ActivePage.Height;
-    {TabSheet3}
-    PanelXCD.Top := TSHeight - 127;
-    PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
-    PanelXCDView.Width := XCDESpeedButton1.Left - 15;
-    XCDETreeView.Height := PanelXCD.Top - 15;
-    XCDEListView1.Height := (PanelXCDViewRight.Height -
-                             SplitterXCDHorizontal.Height) div 2;
-    XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
-    XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
+    {Resize bei kleiner Schriftart}
+    if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
+    begin
+      {Höhe des aktuellen TabSheets}
+      TSHeight := PageControl1.ActivePage.Height;
+      {TabSheet3}
+      PanelXCD.Top := TSHeight - 101;
+      PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
+      PanelXCDView.Width := XCDESpeedButton1.Left - 15;
+      XCDETreeView.Height := PanelXCD.Top - 15;
+      XCDEListView1.Height := (PanelXCDViewRight.Height -
+                               SplitterXCDHorizontal.Height) div 2;
+      XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
+      XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
+    end else
+    {Resize mit großer Schriftart}
+    if (Screen.PixelsPerInch > 96) and not Application.Terminated then
+    begin
+      {Höhe des aktuellen TabSheets}
+      TSHeight := PageControl1.ActivePage.Height;
+      {TabSheet3}
+      PanelXCD.Top := TSHeight - 127;
+      PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
+      PanelXCDView.Width := XCDESpeedButton1.Left - 15;
+      XCDETreeView.Height := PanelXCD.Top - 15;
+      XCDEListView1.Height := (PanelXCDViewRight.Height -
+                               SplitterXCDHorizontal.Height) div 2;
+      XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
+      XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
+    end;
+    {In Abhängigkeit der Fensterhöhe FileExplorer zulassen oder nicht}
+    FileExplorerHeight := FSettings.FileExplorer.Height + 8;
+    CanShowFileExplorer := ((PageControl1.Height - FileExplorerHeight) >= 250);
+    if not FInstanceTermination then
+      MainMenuToggleFileExplorer.Enabled := FFileExplorerShowing or
+                                            CanShowFileExplorer;
+    {gegebenenfalls FileExplorer automatisch ausblenden}
+    ShouldNotShowFileExplorer := FFileExplorerShowing
+                    and not (CanShowFileExplorer or (PageControl1.Height >= 250));
+    if ShouldNotShowFileExplorer then ToggleFileExplorer(False);
   end;
-  {In Abhängigkeit der Fensterhöhe FileExplorer zulassen oder nicht}
-  FileExplorerHeight := FSettings.FileExplorer.Height + 8;
-  CanShowFileExplorer := ((PageControl1.Height - FileExplorerHeight) >= 250);
-  if not FInstanceTermination then
-    MainMenuToggleFileExplorer.Enabled := FFileExplorerShowing or
-                                          CanShowFileExplorer;
-  {gegebenenfalls FileExplorer automatisch ausblenden}
-  ShouldNotShowFileExplorer := FFileExplorerShowing
-                  and not (CanShowFileExplorer or (PageControl1.Height >= 250));
-  if ShouldNotShowFileExplorer then ToggleFileExplorer(False);
-
 end;
 
 { FormCloseQuery ---------------------------------------------------------------
