@@ -1,11 +1,11 @@
-{ $Id: f_filesystem.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_filesystem.pas,v 1.2 2010/06/11 11:34:09 kerberos002 Exp $
 
   f_filesystem.pas: Dateisystemfunktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  11.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -58,6 +58,7 @@ interface
 uses Forms, Windows, Classes, SysUtils, ShlObj, FileCtrl, ActiveX, Registry;
 
 const {IDs für spezielle Ordner}
+      CSIDL_DESKTOP              = $0000;
       CSIDL_APPDATA              = $001A; {Application Data, new for NT4}
       CSIDL_LOCAL_APPDATA        = $001C; {user\Local Settings\Application Data}
       CSIDL_COMMON_APPDATA       = $0023; {All Users\Application Data}
