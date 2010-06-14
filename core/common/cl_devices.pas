@@ -5,7 +5,7 @@
   Copyright (c) 2005-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  14.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -31,6 +31,7 @@
                  DetectDrives
                  GetDriveLetter(const Dev: string): string
                  Rescan
+                 SetDummyDevices
                  UpdateSpeedLists(const Drive: string);
 
 }
@@ -78,6 +79,7 @@ type TDevices = class(TObject)
        function GetDriveLetter(const Dev: string): string;
        procedure DetectDrives;
        procedure Rescan;
+       procedure SetDummyDevices;
        procedure UpdateSpeedLists(const Drive: string);
        property CDDevices    : TStringList read GetCDDevices;
        property CDReader     : TStringList read GetCDReader;
@@ -591,6 +593,17 @@ begin
   {$IFDEF WriteLogFile} AddLogCode(1222); {$ENDIF}
   ClearLists;
   DetectDrives;
+end;
+
+{ SetDummyDevices --------------------------------------------------------------
+
+  belegt die Laufwerkslisten mit jeweils einem Leerstring.                     }
+
+procedure TDevices.SetDummyDevices;
+begin
+  CDWriter.Add('');
+  CDReader.Add('');
+  CDDevices.Add('');
 end;
 
 { UpdateSpeedLists -------------------------------------------------------------
