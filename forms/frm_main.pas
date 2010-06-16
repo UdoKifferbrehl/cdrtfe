@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.06.2010
+  letzte Änderung  16.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,7 +21,7 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
-     ActnList, ShellCtrls,
+     ActnList, ShellCtrls, Clipbrd,
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
@@ -451,6 +451,8 @@ type
     function GetProgressBar(const PB: Integer): TProgressBar;
     function InputOk: Boolean;
     procedure ActivateTab(const PageToActivate: Byte);
+    procedure AddFromClipboard;
+    procedure AddListToPathList(List: TStringList);
     procedure AddToPathList(const Filename: string);
     procedure AddToPathListSort(const FolderAdded: Boolean);
     procedure AddItemToListView(const Item: string; ListView: TListView);
@@ -617,41 +619,14 @@ end;
   diese aus dem Explorer auf cdrtfe gezogen werden.                            }
 
 procedure TCdrtfeMainForm.WMDROPFILES (var Msg: TMessage);
-var i, Anzahl, Size: Integer;
-    Dateiname      : PChar;
-    Filename       : string;
-    FolderAdded    : Boolean;
-    FileList       : TStringList;
+var FileList   : TStringList;
 begin
   inherited;
   FileList := TStringList.Create;
-  FolderAdded := False;
   Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
-  {Wieviele Objekte wurden auf cdrtfe gezogen?}
-  Anzahl := DragQueryFile(Msg.WParam, $FFFFFFFF, nil, 0);
-  for i := 0 to (Anzahl - 1) do
-  begin
-    Size := DragQueryFile(Msg.WParam, i, nil, 0) + 1;
-    Dateiname:= StrAlloc(Size);
-    DragQueryFile(Msg.WParam, i, Dateiname, Size);
-    Filename := string(Dateiname);
-    FileList.Add(Filename);
-    StrDispose(Dateiname);
-  end;
-  FileList.Sort;
-  for i := 0 to (Anzahl - 1) do
-  begin
-    AddToPathList(FileList[i]);
-    {Flag setzen, wenn Order hinzugefügt wurde}
-    if not FolderAdded then
-    begin
-      if DirectoryExists(FileList[i]) then FolderAdded := True;
-    end;
-  end;
-  DragFinish(Msg.WParam);
+  GetDragQueryFileList(Msg.WParam, FileList, True);
+  AddListToPathList(FileList);
   FileList.Free;
-  {Ordner sortieren}
-  AddToPathlistSort(FolderAdded);
 end;
 
 { WMButtonsOff/On --------------------------------------------------------------
@@ -1593,6 +1568,54 @@ begin
   TC.StopTimeCount;
   TLogWin.Inst.Add('check FS  : ' + TC.TimeAsString);
   {$ENDIF}
+end;
+
+{ AddFromClipboard -------------------------------------------------------------
+
+  AddFromClipborad fügt Dateien aus der Zwischenablage ein.                    }
+
+procedure TCdrtfeMainForm.AddFromClipboard;
+var Handle  : THandle;
+    FileList: TStringList;
+begin
+  if Clipboard.HasFormat(CF_HDROP) then
+  begin
+    FileList := TStringList.Create;
+    Clipboard.Open;
+    try
+      Handle := Clipboard.GetAsHandle(CF_HDROP);
+      if Handle <> 0 then
+      begin
+        GetDragQueryFileList(Handle, FileList, False);
+        AddListToPathList(FileList);        
+      end;
+    finally
+      Clipboard.Close;
+      FileList.Free;
+    end;
+  end;
+end;
+
+{ AddListToPathList ------------------------------------------------------------
+
+  fügt den Inhalt von List zur Pfadliste hinzu.                                }
+
+procedure TCdrtfeMainForm.AddListToPathList(List: TStringList);
+var i       : Integer;
+    FolderAdded: Boolean;
+begin
+  FolderAdded := False;
+  for i := 0 to List.Count - 1 do
+  begin
+    AddToPathList(List[i]);
+    {Flag setzen, wenn Order hinzugefügt wurde}
+    if not FolderAdded then
+    begin
+      if DirectoryExists(List[i]) then FolderAdded := True;
+    end;
+  end;
+  {Ordner sortieren}
+  AddToPathlistSort(FolderAdded);
 end;
 
 { AddToPathlist ----------------------------------------------------------------
@@ -5474,6 +5497,10 @@ begin
                end;
     VK_F2    : UserRenameFolderByKey(Tree);
     VK_F5    : UserSort(True);
+    Ord('V') : if Shift = [ssCtrl] then
+               begin
+                 AddFromClipboard;
+               end;
   end;
 end;
 
@@ -5603,6 +5630,10 @@ begin
                 begin
                   ListViewSelectAll(List);
                 end;
+    Ord('V')  : if Shift = [ssCtrl] then
+                begin
+                  AddFromClipboard;
+                end;                
     VK_F2     : if FSettings.General.Choice = cDataCD then
                 begin
                   {nur bei Daten-CDs dürfen Dateien umbenannt werden}
@@ -5816,6 +5847,10 @@ begin
                  begin
                    ListViewSelectAll(AudioListView);
                  end;
+    Ord('V')   : if Shift = [ssCtrl] then
+                 begin
+                   AddFromClipboard;
+                 end;                 
     VK_ADD     : UserMoveTrack(AudioListView, dDown);
     VK_SUBTRACT: UserMoveTrack(AudioListView, dUp);
     VK_RETURN  : ListViewDblCLick(Sender);
@@ -5873,6 +5908,10 @@ begin
                  begin
                    ListViewSelectAll(VideoListView);
                  end;
+    Ord('V')   : if Shift = [ssCtrl] then
+                 begin
+                   AddFromClipboard;
+                 end;                                  
     VK_ADD     : UserMoveTrack(VideoListView, dDown);
     VK_SUBTRACT: UserMoveTrack(VideoListView, dUp);
     VK_RETURN  : ListViewDblCLick(Sender);
