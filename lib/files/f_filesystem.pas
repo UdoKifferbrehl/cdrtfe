@@ -1,11 +1,11 @@
-{ $Id: f_filesystem.pas,v 1.2 2010/06/11 11:34:09 kerberos002 Exp $
+{ $Id: f_filesystem.pas,v 1.3 2010/06/16 14:21:07 kerberos002 Exp $
 
   f_filesystem.pas: Dateisystemfunktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.06.2010
+  letzte Änderung  16.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,6 +38,7 @@
     FindInSearchPath(const Name: string): string
     GetDirSize(Verzeichnis: string): Longint
     GetDriveList(const DriveType: Cardinal; DriveList: TStringList): Byte
+    GetDragQueryFileList(Handle: THandle; List: TStringList; const WmDrpFiles: Boolean)
     GetFileSize(const Filename: string): Longint
     GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word): Boolean
     GetFileVersionString(const FileName: string): string
@@ -55,7 +56,8 @@ unit f_filesystem;
 
 interface
 
-uses Forms, Windows, Classes, SysUtils, ShlObj, FileCtrl, ActiveX, Registry;
+uses Forms, Windows, Classes, SysUtils, ShlObj, ShellAPI, FileCtrl, ActiveX,
+     Registry;
 
 const {IDs für spezielle Ordner}
       CSIDL_DESKTOP              = $0000;
@@ -98,6 +100,7 @@ function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function IsUNCPath(const Path: string): Boolean;
 procedure GetVolumeInfo(var VolInfo: TVolumeInfo);
+procedure GetDragQueryFileList(Handle: THandle; List: TStringList; const WmDrpFiles: Boolean);
 
 implementation
 
@@ -615,6 +618,30 @@ begin
               IntToStr(V2) + '.' +
               IntToStr(V3) + '.' +
               IntToStr(V4);
+end;
+
+{ GetDragQueryFileList ---------------------------------------------------------
+
+  liefert die per DragQuereFile übermittelten Dateinamen in einer Stringliste. }
+
+procedure GetDragQueryFileList(Handle: THandle; List: TStringList;
+                               const WmDrpFiles: Boolean);
+var i, Anzahl, Size: Integer;
+    Dateiname      : PChar;
+    Filename       : string;
+begin
+  Anzahl := DragQueryFile(Handle, $FFFFFFFF, nil, 0);
+  for i := 0 to (Anzahl - 1) do
+  begin
+    Size := DragQueryFile(Handle, i, nil, 0) + 1;
+    Dateiname:= StrAlloc(Size);
+    DragQueryFile(Handle, i, Dateiname, Size);
+    Filename := string(Dateiname);
+    List.Add(Filename);
+    StrDispose(Dateiname);
+  end;
+  if WmDrpFiles then DragFinish(Handle);
+  List.Sort;
 end;
 
 end.
