@@ -1152,7 +1152,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         277)
       object PanelImage: TPanel
         Left = 8
-        Top = 8
+        Top = 16
         Width = 521
         Height = 249
         Anchors = []
