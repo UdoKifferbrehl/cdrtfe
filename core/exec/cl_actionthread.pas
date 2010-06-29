@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  29.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -133,6 +133,8 @@ end;
 
 procedure TActionThread.SendTerminationMessage;
 begin
+  TLogWin.Inst.ProgressBarHide(1);
+  TLogWin.Inst.ProgressBarHide(2);
   {$IFDEF ShowCmdError}
   SendMessage(FHandle, WM_TTerminated, FExitCode, 0);
   {$ELSE}

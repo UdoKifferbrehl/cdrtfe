@@ -1,4 +1,4 @@
-{ $Id: cl_logwindow.pas,v 1.2 2010/03/16 16:23:06 kerberos002 Exp $
+{ $Id: cl_logwindow.pas,v 1.3 2010/06/29 13:26:35 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -6,7 +6,7 @@
 
   Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  16.03.2010
+  letzte Änderung  29.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -529,7 +529,7 @@ begin
     {$ENDIF}
   end else
   {cdrecord: Blanking ...}
-  if Pos('Blanking PMA, TOC, pregap', Temp) > 0 then
+  if Pos('Blanking ', Temp) = 1 then   // Blanking PMA, TOC, pregap
   begin
     Progress := 'Blanking...';
     ProgressBarDoMarquee(True);
@@ -540,7 +540,16 @@ begin
   {mkisofs: ...% done}
   if Pos('done,', Temp) > 0 then
   begin
-    Progress := 'I: ' + Trim(Copy(Temp, 2, Pos('%', Temp)));
+    a := Trim(Copy(Temp, 2, Pos('%', Temp)));
+    Progress := 'I: ' + a;
+    if not FProgressBarShowing[2] then
+      ProgressBarShow(2, 100)
+    else
+    begin
+      a := Copy(a, 1, Pos('.', a) - 1);
+      ia := StrToIntDef(a, 0);
+      ProgressBarUpdate(2, ia);
+    end;
   end else
   {mode2cdmaker: [Progress...]}
   if Pos('[Pro', Temp) > 0 then
@@ -553,14 +562,17 @@ begin
     Delete(Temp, 1, 4);
     TotalSectors := StrToIntDef(Trim(Temp), 1);
     OldSector := 0;
+    ProgressBarShow(2, 100);
   end else
   if Pos('addr:', Temp) = 1 then
   begin
     ia := StrToIntDef(Trim(Copy(Temp, 6, Pos('cnt', Temp) - 6)), 0);
     if ia > OldSector then
     begin
+      ProgTF := (ia / TotalSectors) * 100;
       Progress := 'R: ' + FormatFloat('##0%', (ia / TotalSectors) *100);
       OldSector := ia;
+      ProgressBarUpdate(2, Round(ProgTF));
     end;
   end else
   {ProgressBar sichtbar machen}
