@@ -133,7 +133,7 @@ end;
 
 procedure TActionThread.SendTerminationMessage;
 begin
-  TLogWin.Inst.ProgressBarHide(1);
+  // TLogWin.Inst.ProgressBarHide(1); --> TCdrtfeMainForm.WMTTerminated
   TLogWin.Inst.ProgressBarHide(2);
   {$IFDEF ShowCmdError}
   SendMessage(FHandle, WM_TTerminated, FExitCode, 0);
