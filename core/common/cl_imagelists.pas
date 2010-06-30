@@ -1,11 +1,11 @@
-{ $Id: cl_imagelists.pas,v 1.1 2010/01/11 06:37:38 kerberos002 Exp $
+{ $Id: cl_imagelists.pas,v 1.2 2010/06/30 16:36:31 kerberos002 Exp $
 
   cl_imagelists.pas: Zugriff auf SytemImageList und Icons
 
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.10.2008
+  letzte Änderung  30.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -34,7 +34,7 @@ unit cl_imagelists;
 
 interface
 
-uses Classes, Forms, Controls, Windows, ShellApi, Graphics, SysUtils,
+uses Classes, Forms, Controls, Windows, ShellApi, Graphics, SysUtils, CommCtrl,
      const_glyphs;
 
 
@@ -51,6 +51,10 @@ type TGlyphArray = array[1..cGlyphCount] of TBitmap;
        IconFolderSelected: Integer;
        IconCD            : Integer;
        IconCDA           : Integer;
+       IconInformation   : Integer;
+       IconWarning       : Integer;
+       IconError         : Integer;
+       IconWinlogo       : Integer;
        constructor Create(AOwner: TComponent);
        destructor Destroy; override;
        procedure LoadGlyphs(Glyphs: TGlyphArray);
@@ -76,9 +80,11 @@ var Icon    : TIcon;
     i       : Integer;
     IconFile: string;
     Ok      : Boolean;
+    Info    : TSHFileInfo;
 begin
   {eigene Icons aus der Exe laden}
   IconImages := TImageList.Create(AOwner);
+  IconImages.Handle := ImageList_Create(16, 16, ILC_COLOR32 or ILC_MASK, 0, 0);
   Icon := TIcon.Create;
   Bitmap := TBitmap.Create;
   Mask := TBitmap.Create;
@@ -109,14 +115,40 @@ begin
       IconImages.AddIcon(Icon);    
     end;
   end;
+  {zusätzliche System-Icons laden}
+  Icon.Handle := LoadIcon(0, IDI_INFORMATION);
+  IconImages.AddIcon(Icon);
+  Icon.Handle := LoadIcon(0, IDI_WARNING);
+  IconImages.AddIcon(Icon);
+  Icon.Handle := LoadIcon(0, IDI_ERROR);
+  IconImages.AddIcon(Icon);
+  Icon.Handle := LoadIcon(0, IDI_WINLOGO);
+  IconImages.AddIcon(Icon);
+  {systemabhängige Ordner-Icons}
+  IconFile := ExtractFileDir(ParamStr(0));
+  SHGetFileInfo(PChar(IconFile), 0, Info,
+                SizeOf(TSHFileInfo),
+                SHGFI_ICON or SHGFI_SMALLICON);
+  Icon.Handle := Info.hIcon;
+  IconImages.AddIcon(Icon);
+  SHGetFileInfo(PChar(IconFile), 0, Info,
+                SizeOf(TSHFileInfo),
+                SHGFI_ICON or SHGFI_SMALLICON or SHGFI_OPENICON);
+  Icon.Handle := Info.hIcon;
+  IconImages.AddIcon(Icon);
+
   Icon.Free;
   Bitmap.Free;
   Mask.Free;
   {Icon-Indizes festlegen}
-  IconFolder := 1;
-  IconFolderSelected := 2;
-  IconCD := 3;
-  IconCDA := 4;
+  IconFolder         :=  9; //1;
+  IconFolderSelected := 10; //2;
+  IconCD             :=  3;
+  IconCDA            :=  4;
+  IconInformation    :=  5;
+  IconWarning        :=  6;
+  IconError          :=  7;
+  IconWinlogo        :=  8;
 end;
 
 { TImageLists - public }
