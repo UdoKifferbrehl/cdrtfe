@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.06.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -749,7 +749,8 @@ begin
     begin
       FAction.Action := cVerifyISOImage;
       FAction.StartAction;
-    end;
+    end else
+      SendMessage(Handle, WM_VTerminated, 0, 0);
   end else
   {1:1-Kopie (Audio-CD): Nach dem Auslesen sofort schreiben}
   if (FAction.LastAction = cDAE) and FSettings.General.CDCopy then
