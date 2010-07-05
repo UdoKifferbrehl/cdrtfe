@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -501,16 +501,16 @@ begin
         if Temp <> Item.Caption then
         begin
           ShowMsgDlg(Format(FLang.GMS('e111'), [Temp]), FLang.GMS('g001'),
-                     MB_cdrtfe2);
+                     MB_cdrtfeError);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfeError);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end else                                             // Datei
@@ -547,16 +547,16 @@ begin
         if Temp <> Item.Caption then
         begin
           ShowMsgDlg(Format(FLang.GMS('e112'), [Temp]), FLang.GMS('g001'),
-                     MB_cdrtfe2);
+                     MB_cdrtfeError);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfeError);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end;

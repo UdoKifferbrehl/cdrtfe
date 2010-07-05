@@ -1,11 +1,11 @@
-{ $Id: f_window.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_window.pas,v 1.2 2010/07/05 12:34:53 kerberos002 Exp $
 
   f_window.pas: Funktionnen für Fenster und Dialoge
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  05.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,6 +20,7 @@
     SetFont(Control: TWinControl)
     SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean)
     ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
+    ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound: Boolean): Integer
     WindowStayOnTop(Handle: THandle; Value: Boolean)
 }
 
@@ -29,19 +30,39 @@ unit f_window;
 
 interface
 
-uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages;
+uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages, Dialogs, Classes,
+     MMSystem;
 
-function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
+function FlagIsSet(const Mask, Flag: Longint): Boolean;
+function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
+function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound: Boolean): Integer; overload;
 procedure SetFont(Control: TWinControl);
 procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
 procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 
-const MB_cdrtfe1 = MB_OKCANCEL or MB_SYSTEMMODAL or MB_ICONQUESTION;
-      MB_cdrtfe2 = MB_OK or MB_ICONEXCLAMATION or MB_SYSTEMMODAL;
+const MB_cdrtfeDlgEx	   = $01000000;
+      MB_cdrtfeDlgSnd	   = $02000000;
+      MB_cdrtfeDlgExSnd  = MB_cdrtfeDlgEx or MB_cdrtfeDlgSnd;
+      MB_cdrtfeInfo      = MB_OK or MB_ICONINFORMATION or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
+      MB_cdrtfeError     = MB_OK or MB_ICONSTOP or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
+      MB_cdrtfeWarning   = MB_OK or MB_ICONWARNING or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
+      MB_cdrtfeWarningOC = MB_OKCANCEL or MB_ICONWARNING or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
+      MB_cdrtfeWarningYN = MB_YESNO or MB_ICONWARNING or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
+      MB_cdrtfeConfirm   = MB_OKCANCEL or MB_ICONQUESTION or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
+      MB_cdrtfeConfirmS  = MB_OKCANCEL or MB_ICONQUESTION or MB_SYSTEMMODAL or MB_cdrtfeDlgEx;
 
 implementation
 
-uses f_wininfo;
+uses f_wininfo, c_frametopbanner;
+
+{ FlagIsSet --------------------------------------------------------------------
+
+  prüft, ob ein bestimmtes Flag bei der übergebenen Maske gesetzt ist.         }
+
+function FlagIsSet(const Mask, Flag: Longint): Boolean;
+begin
+  Result := (Mask and Flag) = Flag;
+end;
 
 { SetFont ----------------------------------------------------------------------
 
@@ -81,18 +102,124 @@ end;
   zeigt einen Dialog an. Verwendet Application.MessageBox.
 
   Flags: MB_ICONSTOP             MB_OK                    MB_cdrtfe1
-         MB_ICONQUESTION         MB_OKCANCEL
+         MB_ICONQUESTION         MB_OKCANCEL              MB_cdrtfe2
          MB_ICONWARNING          MB_ABORTRETRYIGNORE
          MB_ICONINFORMATION      MB_YESNOCANCEL
                                  MB_YESNO
                                  MB_RETRYCANCEL
                                  MB_HELP
 
-  Results: ID_OK, ID_CANCEL, ID_ABORT, ID_RETRY, ID_RIGNORE, ID_YES, ID_NO     }
+  Results: ID_OK, ID_CANCEL, ID_ABORT, ID_RETRY, ID_IGNORE, ID_YES, ID_NO      }
 
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
+var Sound  : Boolean;
+    DlgType: TMsgDlgType;
+    Buttons: TMsgDlgButtons;
 begin
-  Result := Application.MessageBox(PChar(Text), PChar(Caption), Flags);
+  if not FlagIsSet(Flags, MB_cdrtfeDlgEx) then
+  begin
+    Result := Application.MessageBox(PChar(Text), PChar(Caption), Flags);
+  end else
+  begin
+    Sound := FlagIsSet(Flags, MB_cdrtfeDlgSnd);
+    case Flags and $000000F0 of
+      MB_ICONSTOP       : DlgType := mtError;
+      MB_ICONQUESTION   : DlgType := mtConfirmation;
+      MB_ICONWARNING    : DlgType := mtWarning;
+      MB_ICONINFORMATION: DlgType := mtInformation;
+    else
+      DlgType := mtCustom;
+    end;
+    case Flags and $0000000F of
+      MB_OK              : Buttons := [mbOK];
+      MB_OKCANCEL        : Buttons := mbOKCancel;
+      MB_ABORTRETRYIGNORE: Buttons := mbAbortRetryIgnore;
+      MB_YESNOCANCEL     : Buttons := mbYesNoCancel;
+      MB_YESNO           : Buttons := [mbYes, mbNo];
+      MB_RETRYCANCEL     : Buttons := [mbRetry, mbCancel];
+      MB_HELP            : Buttons := [mbHelp];
+    else
+      Buttons := [mbOK];
+    end;
+    Result := ShowMsgDlg(Text, Caption, DlgType, Buttons, Sound);
+  end;
+end;
+
+{ ShowMsgDlg -------------------------------------------------------------------
+
+  zeigt einen Dialog an. Verwendet CreateMessageDialog.
+
+  DlgType: mtWarning         Buttons: [mbYes], [mbNo], [mbOK], [mbCancel],
+           mtError                    [mbAbort], [mbRetry], [mbIgnore], [mbAll],
+           mtInformation              [mbNoToAll], [mbYesToAll], [mbHelp],
+           mtConfirmation             mbYesNoCancel, mbYesAllNoAllCancel,
+           mtCustom                   mbOKCancel, mbAbortRetryIgnore,
+                                      mbAbortIgnore
+
+  Results: ID_OK, ID_CANCEL, ID_ABORT, ID_RETRY, ID_IGNORE, ID_YES, ID_NO      }
+
+function ShowMsgDlg(const Text, Caption: string;
+                    const DlgType: TMsgDlgType;
+                    const Buttons: TMsgDlgButtons;
+                    Sound: Boolean): Integer;
+const BannerHeight = 33;
+var Dlg           : TForm;
+    FrameTopBanner: TFrameTopBanner;
+    Component     : TComponent;
+    i             : Integer;
+    SoundString   : string;
+    BannerCap     : string;
+    BannerBG      : string;
+begin
+  BannerBG := 'grad1';
+  case DlgType of
+    mtWarning     : begin
+                      SoundString := 'SystemExclamation';
+                      BannerBG := 'grad2';
+                    end;
+    mtError       : begin
+                      SoundString := 'SystemHand';
+                      BannerBG := 'grad3';
+                    end;
+    mtInformation : SoundString := 'SystemNotification';
+    mtConfirmation: SoundString := 'SystemQuestion';
+  else
+    SoundString := '';
+  end;
+  if SoundString = '' then Sound := False;
+  Dlg := CreateMessageDialog(Text, DlgType, Buttons);
+  try
+    Dlg.BorderStyle := bsSingle;
+    Dlg.BorderIcons := [biSystemMenu];
+    if Caption = '' then BannerCap := Dlg.Caption else BannerCap := Caption;
+    Dlg.Caption := Application.MainForm.Caption;
+    if Dlg.Caption = '' then Dlg.Caption := Application.Title;
+    Dlg.Height := Dlg.Height + BannerHeight;
+    for i := 0 to Dlg.ComponentCount - 1 do
+    begin
+      Component := Dlg.Components[i];
+      if Component is TWinControl then
+       (Component as TWinControl).Top :=
+         (Component as TWinControl).Top + BannerHeight;
+      if Component is TGraphicControl then
+       (Component as TGraphicControl).Top :=
+         (Component as TGraphicControl).Top + BannerHeight;
+    end;
+    FrameTopBanner := TFrameTopBanner.Create(nil);
+    FrameTopBanner.Parent := Dlg;
+    FrameTopBanner.Top := 0;
+    FrameTopBanner.Left := 0;
+    FrameTopBanner.Width := Dlg.ClientWidth;
+    FrameTopBanner.Height := BannerHeight;
+    FrameTopBanner.Image2.Left := 0;
+    FrameTopBanner.Image2.Width := FrameTopBanner.ClientWidth;
+    FrameTopBanner.Init(BannerCap, '', BannerBG);
+    if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
+    Dlg.ShowModal;
+    Result := Dlg.ModalResult
+  finally
+    Dlg.Release;
+  end;
 end;
 
 { SetProgressBarMarquee --------------------------------------------------------

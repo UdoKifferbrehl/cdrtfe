@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -95,7 +95,7 @@ begin
   if RadioButtonImage.Checked and (EditIsoPath.Text = '') then
   begin
     {Name für die Image-Datei fehlt}
-    ShowMsgDlg(FLang.GMS('e101'), FLang.GMS('g001'), MB_cdrtfe2);
+    ShowMsgDlg(FLang.GMS('e101'), FLang.GMS('g001'), MB_cdrtfeError);
     Result := False;
   end;
 end;

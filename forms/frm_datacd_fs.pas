@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -158,7 +158,7 @@ begin
   if CheckBoxBoot.Checked and (EditBootImage.Text = '') then
   begin
     {Kein Boot-Image angegeben.}
-    ShowMsgDlg(FLang.GMS('e201'), FLang.GMS('g001'), MB_cdrtfe2);
+    ShowMsgDlg(FLang.GMS('e201'), FLang.GMS('g001'), MB_cdrtfeError);
     Result := False;
   end;
   {Wenn kein ISO-Level gewählt ist, macht es keinen Sinn, wenn ISOLevel = True
@@ -496,7 +496,7 @@ begin
     begin
       Edit.Text := Copy(Edit.Text, 1, MaxLength);
       ShowMsgDlg(Format(FLang.GMS('m502'), [MaxLength]),
-                 FLang.GMS('g004'), MB_ICONINFORMATION or MB_OK);
+                 FLang.GMS('g004'), MB_cdrtfeWarning);
     end;
   end;
 end;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 10.01.2010
+  letzte Änderung 05.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -197,7 +197,7 @@ begin
     if not FileExists(EditMPlayerCmd.Text) then
     begin
       Text := Format(FLang.GMS('e113'), [EditMPlayerCmd.Text]);
-      ShowMsgDlg(Text, FLang.GMS('g001'), MB_ICONSTOP or MB_OK);
+      ShowMsgDlg(Text, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
       FSettings.General.TabFrmSettings := cCDAudio;
       ActivateTab;
@@ -472,7 +472,7 @@ begin
   begin
     SetSettings;
     FSettings.SaveToFile(cIniFile);
-    ShowMessage(FLang.GMS('mpref05'));
+    ShowMsgDlg(FLang.GMS('mpref05'), FLang.GMS('g004'), MB_cdrtfeInfo);
   end;
 end;
 
@@ -481,7 +481,7 @@ end;
 procedure TFormSettings.ButtonSettingsDeleteClick(Sender: TObject);
 begin
   FSettings.DeleteIniFile;
-  ShowMessage(FLang.GMS('mpref06'));
+  ShowMsgDlg(FLang.GMS('mpref06'), FLang.GMS('g004'), MB_cdrtfeInfo);
 end;
 
 { Delete additional commandline options }

@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2010 Oliver Valencia
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -81,7 +81,7 @@ begin
   if EditIsoPath.Text = '' then
   begin
     {Name für die Image-Datei fehlt}
-    ShowMsgDlg(FLang.GMS('e101'), FLang.GMS('g001'), MB_cdrtfe2);
+    ShowMsgDlg(FLang.GMS('e101'), FLang.GMS('g001'), MB_cdrtfeError);
     Result := False;
   end;
 end;

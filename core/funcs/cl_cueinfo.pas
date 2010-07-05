@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2010 Oliver Valencia
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -226,7 +226,7 @@ begin
   end;
   if not Result then
   begin
-    ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONWARNING);
+    ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeWarning);
   end;
 end;
 

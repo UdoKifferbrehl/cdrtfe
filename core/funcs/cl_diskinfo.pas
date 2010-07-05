@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -930,7 +930,7 @@ begin
   {Fehler: keine CD eingelegt}
   if FDiskType = DT_None then
   begin
-    ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+    ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_cdrtfeError);
     Result := False;
   end;
   {Fehler: nächste Schreibadresse kann nicht gelesen werden}
@@ -940,14 +940,13 @@ begin
        FSettings.Cdrecord.AutoErase then
     begin
       i := ShowMsgDlg(FLang.GMS('eburn09') + CRLF + CRLF + FLang.GMS('eburn16'),
-                      FLang.GMS('g001'),
-                      MB_OKCancel or MB_ICONWARNING);
+                      FLang.GMS('g001'), MB_cdrtfeWarningOC);
       Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
     end else
     begin
-      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -958,8 +957,7 @@ begin
        FSettings.Cdrecord.AutoErase then
     begin
       i := ShowMsgDlg(FLang.GMS('eburn02') + CRLF + CRLF + FLang.GMS('eburn16'),
-                      FLang.GMS('g001'),
-                      MB_OKCancel or MB_ICONWARNING);
+                      FLang.GMS('g001'), MB_cdrtfeWarningOC);
       Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
@@ -968,7 +966,7 @@ begin
       FSizeUsed := 0;
     end else
     begin
-      ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -997,7 +995,7 @@ begin
       if not FSettings.General.NoConfirm then
       begin
         i := ShowMsgDlg(FLang.GMS('eburn03'), FLang.GMS('g004'),
-                        MB_OKCancel or MB_ICONWARNING);
+                        MB_cdrtfeWarningOC);
         Result := i = ID_OK;
       end;
     end;
@@ -1012,7 +1010,7 @@ begin
                 FSettings.General.NoConfirm) then
         begin
           i := ShowMsgDlg(FLang.GMS('eburn04'), FLang.GMS('eburn05'),
-                          MB_OKCancel or MB_ICONWARNING);
+                          MB_cdrtfeWarningOC);
         end else
         begin
           i := ID_OK;
@@ -1048,14 +1046,14 @@ begin
                                       - FSecFree) / 512)),
                         Args.SectorsNeededI + Args.TaoEndSecCount -
                           FSecFree]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
     {Fehler: DVD und Multisession}
     if Result and FIsDVD and FSettings.DataCD.Multi then
     begin
       Result := False;
-      ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_cdrtfeError);
     end;
   end;
 
@@ -1066,8 +1064,7 @@ begin
      machen.}
     if Result and (MsInfo <> '') then
     begin
-      ShowMsgDlg(FLang.GMS('eburn08'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
-
+      ShowMsgDlg(FLang.GMS('eburn08'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
     {Fehler: Restkapazität nicht ausreichend}
@@ -1079,7 +1076,7 @@ begin
                      [IntToStr(Round(FTimeFree) div 60) + ':' +
                       FormatFloat('0#.##',
                         (FTimeFree - (Round(FTimeFree) div 60) * 60))]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONWARNING);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
    {Fehler: Gesamtspielzeit zu lang}
@@ -1091,7 +1088,7 @@ begin
                      [IntToStr(Round(FTime) div 60) + ':' +
                       FormatFloat('0#.##',
                                 (FTime - (Round(FTime) div 60) * 60))]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1104,7 +1101,7 @@ begin
        not FSettings.Cdrecord.CanEraseDVDPlusRW then
     begin
       ShowMsgDlg(FLang.GMS('mburn15'), FLang.GMS('g004'),
-                 MB_OK or MB_ICONINFORMATION);
+                 MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1125,7 +1122,7 @@ begin
                      [FormatFloat('##0.###',
                                   ((Args.SectorsNeededI - FSecFree) / 512)),
                       Args.SectorsNeededI - FSecFree]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1137,13 +1134,13 @@ begin
     if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) then
     begin
       Result := False;
-      ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_cdrtfeError);
     end;
     if (FDiskType in [DT_DVD_PlusRW, DT_DVD_PlusR]) and
        FSettings.Cdrecord.Dummy then
     begin
       Result := False;
-      ShowMsgDlg(FLang.GMS('eburn19'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn19'), FLang.GMS('g001'), MB_cdrtfeError);
     end;    
   end;
 end;
@@ -1575,7 +1572,7 @@ begin
   {Fehler: keine CD eingelegt}
   if FDiskType = DT_None then
   begin
-    ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+    ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_cdrtfeError);
     Result := False;
   end;
   {Fehler: nächste Schreibadresse kann nicht gelesen werden} (*
@@ -1585,14 +1582,13 @@ begin
        FSettings.Cdrecord.AutoErase then
     begin
       i := ShowMsgDlg(FLang.GMS('eburn09') + CRLF + CRLF + FLang.GMS('eburn16'),
-                      FLang.GMS('g001'),
-                      MB_OKCancel or MB_ICONWARNING);
+                      FLang.GMS('g001'), MB_cdrtfeWarningOC);
       Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
     end else
     begin
-      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;                                                     *)
@@ -1603,8 +1599,7 @@ begin
        FSettings.Cdrecord.AutoErase then
     begin
       i := ShowMsgDlg(FLang.GMS('eburn02') + CRLF + CRLF + FLang.GMS('eburn16'),
-                      FLang.GMS('g001'),
-                      MB_OKCancel or MB_ICONWARNING);
+                      FLang.GMS('g001'), MB_cdrtfeWarningOC);
       Result := i = ID_OK;
       FSettings.Cdrecord.Erase := Result;
       FMsInfo := '';
@@ -1619,7 +1614,7 @@ begin
               FSettings.General.NoConfirm) then
       begin
         i := ShowMsgDlg(FLang.GMS('eburn17'), FLang.GMS('g001'),
-                        MB_OKCancel or MB_ICONWARNING);
+                        MB_cdrtfeWarningOC);
       end else
       begin
         i := ID_OK;
@@ -1631,7 +1626,7 @@ begin
       FSizeUsed := 0;
     end else
     begin
-      ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1660,7 +1655,7 @@ begin
       if not FSettings.General.NoConfirm then
       begin
         i := ShowMsgDlg(FLang.GMS('eburn03'), FLang.GMS('g004'),
-                        MB_OKCancel or MB_ICONWARNING);
+                        MB_cdrtfeWarningOC);
         Result := i = ID_OK;
       end;
     end;
@@ -1675,7 +1670,7 @@ begin
                 FSettings.General.NoConfirm) then
         begin
           i := ShowMsgDlg(FLang.GMS('eburn04'), FLang.GMS('eburn05'),
-                          MB_OKCancel or MB_ICONWARNING);
+                          MB_cdrtfeWarningOC);
         end else
         begin
           i := ID_OK;
@@ -1711,7 +1706,7 @@ begin
                                       - FSecFree) / 512)),
                         Args.SectorsNeededI + Args.TaoEndSecCount -
                           FSecFree]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
     {Warnung: CD, Multisession und DAO}
@@ -1719,7 +1714,7 @@ begin
        FSettings.DataCD.DAO and not FIsDVD then
     begin
       i := ShowMsgDlg(FLang.GMS('eburn21'), FLang.GMS('g004'),
-                      MB_OKCancel or MB_ICONWARNING);
+                      MB_cdrtfeWarningOC);
       Result := i = ID_OK;
     end;
     {Fehler: DVD und Multisession}
@@ -1728,7 +1723,7 @@ begin
         (FDiskType in [DT_DVD_PlusR, DT_DVD_PlusRW])) then
     begin
       Result := False;
-      ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn11'), FLang.GMS('g001'), MB_cdrtfeError);
     end;
   end;
 
@@ -1739,7 +1734,7 @@ begin
      machen.}
     if Result and (MsInfo <> '') and FSessionEmpty then
     begin
-      ShowMsgDlg(FLang.GMS('eburn08'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn08'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
     {Fehler: Restkapazität nicht ausreichend}
@@ -1751,7 +1746,7 @@ begin
                      [IntToStr(Round(FTimeFree) div 60) + ':' +
                       FormatFloat('0#.##',
                         (FTimeFree - (Round(FTimeFree) div 60) * 60))]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
    {Fehler: Gesamtspielzeit zu lang}
@@ -1763,7 +1758,7 @@ begin
                      [IntToStr(Round(FTime) div 60) + ':' +
                       FormatFloat('0#.##',
                                 (FTime - (Round(FTime) div 60) * 60))]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1776,7 +1771,7 @@ begin
        not FSettings.Cdrecord.CanEraseDVDPlusRW then
     begin
       ShowMsgDlg(FLang.GMS('mburn15'), FLang.GMS('g004'),
-                 MB_OK or MB_ICONINFORMATION);
+                 MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1797,7 +1792,7 @@ begin
                      [FormatFloat('##0.###',
                                   ((Args.SectorsNeededI - FSecFree) / 512)),
                       Args.SectorsNeededI - FSecFree]);
-      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(Temp, FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
     end;
   end;
@@ -1809,13 +1804,13 @@ begin
     if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) then
     begin
       Result := False;
-      ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_cdrtfeError);
     end;
     if (FDiskType in [DT_DVD_PlusRW, DT_DVD_PlusR]) and
        FSettings.Cdrecord.Dummy then
     begin
       Result := False;
-      ShowMsgDlg(FLang.GMS('eburn19'), FLang.GMS('g001'), MB_OK or MB_ICONSTOP);
+      ShowMsgDlg(FLang.GMS('eburn19'), FLang.GMS('g001'), MB_cdrtfeError);
     end;
   end;
 end;

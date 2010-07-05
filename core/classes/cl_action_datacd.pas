@@ -1,4 +1,4 @@
-{ $Id: cl_action_datacd.pas,v 1.1 2010/05/23 18:51:56 kerberos002 Exp $
+{ $Id: cl_action_datacd.pas,v 1.2 2010/07/05 12:34:52 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.05.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -428,7 +428,7 @@ begin
                   FormatFloat('##0.###', (FDisk.SecFree -
                       (CMArgs.SectorsNeededI + CMArgs.TaoEndSecCount)) / 512)])
                 + Temp;
-      i := ShowMsgDlg(Temp, FLang.GMS('mburn02'), MB_cdrtfe1);
+      i := ShowMsgDlg(Temp, FLang.GMS('mburn02'), MB_cdrtfeConfirmS);
     end else
     begin
       i := 1;

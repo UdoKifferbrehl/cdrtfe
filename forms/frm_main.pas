@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  05.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -705,7 +705,7 @@ end;
   Wenn WM_TTerminated empfangen wird, ist der zweite Thread beendet worden.    }
 
 procedure TCdrtfeMainForm.WMTTerminated(var Msg: TMessage);
-begin
+begin                       
   {$IFDEF ShowCmdError}
   FExitCode := Msg.wParam;
   {$ENDIF}
@@ -771,7 +771,7 @@ end;
 
 procedure TCdrtfeMainForm.WMVTerminated(var Msg: TMessage);
 var LogFile: string;
-begin                           
+begin
   {$IFDEF ShowExecutionTime}
   TC2.StopTimeCount;
   TLogWin.Inst.Add('Time: ' + TC2.TimeAsString);
@@ -1753,7 +1753,7 @@ begin
       if ErrorCode = PD_FileNotUnique then
       begin
         ShowMsgDlg(Format(FLang.GMS('e112'), [OpenDialog1.Files[i]]),
-                   FLang.GMS('g001'), MB_cdrtfe2);
+                   FLang.GMS('g001'), MB_cdrtfeError);
       end;
     end;
     CacheFolderName(DialogID, OpenDialog1.FileName);
@@ -1838,7 +1838,7 @@ begin
       if ErrorCode = PD_FolderNotUnique then
       begin
         ShowMsgDlg(Format(FLang.GMS('e111'), [Name]), FLang.GMS('g001'),
-                   MB_cdrtfe2);
+                   MB_cdrtfeError);
       end else
       begin
         {Änderungen im GUI nachvollziehen}
@@ -1894,7 +1894,7 @@ begin
     Meldung := FLang.GMS('m115');
     if not FSettings.General.NoConfirm then
     begin
-      i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfe1);
+      i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfeConfirm);
     end else
     begin
       i := 1;
@@ -1989,7 +1989,7 @@ begin
     Meldung := Format(FLang.GMS('m108'), [Tree.Selected.Text]);
     if not FSettings.General.NoConfirm then
     begin
-      i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfe1);
+      i := ShowMsgDlg(Meldung, FLang.GMS('m110'), MB_cdrtfeConfirm);
     end else
     begin
       i := 1;
@@ -2014,7 +2014,7 @@ var i: Integer;
 begin
   if not FSettings.General.NoConfirm then
   begin
-    i := ShowMsgDlg(FLang.GMS('m114'), FLang.GMS('m110'), MB_cdrtfe1);
+    i := ShowMsgDlg(FLang.GMS('m114'), FLang.GMS('m110'), MB_cdrtfeConfirm);
   end else
   begin
     i := 1;
@@ -2084,11 +2084,11 @@ begin
        if ErrorCode = PD_FileNotUnique then
        begin
          ShowMsgDlg(Format(FLang.GMS('e112'), [View.Items[i].Caption]),
-                    FLang.GMS('e108'), MB_cdrtfe2);
+                    FLang.GMS('e108'), MB_cdrtfeError);
        end else
        if ErrorCode = PD_PreviousSession then
        begin
-         ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfe2);
+         ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfeError);
        end else
        begin
          if not ItemIsFolder(View.Items[i]) then
@@ -2123,16 +2123,16 @@ begin
    ErrorCode := FData.LastError;
    if ErrorCode = PD_DestFolderIsSubFolder then
    begin
-     ShowMsgDlg(FLang.GMS('e109'), FLang.GMS('e108'), MB_cdrtfe2);
+     ShowMsgDlg(FLang.GMS('e109'), FLang.GMS('e108'), MB_cdrtfeError);
    end else
    if ErrorCode = PD_FolderNotUnique then
    begin
      ShowMsgDlg(Format(FLang.GMS('e111'), [SourceNode.Text]), FLang.GMS('e108'),
-                MB_cdrtfe2);
+                MB_cdrtfeError);
    end else
    if ErrorCode = PD_PreviousSession then
    begin
-     ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfe2);
+     ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('e108'), MB_cdrtfeError);
    end else
    begin
      {Zielordner sortieren}
@@ -3855,10 +3855,10 @@ procedure TCdrtfeMainForm.CheckExitCode;
 begin
   if FExitCode = 142 then
     {ProDVD-Lizenz-Fehler}
-    ShowMsgDlg(FLang.GMS('e002'), FLang.GMS('g001'), MB_cdrtfe2);
+    ShowMsgDlg(FLang.GMS('e002'), FLang.GMS('g001'), MB_cdrtfeError);
   if FExitCode <> 0 then
     {sonstiger Fehler}
-    ShowMsgDlg(FLang.GMS('e001'), FLang.GMS('g001'), MB_cdrtfe2);
+    ShowMsgDlg(FLang.GMS('e001'), FLang.GMS('g001'), MB_cdrtfeError);
   FExitCode := 0;
 end;
 {$ENDIF}
@@ -4634,7 +4634,7 @@ procedure TCdrtfeMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean)
 begin
   if FSettings.Environment.ProcessRunning then
     CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
-                           MB_YESNO or MB_ICONWARNING) = ID_YES;
+                           MB_cdrtfeWarningYN) = ID_YES;
 end;
 
 { FormClose --------------------------------------------------------------------
@@ -4694,7 +4694,7 @@ begin
   {$IFDEF ExportStrings}
   ExportStringProperties;
   FLang.ExportMessageStrings;
-  ShowMessage('Strings exportiert.');
+  ShowMsgDlg('Strings exportiert.', 'Info', MB_cdrtfeInfo);
   {$ENDIF}
   {$IFDEF ExportControls}
   ExportControls;
@@ -5553,20 +5553,20 @@ begin
         if Temp <> Node.Text then
         begin
           ShowMsgDlg(Format(FLang.GMS('e111'), [Temp]), FLang.GMS('g001'),
-                     MB_cdrtfe2);
+                     MB_cdrtfeError);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfeError);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfeError);
       end else
       if ErrorCode = PD_PreviousSession then
       begin
-        ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end else {CD-Label}
@@ -5583,7 +5583,7 @@ begin
       S := Copy(S, 1, 32);
       Node.Text := S;
       ShowMsgDlg(Format(FLang.GMS('m502'), [32]),
-                 FLang.GMS('g004'), MB_ICONINFORMATION or MB_OK);
+                 FLang.GMS('g004'), MB_cdrtfeWarning);
     end;
   end;
 end;
@@ -5692,20 +5692,20 @@ begin
         if Temp <> Item.Caption then
         begin
           ShowMsgDlg(Format(FLang.GMS('e112'), [Temp]), FLang.GMS('g001'),
-                     MB_cdrtfe2);
+                     MB_cdrtfeError);
         end;
       end else
       if ErrorCode = PD_InvalidName then
       begin
-        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e110'), FLang.GMS('g001'), MB_cdrtfeError);
       end else
       if ErrorCode = PD_NameTooLong then
       begin
-        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e501'), FLang.GMS('g001'), MB_cdrtfeError);
       end else
       if ErrorCode = PD_PreviousSession then
       begin
-        ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfe2);
+        ShowMsgDlg(FLang.GMS('e117'), FLang.GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end else
@@ -6722,7 +6722,7 @@ begin
       EditDVDVideoVolID.Text := Copy(EditDVDVideoVolID.Text, 1, 32);
       EditDVDVideoVolID.SelStart := 32;
       ShowMsgDlg(Format(FLang.GMS('m502'), [32]),
-                 FLang.GMS('g004'), MB_ICONINFORMATION or MB_OK);
+                 FLang.GMS('g004'), MB_cdrtfeWarning);
     end;
   end;
 end;

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -58,32 +58,28 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         {Name für die Image-Datei fehlt}
-        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONSTOP or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_cdrtfeError);
       end;
       GetProjectInfo(FileCount, DummyI, DummyL, DummyE, FileCountPrevSess,
-                     FSettings.General.Choice); 
+                     FSettings.General.Choice);
       if (FileCount = 0) and not Boot then
       begin
         Result := False;
         {Keine Dateien oder Ordner ausgewählt}
-        ShowMsgDlg(GMS('e102'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e102'), GMS('g001'), MB_cdrtfeError);
       end;
       if Result and (FileCountPrevSess > 0) and
          (FileCount - Abs(FileCountPrevSess) = 0) then
       begin
         Result := False;
         {Keine Veränderung}
-        ShowMsgDlg(GMS('e118'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e118'), GMS('g001'), MB_cdrtfeError);
       end;
       if BigFilesPresent and not (ISOLevel and (ISOLevelNr > 2)) then
       begin
         Result := False;
         {Datei mit mehr als 4 GiB - 2 Byte -> ISO level 3 oder 4}
-        ShowMsgDlg(GMS('e119'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);        
+        ShowMsgDlg(GMS('e119'), GMS('g001'), MB_cdrtfeError);        
       end;
     end;
   end;
@@ -103,30 +99,26 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         {Keine Titel ausgewählt}
-        ShowMsgDlg(GMS('e103'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e103'), GMS('g001'), MB_cdrtfeError);
       end;
       if CDText and not CDTextPresent and not UseInfo then
       begin
         Result := False;
         {keine CD-Text-Daten}
-        ShowMsgDlg(GMS('ecdtext01'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('ecdtext01'), GMS('g001'), MB_cdrtfeError);
       end;
       if CDText and (CDTextLength > (252 * 12)) then
       begin
         Result := False;
         {zu viel CD-Text}
-        ShowMsgDlg(GMS('ecdtext02'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('ecdtext02'), GMS('g001'), MB_cdrtfeError);
       end;
       if FData.CompressedAudioFilesPresent and
          (FSettings.General.TempFolder = '') then
       begin
         Result := False;
         {es muß ein temp. Verzeichnis für die Konvertierung angegeben sein}
-        ShowMsgDlg(GMS('e116'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e116'), GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end;
@@ -142,8 +134,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         {Keine Form2-Dateien ausgewählt}
-        ShowMsgDlg(GMS('e104'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e104'), GMS('g001'), MB_cdrtfeError);
       end;
       {Wenn es Form2-Dateien mit weniger als 348.601 Bytes gibt, dann warnen und
        Single-Track-Image empfehlen}
@@ -151,16 +142,14 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         Meldung := Format(GMS('e114'), [GetSmallForm2FileCount]);
-        ShowMsgDlg(Meldung, GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(Meldung, GMS('g001'), MB_cdrtfeError);
       end;
       {Eine Pfad für das Image brauchen wir auch.}
       if IsoPath = '' then
       begin
         Result := False;
         {Name für die Image-Datei fehlt}
-        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end;
@@ -180,15 +169,13 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         {Keine Audio-Tracks gewählt oder vorhanden}
-        ShowMsgDlg(GMS('e105'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e105'), GMS('g001'), MB_cdrtfeError);
       end;
       if Path = '' then
       begin
         Result := False;
         {Verzeichnisangabe fehlt}
-        ShowMsgDlg(GMS('e106'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e106'), GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end;
@@ -203,8 +190,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         {Name für die Image-Datei fehlt}
-        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_cdrtfeError);
       end;
       {Angabe für Start- oder Endsektor fehlt}
       if FSettings.Readcd.Range then
@@ -213,8 +199,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
            (FSettings.Readcd.Endsec = '') then
         begin
           Result := False;
-          ShowMsgDlg(GMS('e115'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                     MB_SYSTEMMODAL);
+          ShowMsgDlg(GMS('e115'), GMS('g001'), MB_cdrtfeError);
         end;
       end;
     end;
@@ -236,16 +221,14 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       begin
         Result := False;
         {Keine Titel ausgewählt}
-        ShowMsgDlg(GMS('evcd01'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('evcd01'), GMS('g001'), MB_cdrtfeError);
       end;
       {Eine Pfad für das Image brauchen wir auch.}
       if IsoPath = '' then
       begin
         Result := False;
         {Name für die Image-Datei fehlt}
-        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('e101'), GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end;
@@ -258,8 +241,7 @@ function CheckProject(FData: TProjectData; FSettings: TSettings;
       if (SourcePath = '') or not DirectoryExists(SourcePath) then
       begin
         Result := False;
-        ShowMsgDlg(GMS('edvdv01'), GMS('g001'), MB_OK or MB_ICONWARNING or
-                   MB_SYSTEMMODAL);
+        ShowMsgDlg(GMS('edvdv01'), GMS('g001'), MB_cdrtfeError);
       end;
     end;
   end;

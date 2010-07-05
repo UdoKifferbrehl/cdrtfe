@@ -1,11 +1,11 @@
-{ $Id: f_process.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_process.pas,v 1.2 2010/07/05 12:34:53 kerberos002 Exp $
 
   f_process.pas: Prozesse, Fenster, ...
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -268,7 +268,7 @@ begin
     Msg := 'ShellExecute failed.' + CRLF +
            'Error code: ' + IntToStr(ErrorCode) + CRLF +
            'Error message: ' + Msg2;
-    ShowMsgDlg(Msg, 'Error', MB_OK or MB_ICONWARNING);
+    ShowMsgDlg(Msg, 'Error', MB_cdrtfeError);
   end;
 end;
 

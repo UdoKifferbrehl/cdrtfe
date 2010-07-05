@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.02.2010
+  letzte Änderung  05.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,7 +33,7 @@ unit f_init;
 
 interface
 
-uses Windows, Classes, Forms, SysUtils, Dialogs, FileCtrl, IniFiles,
+uses Windows, Classes, Forms, SysUtils, FileCtrl, IniFiles,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_settings, cl_peheader;
 
@@ -48,7 +48,7 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      cl_logwindow,
      f_filesystem, f_getdosoutput, f_wininfo, f_environment, f_strings, f_cygwin,
-     const_locations, f_locations, const_common, f_process;
+     const_locations, f_locations, const_common, f_process, f_window;
 
 var FLang: TLang;
 
@@ -365,15 +365,11 @@ begin
     if not Ok then
     begin
       if not CdrtoolsOk then
-        MessageBox(Application.Handle, PChar(Lang.GMS('einit01')),
-                   PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION) else
+        ShowMsgDlg(Lang.GMS('einit01'), Lang.GMS('g001'), MB_cdrtfeError) else
       if not CygwinOk then
-        MessageBox(Application.Handle, PChar(Lang.GMS('einit02')),
-                   PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION) else
+        ShowMsgDlg(Lang.GMS('einit02'), Lang.GMS('g001'), MB_cdrtfeError) else
       if not MkisofsOk then
-        MessageBox(Application.Handle, PChar(Lang.GMS('einit03')),
-                   PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION);
-
+        ShowMsgDlg(Lang.GMS('einit03'), Lang.GMS('g001'), MB_cdrtfeError);
       {Programm abbrechen!}
       Application.ShowMainForm:= False;
       Application.Terminate;
@@ -598,8 +594,7 @@ var Output       : string;
        (Pos('heap', s) > 0) then
     begin
       Result := False;
-      MessageBox(Application.Handle, PChar(Lang.GMS('einit04')),
-                 PChar(Lang.GMS('g001')), MB_OK or MB_ICONEXCLAMATION);
+      ShowMsgDlg(Lang.GMS('einit04'), Lang.GMS('g001'), MB_cdrtfeError);
     end;
   end;
 

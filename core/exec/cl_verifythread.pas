@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.03.2010
+  letzte Änderung  04.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -198,7 +198,8 @@ begin
   REText := FLang.GMS('everify03');
   RECaption := FLang.GMS('everify04');
   i := ShowMsgDlg(REText, RECaption,
-                  MB_OKCANCEL or MB_APPLMODAL or MB_ICONEXCLAMATION);
+                  MB_OKCANCEL or MB_APPLMODAL or MB_ICONEXCLAMATION or
+                  MB_cdrtfeDlgExSnd);
   if i <> 1 then
   begin
     Terminate;
