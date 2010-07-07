@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.05.2010
+  letzte Änderung  07.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -89,7 +89,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_logfile, f_filesystem, f_strings, f_stringlist, f_wininfo, f_locations,
-     const_locations, f_window, f_compprop, c_frametopbanner;
+     const_locations, f_window, f_compprop, c_frametopbanner, f_rstranslate;
 
 type TFormSelectLang = class(TForm)
        ComboBox: TComboBox;
@@ -145,6 +145,11 @@ begin
     Add('e001=Es ist ein Fehler aufgetreten!');
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');
     {$ENDIF}
+    {Resource-Strings}
+    Add('rs01=OK');
+    Add('rs02=Abbrechen');
+    Add('rs03=Ja');
+    Add('rs04=Nein');
     {Filter}
     Add('f001=ISO-Image (*.iso)|*.iso;*.iso_00|CUE-Image (*.cue)|*.cue');
     Add('f002=ISO-Image (*.iso)|*.iso;*.iso_00');
@@ -374,6 +379,8 @@ end;
 
 procedure TLang.LangChange;
 begin
+  SetButtonCaptions(GMS('rs01'), GMS('rs02'), GMS('rs03'), GMS('rs04'));
+  TranslateResourceStrings;
   if Assigned(FOnLangChange) then FOnLangChange;
 end;
 
@@ -609,6 +616,9 @@ begin
       AddLogCode(1401);
       {Sprachinformationen laden}
       LoadLanguage;
+      {Resource-Strings}
+      SetButtonCaptions(GMS('rs01'), GMS('rs02'), GMS('rs03'), GMS('rs04'));
+      TranslateResourceStrings;
     end;
   end;
 end;

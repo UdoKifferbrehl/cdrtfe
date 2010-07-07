@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.05.2010
+  letzte Änderung  07.07.2010
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -138,6 +138,7 @@ uses
   f_crc_tab in 'lib\misc\f_crc_tab.pas',
   f_treelistfuncs in 'lib\misc\f_treelistfuncs.pas',
   f_window in 'lib\misc\f_window.pas',
+  f_rstranslate in 'lib\misc\f_rstranslate.pas',
   cl_apeinfo in 'lib\multimedia\cl_apeinfo.pas',
   cl_flacinfo in 'lib\multimedia\cl_flacinfo.pas',
   cl_mpeginfo in 'lib\multimedia\cl_mpeginfo.pas',
