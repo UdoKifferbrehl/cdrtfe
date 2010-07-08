@@ -1,11 +1,11 @@
-{ $Id: f_window.pas,v 1.2 2010/07/05 12:34:53 kerberos002 Exp $
+{ $Id: f_window.pas,v 1.3 2010/07/08 10:31:38 kerberos002 Exp $
 
   f_window.pas: Funktionnen für Fenster und Dialoge
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.07.2010
+  letzte Änderung  08.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -31,11 +31,12 @@ unit f_window;
 interface
 
 uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages, Dialogs, Classes,
-     MMSystem;
+     MMSystem, StdCtrls;
 
 function FlagIsSet(const Mask, Flag: Longint): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
 function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound: Boolean): Integer; overload;
+procedure SetButtonCaptions(const Ok, Cancel, Yes, No: string);
 procedure SetFont(Control: TWinControl);
 procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
 procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
@@ -54,6 +55,8 @@ const MB_cdrtfeDlgEx	   = $01000000;
 implementation
 
 uses f_wininfo, c_frametopbanner;
+
+var StrNewOk, StrNewCancel, StrNewYes, StrNewNo: string;
 
 { FlagIsSet --------------------------------------------------------------------
 
@@ -95,6 +98,45 @@ begin
     SetWindowPos(Handle, HWND_TOPMOST, -1, -1, -1, -1, SWP_NOMOVE + SWP_NOSIZE)
   else
     SetWindowPos(Handle, HWND_NOTOPMOST, -1, -1, -1, -1, SWP_NOMOVE + SWP_NOSIZE);
+end;
+
+{ SetButtonCaptions ------------------------------------------------------------
+
+  ermöglicht Übersetzung der Buttonbeschriftungen bei Dialogen, die von
+  CreateMessageDialog erzeugt wurden.                                          }
+
+procedure SetButtonCaptions(const Ok, Cancel, Yes, No: string);
+begin
+  StrNewOk := Ok;
+  StrNewCancel := Cancel;
+  StrNewYes := Yes;
+  StrNewNo:= No;
+end;
+
+{ TranslateMsgDlgButton --------------------------------------------------------
+
+  übersetetzt die Buttonbeschriftungen der Message-Dialoge.                    }
+
+procedure TranslateMsgDlgButtons(Form: TForm);
+var i     : Integer;
+    Button: TButton;
+begin
+  for i := 0 to Form.ComponentCount - 1 do
+  begin
+    if Form.Components[i] is TButton then
+    begin
+      Button := Form.Components[i] as TButton;
+      if (Button.Name = 'OK') and (StrNewOk <> '') then
+        Button.Caption := StrNewOk;
+      if (Button.Name = 'Cancel') and (StrNewCancel <> '')  then
+        Button.Caption := StrNewCancel;
+      if (Button.Name = 'Yes') and (StrNewYes <> '')  then
+        Button.Caption := StrNewYes;
+      if (Button.Name = 'No') and (StrNewNo <> '')  then
+        Button.Caption := StrNewNo;
+
+    end;
+  end;
 end;
 
 { ShowMsgDlg -------------------------------------------------------------------
@@ -215,6 +257,7 @@ begin
     FrameTopBanner.Image2.Width := FrameTopBanner.ClientWidth;
     FrameTopBanner.Init(BannerCap, '', BannerBG);
     if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
+    TranslateMsgDlgButtons(Dlg);
     Dlg.ShowModal;
     Result := Dlg.ModalResult
   finally

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.07.2010
+  letzte Änderung  08.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4163,6 +4163,11 @@ procedure TCdrtfeMainForm.LangChange;
   end;
 
 begin
+  with FLang do
+  begin
+    SizeToStringSetUnits(GMS('g005'), GMS('g006'), GMS('g007'), GMS('g008'));
+    SetButtonCaptions(GMS('rs01'), GMS('rs02'), GMS('rs03'), GMS('rs04'));
+  end;
   FLang.SetFormLang(Self);
   SetLangFileBrowser;
   CheckControls;
@@ -4173,7 +4178,7 @@ end;
 
 { MessageShow ------------------------------------------------------------------
 
-  MessageShow zeigt den übergebenen String an. 
+  MessageShow zeigt den übergebenen String an.
   Dieser Mechanismus wird genutzt, damit andere Forms oder Klassen im Memo des
   Hauptfensters Text anzeigen können, ohne frm_main.pas einzubinden und direkt
   auf die Form1.Controls zuzugreifen.
@@ -4305,6 +4310,8 @@ begin
     OnLangChange := LangChange;
     {Einheiten übersetzen}
     SizeToStringSetUnits(GMS('g005'), GMS('g006'), GMS('g007'), GMS('g008'));
+    {Buttons der Messagedialoge übersetzen}
+    SetButtonCaptions(GMS('rs01'), GMS('rs02'), GMS('rs03'), GMS('rs04'));
     MainMenuSetLang.Enabled := LangFileFound;
     MainMenuLang.Enabled := LangFileFound;
     CreateLangSubMenu(MainMenuLang);
