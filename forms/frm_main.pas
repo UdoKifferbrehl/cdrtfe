@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.07.2010
+  letzte Änderung  11.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -71,7 +71,6 @@ type
     MainMenuClose: TMenuItem;
     TabSheet6: TTabSheet;
     RadioButtonCapacity: TRadioButton;
-    CDETreeViewPopupMenu: TPopupMenu;
     CDETreeViewPopupSetCDLabel: TMenuItem;
     CDETreeViewPopupN1: TMenuItem;
     CDETreeViewPopupAddFolder: TMenuItem;
@@ -81,7 +80,6 @@ type
     CDETreeViewPopupRenameFolder: TMenuItem;
     CDETreeViewPopupN3: TMenuItem;
     CDETreeViewPopupNewFolder: TMenuItem;
-    CDEListViewPopupMenu: TPopupMenu;
     CDEListViewPopupAddFile: TMenuItem;
     CDEListViewPopupN1: TMenuItem;
     CDEListViewPopupRenameFile: TMenuItem;
@@ -97,7 +95,6 @@ type
     AudioSpeedButton2: TSpeedButton;
     AudioSpeedButton3: TSpeedButton;
     AudioSpeedButton4: TSpeedButton;
-    AudioListViewPopupMenu: TPopupMenu;
     AudioListViewPopupAddTrack: TMenuItem;
     AudioListViewPopupDeleteTrack: TMenuItem;
     AudioListViewPopupN1: TMenuItem;
@@ -282,6 +279,7 @@ type
     MainMenuCdrtfeIni: TMenuItem;
     N6: TMenuItem;
     CheckBoxISOVerify: TCheckBox;
+    TreeListViewPopupMenu: TPopupMenu;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -409,6 +407,7 @@ type
     procedure MainMenuShowOutputWindowClick(Sender: TObject);
     procedure MainMenuSettingsClick(Sender: TObject);
     procedure MainMenuCdrtfeIniClick(Sender: TObject);
+    procedure TreeListViewPopupMenuPopup(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -587,7 +586,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
      f_filesystem, f_process, f_window, f_strings, f_largeint, f_init, f_helper,
      f_checkproject, f_foldernamecache, f_screensaversup, f_locations,
-     f_treelistfuncs, f_dischelper, f_instance,
+     f_treelistfuncs, f_dischelper, f_instance, f_compprop,
      const_tabsheets, const_common, const_locations;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
@@ -6131,6 +6130,65 @@ end;
 
 { Kontextmenü-Events ----------------------------------------------------------}
 
+{ Tree- und ListView-Kontextmenü -----------------------------------------------
+
+  Allgemeines Kontextmenü, das sowohl für die Tree- als auch für die ListViews
+  verwendet wird.                                                              }
+
+{ OnPopUp ----------------------------------------------------------------------
+
+  In Abhängigkeit der aufrufenden Komponente und der dort gewählten Einträge
+  werden die Menü-Einträge aus- bzw. eingeblendet. Dieser Eventhandler ruft
+  die Eventhandler der mittlerweile entfernten Kontextmenüs auf.               }  
+
+procedure TCdrtfeMainForm.TreeListViewPopupMenuPopup(Sender: TObject);
+var ListView: TListView;
+
+  procedure SetPopupMenuItemsByTags(Comp: TComponent);
+  var PopupTag : Integer;
+      i        : Integer;
+      PopupMenu: TPopupMenu;
+  begin
+    PopupTag := 0;
+    PopupMenu := (Sender as TPopupMenu);
+    if (Comp.Name = 'CDETreeView') or (Comp.Name = 'XCDETreeView') then
+    begin
+      PopupTag := 1;
+    end else
+    if (Comp.Name = 'CDEListView') or (Comp.Name = 'XCDEListView1') or
+       (Comp.Name = 'XCDEListView2')then
+    begin
+      PopupTag := 2;
+    end else
+    if (Comp.Name = 'AudioListView') or (Comp.Name = 'VideoListView') then
+    begin
+      PopupTag := 3;
+    end;
+    for i := 0 to PopupMenu.Items.Count - 1 do
+      PopupMenu.Items[i].Visible := PopupMenu.Items[i].Tag = PopupTag;
+  end;
+
+begin
+  SetPopupMenuItemsByTags((Sender as TPopupMenu).PopupComponent);
+  if (Sender as TPopupMenu).PopupComponent is TTreeView then
+  begin
+    CDETreeViewPopupMenuPopup(Sender);
+  end else
+  if (Sender as TPopupMenu).PopupComponent is TListView then
+  begin
+    ListView := (Sender as TPopupMenu).PopupComponent as TListView;
+    if (ListView = AudioListView) or (ListView = VideoListView) then
+    begin
+      AudioListViewPopupMenuPopup(Sender);
+    end else
+    if (ListView = CDEListView) or (ListView = XCDEListView1) or
+       (ListView = XCDEListView2) then
+    begin
+      CDEListViewPopupMenuPopup(Sender);
+    end;
+  end;
+end;
+
 { Kontextmenü der Tree-Views ---------------------------------------------------
 
   Das Tree-View-Kontextmenü wird sowohl für den CDETreeeView als auch für den
@@ -6388,8 +6446,7 @@ procedure TCdrtfeMainForm.CDEListViewPopupDeleteFileClick(Sender: TObject);
 begin
   case FSettings.General.Choice of
     cDataCD: UserDeleteFile(CDETreeView, CDEListView);
-    cXCD   : UserDeleteFile(XCDETreeView,
-                            TListView(CDEListViewPopupMenu.PopupComponent));
+    cXCD   : UserDeleteFile(XCDETreeView, GetPopupComp(Sender) as TListView);
   end;
 end;
 
@@ -6404,7 +6461,7 @@ end;
 
 procedure TCdrtfeMainForm.CDEListViewPopupOpenClick(Sender: TObject);
 begin 
-  UserOpenFile(GetCurrentListView(CDEListViewPopupMenu.PopupComponent));
+  UserOpenFile(GetCurrentListView(GetPopupComp(Sender)));
 end;
 
 { OnPopup ----------------------------------------------------------------------
@@ -6500,7 +6557,7 @@ end;
 
 procedure TCdrtfeMainForm.AudioListViewPopupPlayClick(Sender: TObject);
 begin
-  UserOpenFile(GetCurrentListView(AudioListViewPopupMenu.PopupComponent));
+  UserOpenFile(GetCurrentListView(GetPopupComp(Sender)));
 end;
 
 

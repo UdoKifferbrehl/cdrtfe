@@ -305,7 +305,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           DragMode = dmAutomatic
           HideSelection = False
           Indent = 19
-          PopupMenu = CDETreeViewPopupMenu
+          PopupMenu = TreeListViewPopupMenu
           TabOrder = 0
           OnChange = TreeViewChange
           OnDragDrop = TreeViewDragDrop
@@ -342,7 +342,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           DragMode = dmAutomatic
           HideSelection = False
           MultiSelect = True
-          PopupMenu = CDEListViewPopupMenu
+          PopupMenu = TreeListViewPopupMenu
           TabOrder = 1
           ViewStyle = vsReport
           OnDblClick = ListViewDblClick
@@ -356,10 +356,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -438,7 +434,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           end>
         HideSelection = False
         MultiSelect = True
-        PopupMenu = AudioListViewPopupMenu
+        PopupMenu = TreeListViewPopupMenu
         TabOrder = 0
         ViewStyle = vsReport
         OnDblClick = ListViewDblClick
@@ -553,10 +549,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -675,7 +667,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             DragMode = dmAutomatic
             HideSelection = False
             Indent = 19
-            PopupMenu = CDETreeViewPopupMenu
+            PopupMenu = TreeListViewPopupMenu
             TabOrder = 0
             OnChange = TreeViewChange
             OnDragDrop = TreeViewDragDrop
@@ -729,7 +721,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             DragMode = dmAutomatic
             HideSelection = False
             MultiSelect = True
-            PopupMenu = CDEListViewPopupMenu
+            PopupMenu = TreeListViewPopupMenu
             TabOrder = 0
             ViewStyle = vsReport
             OnDblClick = ListViewDblClick
@@ -766,7 +758,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             DragMode = dmAutomatic
             HideSelection = False
             MultiSelect = True
-            PopupMenu = CDEListViewPopupMenu
+            PopupMenu = TreeListViewPopupMenu
             TabOrder = 1
             ViewStyle = vsReport
             OnDblClick = ListViewDblClick
@@ -864,10 +856,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'CD-RW'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -924,10 +912,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'CD-Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1002,10 +986,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1167,10 +1147,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'CD-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1427,10 +1403,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1507,7 +1479,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Width = 400
           end>
         MultiSelect = True
-        PopupMenu = AudioListViewPopupMenu
+        PopupMenu = TreeListViewPopupMenu
         TabOrder = 0
         ViewStyle = vsReport
         OnDblClick = ListViewDblClick
@@ -1578,10 +1550,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1944,128 +1912,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
       end
     end
   end
-  object CDETreeViewPopupMenu: TPopupMenu
-    OnPopup = CDETreeViewPopupMenuPopup
-    Left = 20
-    Top = 432
-    object CDETreeViewPopupSetCDLabel: TMenuItem
-      Caption = 'CD-Label '#228'ndern'
-      OnClick = CDETreeViewPopupSetCDLabelClick
-    end
-    object CDETreeViewPopupN1: TMenuItem
-      Caption = '-'
-    end
-    object CDETreeViewPopupAddFolder: TMenuItem
-      Caption = 'Ordner hinzuf'#252'gen'
-      OnClick = CDETreeViewPopupAddFolderClick
-    end
-    object CDETreeViewPopupAddFile: TMenuItem
-      Caption = 'Datei hinzuf'#252'gen'
-      OnClick = CDETreeViewPopupAddFileClick
-    end
-    object CDETreeViewPopupN2: TMenuItem
-      Caption = '-'
-    end
-    object CDETreeViewPopupDeleteFolder: TMenuItem
-      Caption = 'Ordner entfernen'
-      OnClick = CDETreeViewPopupDeleteFolderClick
-    end
-    object CDETreeViewPopupRenameFolder: TMenuItem
-      Caption = 'Ordner umbenennen'
-      OnClick = CDETreeViewPopupRenameFolderClick
-    end
-    object CDETreeViewPopupN3: TMenuItem
-      Caption = '-'
-    end
-    object CDETreeViewPopupNewFolder: TMenuItem
-      Caption = 'Neuer Ordner'
-      OnClick = CDETreeViewPopupNewFolderClick
-    end
-    object CDETreeViewPopupN4: TMenuItem
-      Caption = '-'
-    end
-    object CDETreeViewPopupImport: TMenuItem
-      Caption = 'CD importieren'
-      OnClick = CDETreeViewPopupImportClick
-    end
-  end
-  object CDEListViewPopupMenu: TPopupMenu
-    OnPopup = CDEListViewPopupMenuPopup
-    Left = 52
-    Top = 432
-    object CDEListViewPopupAddFile: TMenuItem
-      Caption = 'Datei hinzuf'#252'gen'
-      OnClick = CDEListViewPopupAddFileClick
-    end
-    object CDEListViewPopupAddFolder: TMenuItem
-      Caption = 'Ordner hinzuf'#252'gen'
-      OnClick = CDEListViewPopupAddFolderClick
-    end
-    object CDEListViewPopupAddMovie: TMenuItem
-      Caption = 'Movie (als Form2) hinzuf'#252'gen'
-      OnClick = CDEListViewPopupAddMovieClick
-    end
-    object CDEListViewPopupN1: TMenuItem
-      Caption = '-'
-    end
-    object CDEListViewPopupRenameFile: TMenuItem
-      Caption = 'Umbenennen'
-      OnClick = CDEListViewPopupRenameFileClick
-    end
-    object CDEListViewPopupDeleteFile: TMenuItem
-      Caption = 'Entfernen'
-      OnClick = CDEListViewPopupDeleteFileClick
-    end
-    object CDEListViewPopupN5: TMenuItem
-      Caption = '-'
-    end
-    object CDEListViewPopupNewFolder: TMenuItem
-      Caption = 'Neuer Ordner'
-      OnClick = CDEListViewPopupNewFolderClick
-    end
-    object CDEListViewPopupN6: TMenuItem
-      Caption = '-'
-    end
-    object CDEListViewPopupOpen: TMenuItem
-      Caption = #214'ffnen'
-      OnClick = CDEListViewPopupOpenClick
-    end
-  end
-  object AudioListViewPopupMenu: TPopupMenu
-    OnPopup = AudioListViewPopupMenuPopup
-    Left = 96
-    Top = 432
-    object AudioListViewPopupAddTrack: TMenuItem
-      Caption = 'Track hinzuf'#252'gen'
-      OnClick = AudioListViewPopupAddTrackClick
-    end
-    object AudioListViewPopupDeleteTrack: TMenuItem
-      Caption = 'Track entfernen'
-      OnClick = AudioListViewPopupDeleteTrackClick
-    end
-    object AudioListViewPopupN1: TMenuItem
-      Caption = '-'
-    end
-    object AudioListViewPopupMoveUp: TMenuItem
-      Caption = 'Track nach oben verschieben'
-      OnClick = AudioListViewPopupMoveUpClick
-    end
-    object AudioListViewPopupMoveDown: TMenuItem
-      Caption = 'Track nach unten verschieben'
-      OnClick = AudioListViewPopupMoveDownClick
-    end
-    object AudioListViewPopupN2: TMenuItem
-      Caption = '-'
-    end
-    object AudioListViewPopupPlay: TMenuItem
-      Caption = 'Abspielen'
-      Default = True
-      OnClick = AudioListViewPopupPlayClick
-    end
-  end
   object MiscPopupMenu: TPopupMenu
     OnPopup = MiscPopupMenuPopup
-    Left = 136
+    Left = 48
     Top = 432
     object MiscPopupVerify: TMenuItem
       Caption = 'Vergleich starten'
@@ -2094,5 +1943,142 @@ object CdrtfeMainForm: TCdrtfeMainForm
     OnTimer = TimerNodeExpandTimer
     Left = 504
     Top = 432
+  end
+  object TreeListViewPopupMenu: TPopupMenu
+    OnPopup = TreeListViewPopupMenuPopup
+    Left = 8
+    Top = 432
+    object CDETreeViewPopupSetCDLabel: TMenuItem
+      Tag = 1
+      Caption = 'CD-Label '#228'ndern'
+      OnClick = CDETreeViewPopupSetCDLabelClick
+    end
+    object CDETreeViewPopupN1: TMenuItem
+      Tag = 1
+      Caption = '-'
+    end
+    object CDETreeViewPopupAddFolder: TMenuItem
+      Tag = 1
+      Caption = 'Ordner hinzuf'#252'gen'
+      OnClick = CDETreeViewPopupAddFolderClick
+    end
+    object CDETreeViewPopupAddFile: TMenuItem
+      Tag = 1
+      Caption = 'Datei hinzuf'#252'gen'
+      OnClick = CDETreeViewPopupAddFileClick
+    end
+    object CDETreeViewPopupN2: TMenuItem
+      Tag = 1
+      Caption = '-'
+    end
+    object CDETreeViewPopupDeleteFolder: TMenuItem
+      Tag = 1
+      Caption = 'Ordner entfernen'
+      OnClick = CDETreeViewPopupDeleteFolderClick
+    end
+    object CDETreeViewPopupRenameFolder: TMenuItem
+      Tag = 1
+      Caption = 'Ordner umbenennen'
+      OnClick = CDETreeViewPopupRenameFolderClick
+    end
+    object CDETreeViewPopupN3: TMenuItem
+      Tag = 1
+      Caption = '-'
+    end
+    object CDETreeViewPopupNewFolder: TMenuItem
+      Tag = 1
+      Caption = 'Neuer Ordner'
+      OnClick = CDETreeViewPopupNewFolderClick
+    end
+    object CDETreeViewPopupN4: TMenuItem
+      Tag = 1
+      Caption = '-'
+    end
+    object CDETreeViewPopupImport: TMenuItem
+      Tag = 1
+      Caption = 'CD importieren'
+      OnClick = CDETreeViewPopupImportClick
+    end
+    object CDEListViewPopupAddFile: TMenuItem
+      Tag = 2
+      Caption = 'Datei hinzuf'#252'gen'
+      OnClick = CDEListViewPopupAddFileClick
+    end
+    object CDEListViewPopupAddFolder: TMenuItem
+      Tag = 2
+      Caption = 'Ordner hinzuf'#252'gen'
+      OnClick = CDEListViewPopupAddFolderClick
+    end
+    object CDEListViewPopupAddMovie: TMenuItem
+      Tag = 2
+      Caption = 'Movie (als Form2) hinzuf'#252'gen'
+      OnClick = CDEListViewPopupAddMovieClick
+    end
+    object CDEListViewPopupN1: TMenuItem
+      Tag = 2
+      Caption = '-'
+    end
+    object CDEListViewPopupRenameFile: TMenuItem
+      Tag = 2
+      Caption = 'Umbenennen'
+      OnClick = CDEListViewPopupRenameFileClick
+    end
+    object CDEListViewPopupDeleteFile: TMenuItem
+      Tag = 2
+      Caption = 'Entfernen'
+      OnClick = CDEListViewPopupDeleteFileClick
+    end
+    object CDEListViewPopupN5: TMenuItem
+      Tag = 2
+      Caption = '-'
+    end
+    object CDEListViewPopupNewFolder: TMenuItem
+      Tag = 2
+      Caption = 'Neuer Ordner'
+      OnClick = CDEListViewPopupNewFolderClick
+    end
+    object CDEListViewPopupN6: TMenuItem
+      Tag = 2
+      Caption = '-'
+    end
+    object CDEListViewPopupOpen: TMenuItem
+      Tag = 2
+      Caption = #214'ffnen'
+      OnClick = CDEListViewPopupOpenClick
+    end
+    object AudioListViewPopupAddTrack: TMenuItem
+      Tag = 3
+      Caption = 'Track hinzuf'#252'gen'
+      OnClick = AudioListViewPopupAddTrackClick
+    end
+    object AudioListViewPopupDeleteTrack: TMenuItem
+      Tag = 3
+      Caption = 'Track entfernen'
+      OnClick = AudioListViewPopupDeleteTrackClick
+    end
+    object AudioListViewPopupN1: TMenuItem
+      Tag = 3
+      Caption = '-'
+    end
+    object AudioListViewPopupMoveUp: TMenuItem
+      Tag = 3
+      Caption = 'Track nach oben verschieben'
+      OnClick = AudioListViewPopupMoveUpClick
+    end
+    object AudioListViewPopupMoveDown: TMenuItem
+      Tag = 3
+      Caption = 'Track nach unten verschieben'
+      OnClick = AudioListViewPopupMoveDownClick
+    end
+    object AudioListViewPopupN2: TMenuItem
+      Tag = 3
+      Caption = '-'
+    end
+    object AudioListViewPopupPlay: TMenuItem
+      Tag = 3
+      Caption = 'Abspielen'
+      Default = True
+      OnClick = AudioListViewPopupPlayClick
+    end
   end
 end

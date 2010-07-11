@@ -1,11 +1,11 @@
-{ $Id: f_compprop.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_compprop.pas,v 1.2 2010/07/11 16:37:31 kerberos002 Exp $
 
   f_compprop.pas: Properties von Komponenten
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.10.2008
+  letzte Änderung  11.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,6 +19,7 @@
     ExportControls
     ExportFontList
     GetCompProp(Comp: TComponent; Name: string): string
+    function GetPopupComp(Sender: TObject): TComponent
     PropertyExists(Comp: TComponent; Name: string): Boolean
     SetCompProp(Comp: TComponent; const Name, Value: string)
 
@@ -30,10 +31,11 @@ unit f_compprop;
 
 interface
 
-uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, SysUtils,
-     TypInfo;
+uses Classes, Forms, Controls, ComCtrls, StdCtrls, ExtCtrls, Buttons, Menus,
+     SysUtils, TypInfo;
 
 function GetCompProp(Comp: TComponent; Name: string): string;
+function GetPopupComp(Sender: TObject): TComponent;
 function PropertyExists(Comp: TComponent; Name: string): Boolean;
 procedure ExportControls;
 procedure ExportFontList;
@@ -42,6 +44,21 @@ procedure SetCompProp(Comp: TComponent; const Name, Value: string);
 implementation
 
 uses f_locations;
+
+{ GetPopupComp -----------------------------------------------------------------
+
+  ermittelt, zu welcher Komponente das Popup-Menü gehört, dessen Menuitem
+  als Sender übergeben wurde.                                                  }
+
+function GetPopupComp(Sender: TObject): TComponent;
+begin
+  if Sender is TMenuItem then
+  begin
+    Result :=
+      ((Sender as TMenuItem).GetParentMenu as TPopupMenu).PopupComponent;
+  end else
+    Result := nil;
+end;
 
 { Hilfsprozeduren zum Setzen/Lesen der Properties----------------------------- }
 
