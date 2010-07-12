@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.07.2010
+  letzte Änderung  12.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -280,6 +280,8 @@ type
     N6: TMenuItem;
     CheckBoxISOVerify: TCheckBox;
     TreeListViewPopupMenu: TPopupMenu;
+    TreeListViewPopupN1: TMenuItem;
+    TreeListViewPopupPaste: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -408,6 +410,7 @@ type
     procedure MainMenuSettingsClick(Sender: TObject);
     procedure MainMenuCdrtfeIniClick(Sender: TObject);
     procedure TreeListViewPopupMenuPopup(Sender: TObject);
+    procedure TreeListViewPopupPasteClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -6148,27 +6151,36 @@ var ListView: TListView;
   var PopupTag : Integer;
       i        : Integer;
       PopupMenu: TPopupMenu;
+      List     : TListView;
+      Tree     : TTreeView;
   begin
     PopupTag := 0;
     PopupMenu := (Sender as TPopupMenu);
-    if (Comp.Name = 'CDETreeView') or (Comp.Name = 'XCDETreeView') then
+    if Comp is TTreeView then
     begin
-      PopupTag := 1;
+      Tree := Comp as TTreeView;
+      if (Tree = CDETreeView) or (Tree = XCDETreeView) then  PopupTag := 1;
     end else
-    if (Comp.Name = 'CDEListView') or (Comp.Name = 'XCDEListView1') or
-       (Comp.Name = 'XCDEListView2')then
+    if Comp is TListView then
     begin
-      PopupTag := 2;
-    end else
-    if (Comp.Name = 'AudioListView') or (Comp.Name = 'VideoListView') then
-    begin
-      PopupTag := 3;
+      List := Comp as TListView;
+      if (List = CDEListView) or (List = XCDEListView1) or
+         (List = XCDEListView2) then
+      begin
+        PopupTag := 2;
+      end else
+      if (List = AudioListView) or (List = VideoListView) then
+      begin
+        PopupTag := 3;
+      end;
     end;
     for i := 0 to PopupMenu.Items.Count - 1 do
-      PopupMenu.Items[i].Visible := PopupMenu.Items[i].Tag = PopupTag;
+      PopupMenu.Items[i].Visible := (PopupMenu.Items[i].Tag = PopupTag) or
+                                    (PopupMenu.Items[i].Tag = 0);
   end;
 
 begin
+  TreeListViewPopupPaste.Enabled := Clipboard.HasFormat(CF_HDROP);
   SetPopupMenuItemsByTags((Sender as TPopupMenu).PopupComponent);
   if (Sender as TPopupMenu).PopupComponent is TTreeView then
   begin
@@ -6187,6 +6199,13 @@ begin
       CDEListViewPopupMenuPopup(Sender);
     end;
   end;
+end;
+
+{ Paste }
+
+procedure TCdrtfeMainForm.TreeListViewPopupPasteClick(Sender: TObject);
+begin
+  AddFromClipboard;
 end;
 
 { Kontextmenü der Tree-Views ---------------------------------------------------

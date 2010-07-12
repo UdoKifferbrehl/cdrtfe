@@ -1948,6 +1948,13 @@ object CdrtfeMainForm: TCdrtfeMainForm
     OnPopup = TreeListViewPopupMenuPopup
     Left = 8
     Top = 432
+    object TreeListViewPopupPaste: TMenuItem
+      Caption = 'Einf'#252'gen'
+      OnClick = TreeListViewPopupPasteClick
+    end
+    object TreeListViewPopupN1: TMenuItem
+      Caption = '-'
+    end
     object CDETreeViewPopupSetCDLabel: TMenuItem
       Tag = 1
       Caption = 'CD-Label '#228'ndern'
