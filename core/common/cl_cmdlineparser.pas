@@ -364,8 +364,7 @@ var i: integer;
 begin
   {Handle der vorigen Instanz holen: der Befehlsblock zur Erkennung der vorigen
   Instanz ist in die Funktion FirstInstance in Unit f_instance.pas gewandert.}
-  IsFirst := IsFirstInstance(Instance, Application.MainForm.ClassName,
-                                                                  FFormCaption);
+  IsFirst := IsFirstInstance(Instance, 'TCdrtfeMainForm', FFormCaption);
   {diese Optionen nur, wenn die 1. Instanz startet}
   if IsFirst then
   begin
