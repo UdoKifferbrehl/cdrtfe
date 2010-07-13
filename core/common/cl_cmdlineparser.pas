@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  13.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -363,9 +363,9 @@ var i: integer;
     IsFirst: Boolean;
 begin
   {Handle der vorigen Instanz holen: der Befehlsblock zur Erkennung der vorigen
-  Instanz ist in die Funktion FirstInstance in Unit feprocs.pas gewandert.}
-  IsFirst := IsFirstInstance(Instance, 'TForm1', FFormCaption);
-
+  Instanz ist in die Funktion FirstInstance in Unit f_instance.pas gewandert.}
+  IsFirst := IsFirstInstance(Instance, Application.MainForm.ClassName,
+                                                                  FFormCaption);
   {diese Optionen nur, wenn die 1. Instanz startet}
   if IsFirst then
   begin
