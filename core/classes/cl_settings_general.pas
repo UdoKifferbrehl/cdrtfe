@@ -1,4 +1,4 @@
-{ $Id: cl_settings_general.pas,v 1.2 2010/05/20 14:38:10 kerberos002 Exp $
+{ $Id: cl_settings_general.pas,v 1.3 2010/07/14 16:48:35 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.05.2010
+  letzte Änderung  14.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -65,6 +65,8 @@
 }
 
 unit cl_settings_general;
+
+{$I directives.inc}
 
 interface
 
@@ -159,6 +161,8 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
      end;
 
 implementation
+
+uses f_foldernamecache, f_logfile;
 
 { TGeneralSettings ----------------------------------------------------------- }
 
@@ -282,6 +286,7 @@ end;
 
 procedure TGeneralSettings.Load(MIF: TMemIniFile);
 var Section: string;
+    Temp   : string;
     i      : Integer;
 begin
   Section := 'General';
@@ -310,7 +315,7 @@ begin
     FAutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
     FAllowFileOpen := ReadBool(Section, 'AllowFileOpen', True);
     FUseMplayer := ReadBool(Section, 'UseMPlayer', False);
-    FAllowDblClick := ReadBool(section, 'AllowDblClick', True);
+    FAllowDblClick := ReadBool(Section, 'AllowDblClick', True);
     FMPlayerCmd := ReadString(Section, 'MPlayerCmd', '');
     FMPlayerOpt := ReadString(Section, 'MPlayerOpt', '');
     FFileInfoTitle := ReadBool(Section, 'FileInfoTitle', False);
@@ -319,6 +324,12 @@ begin
     FShowFolderSize := ReadBool(Section, 'ShowFolderSize', False);
     if FAsInifile then
     begin
+      {Defaultwerte für FolderNameCache}
+      for i := 0 to FNCCount - 1 do
+      begin
+        Temp := ReadString(Section, 'DfltDlgFolder' + IntToStr(i), '');
+        if Temp <> '' then CacheFolderName(TDialogID(i), Temp);
+      end;
       {read-only}
       if not PortableMode then
       begin
