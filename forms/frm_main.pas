@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.07.2010
+  letzte Änderung  14.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1079,11 +1079,13 @@ begin
   with FSettings.DataCD do
   begin
     CheckBoxDataCDVerify.Checked := Verify;
+    FData.SetCDLabel(VolID, cDataCD);
   end;
   {XCD}
   with FSettings.XCD do
   begin
     CheckBoxXCDVerify.Checked := Verify;
+    FData.SetCDLabel(VolID, cXCD);
   end;
   {CDRW}
   with FSettings.CDRW do
@@ -4414,9 +4416,10 @@ begin
       end;
       AddToPathlistSort(False);
       FSettings.General.Choice := TempChoice;
-      {Einstellungen wurde ursprünglich hier geladen!}
       {Einstellungen in GUI übernehmen}
       GetSettings;
+      {Tree-Views erneut initialisieren}
+      InitTreeViews;
       {Objekt zum Ausführen der Aktion}
       FAction := TCDAction.Create;
       FAction.Data := FData;
