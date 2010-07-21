@@ -356,10 +356,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -553,10 +549,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -864,10 +856,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'CD-RW'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -924,10 +912,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'CD-Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1002,10 +986,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1167,10 +1147,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'CD-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1189,6 +1165,13 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Height = 217
           Caption = 'Image von CD erstellen'
           TabOrder = 0
+          object LabelReadCDRetries: TLabel
+            Left = 136
+            Top = 121
+            Width = 81
+            Height = 13
+            Caption = 'Wiederholungen:'
+          end
           object CheckBoxReadCDNoerror: TCheckBox
             Left = 16
             Top = 72
@@ -1208,7 +1191,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CheckBoxReadCDClone: TCheckBox
             Left = 16
             Top = 120
-            Width = 233
+            Width = 105
             Height = 17
             Caption = 'Klon-Modus'
             TabOrder = 4
@@ -1216,7 +1199,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CheckBoxReadCDRange: TCheckBox
             Left = 16
             Top = 144
-            Width = 233
+            Width = 105
             Height = 17
             Caption = 'Bereich:'
             TabOrder = 5
@@ -1274,6 +1257,15 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Caption = 'Auswahl'
             TabOrder = 1
             OnClick = ButtonReadCDSelectPathClick
+          end
+          object EditReadCDRetries: TEdit
+            Left = 137
+            Top = 137
+            Width = 65
+            Height = 21
+            TabOrder = 10
+            OnExit = EditExit
+            OnKeyPress = EditKeyPress
           end
         end
         object GroupBoxImage: TGroupBox
@@ -1427,10 +1419,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1578,10 +1566,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)

@@ -1,4 +1,4 @@
-{ $Id: cl_settings_readcd.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_readcd.pas,v 1.2 2010/07/21 14:48:06 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  21.07.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,6 +29,7 @@
                  Startsec: string
                  Endsec  : string
                  DoCopy  : Boolean
+                 Retries : string
 
     Methoden     Init
                  Load(MIF: TMemIniFile)
@@ -54,6 +55,7 @@ type TSettingsReadcd = class(TCdrtfeSettings)
        FStartsec: string;
        FEndsec  : string;
        FDoCopy  : Boolean;
+       FRetries : string;
      public
        constructor Create;
        destructor Destroy; override;
@@ -70,6 +72,7 @@ type TSettingsReadcd = class(TCdrtfeSettings)
        property Startsec: string read FStartsec write FStartsec;
        property Endsec  : string read FEndsec write FEndsec;
        property DoCopy  : Boolean read FDoCopy write FDoCopy;
+       property Retries : string  read FRetries write FRetries;
      end;
 
 implementation
@@ -108,6 +111,7 @@ begin
   FStartsec := '';
   FEndsec   := '';
   FDoCopy   := False;
+  FRetries  := '';
 end;
 
 { Load -------------------------------------------------------------------------
@@ -130,6 +134,7 @@ begin
     FStartSec := ReadString(Section, 'Startsec', '');
     FEndSec := ReadString(Section, 'Endsec', '');
     FDoCopy := ReadBool(Section, 'DoCopy', False);
+    FRetries := ReadString(Section, 'Retries', '');
   end;
 end;
 
@@ -153,6 +158,7 @@ begin
     WriteString(Section, 'Startsec', FStartsec);
     WriteString(Section, 'Endsec', FEndsec);
     WriteBool(Section, 'DoCopy', FDoCopy);
+    WriteString(Section, 'Retries', FRetries);
   end;
 end;
 

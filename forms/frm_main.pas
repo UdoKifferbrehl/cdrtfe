@@ -282,6 +282,8 @@ type
     TreeListViewPopupMenu: TPopupMenu;
     TreeListViewPopupN1: TMenuItem;
     TreeListViewPopupPaste: TMenuItem;
+    LabelReadCDRetries: TLabel;
+    EditReadCDRetries: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -1125,6 +1127,7 @@ begin
     CheckBoxReadCDClone.Checked     := Clone;
     CheckBoxReadCDRange.Checked     := Range;
     CheckBoxReadCDWriteCopy.Checked := DoCopy;
+    EditReadCDRetries.Text          := Retries;
   end;
   with FSettings.Image do
   begin
@@ -1290,6 +1293,7 @@ begin
     Device   := GetDevice(cCDImage);
     Speed    := GetSpeed(cCDImage);
     DoCopy   := CheckBoxReadCDWriteCopy.Checked;
+    Retries  := EditReadCDRetries.Text;
   end;
   with FSettings.Image do
   begin
@@ -6751,6 +6755,10 @@ begin
     begin
       ButtonReadCDSelectPath.SetFocus;
     end else
+    if C = EditReadCDRetries then
+    begin
+      CheckBoxReadCDRange.SetFocus;
+    end else
     if C = EditReadCDStartSec then
     begin
       EditReadCDEndSec.SetFocus;
@@ -6792,6 +6800,12 @@ begin
   if (Sender as TEdit) = EditImageIsoPath then
   begin
     CheckControls;
+  end else
+  if (Sender as TEdit) = EditReadCDRetries then
+  begin
+    {Quick'n'Dirty: nur Zahlen akzeptieren}
+    if StrToIntDef(EditReadCDRetries.Text, -1) = -1 then
+      EditReadCDRetries.Text := '';
   end;
 end;
 
