@@ -235,10 +235,6 @@ object FormSettings: TFormSettings
     object TabSheetCdrecord: TTabSheet
       HelpContext = 1202
       Caption = 'cdrecord'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBoxAdditionalCmdLineOptions: TGroupBox
         Left = 8
         Top = 120
@@ -251,7 +247,7 @@ object FormSettings: TFormSettings
           Top = 24
           Width = 225
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 1
           OnExit = ComboBoxExit
           OnKeyPress = ComboBoxKeyPress
@@ -261,7 +257,7 @@ object FormSettings: TFormSettings
           Top = 56
           Width = 225
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 4
           OnExit = ComboBoxExit
           OnKeyPress = ComboBoxKeyPress
@@ -360,10 +356,10 @@ object FormSettings: TFormSettings
           Width = 190
           Height = 33
           Ctl3D = True
-          Max = 32
+          Max = 128
           Min = 4
           ParentCtl3D = False
-          Frequency = 4
+          Frequency = 16
           Position = 4
           TabOrder = 4
           OnChange = TrackBarFIFOSizeChange
