@@ -130,7 +130,6 @@ object FormDataCDFSError: TFormDataCDFSError
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
-    TabStop = True
     ExplicitWidth = 684
     inherited Bevel1: TBevel
       Width = 684

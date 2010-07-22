@@ -226,7 +226,6 @@ object FormDataCDOptions: TFormDataCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 5
-    TabStop = True
     ExplicitWidth = 458
     inherited Bevel1: TBevel
       Width = 458

@@ -330,10 +330,6 @@ object FormDataCDFS: TFormDataCDFS
     end
     object TabSheetISO: TTabSheet
       Caption = 'ISO9660'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBoxISO: TGroupBox
         Left = 8
         Top = 8
@@ -437,7 +433,7 @@ object FormDataCDFS: TFormDataCDFS
           Height = 21
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 2
           OnChange = CheckBoxClick
           OnKeyPress = EditKeyPress
@@ -459,10 +455,6 @@ object FormDataCDFS: TFormDataCDFS
     end
     object TabSheetSpecial: TTabSheet
       Caption = 'Spezial'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBoxMeta: TGroupBox
         Left = 8
         Top = 8
@@ -590,7 +582,6 @@ object FormDataCDFS: TFormDataCDFS
     Height = 50
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
-    TabStop = True
     ExplicitWidth = 578
     ExplicitHeight = 50
     inherited Bevel1: TBevel

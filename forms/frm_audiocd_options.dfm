@@ -210,7 +210,6 @@ object FormAudioCDOptions: TFormAudioCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 7
-    TabStop = True
     ExplicitWidth = 419
     inherited Bevel1: TBevel
       Width = 419

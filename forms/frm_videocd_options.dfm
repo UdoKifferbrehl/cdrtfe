@@ -156,7 +156,6 @@ object FormVideoCDOptions: TFormVideoCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 6
-    TabStop = True
     ExplicitWidth = 474
     inherited Bevel1: TBevel
       Width = 474

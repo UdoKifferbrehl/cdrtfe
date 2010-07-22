@@ -66,7 +66,6 @@ object FormOutput: TFormOutput
     Height = 50
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
-    TabStop = True
     ExplicitWidth = 608
     ExplicitHeight = 50
     inherited Bevel1: TBevel

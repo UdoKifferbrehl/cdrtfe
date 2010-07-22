@@ -252,10 +252,6 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetCompression: TTabSheet
       HelpContext = 1804
       Caption = 'Encoding'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBoxDAETags: TGroupBox
         Left = 8
         Top = 8
@@ -349,7 +345,7 @@ object FormDAEOptions: TFormDAEOptions
           Top = 24
           Width = 145
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
         end
       end
@@ -401,7 +397,6 @@ object FormDAEOptions: TFormDAEOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
-    TabStop = True
     ExplicitWidth = 481
     inherited Bevel1: TBevel
       Width = 481

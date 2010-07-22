@@ -200,7 +200,6 @@ object FormAudioCDTracks: TFormAudioCDTracks
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 4
-    TabStop = True
     ExplicitWidth = 537
     inherited Bevel1: TBevel
       Width = 537

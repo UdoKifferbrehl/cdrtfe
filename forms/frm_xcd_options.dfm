@@ -219,7 +219,6 @@ object FormXCDOptions: TFormXCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 8
-    TabStop = True
     ExplicitWidth = 473
     inherited Bevel1: TBevel
       Width = 473
