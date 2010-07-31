@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2010 Oliver Valencia
 ;
-;  letzte Änderung  05.07.2010
+;  letzte Änderung  30.07.2010
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,11 +33,11 @@ UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
 ; Compiler
-VersionInfoVersion=1.3.8
+VersionInfoVersion=1.3.8.1
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
 ;OutputDir=J:\shared\cdrtfe
-OutputBaseFilename=cdrtfe-1.3.8
+OutputBaseFilename=cdrtfe-1.3.8.1
 ; Compression
 ;Compression=none
 Compression=lzma
