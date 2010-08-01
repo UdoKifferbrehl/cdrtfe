@@ -1,10 +1,10 @@
-{ $Id: dlg_folderbrowse.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: dlg_folderbrowse.pas,v 1.2 2010/08/01 13:15:39 kerberos002 Exp $
 
   dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
   Copyright (c) 2007-2009 Oliver Valencia
 
-  letzte Änderung  11.06.2009
+  letzte Änderung  01.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -298,9 +298,10 @@ end;
   öffnet den eigentlichen Auswahldialog.                                       }
 
 function TFolderBrowser.Execute: Boolean;
-var NewTop   : Integer;
-    NewBottom: Integer;
-    LVHeight : Integer;
+var NewTop     : Integer;
+    NewBottom  : Integer;
+    LVHeight   : Integer;
+    DefaultPath: string;
 begin
   if FInitOk then
   begin
@@ -393,7 +394,10 @@ begin
         FBShellTreeView.Selected.Expand(False);
       end else
       begin
-        FBShellTreeView.Path := 'c:\';
+        DefaultPath := 'c:\';
+        if not DirectoryExists(DefaultPath) then
+          DefaultPath := ExtractFileDrive(Application.ExeName) + '\';
+        FBShellTreeView.Path := DefaultPath;
         FBShellTreeView.Selected.Parent.Selected := True;
       end;
     end;

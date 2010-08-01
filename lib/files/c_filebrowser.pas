@@ -1,10 +1,10 @@
-{ $Id: c_filebrowser.pas,v 1.2 2010/05/04 09:59:31 kerberos002 Exp $
+{ $Id: c_filebrowser.pas,v 1.3 2010/08/01 13:15:39 kerberos002 Exp $
 
   c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
 
   Copyright (c) 2009-2010 Oliver Valencia
 
-  letzte Änderung  04.05.2010
+  letzte Änderung  01.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -106,6 +106,7 @@ end;
 
 procedure TFrameFileBrowser.SetPath(const NewPath: string);
 var CurrentFolder: TTreeNode;
+    DefaultPath  : string;
 begin
   if DirectoryExists(NewPath) then
   begin
@@ -116,8 +117,12 @@ begin
     CurrentFolder.Selected := True;
   end else
   begin
+    {Defaultpath ist c:\, wenn nicht vorhanden, auf aktuelles Laufwerk setzen}
+    DefaultPath := 'c:\';
+    if not DirectoryExists(DefaultPath) then
+      DefaultPath := ExtractFileDrive(Application.ExeName) + '\';    
     {Arbeitsplatz öffnen}
-    FBShellTreeView.Path := 'c:\';
+    FBShellTreeView.Path := DefaultPath;
     //FBShellTreeView.Selected.Expand(False);
     FBShellTreeView.Selected.Parent.Selected := True;
   end;
