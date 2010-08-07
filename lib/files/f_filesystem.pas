@@ -1,11 +1,11 @@
-{ $Id: f_filesystem.pas,v 1.3 2010/06/16 14:21:07 kerberos002 Exp $
+{ $Id: f_filesystem.pas,v 1.4 2010/08/07 13:56:55 kerberos002 Exp $
 
   f_filesystem.pas: Dateisystemfunktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.06.2010
+  letzte Änderung  07.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -206,7 +206,7 @@ end;
 
 function CDLabelIsValid(const VolID: string):Boolean;
 begin
-  Result := Length(VolID) < 33;
+  Result := (Length(VolID) > 0) and (Length(VolID) < 33);
 end;
 
 { GetLastDirFromPath -----------------------------------------------------------

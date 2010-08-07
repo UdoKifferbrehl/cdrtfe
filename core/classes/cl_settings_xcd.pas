@@ -1,4 +1,4 @@
-{ $Id: cl_settings_xcd.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_xcd.pas,v 1.2 2010/08/07 13:56:55 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2010
+  letzte Änderung  07.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -144,7 +144,7 @@ begin
   FVerify         := False;
   FCreateInfoFile := True;
   {Einstellungen: modecdmaker}
-  FVolID          := '';
+  FVolID          := 'XCD';
   FExt            := '';
   FIsoLevel1      := False;
   FIsoLevel2      := False;
@@ -168,6 +168,7 @@ end;
 
 procedure TSettingsXCD.Load(MIF: TMemIniFile);
 var Section: string;
+    Temp   : string;
 begin
   Section := 'XCD';
   with MIF do
@@ -179,7 +180,8 @@ begin
     FVerify := ReadBool(Section, 'Verify', False);
     FCreateInfoFile := ReadBool(Section, 'CreateInfoFile', True);
     {Einstellungen: modecdmaker}
-    FVOlID := ReadString(Section, 'VolID', '');
+    Temp := ReadString(Section, 'VolID', FVolID);
+    if Temp <> '' then FVolID := Temp;
     FExt := ReadString(Section, 'Ext', '');
     FIsoLevel1 := ReadBool(Section, 'IsoLevel1', False);
     FIsoLevel2 := ReadBool(Section, 'IsoLevel2', False);

@@ -1,4 +1,4 @@
-{ $Id: cl_settings_datacd.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_datacd.pas,v 1.2 2010/08/07 13:56:54 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2010
+  letzte Änderung  07.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -292,7 +292,7 @@ begin
   FBootInfTable := False;
   FBootSegAdr   := '';
   FBootLoadSize := '';
-  FVolId        := '';
+  FVolID        := 'CD';
   FMsInfo       := '';
   FSelectSess   := False;
   FFindDups     := False;
@@ -325,6 +325,7 @@ end;
 
 procedure TSettingsDataCD.Load(MIF: TMemIniFile);
 var Section: string;
+    Temp   : string;
 begin
   Section := 'Data-CD';
   with MIF do
@@ -365,7 +366,8 @@ begin
     FBootInfTable := ReadBool(Section, 'BootInfTable', False);
     FBootSegAdr := ReadString(Section, 'BootSegAdr', '');
     FBootLoadSize := ReadString(Section, 'BootLoadSize', '');
-    FVolId := ReadString(Section, 'VolId', '');
+    Temp := ReadString(Section, 'VolId', FVolID);
+    if Temp <> '' then FVolID := Temp;    
     FFindDups := ReadBool(Section, 'FindDups', False);
     FTransTBL := ReadBool(Section, 'TransTBL', False);
     FHideTransTBL := ReadBool(Section, 'HideTransTBL', True);
@@ -436,7 +438,7 @@ begin
     WriteBool(Section, 'BootInfTable', FBootInfTable);
     WriteString(Section, 'BootSegAdr', FBootSegAdr);
     WriteString(Section, 'BootLoadSize', FBootLoadSize);
-    WriteString(Section, 'VolId', FVolId);
+    WriteString(Section, 'VolId', FVolID);
     WriteBool(Section, 'FindDups', FFindDups);
     WriteBool(Section, 'TransTBL', FTransTBL);
     WriteBool(Section, 'HideTransTBL', FHideTransTBL);

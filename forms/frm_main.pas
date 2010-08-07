@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.07.2010
+  letzte Änderung  07.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5528,7 +5528,7 @@ end;
   werden.                                                                      }
 
 procedure TCdrtfeMainForm.TreeViewEdited(Sender: TObject; Node: TTreeNode;
-                                var S: String);
+                                         var S: String);
 var Temp: string;
     Path: string;
     ErrorCode: Byte;
@@ -5596,10 +5596,19 @@ begin
       Node.Text := S;
     end else
     begin
-      S := Copy(S, 1, 32);
-      Node.Text := S;
-      ShowMsgDlg(Format(FLang.GMS('m502'), [32]),
-                 FLang.GMS('g004'), MB_cdrtfeWarning);
+      if Length(S) > 32 then
+      begin
+        S := Copy(S, 1, 32);
+        Node.Text := S;
+        ShowMsgDlg(Format(FLang.GMS('m502'), [32]),
+                   FLang.GMS('g004'), MB_cdrtfeWarning);
+      end;
+      if Length(S) = 0 then
+      begin
+        Temp := S;
+        S := Node.Text;
+        Node.Text := S;
+      end;
     end;
   end;
 end;
