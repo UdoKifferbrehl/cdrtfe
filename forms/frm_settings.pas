@@ -216,12 +216,12 @@ end;
   FSettings.                                                                   }
 
 procedure TFormSettings.GetSettings;
+var ShlExtOk: Boolean;
 begin
-  if not (FSettings.FileFlags.ShlExtDllOk and IsFullAdmin) then
-  begin
-    CheckBoxShellExt.Enabled := False;
-    StaticText4.Enabled := False;
-  end;
+  ShlExtOk := (FSettings.FileFlags.ShlExtDllOk and IsFullAdmin) or
+               not PlatformWinNT;
+  CheckBoxShellExt.Enabled := ShlExtOk;
+  StaticText4.Enabled := ShlExtOk;     
   CheckBoxAutoSaveOnExit.Checked := FSettings.General.AutoSaveOnExit;
   EditTempFolder.Text := FSettings.General.TempFolder;
   CheckBoxShellExt.Checked           := FShellExtIsSet;
