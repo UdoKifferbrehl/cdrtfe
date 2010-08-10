@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 05.07.2010
+  letzte Änderung 10.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -217,7 +217,7 @@ end;
 
 procedure TFormSettings.GetSettings;
 begin
-  if not (FSettings.FileFlags.ShlExtDllOk and AccessToRegistryHKLM) then
+  if not (FSettings.FileFlags.ShlExtDllOk and IsFullAdmin) then
   begin
     CheckBoxShellExt.Enabled := False;
     StaticText4.Enabled := False;

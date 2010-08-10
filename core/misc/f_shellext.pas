@@ -1,4 +1,4 @@
-{ $Id: f_shellext.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_shellext.pas,v 1.2 2010/08/10 13:41:08 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.01.2010
+  letzte Änderung  10.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -41,9 +41,13 @@ procedure UnregisterShellExtensions;
 
 implementation
 
-uses const_core, const_locations;
+uses f_wininfo, f_process, const_core, const_locations;
 
-const CMHPath: string = '\shellex\ContextMenuHandlers\'; // cdrtfeShlEx';
+const CMHPath: string = '\shellex\ContextMenuHandlers\';
+      KEY_WOW64_64KEY = $0100;
+      KEY_WOW64_32KEY = $0200;
+
+var Is64Bit: Boolean;
 
 { ShellExtensionsRegistered ----------------------------------------------------
 
@@ -51,8 +55,10 @@ const CMHPath: string = '\shellex\ContextMenuHandlers\'; // cdrtfeShlEx';
   (Result = True) oder nicht (Result = False).                                 } 
 
 function ShellExtensionsRegistered: Boolean;
-var Reg: TRegistry;
+var Reg    : TRegistry;
+    ClassID: string;
 begin
+  if Is64Bit then ClassID := CdrtfeClassID64 else ClassID := CdrtfeClassID;
   Reg := TRegistry.Create;
   try
     Reg.RootKey := HKEY_CLASSES_ROOT;
@@ -62,19 +68,19 @@ begin
      Schließen übrig bleibt. Der Fehler wird durch RegOpenKeyEx in der Funktion
      TRegistry.GetKey ausgelöst, wenn der Registry-Zweig nicht vorhanden ist.
      Wahrscheinlich ist es nur ein kosmetisches Problem.}
-    Result := Reg.KeyExists('\CLSID\' + CdrtfeClassID);
+    Result := Reg.KeyExists('\CLSID\' + ClassID);
     {$ELSE}
     {In der alternativen Variante wird versucht den Registry-Zweig zu öffnen.
      Falls er nich vorhanden ist wird er erzeugt. Dann wird auf das Vorhanden-
      sein eines Wertes geprüft. Falls dieser nicht gefunden wird, war der
      Registry-Zweig ursprünglich nicht vorhanden, muß also wieder gelöscht
      werden.}
-    if Reg.OpenKey('\CLSID\' + CdrtfeClassID + '\InProcServer32', True) then
+    if Reg.OpenKey('\CLSID\' + ClassID + '\InProcServer32', True) then
     begin
       Result := Reg.ValueExists('ThreadingModel');
       if not Result then
       begin
-        Reg.DeleteKey('\CLSID\' + CdrtfeClassID);
+        Reg.DeleteKey('\CLSID\' + ClassID);
       end;
     end else
     begin
@@ -86,20 +92,24 @@ begin
   end;
 end;
 
-{ RegisterShellExtensions ------------------------------------------------------
+{ DoRegisterShellExtensions ----------------------------------------------------
 
   RegisterShellExtensions träg alle nötigen Informationen in die Registry ein,
   damit die ShellExtensions verwendet werden können. Im UNterschied zu früheren
   Versionen ist eine Aktivierung per Kommandozeile nicht mehr möglich.         }
 
-procedure RegisterShellExtensions;
+procedure DoRegisterShellExtensions(const Reg64: Boolean);
 var Reg    : TRegistry;
     DLLPath: string;
+    DLLName: string;
+    ClassID: string;
     Key    : string;
 begin
+  if Reg64 then ClassID := CdrtfeClassID64 else ClassID := CdrtfeClassID;
+  if Reg64 then DLLName := cCdrtfeShlExDLL64 else DLLName := cCdrtfeShlExDLL;
   DLLPath := ExtractFilePath(Application.ExeName);
   if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
-  DLLPath := DLLPath + cCdrtfeShlExDll;
+  DLLPath := DLLPath + DLLName;
   Reg := TRegistry.Create;
   try
     with Reg do
@@ -107,19 +117,20 @@ begin
       {ShellExtensions registrieren}
       RootKey := HKEY_CLASSES_ROOT;
       Access := Key_Read or Key_Write;
-      OpenKey('\CLSID\' + CdrtfeClassID, True);
+      if Reg64 then Access := Access or KEY_WOW64_64KEY;
+      OpenKey('\CLSID\' + ClassID, True);
       WriteString('', 'cdrtfe Context Menu Shell Extension');
-      OpenKey('\CLSID\' + CdrtfeClassID + '\InProcServer32', True);
+      OpenKey('\CLSID\' + ClassID + '\InProcServer32', True);
       WriteString('', DLLPath);
       WriteString('ThreadingModel', 'Apartment');
       {Kontextmenü für * erweitern}
-      Key := '\*' + CMHPath + CdrtfeClassID;
+      Key := '\*' + CMHPath + ClassID;
       OpenKey(Key, True);
-      WriteString('', CdrtfeClassID);
+      WriteString('', ClassID);
       {Kontextmenü für Ordner erweitern}
-      Key := '\folder' + CMHPath + CdrtfeClassID;
+      Key := '\folder' + CMHPath + ClassID;
       OpenKey(Key, True);
-      WriteString('', CdrtfeClassID);
+      WriteString('', ClassID);
       {cdrtfe-Programmpfad eintragen}
       RootKey := HKEY_LOCAL_MACHINE; //HKEY_CURRENT_USER;
       OpenKey('\Software\cdrtfe\Program', True);
@@ -128,20 +139,21 @@ begin
   finally
     Reg.Free;
   end;
-  // ShellExtensions registriert.
-  // Form1.Memo1.Lines.Add(GMS('mpref01'));
 end;
 
-{ UnregisterShellExtensions ----------------------------------------------------
+{ DoUnregisterShellExtensions --------------------------------------------------
 
   UnregisterShellExtensions entfernt die zu den ShellExtensions gehörenden Ein-
   träge aus der Registry und deaktiviert diese. Im Gegensatz zu zu früheren
   Versionen ist eine Deaktivierung per Kommandozeile nicht mehr möglich.       }
 
-procedure UnregisterShellExtensions;
-var Reg: TRegistry;
-    Key: string;
+procedure DoUnregisterShellExtensions(const Reg64: Boolean);
+var Reg    : TRegistry;
+    ClassID: string;
+    Key    : string;
+    DLLPath: string;
 begin
+  if Reg64 then ClassID := CdrtfeClassID64 else ClassID := CdrtfeClassID;
   Reg := TRegistry.Create;
   try
     with Reg do
@@ -149,23 +161,52 @@ begin
       {ShellExtensions löschen}
       RootKey := HKEY_CLASSES_ROOT;
       Access := Key_Read or Key_Write;
-      DeleteKey('\CLSID\' + CdrtfeClassID + '\InProcServer32');
-      DeleteKey('\CLSID\' + CdrtfeClassID);
+      if Reg64 then Access := Access or KEY_WOW64_64KEY;
+      DeleteKey('\CLSID\' + ClassID + '\InProcServer32');
+      DeleteKey('\CLSID\' + ClassID);
       {Kontextmenüeintrag für * löschen}
-      Key := '\*' + CMHPath + CdrtfeClassID;
+      Key := '\*' + CMHPath + ClassID;
       DeleteKey(Key);
-      {Kontextmenü für Ordner erweitern}
-      Key := '\folder' + CMHPath + CdrtfeClassID;
+      {Kontextmenü für Ordner löschen}
+      Key := '\folder' + CMHPath + ClassID;
       DeleteKey(Key);
       {cdrtfe-Programmpfad löschen}
       RootKey := HKEY_LOCAL_MACHINE;
-      DeleteKey('\Software\cdrtfe');
+      DeleteKey('\Software\cdrtfe');     // Delphi-Bug: Key bleibt erhalten, x64
     end;
   finally
     Reg.Free;
   end;
-  // Registryeinträge der ShellExtensions entfernt.
-  // Form1.Memo1.Lines.Add(GMS('mpref02'));
+  {Workaround für Delphi-Bug: Unter 64-Bit-Windows wird der Schlüssel 'cdrtfe'
+   nicht gelöscht (Fehler in TRegistry). Daher rufen wir regsvr32 auf, das
+   die DLL abmeldet.}
+  if Reg64 then
+  begin
+    DLLPath := ExtractFilePath(Application.ExeName);
+    if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
+    DLLPath := '"' + DLLPath + cCdrtfeShlExDLL64 + '"';
+    ShlExecute('regsvr32', '-u -s ' + DLLPath);
+  end;
 end;
+
+{ (Un)RegisterShellExtensions --------------------------------------------------
+
+  unter Windows x64 sollen sowohl die 32- als auch die 64-Bit-ShellExtension
+  registriert werden.                                                          }
+
+procedure RegisterShellExtensions;
+begin
+  DoRegisterShellExtensions(False);
+  if Is64Bit then DoRegisterShellExtensions(True);
+end;
+
+procedure UnRegisterShellExtensions;
+begin
+  DoUnRegisterShellExtensions(False);
+  if Is64Bit then DoUnRegisterShellExtensions(True);
+end;
+
+initialization
+  Is64Bit := IsWow64;
 
 end.

@@ -1,4 +1,4 @@
-{ $Id: const_locations.pas,v 1.2 2010/02/06 18:22:59 kerberos002 Exp $
+{ $Id: const_locations.pas,v 1.3 2010/08/10 13:41:08 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.02.2010
+  letzte Änderung  10.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,7 @@ const {Dateinamen - Kommandozeilenprogramme}
 
       {Dateinamen - Tools/DLLs}
       cCdrtfeShlExDll  : string = '\cdrtfeShlEx.dll';
+      cCdrtfeShlExDll64: string = '\cdrtfeShlEx64.dll';
       cCdrtfeResDll    : string = '\cdrtferes.dll';
       {$J+}
       cM2F2ExtractBin  : string = '\m2f2extract.exe';

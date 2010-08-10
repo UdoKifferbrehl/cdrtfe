@@ -1,4 +1,4 @@
-{ $Id: const_core.pas,v 1.2 2010/05/18 17:01:59 kerberos002 Exp $
+{ $Id: const_core.pas,v 1.3 2010/08/10 13:41:08 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,11 +7,11 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.05.2010
+  letzte Änderung  10.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
-  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt. 
+  Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
 
 }
 
@@ -25,6 +25,7 @@ uses Classes;
 
 const {die GUID für cdrtfe}
       CdrtfeClassID    : string = '{23ADD0C0-5A56-11D7-B55C-00E07D907FE2}';
+      CdrtfeClassID64  : string = '{23ADD0C0-5A56-11D7-B55C-00E07D907FE3}';
 
       {ListViews, zählt von Nulll an!}
       cLVCount       = 5;
