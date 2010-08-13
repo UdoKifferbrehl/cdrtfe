@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.07.2010
+  letzte Änderung  13.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -462,6 +462,7 @@ begin
                                         not Settings.Cdrecord.CanWriteCueImage;
       {Ist cdrtfeShlEx.dll da? Falls nicht, entsrpechende Optione deaktivieren.}
       ShlExtDllOk := FileExists(StartUpDir + cCdrtfeShlExDll);
+      if IsWow64 then ShlExtDllOk := FileExists(StartUpDir + cCdrtfeShlExDll64);      
     end;
   end;
 end;
