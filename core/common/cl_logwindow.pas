@@ -1,4 +1,4 @@
-{ $Id: cl_logwindow.pas,v 1.3 2010/06/29 13:26:35 kerberos002 Exp $
+{ $Id: cl_logwindow.pas,v 1.4 2010/08/16 15:26:37 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -6,7 +6,7 @@
 
   Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  29.03.2010
+  letzte Änderung  16.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -528,6 +528,12 @@ begin
     TaskBarProgressIndicatorDoMarquee;
     {$ENDIF}
   end else
+  {cdrecord: Blanking time}
+  if Pos('Blanking time', Temp) > 0 then
+  begin
+    ProgressBarDoMarquee(False);
+    ProgressBarShow(1, 100);
+  end else  
   {cdrecord: Blanking ...}
   if Pos('Blanking ', Temp) = 1 then   // Blanking PMA, TOC, pregap
   begin
