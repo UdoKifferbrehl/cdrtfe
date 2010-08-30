@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2010 Oliver Valencia
 ;
-;  letzte Änderung  30.07.2010
+;  letzte Änderung  19.08.2010
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVerName "cdrtfe 1.3.8"
+#define MyAppVerName "cdrtfe 1.3.9"
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
@@ -33,11 +33,11 @@ UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
 ; Compiler
-VersionInfoVersion=1.3.8.1
+VersionInfoVersion=1.3.9
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
 ;OutputDir=J:\shared\cdrtfe
-OutputBaseFilename=cdrtfe-1.3.8.1
+OutputBaseFilename=cdrtfe-1.3.9
 ; Compression
 ;Compression=none
 Compression=lzma
@@ -74,6 +74,7 @@ Name: copycyg; Description: {cm:CopyCygwin}; GroupDescription: {cm:SpecialTask};
 Source: I:\cdrtfe\proto\cdrtfe.exe; DestDir: {app}; DestName: cdrtfe.exe; Flags: ignoreversion; Components: prog
 Source: I:\cdrtfe\proto\cdrtfedbg.dll; DestDir: {app}; DestName: cdrtfedbg.dll; Flags: ignoreversion; Components: prog
 Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: ignoreversion; Components: prog
+Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: ignoreversion; Components: prog; Check: IsWin64;
 Source: I:\cdrtfe\proto\cdrtfe.jdbg; DestDir: {app}; Flags: ignoreversion; Components: prog
 ; Manifest
 Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
@@ -475,12 +476,12 @@ en.IconSourceFiles=Source files
 en.SpecialTask=special Tasks:
 en.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; French
-fr.CompLang=Support multilingue (nécessaire pour les langues autres que l'allemand)
+fr.CompLang=Prise en charge multilingue (nécessaire pour d'autres langues que l'allemand)
 fr.CompTools=Outils en ligne de commande
 fr.CompM2CDMex=m2cdm (Mode2CDMaker modifié)
-fr.CompRrenc=Additif pour correction d'erreur XCD
+fr.CompRrenc=Correction d'erreur XCD supplémentaire
 fr.CompXCD=Outils d'extraction XCD (dat2file, d2fgui, M2F2Extract)
-fr.CompAudio=Prise en charge MP3, OGG, FLAC et Monkey's Audio
+fr.CompAudio=Prise en charge de MP3, OGG et FLAC
 fr.CompSrc=Fichiers sources de {#MyAppVerName}
 fr.TaskAllUsers=Pour tous les utilisateurs
 fr.TaskCurrentUser=Pour l'utilisateur actuel seulement
@@ -488,17 +489,17 @@ fr.CygwinHeader=Cygwin
 fr.CygwinHeader2=Un fichier cygwin1.dll a été trouvé sur votre système.
 fr.CygwinText=Quelle dll cygwin voulez-vous utiliser ?
 fr.CygwinText2=Remarque : les fichiers cygiconv-2.dll et cygintl-3.dll sont introuvables dans votre chemin d'accès.
-fr.CygwinText3=Attention : le fichier cygwin1.dll a été trouvé dans un dossier système de Windows. L'utilisation de la DLL fournie ne peut pas être forcée.
-fr.CygwinOpt1=Utiliser la DLL déjà installée pour éviter un conflit de version.
-fr.CygwinOpt2=Utiliser la DLL fournie.
-fr.CygwinReadyHeader=DLL Cygwin :
-fr.CygwinReadyUsePrev=Utilisation des DLL cygwin trouvées dans le chemin d'accès.
-fr.CygwinReadyUseOwn=Utilisation des DLL fournies.
+fr.CygwinText3=Attention : le fichier cygwin1.dll a été trouvé dans un dossier système de Windows. L'utilisation de la dll fournie ne peut pas être forcée.
+fr.CygwinOpt1=Utiliser la dll déjà installée pour éviter un conflit de version.
+fr.CygwinOpt2=Utiliser la dll fournie.
+fr.CygwinReadyHeader=Dll cygwin :
+fr.CygwinReadyUsePrev=Utilisation des dll cygwin trouvées dans le chemin d'accès.
+fr.CygwinReadyUseOwn=Utilisation des dll fournies.
 fr.OldVersionError=Une ancienne version a été trouvée. Veuillez d'abord la désinstaller.
 fr.IconHelpFile=Aide de cdrtfe
 fr.IconSourceFiles=Fichiers sources
-fr.SpecialTask=special Tasks:
-fr.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
+fr.SpecialTask=Tâches spéciales :
+fr.CopyCygwin=Copier les dll cygwin et les scripts (pour expert seulement, non recommandé)
 ; Italian
 it.CompLang=Supporto multilingue (necessario per lingue diverse dal tedesco)
 it.CompTools=Strumenti a riga di comando

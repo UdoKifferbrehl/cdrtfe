@@ -149,7 +149,7 @@
 			<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 			<VersionInfo Name="MajorVer">1</VersionInfo>
 			<VersionInfo Name="MinorVer">3</VersionInfo>
-			<VersionInfo Name="Release">6</VersionInfo>
+			<VersionInfo Name="Release">9</VersionInfo>
 			<VersionInfo Name="Build">0</VersionInfo>
 			<VersionInfo Name="Debug">False</VersionInfo>
 			<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -166,9 +166,9 @@ http://cdrtfe.sourceforge.net
 eMail:
 kerberos002@arcor.de</VersionInfoKeys>
 			<VersionInfoKeys Name="FileDescription">cdrtfe debug dll</VersionInfoKeys>
-			<VersionInfoKeys Name="FileVersion">1.3.6.0</VersionInfoKeys>
+			<VersionInfoKeys Name="FileVersion">1.3.9.0</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">cdrtfedbg.dll</VersionInfoKeys>
-			<VersionInfoKeys Name="LegalCopyright">Copyright © 2007-2009  O. Valencia</VersionInfoKeys>
+			<VersionInfoKeys Name="LegalCopyright">Copyright © 2007-2010  O. Valencia</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
 			<VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">cdrtools Frontend</VersionInfoKeys>
