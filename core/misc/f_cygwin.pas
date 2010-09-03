@@ -1,10 +1,10 @@
-{ $Id: f_cygwin.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_cygwin.pas,v 1.2 2010/09/03 19:57:35 kerberos002 Exp $
 
   f_cygwin.pas: cygwin-Funktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
 
-  letzte Änderung  12.12.2009
+  letzte Änderung  03.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -41,16 +41,85 @@ function MakePathCygwinConform(Path: string):string;
 function MakePathMkisofsConform(const Path: string):string;
 function MakePathMingwMkisofsConform(const Path: string): string;
 function UseOwnCygwinDLLs: Boolean;
+procedure CleanRegistryPortable;
 procedure SetUseOwnCygwinDLLs(Value: Boolean);
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
-     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}   // debug: f_window,
      cl_cdrtfedata, f_strings, f_filesystem, f_locations, const_locations;
 
 { 'statische' Variablen }
-var CygPathPrefix : string;           // Cygwin-Mountpoint
+var CygPathPrefix    : string;           // Cygwin-Mountpoint
+    CygnusPresentHKLM: Boolean;
+    CygnusPresentHKCU: Boolean;
+
+{ CygnusPresent ----------------------------------------------------------------
+
+  True, wenn Registry-Zweig "HK\Software\Cygnus Solutions" existiert.          }
+
+function CygnusPresent(HK: HKEY): Boolean;
+var Reg: TRegistry;
+begin
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HK;
+    Reg.Access := Key_Read;
+    Result := Reg.KeyExists('\Software\Cygnus Solutions');
+  finally
+    Reg.Free;
+  end;
+end;
+
+{ DeleteCygnus -----------------------------------------------------------------
+
+ löscht Registry-Zweig "HK\Software\Cygnus Solutions".                         }
+
+function DeleteCygnus(HK: HKEY): Boolean;
+var Reg: TRegistry;
+begin
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HK;
+    Reg.Access := Key_Read or Key_Write;
+    Result := Reg.DeleteKey('\Software\Cygnus Solutions');
+  finally
+    Reg.Free;
+  end;
+end;
+
+{ CleanRegistryPortable --------------------------------------------------------
+
+  löscht die von cygwin erzeugten Einträge, sofern sie beim Start nicht vor-
+  handen waren.                                                                }
+
+procedure CleanRegistryPortable;
+// var Temp: string;
+//    Ok  : Boolean;
+begin
+  if not CygnusPresentHKLM then DeleteCygnus(HKEY_LOCAL_MACHINE);
+  if not CygnusPresentHKCU then DeleteCygnus(HKEY_CURRENT_USER);
+(* debug:
+  if CygnusPresentHKLM then Temp := 'CygnusHKLMPresent = True' + #13#10 else
+                            Temp := 'CygnusHKLMPresent = False' + #13#10;
+  if CygnusPresentHKCU then Temp := Temp + 'CygnusHKCUPresent = True' + #13#10 else
+                            Temp := Temp + 'CygnusHKCUPresent = False' + #13#10;
+  if not CygnusPresentHKLM then
+  begin
+    Ok := DeleteCygnus(HKEY_LOCAL_MACHINE);
+    if OK then Temp := Temp + 'CygnusHKLM deleted' + #13#10 else
+               Temp := Temp + 'CygnusHKLM delete failed' + #13#10;
+  end;
+  if not CygnusPresentHKCU then
+  begin
+    Ok := DeleteCygnus(HKEY_CURRENT_USER);
+    if OK then Temp := Temp + 'CygnusHKLM deleted' + #13#10 else
+               Temp := Temp + 'CygnusHKLM delete failed' + #13#10;
+  end;
+  ShowMsgDlg(Temp, 'StealthInfo', MB_cdrtfeInfo);
+*)
+end;
 
 { GetCygwinPathPrefix ----------------------------------------------------------
 
@@ -256,5 +325,7 @@ end;
                 
 initialization
   CygPathPrefix := 'unknown';
+  CygnusPresentHKLM := CygnusPresent(HKEY_LOCAL_MACHINE);
+  CygnusPresentHKCU := CygnusPresent(HKEY_CURRENT_USER);  
 
 end.

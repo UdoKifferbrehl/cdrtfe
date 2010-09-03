@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.08.2010
+  letzte Änderung  03.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -591,7 +591,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
      f_filesystem, f_process, f_window, f_strings, f_largeint, f_init, f_helper,
      f_checkproject, f_foldernamecache, f_screensaversup, f_locations,
-     f_treelistfuncs, f_dischelper, f_instance, f_compprop,
+     f_treelistfuncs, f_dischelper, f_instance, f_compprop, f_cygwin,
      const_tabsheets, const_common, const_locations;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
@@ -4668,6 +4668,7 @@ begin
     SetSettings;
     FSettings.SaveToFile(cIniFile);
   end;
+  if FSettings.General.PortableMode then CleanRegistryPortable;
 end;
 
 procedure TCdrtfeMainForm.FormDblClick(Sender: TObject);
