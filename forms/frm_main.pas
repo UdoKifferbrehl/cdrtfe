@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.09.2010
+  letzte Änderung  10.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4400,6 +4400,7 @@ begin
         RemoteDrives := FSettings.Drives.RemoteDrives;
         LocalDrives := FSettings.Drives.LocalDrives;
         AssignManually := FSettings.Drives.AssignManually;
+        ForcedInterface := FSettings.Drives.SCSIInterface;
         DetectDrives;
         if (CDWriter.Count = 1) and (CDWriter[0] = '') then
         begin

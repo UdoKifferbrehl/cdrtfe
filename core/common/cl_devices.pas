@@ -5,7 +5,7 @@
   Copyright (c) 2005-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.06.2010
+  letzte Änderung  10.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -61,6 +61,7 @@ type TDevices = class(TObject)
        FRSCSIHost          : string;
        FUseRSCSI           : Boolean;
        FAssignManually     : Boolean;
+       FForcedInterface    : string;
        function GetCDDevices    : TStringList;
        function GetCDReader     : TStringList;
        function GetCDWriter     : TStringList;
@@ -91,6 +92,7 @@ type TDevices = class(TObject)
        property RSCSIHost: string read FRSCSIHost write FRSCSIHost;
        property UseRSCSI: Boolean read FUseRSCSI write FUseRSCSI;
        property AssignManually: Boolean read FAssignManually write FAssignManually;
+       property ForcedInterface: string read FForcedInterface write FForcedInterface;
      end;
 
 implementation
@@ -345,6 +347,9 @@ begin
   AddLogCode(1213);
   {$ENDIF}
   SCSIDevices := TSCSIDevices.Create;
+  if FForcedInterface = 'ASPI' then SCSIDevices.ForcedLayer := L_ASPI else
+  if FForcedInterface = 'SPTI' then SCSIDevices.ForcedLayer := L_SPTI else
+                                    SCSIDevices.ForcedLayer := L_Undef;
   SCSIDevices.Init;
   SCSIDevices.Scanbus;
   {$IFDEF WriteLogFile}

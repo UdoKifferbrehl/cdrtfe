@@ -1,12 +1,12 @@
-{ $Id: cl_deviceenum.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: cl_deviceenum.pas,v 1.2 2010/09/10 13:58:41 kerberos002 Exp $
 
 { cl_deviceenum.pas: Implementierung eines einfachen SCSI-Device-Enumerators
 
-  Copyright (c) 2004-2005, 2007-2009 Oliver Valencia
+  Copyright (c) 2004-2005, 2007-2010 Oliver Valencia
 
-  Version          1.2
+  Version          1.3
   erstellt         23.11.2004
-  letzte Änderung  21.10.2009
+  letzte Änderung  10.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -79,6 +79,7 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
        FDeviceListNoID: TStringList;          // <name>=<driveletter>
        FLastError     : TSCSIDevicesError;
        FLayer         : TSCSILayer;
+       FForcedLayer   : TSCSILayer;
        FSPTIHaMax     : Integer;
        FSPTIHaSortArr : array[0..25] of Word;
        FSPTIGlobal    : array[0..25] of DeviceInfo;
@@ -114,6 +115,7 @@ type TSCSILayer = (L_ASPI,             // ASPI-Layer wird verwendet
        property DeviceListNoID: TStringList read FDeviceListNoID;
        property LastError: TSCSIDevicesError read GetLastError;
        property Layer: string read GetLayer;
+       property ForcedLayer: TSCSILayer read FForcedLayer write FForcedLayer;
        {$IFDEF EnableLogging}
        property Log: TStringList read FLog;
        {$ENDIF}
@@ -975,14 +977,8 @@ end;
   WinXP: SPTI (default) oder ASPI) und initialisiert es.                       }
 
 procedure TSCSIDevices.Init;
-begin
-  {$IFDEF EnableLogging}
-  FLog.Add(#13#10 + 'TSCSIDevices - Log');
-  FLog.Add('------------------');
-  FLog.Add('  Checking for SCSI Interface');
-  {$ENDIF}
-  {Können wir SPTI verwenden?}
-  if FLayer = L_Undef then
+
+  procedure InitSPTI;
   begin
     {$IFDEF EnableLogging}
     FLog.Add('  Initializing SPTI');
@@ -990,11 +986,9 @@ begin
     FLayer := L_SPTI;
     {SPTI initialisieren}
     SPTIInit;
-    {SPTI-Fehler}
-    if FLastError <> SD_NoError then FLayer := L_Undef;
   end;
-  {Wenn nicht, dann ASPI versuchen.}
-  if FLayer = L_Undef then
+
+  procedure InitASPI;
   begin
     {$IFDEF EnableLogging}
     FLog.Add('  Initializing ASPI');
@@ -1002,7 +996,43 @@ begin
     FLayer := L_ASPI;
     {ASPI initialiseren}
     ASPIInit;
-    {ASPI-Fehler}
+  end;
+
+begin
+  {$IFDEF EnableLogging}
+  FLog.Add(#13#10 + 'TSCSIDevices - Log');
+  FLog.Add('------------------');
+  FLog.Add('  Checking for SCSI Interface');
+  {$ENDIF}
+
+  if FForcedLayer = L_Undef then
+  begin
+    {Automatische Erkennung. Können wir SPTI verwenden?}
+    {$IFDEF EnableLogging}
+    FLog.Add('  Auto-Mode');
+    {$ENDIF}
+    if FLayer = L_Undef then
+    begin
+      InitSPTI;
+      {SPTI-Fehler}
+      if FLastError <> SD_NoError then FLayer := L_Undef;
+    end;
+    {Wenn nicht, dann ASPI versuchen.}
+    if FLayer = L_Undef then
+    begin
+      InitASPI;
+      {ASPI-Fehler}
+      if FLastError <> SD_NoError then FLayer := L_None;
+    end;
+  end else
+  begin
+    {$IFDEF EnableLogging}
+    FLog.Add('  Forced Mode');
+    {$ENDIF}
+    case FForcedLayer of
+      L_ASPI: InitASPI;
+      L_SPTI: InitSPTI;
+    end;
     if FLastError <> SD_NoError then FLayer := L_None;
   end;
 end;
@@ -1043,6 +1073,7 @@ begin
   FDeviceListNoID := TStringList.Create;
   FLastError      := SD_NoError;
   FLayer          := L_Undef;
+  FForcedLayer    := L_Undef;
   for i := 0 to 25 do  FSPTIGlobal[i].Used := False;    
   {$IFDEF EnableLogging}
   FLog            := TStringList.Create;
