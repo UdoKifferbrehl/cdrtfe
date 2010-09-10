@@ -38,4 +38,17 @@ object FormSplashScreen: TFormSplashScreen
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object LabelPortable: TLabel
+    Left = 374
+    Top = 195
+    Width = 3
+    Height = 13
+    Alignment = taRightJustify
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
 end

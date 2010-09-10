@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.08.2010
+  letzte Änderung  08.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,10 +50,12 @@ type
     procedure FormShow(Sender: TObject);
   private
     { Private declarations }
-    FLang: TLang;
+    FLang    : TLang;
+    FPortable: Boolean;
   public
     { Public declarations }
-    property Lang: TLang read Flang write FLang;
+    property Lang: TLang read FLang write FLang;
+    property Portable: Boolean read FPortable write FPortable;
   end;
 
 { var }
@@ -75,6 +77,7 @@ uses f_filesystem, f_window, const_common;
 const Cdrtfe_Name        = 'cdrtfe';
       Cdrtfe_Version     = 'cdrtfe 1.3.9'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
+      Cdrtfe_Portable    = ' portable';
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2010  O. Valencia';
       Cdrtfe_Copyright2  = 'Copyright © 2002-2004  O. Valencia, O. Kutsche';
@@ -115,7 +118,6 @@ begin
   StaticText3.Caption := Cdrtfe_Copyright;
   StaticText6.Caption := Cdrtfe_Copyright2;
   StaticText7.Caption := '(' + GetFileVersionString(Application.ExeName) + ')';
-  StaticText7.Left := StaticTextVersion.Left + StaticTextVersion.Width + 10;
   Label1.Caption      := Cdrtfe_Homepage;
   Label2.Caption      := Cdrtfe_eMail;
 
@@ -171,7 +173,10 @@ end;
 
 procedure TFormAbout.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  FLang.SetFormLang(Self);
+  if FPortable then
+    StaticTextVersion.Caption := StaticTextVersion.Caption + Cdrtfe_Portable;
+  StaticText7.Left := StaticTextVersion.Left + StaticTextVersion.Width + 10;      
 end;
 
 initialization

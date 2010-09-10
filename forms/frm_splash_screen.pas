@@ -4,7 +4,7 @@
 
   Copyright (c) 2008-2010 Oliver Valencia, Fabrice Tiercelin
 
-  letzte Änderung  08.04.2010
+  letzte Änderung  08.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,13 +20,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, IniFiles,
+  Dialogs, ExtCtrls, StdCtrls, IniFiles, usermessages,
   {$IFDEF UseImagingLib}ImagingComponents;{$ELSE}jpeg;{$ENDIF}
 
 type
   TFormSplashScreen = class(TForm)
     Image1: TImage;
     LabelVersion: TLabel;
+    LabelPortable: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -37,6 +38,8 @@ type
     function GetIniFileName: string;
     function GetNoSplashIni: Boolean;
     procedure InitShowSplash;
+    { Messagehandling }
+    procedure WMSplashScreen(var Msg: TMessage); message WM_SplashScreen;
   public
     { Déclarations publiques }
     procedure ShowEx;
@@ -60,9 +63,19 @@ const SplashClientWidth  = 399;
       LabelLeft          = 278;
       LabelWidth         = 100;
 
+{ Messagehandling ------------------------------------------------------------ }
+
+procedure TFormSplashScreen.WMSplashScreen(var Msg: TMessage);
+begin
+  if Msg.WParam = wmwpSetPortable then
+  begin
+    LabelPortable.Caption := 'portable';
+  end;
+end;
+
 { Form-Events ---------------------------------------------------------------- }
 
-{ FormCreateOnClick ------------------------------------------------------------
+{ FormCreate -------------------------------------------------------------------
 
   Splashscreen initialisieren, Bild laden.                                     }
 
@@ -98,6 +111,8 @@ begin
   LabelVersion.Left := LabelLeft;
   LabelVersion.Width := LabelWidth;
   LabelVersion.Transparent := True;
+  LabelPortable.Transparent := True;
+  LabelPortable.Left := (LabelVersion.Left + LabelVersion.Width) - LabelPortable.Width;
 end;
 
 { FormClose --------------------------------------------------------------------

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.09.2010
+  letzte Änderung  08.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4386,6 +4386,9 @@ begin
       FData.AcceptApe := FSettings.FileFlags.MonkeyOk;
       {Einstellungen laden: Ini}
       FSettings.LoadFromFile(cIniFile);
+      if FSettings.General.PortableMode then      
+        SendMessage(FindWindow('TFormSplashScreen', 'FormSplashScreen'),
+          WM_SplashScreen, wmwpSetPortable, 0);
       {Datenverzeichnis anlegen (WinNT/2k/XP)}
       if FSettings.General.PortableMode then OverrideProgDataDir(True);
       ProgDataDirCreate;
@@ -5307,7 +5310,8 @@ var AboutBox: TFormAbout;
 begin
   AboutBox := TFormAbout.Create(nil);
   try
-    AboutBox.Lang := Flang;
+    AboutBox.Lang := FLang;
+    AboutBox.Portable := FSettings.General.PortableMode;
     AboutBox.ShowModal;
   finally
     AboutBox.Release;

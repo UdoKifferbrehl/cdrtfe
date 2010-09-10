@@ -1,13 +1,13 @@
-{ $Id: usermessages.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: usermessages.pas,v 1.2 2010/09/10 12:59:32 kerberos002 Exp $
  
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   user_messages.pas: Deklaration von User-Messages
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.12.2008
+  letzte Änderung  08.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -44,10 +44,14 @@ const WM_CDRTFE           = WM_APP;
       WM_ACTIVATEIMGTAB   = WM_CDRTFE + 16;
       WM_ACTIVATEDVDTAB   = WM_CDRTFE + 17;
       WM_DriveSettings    = WM_CDRTFE + 18;
+      WM_SplashScreen     = WM_CDRTFE + 19;
 
       {Parameter-Konstanten für WM_DriveSettings}
-      wmwpDrvSetSCSIChange = 1; // anderes Interface -> Rescan  
+      wmwpDrvSetSCSIChange = 1; // anderes Interface -> Rescan
 
+      {Parameter-Konstanten für WM_SplashScreen}
+      wmwpSetPortable      = 1;
+      
 implementation
 
 { Dateils zu einigen Messages:
