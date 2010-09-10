@@ -1,4 +1,4 @@
-{ $Id: f_helper.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_helper.pas,v 1.2 2010/09/10 16:33:56 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -45,7 +45,7 @@ procedure SetSCSIInterface(const SCSIIF: string);
 
 implementation
 
-uses const_locations;
+uses f_locations, const_locations;
 
 const {$J+}
       SCSIInterface: string = '';
@@ -120,7 +120,7 @@ end;
 function GetCurrentFolder(const CommandLine: string): string;
 var Temp: string;
 begin
-  Temp := '';
+  Temp := StartUpDir; //'';
   {Workaround for mkisofs 2.01.01a28 and above: Zeichensatztabellen werden im
    aktuellen Verzeicnis gesucht, wenn cygwin nicht komplett installiert ist.}
   if Pos(cMkisofsBin, CommandLine) > 0 then

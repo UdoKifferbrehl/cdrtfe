@@ -591,7 +591,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      {$IFDEF AddCDText} f_cdtext, {$ENDIF}
      f_filesystem, f_process, f_window, f_strings, f_largeint, f_init, f_helper,
      f_checkproject, f_foldernamecache, f_screensaversup, f_locations,
-     f_treelistfuncs, f_dischelper, f_instance, f_compprop, f_cygwin,
+     f_treelistfuncs, f_dischelper, f_instance, f_compprop, f_cygwin, f_system,
      const_tabsheets, const_common, const_locations;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
@@ -7145,6 +7145,7 @@ end;
 {$IFDEF TestVersion}{$MESSAGE Hint 'Kompilation als Testversion!'}{$ENDIF}
 
 initialization
+  SetDLLDirectory('');
   {$IFDEF DoMemCheck}
   ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}

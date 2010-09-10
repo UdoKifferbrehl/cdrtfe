@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.07.2010
+  letzte Änderung  10.09.2010
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -152,6 +152,7 @@ uses
   f_largeint in 'lib\system\f_largeint.pas',
   f_screensaversup in 'lib\system\f_screensaversup.pas',
   f_wininfo in 'lib\system\f_wininfo.pas',
+  f_system in 'lib\system\f_system.pas',
   cl_exceptionlog in 'import\exceptionlog\cl_exceptionlog.pas',
   frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',
   DropTarget in 'import\oledragdrop\DropTarget.pas',
