@@ -2,9 +2,9 @@
 
   f_logstrings.pas: vordefinierte Strings
 
-  Copyright (c) 2007-2009 Oliver Valencia
+  Copyright (c) 2007-2010 Oliver Valencia
 
-  letzte Änderung  22.12.2009
+  letzte Änderung  19.10.2009
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -106,6 +106,7 @@ begin
     {cl_settings.pas}
     Add('1300=Path to cdrtfe.ini');
     Add('1301=Portable Mode activated via cdrtfe.ini.');
+    Add('1302=Program Data Dir');
     {cl_lang.pas}
     Add('1400=\translation\cdrtfe_lang.ini found.');
     Add('1401=\translation\<lang>\cdrtfe_lang.ini found.');
