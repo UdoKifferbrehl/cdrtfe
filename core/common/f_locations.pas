@@ -1,4 +1,4 @@
-{ $Id: f_locations.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_locations.pas,v 1.2 2010/09/19 08:52:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  19.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -47,7 +47,8 @@ procedure ProgDataDirCreate;
 
 implementation
 
-uses f_wininfo, f_environment, f_filesystem, const_locations;
+uses f_wininfo, f_environment, f_filesystem, f_logfile, const_common,
+     const_locations;
 
     {'statische' Variablen}
 var ProgDataDirOverride: string;
@@ -106,6 +107,10 @@ end;
 
 procedure ProgDataDirCreate;
 begin
+  {$IFDEF WriteLogFile}
+  AddLogCode(1302);
+  AddLog(ProgDataDir + CRLF + ' ', 3);
+  {$ENDIF}
   {Überprüfen, ob das Daten-Verzeichnis da ist. Wenn nicht, anlegen.}
   if PlatformWinNT then
   begin

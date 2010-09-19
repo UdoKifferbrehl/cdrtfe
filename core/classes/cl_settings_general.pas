@@ -1,4 +1,4 @@
-{ $Id: cl_settings_general.pas,v 1.3 2010/07/14 16:48:35 kerberos002 Exp $
+{ $Id: cl_settings_general.pas,v 1.4 2010/09/19 08:52:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  14.07.2010
+  letzte Änderung  19.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -330,7 +330,6 @@ begin
         Temp := ReadString(Section, 'DfltDlgFolder' + IntToStr(i), '');
         if Temp <> '' then CacheFolderName(TDialogID(i), Temp);
       end;
-      {read-only}
       if not PortableMode then
       begin
         PortableMode := ReadBool(Section, 'PortableMode', False);
@@ -381,6 +380,13 @@ begin
     WriteBool(Section, 'SpaceMeter', FSpaceMeter);
     WriteBool(Section, 'DisableScrSvr', FDisableScrSvr);
     WriteBool(Section, 'ShowFolderSize', FShowFolderSize);
+    if FAsIniFile then
+    begin
+      if PortableMode then
+      begin
+        WriteBool(Section, 'PortableMode', PortableMode);
+      end;
+    end;
   end;
 end;
 

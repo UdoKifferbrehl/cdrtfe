@@ -1,4 +1,4 @@
-{ $Id: cl_settings.pas,v 1.7 2010/05/20 14:38:10 kerberos002 Exp $
+{ $Id: cl_settings.pas,v 1.8 2010/09/19 08:52:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.05.2010
+  letzte Änderung  19.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -227,16 +227,16 @@ begin
     Name := cDataDir + cIniFile;
     if PlatformWinNT then
     begin
-      Temp := GetShellFolder(CSIDL_LOCAL_APPDATA) + Name;
+      Temp := StartUpDir + cIniFile;
       if not FileExists(Temp) then
       begin
-        Temp := GetShellFolder(CSIDL_APPDATA) + Name;
+        Temp := GetShellFolder(CSIDL_LOCAL_APPDATA) + Name;
         if not FileExists(Temp) then
         begin
-          Temp := GetShellFolder(CSIDL_COMMON_APPDATA) + Name;
+          Temp := GetShellFolder(CSIDL_APPDATA) + Name;
           if not FileExists(Temp) then
           begin
-            Temp := StartUpDir + cIniFile;
+            Temp := GetShellFolder(CSIDL_COMMON_APPDATA) + Name;
             if not FileExists(Temp) then
             begin
               Temp := '';
