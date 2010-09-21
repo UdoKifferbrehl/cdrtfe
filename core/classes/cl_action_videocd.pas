@@ -1,4 +1,4 @@
-{ $Id: cl_action_videocd.pas,v 1.2 2010/07/05 12:34:52 kerberos002 Exp $
+{ $Id: cl_action_videocd.pas,v 1.3 2010/09/21 11:26:13 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  21.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -170,7 +170,7 @@ begin
       if Speed <> '' then CmdC := CmdC + ' speed=' + Speed;
       if FIFO        then CmdC := CmdC + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then CmdC := CmdC + ' driver=cdr_simul';
-      if Burnfree    then CmdC := CmdC + ' driveropts=burnfree';
+      CmdC := CmdC + GetDriverOpts;
       if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         CmdC := CmdC + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
       if Verbose     then CmdC := CmdC + ' -v';

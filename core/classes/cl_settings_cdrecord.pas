@@ -1,4 +1,4 @@
-{ $Id: cl_settings_cdrecord.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_cdrecord.pas,v 1.2 2010/09/21 11:26:13 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2010
+  letzte Änderung  21.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -24,6 +24,7 @@
                         Eject      : Boolean
                         Verbose    : Boolean
                         Burnfree   : Boolean
+                        Audiomaster: Boolean
                         SimulDrv   : Boolean
                         FIFO       : Boolean
                         FIFOSize   : Integer
@@ -45,6 +46,7 @@
                         HaveHideUDF        : Boolean
                         CanEraseDVDPlusRW  : Boolean
                         HasMultiborder     : Boolean
+                        CustDriverOpts     : string
 
     Methoden     Init
                  Load(MIF: TMemIniFile)
@@ -65,6 +67,7 @@ type TSettingsCdrecord = class(TCdrtfeSettings)
        FEject      : Boolean;
        FVerbose    : Boolean;
        FBurnfree   : Boolean;
+       FAudiomaster: Boolean;
        FSimulDrv   : Boolean;
        FFIFO       : Boolean;
        FFIFOSize   : Integer;
@@ -72,6 +75,7 @@ type TSettingsCdrecord = class(TCdrtfeSettings)
        FAutoErase  : Boolean;
        FErase      : Boolean;
        FAllowFormat: Boolean;
+       FCustDriverOpts: string;
        {zusätzliche Kommandotzeilenoptionen}
        FCdrecordUseCustOpts  : Boolean;
        FMkisofsUseCustOpts   : Boolean;
@@ -99,6 +103,7 @@ type TSettingsCdrecord = class(TCdrtfeSettings)
        property Eject      : Boolean read FEject write FEject;
        property Verbose    : Boolean read FVerbose write FVerbose;
        property Burnfree   : Boolean read FBurnFree write FBurnfree;
+       property Audiomaster: Boolean read FAudiomaster write FAudiomaster;
        property SimulDrv   : Boolean read FSimulDrv write FSimulDrv;
        property FIFO       : Boolean read FFIFO write FFIFO;
        property FIFOSize   : Integer read FFIFOSize write FFIFOSize;
@@ -106,6 +111,7 @@ type TSettingsCdrecord = class(TCdrtfeSettings)
        property AutoErase  : Boolean read FAutoErase write FAutoErase;
        property Erase      : Boolean read FErase write FErase;
        property AllowFormat: Boolean read FAllowFormat write FAllowFormat;
+       property CustDriverOpts: string read FCustDriverOpts write FCustDriverOpts;
        property CdrecordUseCustOpts  : Boolean read FCdrecordUseCustOpts write FCdrecordUseCustOpts;
        property MkisofsUseCustOpts   : Boolean read FMkisofsUseCustOpts write FMkisofsUseCustOpts;
        property CdrecordCustOpts     : TStringList read FCdrecordCustOpts write FCdrecordCustOpts;
@@ -157,6 +163,7 @@ begin
   FEject       := False;
   FVerbose     := True;
   FBurnfree    := True;
+  FAudiomaster := False;
   FSimulDrv    := False;
   FFIFO        := False;
   FFIFOSize    := 4;
@@ -164,6 +171,7 @@ begin
   FAutoErase   := False;
   FErase       := False;
   FAllowFormat := False;
+  FCustDriverOpts := '';
   FCdrecordUseCustOpts   := False;
   FMkisofsUseCustOpts    := False;
   FCdrecordCustOptsIndex := -1;
@@ -193,12 +201,14 @@ begin
     FEject := ReadBool(Section, 'Eject', False);
     FVerbose := ReadBool(Section, 'Verbose', False);
     FBurnfree := ReadBool(Section, 'Burnfree', False);
+    FAudiomaster := ReadBool(Section, 'Audiomaster', False);
     FSimulDrv := ReadBool(Section, 'SimulDrv', False);
     FFIFO := ReadBool(Section, 'FIFO', False);
     FFIFOSize := ReadInteger(Section, 'FIFOSize', 4);
     FForceSpeed := ReadBool(Section, 'ForceSpeed', False);
     FAutoErase := ReadBool(Section, 'AutoErase', False);
     FAllowFormat := ReadBool(Section, 'AllowFormat', False);
+    FCustDriverOpts := ReadString(Section, 'CustDriverOpts', '');
     FCdrecordUseCustOpts := ReadBool(Section, 'CdrecordUseCustOpts', False);
     FCdrecordCustOptsIndex := ReadInteger(Section,
                                           'CdrecordCustOptsIndex', -1);
@@ -237,12 +247,14 @@ begin
     WriteBool(Section, 'Eject', FEject);
     WriteBool(Section, 'Verbose', FVerbose);
     WriteBool(Section, 'Burnfree', FBurnfree);
+    WriteBool(Section, 'Audiomaster', FAudiomaster);
     WriteBool(Section, 'SimulDrv', FSimulDrv);
     WriteBool(Section, 'FIFO', FFIFO);
     WriteInteger(Section, 'FIFOSize', FFIFOSize);
     WriteBool(Section, 'ForceSpeed', FForceSpeed);
     WriteBool(Section, 'AutoErase', FAutoErase);
     WriteBool(Section, 'AllowFormat', FAllowFormat);
+    WriteString(Section, 'CustDriverOpts', FCustDriverOpts);
     WriteBool(Section, 'CdrecordUseCustOpts', FCdrecordUseCustOpts);
     WriteInteger(Section, 'CdrecordCustOptsIndex', FCdrecordCustOptsIndex);
     WriteInteger(Section, 'CdrecordCustOptsCount', FCdrecordCustOpts.Count);

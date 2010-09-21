@@ -1,4 +1,4 @@
-{ $Id: cl_action_image.pas,v 1.3 2010/07/21 14:48:06 kerberos002 Exp $
+{ $Id: cl_action_image.pas,v 1.4 2010/09/21 11:26:13 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.07.2010
+  letzte Änderung  21.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -126,7 +126,7 @@ begin
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
       if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
-      if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
+      Cmd := Cmd + GetDriverOpts;
       if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
       if Verbose     then Cmd := Cmd + ' -v';
@@ -200,7 +200,7 @@ begin
         if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
         if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
         if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
-        if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
+        Cmd := Cmd + GetDriverOpts;
         if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
           Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
         if Verbose     then Cmd := Cmd + ' -v';
@@ -273,7 +273,7 @@ begin
     if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
     if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
     if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
-    if Burnfree    then Cmd := Cmd + ' driveropts=burnfree';
+    Cmd := Cmd + GetDriverOpts;
     if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
       Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then Cmd := Cmd + ' -v';

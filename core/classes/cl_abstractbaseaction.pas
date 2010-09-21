@@ -1,4 +1,4 @@
-{ $Id: cl_abstractbaseaction.pas,v 1.2 2010/07/05 12:34:52 kerberos002 Exp $
+{ $Id: cl_abstractbaseaction.pas,v 1.3 2010/09/21 11:26:13 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  21.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -64,6 +64,7 @@ type TCdrtfeAction = class(TObject)
        FLang          : TLang;
        FSettings      : TSettings;
        FDisk          : TDiskInfo;
+       function GetDriverOpts: string;
        function GetFormatCommand: string;
        function GetSectorNumber(const MkisofsOptions: string): string;
        function MakePathConform(const Path: string): string;
@@ -240,6 +241,28 @@ begin
   end;
   Output.Free;
   SetPanels ('<>', '');
+end;
+
+{ GetDriverOps -----------------------------------------------------------------
+
+  liefert einen String mit den gesetzten Treiberoptionen.                      }
+
+function TCdrtfeAction.GetDriverOpts: string;
+var Temp: TStringList;
+begin
+  Temp := TStringList.Create;
+  Result := '';
+  with FSettings.Cdrecord do
+  begin
+    if Audiomaster then Temp.Add('audiomaster');
+    if Burnfree then Temp.Add('burnfree');
+    if CustDriverOpts <> '' then Temp.Add(CustDriverOpts);
+  end;
+  if Temp.Count > 0 then
+  begin
+    Result := ' driveropts=' + Temp.CommaText;
+  end;
+  Temp.Free;
 end;
 
 { GetFormatCommand -------------------------------------------------------------
