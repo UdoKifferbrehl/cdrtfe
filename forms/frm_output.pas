@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  01.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,10 +19,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls,
+  StdCtrls, ActnList, Menus,
   {eigene Klassendefinitionen/Units}
   cl_lang, cl_settings, c_frametopbanner;
-
 
 type
   TFormOutput = class(TForm)
@@ -40,6 +39,10 @@ type
     { Private declarations }
     FLang: TLang;
     FSettings: TSettings;
+    FActionList: TActionList;
+    ActionUserClose: TAction;
+    procedure InitActions;
+    procedure UserCloseWindow(Sender: TObject);
   public
     { Public declarations }
     property Lang: TLang read FLang write FLang;
@@ -54,9 +57,26 @@ uses frm_main, f_window, cl_logwindow;
 
 {$R *.DFM}
 
+procedure TFormOutput.InitActions;
+begin
+  {ActionList erstellen}
+  FActionList := TActionList.Create(Self);
+  {Actions erstellen - Dateien/Tracks hinzufügen}
+  ActionUserClose := TAction.Create(FActionList);
+  ActionUserClose.ShortCut := ShortCut($4C{VK_L}, [ssAlt]);
+  ActionUserClose.OnExecute := UserCloseWindow;
+  ActionUserClose.ActionList := FActionList;
+end;
+
+procedure TFormOutput.UserCloseWindow(Sender: TObject);
+begin
+  Self.Close;
+end;
+
 procedure TFormOutput.FormCreate(Sender: TObject);
 begin
   SetFont(Self);
+  InitActions;
   (*
   if Screen.PixelsPerInch > 96 then
   begin
