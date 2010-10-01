@@ -2,9 +2,9 @@
 
   compiler.inc: Symbol-Definitionen
 
-  Copyright (c) 2006 Oliver Valencia
+  Copyright (c) 2006, 2010 Oliver Valencia
 
-  letzte Änderung  11.09.2006
+  letzte Änderung  30.09.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -54,6 +54,17 @@
   {$DEFINE Delphi2006}
 {$ENDIF}
 
+{$IFDEF VER185}
+  {$DEFINE Delphi2007}
+{$ENDIF}
+
+{$IFDEF VER200}
+  {$DEFINE Delphi2009}
+{$ENDIF}
+
+{$IFDEF VER210}
+  {$DEFINE Delphi2010}
+{$ENDIF}
 
 (* -------------------------------------------------------------------------- *)
 
@@ -65,6 +76,9 @@
 {$DEFINE Delphi8Up}
 {$DEFINE Delphi2005Up}
 {$DEFINE Delphi2006Up}
+{$DEFINE Delphi2007Up}
+{$DEFINE Delphi2009Up}
+{$DEFINE Delphi2010Up}
 
 {$IFDEF Delphi3}
   {$UNDEF Delphi4Up}
@@ -74,6 +88,9 @@
   {$UNDEF Delphi8Up}
   {$UNDEF Delphi2005Up}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 {$IFDEF Delphi4}
@@ -83,6 +100,9 @@
   {$UNDEF Delphi8Up}
   {$UNDEF Delphi2005Up}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 {$IFDEF Delphi5}
@@ -91,6 +111,9 @@
   {$UNDEF Delphi8Up}
   {$UNDEF Delphi2005Up}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 {$IFDEF Delphi6}
@@ -98,21 +121,49 @@
   {$UNDEF Delphi8Up}
   {$UNDEF Delphi2005Up}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 {$IFDEF Delphi7}
   {$UNDEF Delphi8Up}
   {$UNDEF Delphi2005Up}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 {$IFDEF Delphi8}
   {$UNDEF Delphi2005Up}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 {$IFDEF Delphi2005}
   {$UNDEF Delphi2006Up}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
+{$ENDIF}
+
+
+{$IFDEF Delphi2006}
+  {$UNDEF Delphi2007Up}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
+{$ENDIF}
+
+{$IFDEF Delphi2007}
+  {$UNDEF Delphi2009Up}
+  {$UNDEF Delphi2010Up}
+{$ENDIF}
+
+{$IFDEF Delphi2009}
+  {$UNDEF Delphi2010Up}
 {$ENDIF}
 
 
