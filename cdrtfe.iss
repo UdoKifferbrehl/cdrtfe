@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2010 Oliver Valencia
 ;
-;  letzte Änderung  19.08.2010
+;  letzte Änderung  10.10.2010
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -111,7 +111,7 @@ Source: I:\cdrtfe\proto\tools\xcd\m2f2extract.exe; DestDir: {app}\tools\xcd; Fla
 Source: I:\cdrtfe\proto\tools\xcd\d2fgui.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\xcd
 Source: I:\cdrtfe\proto\tools\xcd\dat2file.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\xcd
 ; Tools: audio tools
-Source: I:\cdrtfe\proto\tools\sound\madplay.exe; DestDir: {app}\tools\sound; Flags: ignoreversion; Components: tools\audio
+Source: I:\cdrtfe\proto\tools\sound\mpg123.exe; DestDir: {app}\tools\sound; Flags: ignoreversion; Components: tools\audio
 Source: I:\cdrtfe\proto\tools\sound\lame.exe; DestDir: {app}\tools\sound; Flags: ignoreversion; Components: tools\audio
 Source: I:\cdrtfe\proto\tools\sound\oggdec.exe; DestDir: {app}\tools\sound; Flags: ignoreversion; Components: tools\audio
 Source: I:\cdrtfe\proto\tools\sound\oggenc.exe; DestDir: {app}\tools\sound; Flags: ignoreversion; Components: tools\audio

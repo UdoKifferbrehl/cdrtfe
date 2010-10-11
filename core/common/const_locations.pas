@@ -1,4 +1,4 @@
-{ $Id: const_locations.pas,v 1.3 2010/08/10 13:41:08 kerberos002 Exp $
+{ $Id: const_locations.pas,v 1.4 2010/10/11 16:23:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.08.2010
+  letzte Änderung  11.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -32,7 +32,7 @@ const {Dateinamen - Kommandozeilenprogramme}
       cMode2CDMakerBin : string = '\mode2cdmaker';
       cVCDImagerBin    : string = '\vcdimager';
       cCdrdaoBin       : string = '\cdrdao';
-      cMadplayBin      : string = '\madplay';
+      cMPG123Bin       : string = '\mpg123';
       cLameBin         : string = '\lame';
       cOggdecBin       : string = '\oggdec';
       cOggencBin       : string = '\oggenc';

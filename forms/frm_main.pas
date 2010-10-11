@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.09.2010
+  letzte Änderung  11.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4380,7 +4380,7 @@ begin
     begin
       {Wenn die entrpechenden Programme vorhanden sind, können MP3-, Ogg-, Ape-
        und FLAC-Dateien verwendet werden.}
-      FData.AcceptMP3 := FSettings.FileFlags.MadplayOk;
+      FData.AcceptMP3 := FSettings.FileFlags.MPG123Ok;
       FData.AcceptOgg := FSettings.FileFlags.OggdecOk;
       FData.AcceptFLAC := FSettings.FileFlags.FLACOk;
       FData.AcceptApe := FSettings.FileFlags.MonkeyOk;

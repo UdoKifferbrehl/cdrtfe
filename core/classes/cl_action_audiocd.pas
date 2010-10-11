@@ -1,4 +1,4 @@
-{ $Id: cl_action_audiocd.pas,v 1.3 2010/09/21 11:26:13 kerberos002 Exp $
+{ $Id: cl_action_audiocd.pas,v 1.4 2010/10/11 16:23:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.09.2010
+  letzte Änderung  11.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -103,9 +103,11 @@ var i         : Integer;
         BurnList[j] := Target;
         if (Ext = cExtMP3) then
         begin
-          CmdTemp := StartUpDir + cMadplayBin +
-                     ' -v -S -b 16 -R 44100 -o wave:' +
+          CmdTemp := StartUpDir + cMPG123Bin +
+                     ' -v --stereo -r 44100 -w ' +
                      QuotePath(Target) + ' ' + QuotePath(Source) + CR
+                     // ' -v -S -b 16 -R 44100 -o wave:' +
+                     // QuotePath(Target) + ' ' + QuotePath(Source) + CR
         end else
         if (Ext = cExtOgg) then
         begin

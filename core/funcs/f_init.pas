@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.08.2010
+  letzte Änderung  11.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -69,7 +69,7 @@ begin
   AddLog('cMode2CDMakerBin  ' + cMode2CDMakerBin, 3);
   AddLog('cVCDImagerBin     ' + cVCDImagerBin, 3);
   AddLog('cCdrdaoBin        ' + cCdrdaoBin, 3);
-  AddLog('cMadplayBin       ' + cMadplayBin, 3);
+  AddLog('cMPG123Bin        ' + cMPG123Bin, 3);
   AddLog('cLameBin          ' + cLameBin, 3);
   AddLog('cOggdecBin        ' + cOggdecBin, 3);
   AddLog('cOggencBin        ' + cOggencBin, 3);
@@ -129,7 +129,7 @@ begin
     cMode2CDMakerBin := Path + cXCDDir       + cMode2CDMakerBin;
     cVCDImagerBin    := Path + cVCDImagerDir + cVCDImagerBin;
     cCdrdaoBin       := Path + cCdrdaoDir    + cCdrdaoBin;
-    cMadplayBin      := Path + cSoundDir     + cMadplayBin;
+    cMPG123Bin       := Path + cSoundDir     + cMPG123Bin;
     cLameBin         := Path + cSoundDir     + cLameBin;
     cOggdecBin       := Path + cSoundDir     + cOggdecBin;
     cOggencBin       := Path + cSoundDir     + cOggencBin;
@@ -175,8 +175,8 @@ begin
       Temp := ReadString(cTool, 'CdrdaoBin', '');
       if Temp <> '' then cCdrdaoBin := Temp;
 
-      Temp := ReadString(cTool, 'MadplayBin', '');
-      if Temp <> '' then cMadplayBin := Temp;
+      Temp := ReadString(cTool, 'MPG123Bin', '');
+      if Temp <> '' then cMPG123Bin := Temp;
 
       Temp := ReadString(cTool, 'LameBin', '');
       if Temp <> '' then cLameBin := Temp;
@@ -421,8 +421,8 @@ begin
         TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit08'));
       end;
       {Ist Madplay da? Falls nicht, MP3-Dateien ignorieren.}
-      MadplayOk := FileExists(StartUpDir + cMadplayBin + cExtExe);
-      if not MadplayOk then
+      MPG123Ok := FileExists(StartUpDir + cMPG123Bin + cExtExe);
+      if not MPG123Ok then
       begin
         TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit09'));
       end;

@@ -1,4 +1,4 @@
-{ $Id: cl_settings_fileflags.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_fileflags.pas,v 1.2 2010/10/11 16:23:23 kerberos002 Exp $
  
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -7,7 +7,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  11.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -35,7 +35,7 @@
                  VCDImOk    : Boolean
                  ShlExtDllOk: Boolean
                  ProDVD     : Boolean
-                 MadplayOk  : Boolean
+                 MPG123Ok   : Boolean
                  OggdecOk   : Boolean
                  OggencOk   : Boolean
                  FLACOk     : Boolean
@@ -76,7 +76,7 @@ type TFileFlags = class(TCdrtfeData)
        FVCDImOk    : Boolean;
        FShlExtDllOk: Boolean;
        FProDVD     : Boolean;
-       FMadplayOk  : Boolean;
+       FMPG123Ok   : Boolean;
        FOggdecOk   : Boolean;
        FOggencOk   : Boolean;
        FFLACOk     : Boolean;
@@ -108,7 +108,7 @@ type TFileFlags = class(TCdrtfeData)
        property VCDImOk    : Boolean read FVCDImOk write FVCDImOk;
        property ShlExtDllOk: Boolean read FShlExtDllOk write FShlExtDllOk;
        property ProDVD     : Boolean read FProDVD write FProDVD;
-       property MadplayOk  : Boolean read FMadplayOk write FMadPlayOk;
+       property MPG123Ok   : Boolean read FMPG123Ok write FMPG123Ok;
        property OggdecOk   : Boolean read FOggdecOk write FOggdecOk;
        property OggencOk   : Boolean read FOggencOk write FOggencOk;
        property FLACOk     : Boolean read FFLACOk write FFLACOk;
@@ -163,7 +163,7 @@ begin
   FVCDImOk     := True;
   FShlExtDllOk := True;
   FProDVD      := False;
-  FMadplayOK   := True;
+  FMPG123OK    := True;
   FLameOk      := True;
   FOggdecOk    := True;
   FOggencOk    := True;

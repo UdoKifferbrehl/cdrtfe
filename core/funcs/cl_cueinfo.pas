@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2010 Oliver Valencia
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  11.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -122,9 +122,9 @@ begin
     if (Ext = cExtMP3) then
     begin
       FMP3 := True;
-      CmdTemp := StartUpDir + cMadplayBin +
-                 ' -v -S -b 16 -R 44100 -o wave:' +
-                 QuotePath(Target) + ' ' + QuotePath(Source) + CR
+      CmdTemp := StartUpDir + cMPG123Bin +
+                     ' -v --stereo -r 44100 -w ' +
+                     QuotePath(Target) + ' ' + QuotePath(Source) + CR
     end else
     if (Ext = cExtOgg) then
     begin
@@ -204,7 +204,7 @@ function TCueFile.GetCueOk: Boolean;
 var Temp: string;
 begin
   Result := True;
-  if FMP3 and not FSettings.FileFlags.MadplayOk then
+  if FMP3 and not FSettings.FileFlags.MPG123Ok then
   begin
     Result := False;
     Temp := FLang.GMS('minit09');

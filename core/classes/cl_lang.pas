@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.07.2010
+  letzte Änderung  10.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -279,7 +279,7 @@ begin
     Add('minit06=Ohne die Datei readcd.exe können keine Images von CDs angelegt weerden.\n ');
     Add('minit07=Mit der Mingw32-Version der cdrtools unter Win9x, ME kann cdrtfe zur\nZeit keine CDs on-the-fly schreiben.\n ');
     Add('minit08=Ohne die Datei vcdimager.exe können keine Video-CDs erstellt werden.\n ');
-    Add('minit09=Ohne madplay.exe werden MP3-Tracks nicht unterstützt.\n ');
+    Add('minit09=Ohne mpg123.exe werden MP3-Tracks nicht unterstützt.\n ');
     Add('minit10=Ohne oggdec.exe werden Ogg-Vorbis-Tracks nicht unterstützt.\n ');
     Add('minit11=Ohne flac.exe werden FLAC-Tracks nicht unterstützt.\n ');
     Add('minit12=Ohne mac.exe werden APE-Tracks nicht unterstützt.\n ');            
