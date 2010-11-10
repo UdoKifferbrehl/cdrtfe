@@ -1,10 +1,10 @@
-{ $Id: f_cygwin.pas,v 1.2 2010/09/03 19:57:35 kerberos002 Exp $
+{ $Id: f_cygwin.pas,v 1.3 2010/11/10 18:02:39 kerberos002 Exp $
 
   f_cygwin.pas: cygwin-Funktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
 
-  letzte Änderung  03.09.2010
+  letzte Änderung  10.11.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,7 +19,7 @@
   exportierte Funktionen/Prozeduren:
 
     GetCygwinPathPrefix: string
-    MakePathCygwinConform(Path: string):string
+    MakePathCygwinConform(Path: string; GraftPoints: Boolean = False): string;
     MakePathMkisofsConform(const Path: string):string
     MakePathMingwMkisofsConform(const Path: string):string
     SetUseOwnCygwinDLLs(Value: Boolean);
@@ -37,7 +37,7 @@ uses Windows, SysUtils, Registry, IniFiles;
 
 function CheckForActiveCygwinDLL: Boolean;
 function GetCygwinPathPrefix: string;
-function MakePathCygwinConform(Path: string):string;
+function MakePathCygwinConform(Path: string; GraftPoints: Boolean = False): string;
 function MakePathMkisofsConform(const Path: string):string;
 function MakePathMingwMkisofsConform(const Path: string): string;
 function UseOwnCygwinDLLs: Boolean;
@@ -172,7 +172,8 @@ end;
   Wenn die Pfadangaben '=' enthalten (aus der Graft-Points-Pfadliste), wird dies
   korrekt behandelt.                                                           }
 
-function MakePathCygwinConform(Path: string):string;
+function MakePathCygwinConform(Path: string;
+                               GraftPoints: Boolean = False): string;
 var p     : Integer;
     Target: string;
 begin
@@ -188,7 +189,7 @@ begin
   {Pfade für Cygwin anpassen, dabei auf das = für -graft-points achten. UNC-
    Pfade (\\server\...) können bleiben, wie sie sind.}
   p := Pos('=', Path);
-  if p <> 0 then
+  if (p <> 0) and GraftPoints then
   begin
     SplitString(Path, '=', Target, Path);
     if IsUNCPath(Path) then
@@ -222,7 +223,7 @@ begin
   Temp := ReplaceCharFirst(Temp, ':', '=');                {$IFDEF DebugMMkC}
                                                            Deb(Temp, 2);{$ENDIF}
   {\ -> / und x: -> /cygdrive/x}
-  Temp := MakePathCygwinConform(Temp);                     {$IFDEF DebugMMkC}
+  Temp := MakePathCygwinConform(Temp, True);               {$IFDEF DebugMMkC}
                                                            Deb(Temp, 2);{$ENDIF}
   {* - > \=}
   Temp := ReplaceString(Temp, '*', '\=');
