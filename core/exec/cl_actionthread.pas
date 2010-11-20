@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.06.2010
+  letzte Änderung  20.11.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -277,7 +277,7 @@ var lpPipeAttributes     : TSecurityAttributes;
     StartWithNewLine     : Boolean;
     OnlyBS               : Boolean;
     {$IFDEF ShowCmdError}
-    ExitCode             : Integer;
+    ExitCode             : Cardinal;
     {$ENDIF}
 begin
   FLine := FCommandLine;
