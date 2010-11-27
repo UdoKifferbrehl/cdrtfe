@@ -1,11 +1,11 @@
-{ $Id: f_compprop.pas,v 1.2 2010/07/11 16:37:31 kerberos002 Exp $
+{ $Id: f_compprop.pas,v 1.3 2010/11/27 20:35:03 kerberos002 Exp $
 
   f_compprop.pas: Properties von Komponenten
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.07.2010
+  letzte Änderung  27.11.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,6 +40,7 @@ function PropertyExists(Comp: TComponent; Name: string): Boolean;
 procedure ExportControls;
 procedure ExportFontList;
 procedure SetCompProp(Comp: TComponent; const Name, Value: string);
+procedure SetDoubleBuffered(const Value: Boolean);
 
 implementation
 
@@ -205,6 +206,53 @@ begin
   end;
   List.SaveToFile(StartUpDir + '\fonts.txt');
   List.Free;
+end;
+
+{ SetDoubleBuffered ------------------------------------------------------------
+
+  setzt DoubleBuffered für alle Componenten auf Value.                         }
+
+procedure SetDoubleBuffered(const Value: Boolean);
+var i: Integer;
+
+  procedure SetDoubleBufferedRek(Comp: TComponent; const Value: Boolean);
+  var i: Integer;
+  begin
+    if (Comp.Name <> '') {and PropertyExists(Comp, 'DoubleBuffered')} then
+    begin
+      if Comp is TMemo        then (Comp as TMemo).DoubleBuffered := Value else
+      if Comp is TForm        then (Comp as TForm).DoubleBuffered := Value else
+      if Comp is TGroupBox    then (Comp as TGroupBox).DoubleBuffered := Value else
+      if Comp is TButton      then (Comp as TButton).DoubleBuffered := Value else
+      if Comp is TRadioButton then (Comp as TRadioButton).DoubleBuffered := Value else
+      if Comp is TCheckBox    then (Comp as TCheckBox).DoubleBuffered := Value else
+      if Comp is TComboBox    then (Comp as TComboBox).DoubleBuffered := Value else
+      if Comp is TEdit        then (Comp as TEdit).DoubleBuffered := Value else
+      if Comp is TTabSheet    then (Comp as TTabSheet).DoubleBuffered := Value else
+      if Comp is TPanel       then (Comp as TPanel).DoubleBuffered := Value else
+      if Comp is TPageControl then (Comp as TPageControl).DoubleBuffered := Value else
+      if Comp is TTreeView    then (Comp as TTreeView).DoubleBuffered := Value else
+      if Comp is TListView    then (Comp as TListView).DoubleBuffered := Value else
+      if Comp is TStatusBar   then (Comp as TStatusBar).DoubleBuffered := Value else
+      if Comp is TStaticText  then (Comp as TStaticText).DoubleBuffered := Value;
+    end;
+    if Comp.ComponentCount > 0 then
+    begin
+      for i := 0 to Comp.ComponentCount - 1 do
+      begin
+        SetDoubleBufferedRek(Comp.Components[i], Value);
+      end;
+    end;
+  end;
+
+begin
+  for i:= 0 to Application.ComponentCount - 1 do
+  begin
+    //if Application.Components[i] is TForm then
+    begin
+      SetDoubleBufferedRek(Application.Components[i], Value);
+    end;
+  end;
 end;
 
 end.

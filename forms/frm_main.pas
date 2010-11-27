@@ -3991,6 +3991,7 @@ var GlyphArray    : TGlyphArray;
   end;
 
 begin
+  SetDoubleBuffered(True);
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
   DragAcceptFiles(Self.Handle, true);
