@@ -2,9 +2,9 @@
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2009 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
 
-  letzte Änderung  08.02.2009
+  letzte Änderung  20.11.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -42,7 +42,7 @@
 
 (* ------------------------------------------------------------- Win7-Support *)
 
-{$DEFINE xWin7Comp}
+{$DEFINE Win7Comp}
          // Unterstützung für Win7-Aero-Funktionen (z.B. Fortschrittsanzeige
          // Taskbar-Eintrag.
 
@@ -60,7 +60,7 @@
 
 (* -------------------------------------------- expliziter Hinweis auf Fehler *)
 
-{$DEFINE xShowCmdError}
+{$DEFINE ShowCmdError}
          // Falls beim Ausführen der Kommandozeile ein Fehler auftritt (d.h.
          // ProcessExitCode <> 0), wird eine Warnung ausgegeben.
          //    - betrifft: frm_main.pas, cl_actionthread.pas, cl_lang.pas

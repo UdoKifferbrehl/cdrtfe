@@ -1,4 +1,4 @@
-{ $Id: cl_logwindow.pas,v 1.4 2010/08/16 15:26:37 kerberos002 Exp $
+{ $Id: cl_logwindow.pas,v 1.5 2010/12/28 09:33:53 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
@@ -6,7 +6,7 @@
 
   Copyright (c) 2006-2010 Oliver Valencia
 
-  letzte Änderung  16.08.2010
+  letzte Änderung  26.12.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -110,6 +110,7 @@ type TLogWin = class(TObject)
 implementation
 
 uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     {$IFDEF Win7Comp} f_process, {$ENDIF}
      f_wininfo, f_strings, const_common;
 
 { TLogWindow ----------------------------------------------------------------- }
@@ -143,11 +144,14 @@ end;
 { TLogWindow - protected }
 
 constructor TLogWin.CreateInstance;
+var Temp: string;
 begin
   inherited Create;
+  FTaskBarProgressIndicator := nil;
   FLog := TStringList.Create;
   {$IFDEF Win7Comp}
-  TaskBarProgressIndicatorInit;
+  if not DLLIsLoaded('bbLeanSkinEng.dll', Temp) then
+    TaskBarProgressIndicatorInit;
   {$ENDIF}
   FProgressBarShowing[1] := False;
   FProgressBarShowing[2] := False;
@@ -183,7 +187,7 @@ begin
   if AccessInstance(0) = Self then AccessInstance(2);
   FLog.Free;
   {$IFDEF Win7Comp}
-  FTaskBarProgressIndicator.Free;
+  if Assigned(FTaskBarProgressIndicator) then FTaskBarProgressIndicator.Free;
   {$ENDIF}
   inherited Destroy;
 end;
@@ -263,27 +267,35 @@ end;
 {$IFDEF Win7Comp}
 procedure TLogWin.TaskBarProgressIndicatorHide;
 begin
-  FTaskBarProgressIndicator.ShowInTaskbar := False;
+  if Assigned(FTaskBarProgressIndicator) then
+    FTaskBarProgressIndicator.ShowInTaskbar := False;
 end;
 
 procedure TLogWin.TaskBarProgressIndicatorShow;
 begin
-  FTaskBarProgressIndicator.Position := 0;
-  FTaskBarProgressIndicator.MarqueeEnabled := False;
-  FTaskBarProgressIndicator.ProgressBarState := pbstNormal;
-  FTaskBarProgressIndicator.ShowInTaskbar := True;
+  if Assigned(FTaskBarProgressIndicator) then
+  begin
+    FTaskBarProgressIndicator.Position := 0;
+    FTaskBarProgressIndicator.MarqueeEnabled := False;
+    FTaskBarProgressIndicator.ProgressBarState := pbstNormal;
+    FTaskBarProgressIndicator.ShowInTaskbar := True;
+  end;
 end;
 
 procedure TLogWin.TaskBarProgressIndicatorUpdate(const Position: Integer);
 begin
-  FTaskBarProgressIndicator.Position := Position;
+  if Assigned(FTaskBarProgressIndicator) then
+    FTaskBarProgressIndicator.Position := Position;
 end;
 
 procedure TLogWin.TaskBarProgressIndicatorDoMarquee;
 begin
   TaskBarProgressIndicatorShow;
-  FTaskBarProgressIndicator.MarqueeEnabled := True;
-  FTaskBarProgressIndicator.ProgressBarState := pbstMarquee;
+  if Assigned(FTaskBarProgressIndicator) then
+  begin
+    FTaskBarProgressIndicator.MarqueeEnabled := True;
+    FTaskBarProgressIndicator.ProgressBarState := pbstMarquee;
+  end;
 end;
 {$ENDIF}
 
