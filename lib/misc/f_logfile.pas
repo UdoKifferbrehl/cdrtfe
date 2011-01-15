@@ -1,10 +1,10 @@
-{ $Id: f_logfile.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
+{ $Id: f_logfile.pas,v 1.2 2011/01/15 17:26:17 kerberos002 Exp $
 
   f_logfile.pas: Funktionen zum Debuggen, Anzeigen und Schreiben eines Log-Files
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
 
-  letzte Änderung  02.10.2008
+  letzte Änderung  15.01.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,6 +53,7 @@ var DLLName       : string;
     DLLLoaded     : Boolean = False;
     DoDebug       : Boolean = False;
     DoAutoSave    : Boolean = False;
+    LogFileName   : string;
     {Prozedurvariablen}
     InitDebugForm : TInitDebugForm = nil;
     FreeDebugForm : TFreeDebugForm = nil;
@@ -64,14 +65,17 @@ var DLLName       : string;
 
 { InitDebugVars ----------------------------------------------------------------
 
-  InitDebuigVars initialisiert einige der Variablen.                           }
+  InitDebugVars initialisiert einige der Variablen.                           }
 
 procedure InitDebugVars;
 begin
-  DLLLoaded  := False;
-  DLLName    := StartUpDir + '\' + cDebugDLL;
-  DoAutoSave := CheckCommandLineSwitch('/debugAS');
-  DoDebug    := CheckCommandLineSwitch('/debug') or DoAutosave;
+  DLLLoaded   := False;
+  DLLName     := StartUpDir + '\' + cDebugDLL;
+  DoAutoSave  := CheckCommandLineSwitch('/debugAS');
+  DoDebug     := CheckCommandLineSwitch('/debug') or DoAutosave;
+  LogFileName := ProgDataDir + '\' + cLogName;
+  if CheckCommandLineSwitch('/portable') then
+    LogFileName := StartUpDir + '\' + cLogName;  
 end;
 
 { LoadDll ----------------------------------------------------------------------
@@ -129,10 +133,11 @@ initialization
   if DLLLoaded then
   begin
     if DoAutoSave then SetAutoSave(1);
-    SetLogFile(PChar(ProgDataDir + '\' + cLogName));
+    SetLogFile(PChar(LogFileName));
     InitDebugForm(Application.Handle);
     ShowDebugForm;
     AddLogCode(1010);
+    AddLog(LogFileName + #13#10 + ' ', 2);
   end;
 
 finalization
