@@ -2,9 +2,9 @@
 
   frm_dbg.pas: Debug-Fenster
 
-  Copyright (c) 2007-2010 Oliver Valencia
+  Copyright (c) 2007-2011 Oliver Valencia
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  15.01.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -74,10 +74,24 @@ end;
   Aktionen beim Schließen des Fensters.                                        }
 
 procedure TFormDebug.FormClose(Sender: TObject; var Action: TCloseAction);
+var Text: string;
+    i   : Integer;
 begin
   if CheckBoxAutoSave.Checked then
   begin
-    MemoLog.Lines.SaveToFile(FLogFileName);
+    try
+      MemoLog.Lines.SaveToFile(FLogFileName);
+    except
+      on Exception do
+      begin
+        Text := 'Error writing log to ' + #13#10 +
+                '''' + FLogFileName + '''.' + #13#10 +
+                'Click ''OK'' to select another location or ''Cancel'' to ' +
+                'quit anyway.';
+        i := MessageBox(Self.Handle, PChar(Text), 'Error', MB_OkCancel);
+        if i = 1 then ButtonSaveLogClick(nil);        
+      end;
+    end;
   end;
 end;
 
@@ -94,7 +108,7 @@ begin
     SaveDialog1.FileName := 'cdrtfelog.txt';
   SaveDialog1.DefaultExt := 'txt';
   SaveDialog1.Filter := '(*.txt)|*.txt';
-  SaveDialog1.Options := [ofOverwritePrompt,ofHideReadOnly];
+  SaveDialog1.Options := [ofOverwritePrompt, ofHideReadOnly];
   if SaveDialog1.Execute then
   begin
     MemoLog.Lines.SaveToFile(SaveDialog1.FileName);
