@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.10.2010
+  letzte Änderung  23.01.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -284,6 +284,7 @@ type
     TreeListViewPopupPaste: TMenuItem;
     LabelReadCDRetries: TLabel;
     EditReadCDRetries: TEdit;
+    RadioButtonMetaData: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -1108,6 +1109,7 @@ begin
     RadioButtonMSInfo.Checked   := MSInfo;
     RadioButtonMInfo.Checked    := MInfo;    
     RadioButtonCapacity.Checked := CapInfo;
+    RadioButtonMetaData.Checked := MetaInfo;
   end;
   {DAE}
   with FSettings.DAE do
@@ -1250,14 +1252,15 @@ begin
   {CDInfos}
   with FSettings.CDInfo do
   begin
-    Scanbus := RadioButtonScanbus.Checked;
-    Prcap   := RadioButtonPrcap.Checked;
-    Toc     := RadioButtonToc.Checked;
-    Atip    := RadioButtonAtip.Checked;
-    MSInfo  := RadioButtonMSInfo.Checked;
-    MInfo   := RadioButtonMInfo.Checked;    
-    CapInfo := RadioButtonCapacity.Checked;
-    Device  := GetDevice(cCDInfos);
+    Scanbus  := RadioButtonScanbus.Checked;
+    Prcap    := RadioButtonPrcap.Checked;
+    Toc      := RadioButtonToc.Checked;
+    Atip     := RadioButtonAtip.Checked;
+    MSInfo   := RadioButtonMSInfo.Checked;
+    MInfo    := RadioButtonMInfo.Checked;
+    CapInfo  := RadioButtonCapacity.Checked;
+    MetaInfo := RadioButtonMetaData.Checked;
+    Device   := GetDevice(cCDInfos);
   end;
   {DAE}
   with FSettings.DAE do

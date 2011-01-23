@@ -1,13 +1,13 @@
-{ $Id: cl_action_cdinfo.pas,v 1.1 2010/05/23 18:51:55 kerberos002 Exp $
+{ $Id: cl_action_cdinfo.pas,v 1.2 2011/01/23 14:05:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_action_cdinfo.pas: Infos über Disks und Laufwerke
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  22.05.2010
+  letzte Änderung  23.01.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -75,6 +75,12 @@ begin
     Cmd := QuotePath(Cmd);
     with FSettings.CDInfo do
     begin
+      if MetaInfo then
+      begin
+        Cmd := StartUpDir + cIsoInfoBin;
+        Cmd := QuotePath(Cmd);
+        Cmd := Cmd + ' dev=' + SCSIIF(Device) + ' -d -debug';
+      end else
       if Scanbus then
       begin
         if FSettings.Drives.UseRSCSI then
@@ -90,8 +96,8 @@ begin
         if MSInfo then Cmd := Cmd + ' -msinfo' else
         if MInfo  then Cmd := Cmd + ' -minfo';
       end;
+      if FSettings.Cdrecord.Verbose and not MetaInfo then Cmd := Cmd + ' -v';      
     end;
-    if FSettings.Cdrecord.Verbose then Cmd := Cmd + ' -v';
     {Kommando ausführen}
     CheckEnvironment(FSettings);
     DisplayDOSOutput(Cmd, FActionThread, FLang,

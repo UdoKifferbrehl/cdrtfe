@@ -1,13 +1,13 @@
-{ $Id: cl_settings_cdinfo.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
+{ $Id: cl_settings_cdinfo.pas,v 1.2 2011/01/23 14:05:23 kerberos002 Exp $
 
   cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_cdinfo.pas: Objekt für Einstellungen des CDInfo-Projektes
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2010
+  letzte Änderung  23.01.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,6 +27,7 @@
                  MSInfo  : Boolean
                  MInfo   : Boolean
                  CapInfo : Boolean
+                 MetaInfo: Boolean
 
     Methoden     Init
                  Load(MIF: TMemIniFile)
@@ -50,6 +51,7 @@ type TSettingsCDInfo = class(TCdrtfeSettings)
        FMSInfo  : Boolean;
        FMInfo   : Boolean;
        FCapInfo : Boolean;
+       FMetaInfo: Boolean;
      public
        constructor Create;
        destructor Destroy; override;
@@ -64,6 +66,7 @@ type TSettingsCDInfo = class(TCdrtfeSettings)
        property MSInfo  : Boolean read FMSInfo write FMSInfo;
        property MInfo   : Boolean read FMInfo write FMInfo;
        property CapInfo : Boolean read FCapInfo write FCapInfo;
+       property MetaInfo: Boolean read FMetaInfo write FMetaInfo;
      end;
 
 implementation
@@ -100,6 +103,7 @@ begin
   FMSInfo   := False;
   FMInfo    := False;
   FCapInfo  := False;
+  FMetaInfo := False;
 end;
 
 { Load -------------------------------------------------------------------------
@@ -120,6 +124,7 @@ begin
     FMSInfo := ReadBool(Section, 'MSInfo', False);
     FMInfo := ReadBool(Section, 'MInfo', False);
     FCapInfo := ReadBool(Section, 'CapInfo', False);
+    FMetaInfo := ReadBool(Section, 'MetaInfo', False);
   end;
 end;
 
@@ -141,6 +146,7 @@ begin
     WriteBool(Section, 'MSInfo', FMSInfo);
     WriteBool(Section, 'MInfo', FMInfo);
     WriteBool(Section, 'CapInfo', FCapInfo);
+    WriteBool(Section, 'MetaInfo', FMetaInfo);
   end;
 end;
 

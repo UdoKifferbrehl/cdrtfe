@@ -356,10 +356,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -553,10 +549,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -864,10 +856,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'CD-RW'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -924,10 +912,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'CD-Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -982,7 +966,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           TabOrder = 1
         end
         object RadioButtonCapacity: TRadioButton
-          Left = 168
+          Left = 24
           Top = 160
           Width = 137
           Height = 17
@@ -997,15 +981,19 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Caption = 'Disk Informationen'
           TabOrder = 6
         end
+        object RadioButtonMetaData: TRadioButton
+          Left = 168
+          Top = 160
+          Width = 129
+          Height = 17
+          Caption = 'Meta-Daten anzeigen'
+          TabOrder = 7
+        end
       end
     end
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1167,10 +1155,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'CD-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1443,10 +1427,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
@@ -1594,10 +1574,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         538
         277)
