@@ -1,6 +1,4 @@
-{ $Id: cl_abstractbaseaction.pas,v 1.3 2010/09/21 11:26:13 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_abstractbaseaction.pas: abstrakte Basisklasse für Projekt
 

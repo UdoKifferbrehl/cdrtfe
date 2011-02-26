@@ -1,6 +1,4 @@
-{ $Id: cl_imagelists.pas,v 1.2 2010/06/30 16:36:31 kerberos002 Exp $
-
-  cl_imagelists.pas: Zugriff auf SytemImageList und Icons
+{ cl_imagelists.pas: Zugriff auf SytemImageList und Icons
 
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

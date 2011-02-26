@@ -1,6 +1,4 @@
-{ $Id: cl_settings_readcd.pas,v 1.2 2010/07/21 14:48:06 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_readcd.pas: Objekt für Einstellungen des CD-Image-Projektes
 

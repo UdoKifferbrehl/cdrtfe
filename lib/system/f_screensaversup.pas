@@ -1,6 +1,4 @@
-{ $Id: f_screensaversup.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_screensaversup.pas: Bildschirmschoner (de-)aktivieren
 

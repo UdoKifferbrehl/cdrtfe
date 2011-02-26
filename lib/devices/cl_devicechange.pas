@@ -1,6 +1,4 @@
-{ $Id: cl_devicechange.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_devicechange.pas: Device change notifier
+{ cl_devicechange.pas: Device change notifier
 
   Copyright (c) 2006, 2008 Oliver Valencia
 

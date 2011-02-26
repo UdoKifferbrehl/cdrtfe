@@ -1,6 +1,4 @@
-{ $Id: cl_settings_fileexplorer.pas,v 1.1 2010/05/16 15:25:38 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_fileexplorer.pas: Objekt für FileExplorer-Einstellungen
 

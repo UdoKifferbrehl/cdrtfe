@@ -1,6 +1,4 @@
-{ $Id: const_common.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  const_common.pas: allgemeine Konstanten-Deklaration
+{ const_common.pas: allgemeine Konstanten-Deklaration
 
   Copyright (c) 2004-2008 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

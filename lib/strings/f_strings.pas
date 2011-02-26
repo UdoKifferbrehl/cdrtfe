@@ -1,6 +1,4 @@
-{ $Id: f_strings.pas,v 1.2 2010/05/23 18:51:56 kerberos002 Exp $
-
-  f_strings.pas: String-Funktionen
+{ f_strings.pas: String-Funktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
 

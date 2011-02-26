@@ -1,6 +1,4 @@
-{ $Id: cl_flacinfo.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_flacinfo.pas: Funktionen für FLAC-Audio-Dateien
+{ cl_flacinfo.pas: Funktionen für FLAC-Audio-Dateien
 
   Copyright (c) 2006-2010 Oliver Valencia
 

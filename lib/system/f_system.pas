@@ -1,6 +1,4 @@
-{ $Id: f_system.pas,v 1.1 2010/09/10 16:33:56 kerberos002 Exp $
-
-  f_system.pas: allgemeine Systemfunktionen
+{ f_system.pas: allgemeine Systemfunktionen
 
   Copyright (c) 2010 Oliver Valencia
 

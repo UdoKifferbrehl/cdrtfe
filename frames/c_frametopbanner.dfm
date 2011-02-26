@@ -5,6 +5,7 @@ object FrameTopBanner: TFrameTopBanner
   Height = 53
   Anchors = [akLeft, akTop, akRight]
   TabOrder = 0
+  TabStop = True
   DesignSize = (
     345
     53)

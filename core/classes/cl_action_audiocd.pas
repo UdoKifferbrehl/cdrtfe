@@ -1,6 +1,4 @@
-{ $Id: cl_action_audiocd.pas,v 1.4 2010/10/11 16:23:23 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_action_audiocd.pas: Audio-CD
 

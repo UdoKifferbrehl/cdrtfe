@@ -1,6 +1,4 @@
-{ $Id: cl_settings_xcd.pas,v 1.2 2010/08/07 13:56:55 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_xcd.pas: Objekt für Einstellungen des XCD-Projektes
 

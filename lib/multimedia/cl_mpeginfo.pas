@@ -1,6 +1,4 @@
-{ $Id: cl_mpeginfo.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_mpeginfo.pas: Funktionen für MPEG-Audio-Dateien
+{ cl_mpeginfo.pas: Funktionen für MPEG-Audio-Dateien
 
   Copyright (c) 2006-2008 Oliver Valencia
 

@@ -1,6 +1,4 @@
-{ $Id: cl_settings_fileflags.pas,v 1.2 2010/10/11 16:23:23 kerberos002 Exp $
- 
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_fileflags.pas: Objekt für Flags bzgl. der Tools
 

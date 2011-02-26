@@ -1,6 +1,4 @@
-{ $Id: c_spacemeter.pas,v 1.8 2010/01/11 06:37:38 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   c_spacemeter.pas: Anzeigen des auf der Disk beanspruchten Speicherplatzes
 

@@ -1,6 +1,4 @@
-{ $Id: const_locations.pas,v 1.4 2010/10/11 16:23:23 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   const_locations.pas: Konstanten-Deklaration, Dateinamen und Ordner
 

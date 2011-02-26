@@ -1,6 +1,4 @@
-{ $Id: cl_mpegvinfo.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_mpegvinfo.pas: Funktionen für MPEG-Video-Dateien
+{ cl_mpegvinfo.pas: Funktionen für MPEG-Video-Dateien
 
   Copyright (c) 2006-2008 Oliver Valencia
 

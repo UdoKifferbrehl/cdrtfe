@@ -1,6 +1,4 @@
-{ $Id: c_frametopbanner.pas,v 1.4 2010/05/27 19:32:33 kerberos002 Exp $
-
-  c_frametopbanner: Komponente zur Darstellung eines Banners
+{ c_frametopbanner: Komponente zur Darstellung eines Banners
 
   Copyright (c) 2009-2010 Oliver Valencia
 

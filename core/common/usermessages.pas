@@ -1,6 +1,4 @@
-{ $Id: usermessages.pas,v 1.2 2010/09/10 12:59:32 kerberos002 Exp $
- 
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   user_messages.pas: Deklaration von User-Messages
 

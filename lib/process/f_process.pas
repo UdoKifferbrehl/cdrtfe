@@ -1,6 +1,4 @@
-{ $Id: f_process.pas,v 1.2 2010/07/05 12:34:53 kerberos002 Exp $
-
-  f_process.pas: Prozesse, Fenster, ...
+{ f_process.pas: Prozesse, Fenster, ...
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

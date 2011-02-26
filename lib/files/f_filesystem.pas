@@ -1,6 +1,4 @@
-{ $Id: f_filesystem.pas,v 1.4 2010/08/07 13:56:55 kerberos002 Exp $
-
-  f_filesystem.pas: Dateisystemfunktionen
+{ f_filesystem.pas: Dateisystemfunktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

@@ -1,6 +1,4 @@
-{ $Id: f_shellext.pas,v 1.2 2010/08/10 13:41:08 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_shellext.pas: ShellExtensions registrieren/löschen
 

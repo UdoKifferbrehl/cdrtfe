@@ -1,6 +1,4 @@
-{ $Id: f_environment.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  f_environment.pas: Umgebungsvariablen
+{ f_environment.pas: Umgebungsvariablen
 
   Copyright (c) 2005, 2008 Oliver Valencia
 

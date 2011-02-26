@@ -1,6 +1,4 @@
-{ $Id: f_crc.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  f_crc.pas: Berechnung der CRC-Prüfsummen, bitweiser Vergleich
+{ f_crc.pas: Berechnung der CRC-Prüfsummen, bitweiser Vergleich
 
   Copyright (c) 2004-2008 Oliver Valencia
 

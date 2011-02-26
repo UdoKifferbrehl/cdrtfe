@@ -1,6 +1,4 @@
-{ $Id: f_compprop.pas,v 1.3 2010/11/27 20:35:03 kerberos002 Exp $
-
-  f_compprop.pas: Properties von Komponenten
+{ f_compprop.pas: Properties von Komponenten
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

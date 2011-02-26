@@ -1,6 +1,4 @@
-{ $Id: cl_settings.pas,v 1.8 2010/09/19 08:52:23 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings.pas: Einstellungen von cdrtfe
 

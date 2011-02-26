@@ -1,6 +1,4 @@
-{ $Id: const_tabsheets.pas,v 1.3 2010/05/20 14:38:10 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   const_tabsheets.pas: Konstanten-Deklaration für TabSheets
 

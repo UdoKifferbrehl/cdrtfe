@@ -1,6 +1,4 @@
-{ $Id: cl_projectdata_audiocd.pas,v 1.1 2010/05/18 17:01:59 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_projectdata_audiocd.pas: Datentypen zur Speicherung der Pfadlisten
 

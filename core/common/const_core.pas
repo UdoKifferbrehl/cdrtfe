@@ -1,6 +1,4 @@
-{ $Id: const_core.pas,v 1.3 2010/08/10 13:41:08 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   const_core.pas: Konstanten-Deklaration
 

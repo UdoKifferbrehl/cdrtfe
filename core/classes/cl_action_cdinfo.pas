@@ -1,6 +1,4 @@
-{ $Id: cl_action_cdinfo.pas,v 1.2 2011/01/23 14:05:23 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_action_cdinfo.pas: Infos über Disks und Laufwerke
 

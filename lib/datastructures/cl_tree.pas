@@ -1,6 +1,4 @@
-{ $Id: cl_tree.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_tree.pas: Implementierung einer einfachen Baum-Struktur
+{ cl_tree.pas: Implementierung einer einfachen Baum-Struktur
 
   Copyright (c) 2004-2008 Oliver Valencia
 

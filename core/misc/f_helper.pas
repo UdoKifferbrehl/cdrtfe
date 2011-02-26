@@ -1,6 +1,4 @@
-{ $Id: f_helper.pas,v 1.2 2010/09/10 16:33:56 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_helper.pas: Hilfsfunktionen
 

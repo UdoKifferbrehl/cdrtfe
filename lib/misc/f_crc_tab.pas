@@ -1,6 +1,4 @@
-{ $Id: f_crc_tab.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  f_crc_tab.pas: statische Lookup-Tabellen für die Berechnung der CRC-Prüfsummen
+{ f_crc_tab.pas: statische Lookup-Tabellen für die Berechnung der CRC-Prüfsummen
 
   Copyright (c) 2005-2008 Oliver Valencia
 

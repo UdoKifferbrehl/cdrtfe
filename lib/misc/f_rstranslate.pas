@@ -1,6 +1,4 @@
-{ $Id: f_rstranslate.pas,v 1.1 2010/07/07 21:09:44 kerberos002 Exp $
-
-  f_rstranslate.pas: delphieigene Resource-Strings übersetzen
+{ f_rstranslate.pas: delphieigene Resource-Strings übersetzen
 
   Copyright (c) 2010 Oliver Valencia
 

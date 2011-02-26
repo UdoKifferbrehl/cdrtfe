@@ -1,6 +1,4 @@
-{ $Id: f_logfile.pas,v 1.2 2011/01/15 17:26:17 kerberos002 Exp $
-
-  f_logfile.pas: Funktionen zum Debuggen, Anzeigen und Schreiben eines Log-Files
+{ f_logfile.pas: Funktionen zum Debuggen, Anzeigen und Schreiben eines Log-Files
 
   Copyright (c) 2004-2011 Oliver Valencia
 

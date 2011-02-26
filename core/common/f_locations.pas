@@ -1,6 +1,4 @@
-{ $Id: f_locations.pas,v 1.2 2010/09/19 08:52:23 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_locations.pas: Funktionen, um bestimmte cdrtfe-Ordner/-Dateien zu ermitteln
 

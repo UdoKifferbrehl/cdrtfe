@@ -1,6 +1,4 @@
-{ $Id: frm_exceptdlg.pas,v 1.3 2010/06/11 11:34:48 kerberos002 Exp $
-
-  frm_exceptdlg.pas:
+{ frm_exceptdlg.pas:
 
   The contents of this file are subject to the Mozilla Public License Version
   1.1 (the "License"); you may not use this file except in compliance with the

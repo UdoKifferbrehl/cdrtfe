@@ -1,6 +1,4 @@
-{ $Id: cl_settings_datacd.pas,v 1.2 2010/08/07 13:56:54 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_datacd.pas: Objekt für Einstellungen für Projekt Daten-CD
 

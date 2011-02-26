@@ -1,6 +1,4 @@
-{ $Id: f_largeint.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  f_largeint.pas: 64-Bit-Integer
+{ f_largeint.pas: 64-Bit-Integer
 
   Copyright (c) 2004-2010 Oliver Valencia
 

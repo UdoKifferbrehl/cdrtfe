@@ -1,6 +1,4 @@
-{ $Id: scsidefs.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $
-
-  scsidefs.pas: SCSI definitions
+{ scsidefs.pas: SCSI definitions
 
   letzte Änderung  01.10.2008
 

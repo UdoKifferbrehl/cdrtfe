@@ -1,6 +1,4 @@
-{ $Id: cl_filetypeinfo.pas,v 1.2 2010/01/12 23:05:34 kerberos002 Exp $
-
-  cl_filetypeinfo.pas: Dateityp und IconIndex cachen
+{ cl_filetypeinfo.pas: Dateityp und IconIndex cachen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

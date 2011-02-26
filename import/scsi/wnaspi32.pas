@@ -1,6 +1,4 @@
-{ $Id: wnaspi32.pas,v 1.2 2010/01/11 06:37:38 kerberos002 Exp $
-
-  wnaspi32.pas: ASPI for Win32 definitions
+{ wnaspi32.pas: ASPI for Win32 definitions
 
   letzte Änderung  01.10.2008
 

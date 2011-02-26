@@ -1,6 +1,4 @@
-{ $Id: c_filebrowser.pas,v 1.3 2010/08/01 13:15:39 kerberos002 Exp $
-
-  c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
+{ c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
 
   Copyright (c) 2009-2010 Oliver Valencia
 

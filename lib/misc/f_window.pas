@@ -1,6 +1,4 @@
-{ $Id: f_window.pas,v 1.3 2010/07/08 10:31:38 kerberos002 Exp $
-
-  f_window.pas: Funktionnen für Fenster und Dialoge
+{ f_window.pas: Funktionnen für Fenster und Dialoge
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

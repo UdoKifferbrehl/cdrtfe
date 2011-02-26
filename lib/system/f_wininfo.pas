@@ -1,6 +1,4 @@
-{ $Id: f_wininfo.pas,v 1.2 2010/08/10 13:41:08 kerberos002 Exp $
-
-  f_wininfo.pas: Windows-System-Informationen
+{ f_wininfo.pas: Windows-System-Informationen
 
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche

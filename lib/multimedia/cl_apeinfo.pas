@@ -1,6 +1,4 @@
-{ $Id: cl_apeinfo.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_apeinfo.pas: Funktionen für Ape-Audio-Dateien (Monkey's Audio)
+{ cl_apeinfo.pas: Funktionen für Ape-Audio-Dateien (Monkey's Audio)
 
   Copyright (c) 2007-2008 Oliver Valencia
 

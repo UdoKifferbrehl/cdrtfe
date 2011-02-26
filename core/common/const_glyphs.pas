@@ -1,6 +1,4 @@
-{ $Id: const_glyphs.pas,v 1.1 2010/01/11 06:37:38 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   const_glyphs.pas: Konstanten-Deklaration, Icons und Glyphs
 

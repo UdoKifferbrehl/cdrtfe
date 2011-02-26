@@ -1,6 +1,4 @@
-{ $Id: cl_settings_cdrecord.pas,v 1.2 2010/09/21 11:26:13 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_settings_cdrecord.pas: Objekt für Einstellungen von cdrecord
 

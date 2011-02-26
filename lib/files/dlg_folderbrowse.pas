@@ -1,6 +1,4 @@
-{ $Id: dlg_folderbrowse.pas,v 1.2 2010/08/01 13:15:39 kerberos002 Exp $
-
-  dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
+{ dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
   Copyright (c) 2007-2009 Oliver Valencia
 

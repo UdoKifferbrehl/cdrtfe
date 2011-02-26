@@ -1,6 +1,4 @@
-{ $Id: f_cygwin.pas,v 1.3 2010/11/10 18:02:39 kerberos002 Exp $
-
-  f_cygwin.pas: cygwin-Funktionen
+{ f_cygwin.pas: cygwin-Funktionen
 
   Copyright (c) 2004-2010 Oliver Valencia
 

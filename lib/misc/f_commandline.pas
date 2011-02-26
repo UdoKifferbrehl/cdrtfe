@@ -1,6 +1,4 @@
-{ $Id: f_commandline.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  f_commandline.pas: Aufrufparameter auswerten
+{ f_commandline.pas: Aufrufparameter auswerten
 
   Copyright (c) 2008      Oliver Valencia
 

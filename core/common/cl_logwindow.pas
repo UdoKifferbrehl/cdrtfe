@@ -1,6 +1,4 @@
-{ $Id: cl_logwindow.pas,v 1.5 2010/12/28 09:33:53 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 

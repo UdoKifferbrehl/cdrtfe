@@ -1,6 +1,4 @@
-{ $Id: f_getdosoutput.pas,v 1.2 2010/07/05 12:34:52 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   f_getdosoutput.pas: Kommandozeile ausführen
 

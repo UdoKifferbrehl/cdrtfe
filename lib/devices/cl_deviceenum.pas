@@ -1,5 +1,3 @@
-{ $Id: cl_deviceenum.pas,v 1.2 2010/09/10 13:58:41 kerberos002 Exp $
-
 { cl_deviceenum.pas: Implementierung eines einfachen SCSI-Device-Enumerators
 
   Copyright (c) 2004-2005, 2007-2010 Oliver Valencia

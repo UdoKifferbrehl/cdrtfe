@@ -1,6 +1,4 @@
-{ $Id: cl_peheader.pas,v 1.1 2010/01/11 06:37:39 kerberos002 Exp $
-
-  cl_peheader.pas: Funktionen zum Auswerten der PE-Header einer EXE-Datei
+{ cl_peheader.pas: Funktionen zum Auswerten der PE-Header einer EXE-Datei
 
   Copyright (c) 2004-2008 Oliver Valencia
 

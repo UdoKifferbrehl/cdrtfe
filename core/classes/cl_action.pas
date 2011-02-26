@@ -1,6 +1,4 @@
-{ $Id: cl_action.pas,v 1.7 2010/05/26 10:52:44 kerberos002 Exp $
-
-  cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
+{ cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   cl_action.pas: die im GUI gewählte Aktion ausführen
 
