@@ -2,9 +2,9 @@
 
   cl_diskinfo.pas: Zugriff auf Rohlingsinformationen und Medien-Überprüfung
 
-  Copyright (c) 2006-2010 Oliver Valencia
+  Copyright (c) 2006-2011 Oliver Valencia
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  19.03.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -25,6 +25,7 @@
                  TimeFree
                  MsInfo
                  IsDVD
+                 IsBD
                  DiskType
                  SelectSess
                  SessOverride
@@ -44,16 +45,19 @@ interface
 uses Windows, Forms, StdCtrls, Controls, SysUtils,
      cl_settings, cl_lang, f_largeint;
 
-const cDiskTypeBlocks: array[0..4, 0..1] of string =
+const cDiskTypeBlocks: array[0..6, 0..1] of string =
         ((' ', '1024'),                                    // Dummyeintrag
          ('DVD-R(W) [4,38 GiByte]', '2298496'),
          ('DVD+R(W) [4,38 GiByte]', '2295104'),
          ('DVD-R/DL (-R9) [7,96 GiByte]', '4171712'),
-         ('DVD+R/DL (+R9) [7,96 GiByte]', '4173824'));
+         ('DVD+R/DL (+R9) [7,96 GiByte]', '4173824'),
+         ('BD-R(E) [23,3 GiByte]', '12219392'),
+         ('BD-RE DL [46,6 GiByte]', '24438784'));
 
 type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
                   DT_DVD_R, DT_DVD_RW, DT_DVD_RDL,
                   DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL,
+                  DT_BD_ROM, DT_BD_R, DT_BD_RE, DT_BD_R_DL, DT_BD_RE_DL,
                   DT_Unknown,      // unbekannte Disk
                   DT_None,         // keine Disk eingelegt
                   DT_Manual,       // manuelle Auswahl durch User
@@ -90,6 +94,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        FTimeFree     : Double;
        FMsInfo       : string;
        FIsDVD        : Boolean;
+       FIsBD         : Boolean;
        FDiskType     : TDiskType;
        FUseProfiles  : Boolean;
        FForcedFormat : Boolean;
@@ -100,6 +105,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        function GetCDType(const CDInfo: string): TDiskType;
        function GetDVDType(const DVDInfo: string): TDiskType; virtual;
        function MediumIsDVD(const CDInfo: string): Boolean;
+       function MediumIsBD(const CDInfo: string): Boolean;
        {$IFDEF DebugReadCDInfo}
        procedure DebugShowDiskInfo; virtual;
        {$ENDIF}
@@ -117,6 +123,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        property TimeFree     : Double    read FTimeFree;
        property MsInfo       : string    read FMsInfo;
        property IsDVD        : Boolean   read FIsDVD;
+       property IsBD         : Boolean   read FIsBD;
        property DiskType     : TDiskType read FDiskType;
        property ForcedFormat : Boolean   read FForcedFormat; // für neue DVD+RWs
        property FormatCommand: string    read FFormatCommand;
@@ -165,7 +172,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
 
 implementation
 
-uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
+uses {$IFDEF ShowDebugWindow} frm_debug, f_stringlist,{$ENDIF}
      cl_cdrtfedata, cl_sessionimport,
      f_filesystem, f_strings, f_getdosoutput, f_helper, f_window, f_locations,
      const_locations, const_common, const_tabsheets;
@@ -328,6 +335,8 @@ begin
   Deb('Disk.MsInfo  : ' + FMsInfo, 1);
   if FIsDVD then Deb('Disk.IsDVD   : True', 1) else
     Deb('Disk.IsDVD   : False', 1);
+  if FIsBD then Deb('Disk.IsBD    : True', 1) else
+    Deb('Disk.IsBD    : False', 1);
   Deb('Disk.DiskType: ' + EnumToStr(TypeInfo(TDiskType), FDiskType)
       + CRLF, 1);
 end;
@@ -352,6 +361,7 @@ begin
   FTimeFree      := 0;
   FMsInfo        := '';
   FIsDVD         := False;
+  FIsBD          := False;
   FDiskType      := DT_CD;
   FUseProfiles   := True;
   FForcedFormat  := False;
@@ -388,6 +398,17 @@ begin
   Temp := ExtractInfo(CDInfo, 'Driver flags', ':', LF);
   Result := (Pos('DVD', Temp) > 0) or                // Pro-DVD
             (Pos('Found DVD media', CDInfo) > 0);    // DVD-Hack or wodim
+end;
+
+{ MediumIsBD -------------------------------------------------------------------
+
+  MediumIsBD liefert True, wenn die Disk eine BD ist, False sonst.             }
+
+function TDiskInfo.MediumIsBD(const CDInfo: string): Boolean;
+var Temp: string;
+begin
+  Temp := ExtractInfo(CDInfo, 'Driver flags', ':', LF);
+  Result := (Pos('BD', Temp) > 0);
 end;
 
 { GetDVDType -------------------------------------------------------------------
@@ -441,6 +462,9 @@ begin
     if Temp = 'DVD+R'    then Result := DT_DVD_PlusR   else
     if Temp = 'DVD+RW'   then Result := DT_DVD_PlusRW  else
     if Temp = 'DVD+R/DL' then Result := DT_DVD_PlusRDL else
+    if Temp = 'BD-ROM'   then Result := DT_BD_ROM      else
+    if Temp = 'BD-R'     then Result := DT_BD_R        else
+    if Temp = 'BD-RE'    then Result := DT_BD_RE       else
     Result := DT_Unknown;
     {$IFDEF ForceUnknownMedium}
     Result := DT_Unknown;
@@ -749,7 +773,8 @@ begin
   {An dieser Stelle wurde cdrecord -atip mit -v oder -vv aufgerufen. Wenn auch
    jetzt keine Größeninformationen vorhanden sind, muß der User selbst den Disk-
    Type auswählen, es sei denn, es ist eine DVD-ROM.}
-  if (Result <> DT_DVD_ROM) and not DVDSizeInfoFound then
+  // if (Result <> DT_DVD_ROM) and not DVDSizeInfoFound then
+  if not (Result in [DT_DVD_ROM, DT_BD_ROM]) and not DVDSizeInfoFound then  
   begin
     Result := DT_Unknown;
     {$IFDEF DebugReadCDInfo}
@@ -793,12 +818,12 @@ begin
     {$ENDIF}
   end else
   begin
-    if FDiskType in [DT_DVD_R, DT_DVD_RW, DT_DVD_RDL] then
+    if FDiskType in [DT_DVD_R, DT_DVD_RW, DT_DVD_RDL, DT_BD_R, DT_BD_RE] then
     begin
       Delete(Temp, 1, Pos('free blocks:', Temp) + 11);
       Temp := Trim(Copy(Temp, 1, Pos(LF, Temp)));
       {$IFDEF DebugReadCDInfo}
-      Deb('DVD-R or -RW found.', 1);
+      Deb('DVD-R(W) or BD-R(E) found.', 1);
       Deb('Using ''free blocks''.', 1);
       {$ENDIF}
     end else
@@ -888,6 +913,7 @@ begin
   begin
     {Handelt es sich um eine DVD?}
     FIsDVD := MediumIsDVD(FAtipInfo);
+    FIsBD  := MediumIsBD(FAtipInfo);
     if not FIsDVD then
     begin
       {Es ist eine CD}
@@ -1365,7 +1391,8 @@ begin
   {$ENDIF}
   {An dieser Stelle sollte eigentlich auch die Größe der Disk bekannt sein. Wenn
    nicht, muß der User gefragt werden.}
-  if (Result <> DT_DVD_ROM) and not DVDSizeInfoFound then
+  // if (Result <> DT_DVD_ROM) and not DVDSizeInfoFound then
+  if not (Result in [DT_DVD_ROM, DT_BD_ROM]) and not DVDSizeInfoFound then
   begin
     Result := DT_Unknown;
     {$IFDEF DebugReadCDInfo}
@@ -1404,11 +1431,13 @@ begin
   FDiskType := GetDVDType(FMediumInfo);
   {Gesamtspeicher anhand des Disk-Typs}
   case FDiskType of
-    DT_DVD_ROM                 : FSectors := 0;
+    DT_DVD_ROM, DT_BD_ROM      : FSectors := 0;
     DT_DVD_R, DT_DVD_RW        : FSectors := StrToInt(cDiskTypeBlocks[1, 1]);
     DT_DVD_RDL                 : FSectors := StrToInt(cDiskTypeBlocks[3, 1]);
     DT_DVD_PlusR, DT_DVD_PlusRW: FSectors := StrToInt(cDiskTypeBlocks[2, 1]);
     DT_DVD_PlusRDL             : FSectors := StrToInt(cDiskTypeBlocks[4, 1]);
+    DT_BD_R, DT_BD_RE          : FSectors := StrToInt(cDiskTypeBlocks[5, 1]);
+    DT_BD_R_DL, DT_BD_RE_DL    : FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
   end;
   {Dvd leer? Fortsetzbar?}
   Temp := ExtractInfo(FMediumInfo, 'disk status', ':', LF);
@@ -1442,7 +1471,7 @@ begin
   if FDiskType = DT_Unknown then
   begin
     {$IFDEF DebugReadCDInfo}
-    Deb('Unknown DVD-Medium found.', 1);
+    Deb('Unknown DVD/BD-Medium found.', 1);
     Deb('Ask user to select a medium or work with unknown size.', 1);
     Deb('No size check, if no medium specified.', 1);
     {$ENDIF}
@@ -1526,6 +1555,7 @@ begin
   begin
     {Handelt es sich um eine DVD?}
     FIsDVD := MediumIsDVD(FMediumInfo);
+    FIsBD  := MediumIsBD(FMediumInfo);
     if not FIsDVD then
     begin
       {Es ist eine CD}
@@ -1595,7 +1625,7 @@ begin
   {Fehler: fixierte CD eingelegt}
   if FDiskComplete and (Args.Choice <> cCDRW)then
   begin
-    if (FDiskType in [DT_CD_RW, DT_DVD_RW]) and
+    if (FDiskType in [DT_CD_RW, DT_DVD_RW, DT_BD_RE, DT_BD_RE_DL]) and
        FSettings.Cdrecord.AutoErase then
     begin
       i := ShowMsgDlg(FLang.GMS('eburn02') + CRLF + CRLF + FLang.GMS('eburn16'),

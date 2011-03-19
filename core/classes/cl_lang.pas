@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.10.2010
+  letzte Änderung  19.03.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -138,7 +138,7 @@ begin
     Add('g011=Importiere vorige Session von Laufwerk %s (ID: %s) ...');
     Add('g012=ausgewählte Ordner (mit Entf aus Liste löschen)');
     Add('g013=mehrere Ordner mit Alt-Einfg auswählen');
-    Add('g014=CD 650 MiB (74 min)\nCD 700 MiB (80 min)\nCD 800 MiB (90 min)\nCD 870 MiB (99 min)\nDVD 4.38 GiB\nDVD/DL 7.96 GiB\nMiB\nmin');
+    Add('g014=CD 650 MiB (74 min)\nCD 700 MiB (80 min)\nCD 800 MiB (90 min)\nCD 870 MiB (99 min)\nDVD 4.38 GiB\nDVD/DL 7.96 GiB\nBD 23.3 GiB\nBD DL 46,6 GiB\nMiB\nmin');
     Add('g015=Geändert am');
     Add('g016=Quelldateien');
     {$IFDEF ShowCmdError}

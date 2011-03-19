@@ -2,10 +2,10 @@
 
   cl_action_datacd.pas: Daten-Disk
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.09.2010
+  letzte Änderung  19.03.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -301,10 +301,8 @@ begin
     begin
       Ok := FDisk.CheckMedium(CMArgs);
       {Bei DVD als Simulationstreiber dvd_simul verwenden.}
-      if FDisk.IsDVD then
-      begin
-        SimulDev := 'dvd';
-      end;
+      if FDisk.IsDVD then SimulDev := 'dvd';
+      if FDisk.IsBD  then SimulDev := 'bd';
     end;
     {Genügend Platz für Image?}
     if not OnTheFly then

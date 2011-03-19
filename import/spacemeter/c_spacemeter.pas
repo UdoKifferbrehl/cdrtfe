@@ -2,9 +2,9 @@
 
   c_spacemeter.pas: Anzeigen des auf der Disk beanspruchten Speicherplatzes
 
-  Copyright (c) 2008-2010 Oliver Valencia
+  Copyright (c) 2008-2011 Oliver Valencia
 
-  letzte Änderung  06.01.2010
+  letzte Änderung  19.03.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -35,10 +35,10 @@ interface
 uses Windows, Classes, Controls, ComCtrls, ExtCtrls, Graphics, Menus,
      QProgBar, SysUtils;
 
-const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
+const cDiskTypeCount = 7;    // zählt von 0 an! counts from 0!
 
       cSpaceMeterDiskSizes: array[0..cDiskTypeCount] of Integer =
-                              (650, 700, 800, 870, 4482, 8147);
+                              (650, 700, 800, 870, 4482, 8147, 23866, 47732);
 
       {$J+}
       cPopupMenuStrings: array[0..cDiskTypeCount] of string =
@@ -47,14 +47,16 @@ const cDiskTypeCount = 5;    // zählt von 0 an! counts from 0!
                             'CD 800 MiB (90 min)',
                             'CD 870 MiB (99 min)',
                             'DVD 4.38 GiB',
-                            'DVD/DL 7.96 GiB');
+                            'DVD/DL 7.96 GiB',
+                            'BD 23.3 GiB',
+                            'BD DL 46,6 GiB');
 
       cUnitMiB: string = 'MiB';
       cUnitMin: string = 'min';
       {$J-}
 
 type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
-                            SMDT_DVD, SMDT_DVD_DL);
+                            SMDT_DVD, SMDT_DVD_DL, SMDT_BD, SMDT_BD_DL);
 
      TSpaceMeterMode = (SMM_DataCD, SMM_XCD, SMM_AudioCD, SMM_NoDisk);
 
@@ -158,9 +160,12 @@ begin
   end else
   begin
     {Daten-CD/DVD:
-     <1000 MiB: Teilstrich = 10 MiB; >= 1000 MiB: Teilstrich = 100MiB}
+     <1000 MiB: Teilstrich = 10 MiB; >= 1000 MiB: Teilstrich = 100MiB
+     Daten-BD:
+     Teilstrich = 1000MiB}
     Divisor := 10;
     if FCapacity > 1000 then Divisor := 100;
+    if FCapacity > 10000 then Divisor := 1000;
     TickUnit := FUnitMiB;
   end;
   {Anzahl der Teilstriche bestimmen}
@@ -222,19 +227,21 @@ end;
   SetCaptions setzt die Strings für die Menü-Einträge und die Einheiten.       }
 
 procedure TSpaceMeter.SetCaptions(Value: string);
-var List: TStringList;
-    i   : Integer;
+var List   : TStringList;
+    i      : Integer;
+    MSCount: Integer;
 begin
- List := TStringList.Create;
- List.Text := Value;
- for i := 0 to cDiskTypeCount do
- begin
-   cPopupMenuStrings[i] := List[i];
-   FPopupMenu.Items[i].Caption := List[i];
-  end;
- FScale.UnitMiB := List[cDiskTypeCount + 1];
- FScale.UnitMin := List[cDiskTypeCount + 2];
- List.Free;
+  List := TStringList.Create;
+  List.Text := Value;
+  MSCount := List.Count - 3; {die letzen beiden Einträge sind Einheiten}
+  for i := 0 to MSCount {cDiskTypeCount} do
+  begin
+    cPopupMenuStrings[i] := List[i];
+    FPopupMenu.Items[i].Caption := List[i];
+   end;
+  FScale.UnitMiB := List[MSCount {cDiskTypeCount} + 1];
+  FScale.UnitMin := List[MSCount {cDiskTypeCount} + 2];
+  List.Free;
 end;
 
 { InitPopupMenu ----------------------------------------------------------------
@@ -394,6 +401,8 @@ begin
     SMDT_CD870 : Size := cSpaceMeterDiskSizes[Integer(SMDT_CD870)];
     SMDT_DVD   : Size := cSpaceMeterDiskSizes[Integer(SMDT_DVD)];
     SMDT_DVD_DL: Size := cSpaceMeterDiskSizes[Integer(SMDT_DVD_DL)];
+    SMDT_BD    : Size := cSpaceMeterDiskSizes[Integer(SMDT_BD)];
+    SMDT_BD_DL : Size := cSpaceMeterDiskSizes[Integer(SMDT_BD_DL)];
   else
     Size := Integer(SMDT_CD650);
   end;
