@@ -2,10 +2,10 @@
 
   cl_action_image.pas: Disk-Images
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.09.2010
+  letzte Änderung  20.03.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -109,11 +109,27 @@ var i         : Integer;
     Cmd,
     Temp, Name: string;
     CueFile   : TCueFile;
+    CMArgs    : TCheckMediumArgs;
     Ok        : Boolean;
+    SimulDev  : string;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  {Kommandozeile zusammenstellen}
   Ok := True;
+  SimulDev := 'cdr';
+  CMArgs.ForcedContinue := False;
+  CMArgs.Choice := cCDImage;
+  {Größe der Daten ermitteln}
+  //FData.GetProjectInfo(Count, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
+  {Infos über eingelegte CD einlesen}
+  SetPanels('<>', FLang.GMS('mburn13'));
+  FDisk.GetDiskInfo(FSettings.Image.Device, False);
+  SetPanels('<>', '');
+  {Zusammenstellung prüfen}
+  Ok := FDisk.CheckMedium(CMArgs);
+  {Bei DVD als Simulationstreiber dvd_simul verwenden.}
+  if FDisk.IsDVD then SimulDev := 'dvd';
+  if FDisk.IsBD  then SimulDev := 'bd';
+  {Kommandozeile zusammenstellen}
   if Pos(cExtCue, LowerCase(FSettings.Image.IsoPath)) = 0 then
   begin
     with FSettings.Cdrecord, FSettings.Image do
@@ -123,7 +139,7 @@ begin
       Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
-      if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
+      if SimulDrv    then Cmd := Cmd + ' driver=' + SimulDev + '_simul';
       Cmd := Cmd + GetDriverOpts;
       if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
@@ -197,7 +213,7 @@ begin
         Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
         if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
         if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
-        if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
+        if SimulDrv    then Cmd := Cmd + ' driver=' + SimulDev + '_simul';
         Cmd := Cmd + GetDriverOpts;
         if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
           Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
@@ -220,7 +236,7 @@ begin
 
       end;
     end;
-    Ok := CueFile.CueOk;
+    Ok := Ok and CueFile.CueOk;
     CueFile.Free;
   end;
   {Kommando ausführen}

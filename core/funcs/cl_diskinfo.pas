@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2011 Oliver Valencia
 
-  letzte Änderung  19.03.2011
+  letzte Änderung  20.03.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1806,6 +1806,12 @@ begin
     end;
   end;
 
+  {Fehler: Image schreiben}
+  if Args.Choice = cCDImage then
+  begin
+    // zur Zeit testen wir auf keine weiteren Fehler
+  end;
+
   {DVD-Video-Fehler}
   if Args.Choice = cDVDVideo then
   begin
@@ -1831,7 +1837,8 @@ begin
   {Fehler: DVD und TAO/RAW}
   if Result and FIsDVD then
   begin
-    if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) then
+    if ((Args.Choice = cDataCD) and not FSettings.DataCD.DAO) or
+       ((Args.Choice = cCDImage) and not FSettings.Image.DAO) then
     begin
       Result := False;
       ShowMsgDlg(FLang.GMS('eburn10'), FLang.GMS('g001'), MB_cdrtfeError);
