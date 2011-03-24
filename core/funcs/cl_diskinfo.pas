@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2011 Oliver Valencia
 
-  letzte Änderung  20.03.2011
+  letzte Änderung  24.03.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -289,7 +289,7 @@ begin
     OnClick := ButtonCancelClick;
   end;
   {Liste füllen}
-  for i := 0 to 4 do ComboBox.Items.Add(cDiskTypeBlocks[i, 0]);
+  for i := 0 to 6 do ComboBox.Items.Add(cDiskTypeBlocks[i, 0]);
   ComboBox.ItemIndex := 0;
 end;
 
@@ -1556,6 +1556,7 @@ begin
     {Handelt es sich um eine DVD?}
     FIsDVD := MediumIsDVD(FMediumInfo);
     FIsBD  := MediumIsBD(FMediumInfo);
+    if FIsBD then FIsDVD := True;
     if not FIsDVD then
     begin
       {Es ist eine CD}
