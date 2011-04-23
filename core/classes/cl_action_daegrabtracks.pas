@@ -2,10 +2,10 @@
 
   cl_action_daegrabtracks.pas: Audio-CD auslesen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.09.2010
+  letzte Änderung  23.04.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -396,7 +396,7 @@ begin
                   TrackList[i] + ' - ';
         {Kommandozeile für das Komprimierungstool zusammenstellen}
         CmdComp := GetCommandLineCompress(InfoList[Index + HiddenTrckOff],
-                                           Index + HiddenTrckOff);
+                                           Index);
         {Kommandozeilen pipen}
         if FSettings.FileFlags.UseSh then
         begin
