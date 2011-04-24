@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.01.2011
+  letzte Änderung  24.04.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5000,12 +5000,14 @@ end;
 { DAE: Select path }
 
 procedure TCdrtfeMainForm.ButtonDAESelectPathClick(Sender: TObject);
-var dir: string;
+var Dir: string;
 begin
-  dir := ChooseDir(Flang.GMS('g002'), '', Self.Handle);
-  if dir <> '' then
+  Dir := ChooseDir(Flang.GMS('g002'), GetCachedFolderName(DIDDAEFolder),
+                   Self.Handle);
+  if Dir <> '' then
   begin
-    EditDAEPath.Text := dir;
+    EditDAEPath.Text := Dir;
+    CacheFolderName(DIDDAEFolder, Dir);
   end;
 end;
 

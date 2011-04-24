@@ -61,7 +61,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Top = 8
     Width = 546
     Height = 305
-    ActivePage = TabSheet1
+    ActivePage = TabSheet6
     Anchors = [akLeft, akTop, akRight, akBottom]
     MultiLine = True
     TabOrder = 0

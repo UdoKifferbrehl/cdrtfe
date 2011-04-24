@@ -2,9 +2,9 @@
 
   f_foldernamecache.pas: Ordnernamen merken
 
-  Copyright (c) 2008      Oliver Valencia
+  Copyright (c) 2008-2001 Oliver Valencia
 
-  letzte Änderung  09.11.2008
+  letzte Änderung  24.04.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,7 +29,7 @@ interface
 
 uses SysUtils, FileCtrl;
 
-const FNCCount = 20;
+const FNCCount = 21;
 
 type TDialogID = (DIDDataCDFile,
                   DIDDataCDFolder,
@@ -41,6 +41,7 @@ type TDialogID = (DIDDataCDFile,
                   DIDAudioCDTrack,
                   DIDVideoCDTrack,
                   DIDVideoCDImage,
+                  DIDDAEFolder,
                   DIDCDImage,
                   DIDSaveImage,
                   DIDVideoDVDFolder,
