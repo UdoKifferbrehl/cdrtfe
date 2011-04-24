@@ -1,9 +1,9 @@
 { f_filesystem.pas: Dateisystemfunktionen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.08.2010
+  letzte Änderung  24.04.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,7 @@
     GetShellFolder(ID: Integer): string
     GetVolumeInfo(var VolInfo: TVolumeInfo)
     IsUNCPath(const Path: string): Boolean
+    MakeFileNameValid(Name: string): string
 
 }
 
@@ -97,6 +98,7 @@ function GetFreeSpaceDisk(Drive: string): Int64;
 function GetShellFolder(ID: Integer): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function IsUNCPath(const Path: string): Boolean;
+function MakeFileNameValid(Name: string): string;
 procedure GetVolumeInfo(var VolInfo: TVolumeInfo);
 procedure GetDragQueryFileList(Handle: THandle; List: TStringList; const WmDrpFiles: Boolean);
 
@@ -196,6 +198,17 @@ end;
 function FilenameIsValid(const Name: string):Boolean;
 begin
   Result := not ((LastDelimiter('\/:*?"<>|;', Name) > 0) or (Name = ''));
+end;
+
+{ MakeFileNameValid ------------------------------------------------------------
+
+  entfernt alle ungültigen Zeichen aus einem Dateinamen.                       }
+
+function MakeFileNameValid(Name: string): string;
+begin
+  while not FilenameIsValid(Name) do
+    Delete(Name, LastDelimiter('\/:*?"<>|;', Name), 1);
+  Result := Name;
 end;
 
 { CDLabelIsValid ---------------------------------------------------------------
