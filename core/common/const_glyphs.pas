@@ -51,6 +51,8 @@ const {Icons/Glyphs}
                             ('btn_v_load_track',   'B1', '1'),
                             ('btn_v_del_track',    'B3', '3'));
 
+      cToolButtonCount = 6;
+
 implementation
 
 end.

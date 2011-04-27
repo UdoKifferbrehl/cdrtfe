@@ -5,7 +5,7 @@
   Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.05.2010
+  letzte Änderung  19.10.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,6 +18,7 @@
   TFileExplorer
 
     Properties   Showing      : Boolean;
+                 HideLogWindow: Boolean;
                  Path         : string;
                  Height       : Integer;
 
@@ -36,6 +37,7 @@ uses IniFiles, cl_abstractbase;
 type TFileExplorer = class(TCdrtfeSettings)
      private
        FShowing      : Boolean;
+       FHideLogWindow: Boolean;
        FPath         : string;
        FHeight       : Integer;
      public
@@ -45,6 +47,7 @@ type TFileExplorer = class(TCdrtfeSettings)
        procedure Load(MIF: TMemIniFile); override;
        procedure Save(MIF: TMemIniFile); override;
        property Showing: Boolean read FShowing write FShowing;
+       property HideLogWindow: Boolean read fHideLogWindow write FHideLogWindow;
        property Path   : string read FPath write FPath;
        property Height : Integer read FHeight write FHeight;
      end;
@@ -76,6 +79,7 @@ procedure TFileExplorer.Init;
 begin
   FHeight := 192;
   FShowing := False;
+  FHideLogWindow := False;
   FPath := '';
 end;
 
@@ -90,6 +94,7 @@ begin
   with MIF do
   begin
     FShowing := ReadBool(Section, 'Showing', False);
+    FHideLogWindow := ReadBool(Section, 'HideLogWindow', False);
     FPath := ReadString(Section, 'Path', '');
 //  FHeight := ReadInteger(Section, 'Height', 192);
   end;
@@ -106,6 +111,7 @@ begin
   with MIF do
   begin
     WriteBool(Section, 'Showing', FShowing);
+    WriteBool(Section, 'HideLogWindow', FHideLogWindow);
     WriteString(Section, 'Path', FPath);
 //  WriteInteger(Section, 'Height', FHeight);
   end;

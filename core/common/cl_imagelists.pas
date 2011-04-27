@@ -1,9 +1,9 @@
 { cl_imagelists.pas: Zugriff auf SytemImageList und Icons
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2010 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.06.2010
+  letzte Änderung  26.08.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -18,8 +18,9 @@
 
     Properties   -
 
-    Variablen    LargeImages, SmallImages, IconImages,
-                 IconFolder, IconFolderSelected, IconCD, IconCDA
+    Variablen    LargeImages, SmallImages, IconImages, ToolButtonImages,
+                 ToolButtonImagesD, IconFolder, IconFolderSelected, IconCD,
+                 IconCDA
 
     Methoden     Create(AOwner: TComponent)
                  LoadGlyphs(Glyphs: TGlyphArray)
@@ -41,10 +42,13 @@ type TGlyphArray = array[1..cGlyphCount] of TBitmap;
      TImageLists = class(TObject)
      private
        procedure InitIcons(AOwner: TComponent);
+       procedure InitToolButtonImages(AOwner: TComponent);
      public
        LargeImages       : TImageList;
        SmallImages       : TImageList;
        IconImages        : TImageList;
+       ToolButtonImages  : TImageList;
+       ToolButtonImagesD : TImageList;
        IconFolder        : Integer;
        IconFolderSelected: Integer;
        IconCD            : Integer;
@@ -110,7 +114,7 @@ begin
     end else
     begin
       Icon.Handle := ExtractIcon(Application.Handle, PChar(IconFile), i);
-      IconImages.AddIcon(Icon);    
+      IconImages.AddIcon(Icon);
     end;
   end;
   {zusätzliche System-Icons laden}
@@ -149,6 +153,40 @@ begin
   IconWinlogo        :=  8;
 end;
 
+{ InitToolButtonImages ---------------------------------------------------------
+
+  lädt die Bitmaps für die ToolButtons aus cdrtfe.exe.                         }
+
+procedure TImageLists.InitToolButtonImages(AOwner: TComponent);
+var InstanceHandle: THandle;
+    Bitmap        : TBitmap;
+    Mask          : TBitmap;
+    i             : Integer;
+    ResNameA      : string;
+    ResNameD      : string;
+begin
+  ToolButtonImages := TImageList.Create(AOwner);
+  ToolButtonImagesD := TImageList.Create(AOwner);
+  Bitmap := TBitmap.Create;
+  Mask := TBitmap.Create;
+  InstanceHandle := hInstance;
+  for i := 1 to cToolButtonCount do
+  begin
+    ResNameA := 'tb' + IntToStr(i) + 'a';
+    ResNameD := 'tb' + IntToStr(i) + 'd';
+    Bitmap.LoadFromResourceName(InstanceHandle, ResNameA);
+    Mask.Assign(Bitmap);
+    Mask.Mask(clFuchsia);
+    ToolButtonImages.Add(Bitmap, Mask);
+    Bitmap.LoadFromResourceName(InstanceHandle, ResNameD);
+    Mask.Assign(Bitmap);
+    Mask.Mask(clFuchsia);
+    ToolButtonImagesD.Add(Bitmap, Mask);
+  end;
+  Bitmap.Free;
+  Mask.Free;
+end;
+
 { TImageLists - public }
 
 constructor TImageLists.Create(AOwner: TComponent);
@@ -176,12 +214,16 @@ begin
   end;
   {Icons laden}
   InitIcons(AOwner);
+  {ToolButtonImages laden}
+  InitToolButtonImages(AOwner);
 end;
 
 destructor TImageLists.Destroy;
 begin
   LargeImages.Free;
   SmallImages.Free;
+  ToolButtonImages.Free;
+  ToolButtonImagesD.Free;
   IconImages.Free;
   inherited Destroy;
 end;

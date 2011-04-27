@@ -21,7 +21,7 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
-     ActnList, ShellCtrls, Clipbrd,
+     ActnList, ShellCtrls, Clipbrd, XPMan, ToolWin,
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
@@ -44,9 +44,6 @@ type
     TabSheet3: TTabSheet;
     TabSheet4: TTabSheet;
     GroupBoxDrive: TGroupBox;
-    ComboBoxDrives: TComboBox;
-    ComboBoxSpeed: TComboBox;
-    StaticTextSpeed: TStaticText;
     CheckBoxDummy: TCheckBox;
     GroupBoxCDRWDelete: TGroupBox;
     RadioButtonCDRWBlankAll: TRadioButton;
@@ -61,7 +58,6 @@ type
     RadioButtonMSInfo: TRadioButton;
     RadioButtonScanbus: TRadioButton;
     RadioButtonPrcap: TRadioButton;
-    Bevel1: TBevel;
     MainMenu1: TMainMenu;
     Projekt1: TMenuItem;
     MainMenuLoadProject: TMenuItem;
@@ -186,14 +182,10 @@ type
     CheckBoxImageClone: TCheckBox;
     MiscPopupClearOutput: TMenuItem;
     Panel1: TPanel;
-    Bevel2: TBevel;
     ButtonSettings: TButton;
-    Bevel3: TBevel;
     ButtonStart: TButton;
     ButtonCancel: TButton;
     ButtonAbort: TButton;
-    ProgressBar: TProgressBar;
-    SpeedButtonFixCD: TSpeedButton;
     ButtonAudioCDTracks: TButton;
     LabelAudioCDText: TLabel;
     N2: TMenuItem;
@@ -275,7 +267,6 @@ type
     MainMenuShowOutputWindow: TMenuItem;
     MainMenuSettings: TMenuItem;
     N5: TMenuItem;
-    ProgressBarTotal: TProgressBar;
     MainMenuCdrtfeIni: TMenuItem;
     N6: TMenuItem;
     CheckBoxISOVerify: TCheckBox;
@@ -284,12 +275,56 @@ type
     TreeListViewPopupPaste: TMenuItem;
     LabelReadCDRetries: TLabel;
     EditReadCDRetries: TEdit;
+    MainMenuToggleLogWindow: TMenuItem;
+    XPManifest1: TXPManifest;
+    PanelTabSheet1: TPanel;
+    PanelTabSheet2: TPanel;
+    PanelTabSheet3: TPanel;
+    PanelTabSheet8: TPanel;
+    ToolBar1: TToolBar;
+    ToolButton1: TToolButton;
+    ToolButtonLoad: TToolButton;
+    ToolButtonSave: TToolButton;
+    ToolButton4: TToolButton;
+    ToolButtonSettings: TToolButton;
+    ToolButton6: TToolButton;
+    ToolButtonStart: TToolButton;
+    ToolButtonAbort: TToolButton;
+    ToolButton9: TToolButton;
+    ToolButtonClose: TToolButton;
+    Bevel5: TBevel;
+    StaticTextSpeed: TStaticText;
+    ComboBoxSpeed: TComboBox;
+    ComboBoxDrives: TComboBox;
+    ProgressBarTotal: TProgressBar;
+    ProgressBar: TProgressBar;
+    SpeedButtonFixCD: TSpeedButton;
+    Aktion1: TMenuItem;
+    MainMenuStart: TMenuItem;
+    MainMenuAbort: TMenuItem;
+    N7: TMenuItem;
+    MainMenuFixate: TMenuItem;
     RadioButtonMetaData: TRadioButton;
+    MainMenuErase: TMenuItem;
+    N8: TMenuItem;
+    MainMenuEraseFast: TMenuItem;
+    MainMenuEraseFull: TMenuItem;
+    MainMenuShowInfo: TMenuItem;
+    MainMenuInfoDev: TMenuItem;
+    MainMenuInfoDisk: TMenuItem;
+    MainMenuInfoSCSI: TMenuItem;
+    MainMenuInfoDevice: TMenuItem;
+    MainMenuInfoTOC: TMenuItem;
+    MainMenuInfoATIP: TMenuItem;
+    MainMenuInfoMSI: TMenuItem;
+    MainMenuInfoDiskInfo: TMenuItem;
+    MainMenuInfoCap: TMenuItem;
+    MainMenuInfoMeta: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormDblClick(Sender: TObject);
-    procedure MainMenuInfoClick(Sender: TObject);
+    procedure MainMenuAboutClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure TreeViewChange(Sender: TObject; Node: TTreeNode);
     procedure FormShow(Sender: TObject);
@@ -414,6 +449,13 @@ type
     procedure MainMenuCdrtfeIniClick(Sender: TObject);
     procedure TreeListViewPopupMenuPopup(Sender: TObject);
     procedure TreeListViewPopupPasteClick(Sender: TObject);
+    procedure MainMenuToggleLogWindowClick(Sender: TObject);
+    procedure MainMenuStartClick(Sender: TObject);
+    procedure MainMenuAbortClick(Sender: TObject);
+    procedure MainMenuFixateClick(Sender: TObject);
+    procedure MainMenuEraseFastClick(Sender: TObject);
+    procedure MainMenuEraseFullClick(Sender: TObject);
+    procedure MainMenuShowInfoClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -444,11 +486,14 @@ type
     ActionUserSettings : TAction;
     ActionUserShowOutputWindow: TAction;
     ActionUserSpecialTab: TAction;
+    ActionUserToggleLogWindow: TAction;
+    ActionUserToggleExplorerLog: TAction;
     FImageTabFirstShow  : Boolean;
     FImageTabFirstWrite : Boolean;
     FCheckingControls   : Boolean;
     FFileExplorerShowing: Boolean;
     FOutputWindowShowing: Boolean;
+    FLogWindowShowing   : Boolean;
     FLVArray: array[0..cLVCount] of TListView;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
@@ -468,6 +513,8 @@ type
     procedure CheckExitCode;
     {$ENDIF}
     procedure ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
+    procedure DoMenuEraseDisk(const FastErase: Boolean);
+    procedure DoMenuShowInfo(const ID: Integer);
     procedure GetSettings;
     procedure InitMainform;
     procedure InitSpaceMeter;
@@ -476,6 +523,8 @@ type
     procedure LoadProject(const ListsOnly: Boolean);
     procedure SaveProject(const ListsOnly: Boolean);
     procedure SaveWinPos;
+    procedure SetFileBrowserParent;
+    procedure SetPanelSize(const Status: Boolean; const FileExplorerHeight: Integer);
     procedure SetGlobalWriter;
     procedure SetHelpFile;
     procedure SetSettings;
@@ -487,6 +536,7 @@ type
     procedure SpecialTab;
     procedure ToggleFileExplorer(const Status: Boolean);
     procedure ToggleOutputWindow(const Status: Boolean);
+    procedure ToggleLogWindow(const Status: Boolean);
     {$IFDEF AllowToggle}
     procedure ToggleOptions(Sender: TObject);
     {$ENDIF}
@@ -567,6 +617,8 @@ type
     procedure ActionUserSettingsExecute(Sender: TObject);
     procedure ActionUserShowOutputWindowExecute(Sender: TObject);
     procedure ActionUserSpecialTabExecute(Sender: TObject);
+    procedure ActionUserToggleLogWindowExecute(Sender: TObject);
+    procedure ActionUserToggleExplorerLogExecute(Sender: TObject);
     procedure ImageTabInitRadioButtons;
   public
     { Public declarations }
@@ -579,6 +631,7 @@ implementation
 {$R *.DFM}
 {$R ../resource/icons.res}
 {$R ../resource/buttons.res}
+{$R ../resource/toolbuttons.res}
 {$R ../resource/logo.res}
 
 uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
@@ -710,9 +763,11 @@ end;
   Wenn WM_TTerminated empfangen wird, ist der zweite Thread beendet worden.    }
 
 procedure TCdrtfeMainForm.WMTTerminated(var Msg: TMessage);
-begin                       
+var Ok: Boolean;
+begin
   {$IFDEF ShowCmdError}
   FExitCode := Msg.wParam;
+  Ok := FExitCode = 0;
   {$ENDIF}
   TLogWin.Inst.ProgressBarDoMarquee(False);
   {EnvironmentBlock entsorgen, falls nötig}
@@ -720,6 +775,11 @@ begin
   {Aufräumen: aufgrund des Multithreadings hierher verschoben}
   FAction.CleanUp(2);  
   {Thread zu Vergleichen der Dateien starten}
+  if not Ok then
+  begin
+    {Im Fehlerfaller abbrechen}
+    SendMessage(Handle, WM_VTerminated, 0, 0);
+  end else
   if (FAction.LastAction = cDataCD) and FSettings.DataCD.Verify  and
      not ((FSettings.DataCD.ImageOnly and not FSettings.DataCD.OnTheFly)
           or FSettings.Cdrecord.Dummy) then
@@ -2813,6 +2873,7 @@ begin
   end;
   {FileExplorer}
   FSettings.FileExplorer.Showing := FFileExplorerShowing;
+  FSettings.FileExplorer.HideLogWindow := not FLogWindowShowing;
   FSettings.FileExplorer.Path := FileBrowser.Path;
 end;
 
@@ -2863,6 +2924,7 @@ begin
           FLVArray[i].Columns[j].Width := FSettings.WinPos.LVColWidth[i, j];
   end;
   {FileExplorer}
+  ToggleLogWindow(not FSettings.FileExplorer.HideLogWindow);
   ToggleFileExplorer(FSettings.FileExplorer.Showing);
 end;
 
@@ -3217,32 +3279,88 @@ begin
   end;
 end;
 
+{ SetFileBrowserParent ---------------------------------------------------------
+
+  setzt beim Panel, das den Filebrowser enthält den Parent entsprechend des
+  aktiven Tabsheets.                                                           }
+
+procedure TCdrtfeMainForm.SetFileBrowserParent;
+var ActivePage: Integer;
+begin
+  if FFileExplorerShowing then
+  begin
+    ActivePage := GetActivePage;
+    case ActivePage of
+      cDataCD,
+      cAudioCD,
+      cXCD,
+      cVideoCD: PanelBrowser.Parent := PageControl1.Pages[ActivePage - 1];
+    else
+      PanelBrowser.Parent := PageControl1.Pages[0];
+    end;
+  end;
+end;
+
+{ SetPanelSize ----------------------------------------------------------------
+
+  setzt bei den Panels auf den Tabsheets die Höhe in Abhängigkeit der Größe
+  des FileExplorers .                                                          }
+
+procedure TCdrtfeMainForm.SetPanelSize(const Status: Boolean;
+                                       const FileExplorerHeight: Integer);
+var i         : Integer;
+    Panel     : TPanel;
+    PanelArray: array[1..4] of TPanel;
+begin
+  PanelArray[1] := PanelTabSheet1;
+  PanelArray[2] := PanelTabSheet2;
+  PanelArray[3] := PanelTabSheet3;
+  PanelArray[4] := PanelTabSheet8;
+  for i := 1 to 4 do
+  begin
+    Panel := PanelArray[i];
+    if Status then
+    begin
+      Panel.Top := FileExplorerHeight;
+      Panel.Height := TabSheet1.Height - FileExplorerHeight;
+    end else
+    begin
+      Panel.Top := 0;
+      Panel.Height := TabSheet1.Height;
+    end;
+  end;
+end;
+
 { ToggleFileExplorer -----------------------------------------------------------
 
   Der FileExlorer wird je nach übergebenem Wert ein- bzw. abgeschaltet.        }
 
 procedure TCdrtfeMainForm.ToggleFileExplorer(const Status: Boolean);
 var FileExplorerHeight: Integer;
+    TabSheet          : TTabSheet;
 begin
-  FileExplorerHeight := FSettings.FileExplorer.Height + 8;
+  TabSheet := PageControl1.Pages[GetActivePage - 1];
   {FileExplorer zeigen}
   if Status and not FFileExplorerShowing then
   begin
+    FSettings.FileExplorer.Height := Round(TabSheet.Height * 0.45);
+    FileExplorerHeight := FSettings.FileExplorer.Height + 4;
     FFileExplorerShowing := True;
     MainMenuToggleFileExplorer.Checked := True;
     FileBrowser.Path := FSettings.FileExplorer.Path;
-    {PageControl verkleinern}
-    PageControl1.Height  := PageControl1.Height - FileExplorerHeight;
-    PageControl1.Top     := PageControl1.Top + FileExplorerHeight;
-    PanelBrowser.Visible := True;
+    SetPanelSize(Status, FileExplorerHeight);
+    SetFileBrowserParent;
+    PanelBrowser.Width := TabSheet.Width - 5 - 36; //41;
+    PanelBrowser.Height := FSettings.FileExplorer.Height;
+    PanelBrowser.Visible  := True;
   end else
   {FileExplorer ausblenden}
   if not Status and FFileExplorerShowing then
   begin
+    FileExplorerHeight := FSettings.FileExplorer.Height + 4;
     FFileExplorerShowing := False;
     MainMenuToggleFileExplorer.Checked := False;
-    PageControl1.Height  := PageControl1.Height + FileExplorerHeight;
-    PageControl1.Top     := PageControl1.Top - FileExplorerHeight;
+    SetPanelSize(Status, FileExplorerHeight);
     PanelBrowser.Visible := False;
   end;
   FormResize(Self);
@@ -3265,6 +3383,38 @@ begin
     TLogWin.Inst.UnsetMemo2;
     FormOutput.Release;
   end;
+end;
+
+{ ToggleLogWindow --------------------------------------------------------------
+
+  Das Memo mit den Log-Infos ein- bzw. ausblenden.                             }
+
+procedure TCdrtfeMainForm.ToggleLogWindow(const Status: Boolean);
+var MemoHeight: Integer;
+begin
+  MemoHeight := Memo1.Height;
+  {LogWindow zeigen}
+  if Status and not FLogWindowShowing then
+  begin
+    FLogWindowShowing := True;
+    Memo1.Visible := True;
+    Memo1.Enabled := True;
+    Panel1.Enabled := True;
+    MainMenuToggleLogWindow.Checked := True;
+    {PageControl verkleinern}
+    PageControl1.Height  := PageControl1.Height - MemoHeight - 8;
+  end else
+  {LogWindow ausblenden}
+  if not Status and FLogWindowShowing then
+  begin
+    FLogWindowShowing := False;
+    Memo1.Visible := False;
+    Memo1.Enabled := False;
+    Panel1.Enabled := False;
+    MainMenuToggleLogWindow.Checked := False;
+    PageControl1.Height  := PageControl1.Height + MemoHeight + 8;
+  end;
+  FormResize(Self);
 end;
 
 { ToggleOptions ----------------------------------------------------------------
@@ -3838,6 +3988,15 @@ begin
     if FSettings.General.DisableScrSvr then DeactivateScreenSaver;
     if Title = '' then Title := Application.Title;
     Application.Title := FLang.GMS('g009') + ' ' + Title;
+    ToolButtonLoad.Enabled := False;
+    ToolButtonSave.Enabled := False;
+    ToolButtonSettings.Enabled := False;
+    ToolButtonStart.Enabled := False;
+    ToolButtonClose.Enabled := False;
+    ToolButtonAbort.Enabled := True;
+    MainMenuStart.Enabled := False;
+    MainMenuFixate.Enabled := False;
+    MainMenuAbort.Enabled := True;
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
@@ -3851,8 +4010,18 @@ begin
     ButtonSettings.Enabled := True;
     ButtonAbort.Visible := False;
     SpeedButtonFixCD.Enabled := True;
-    if FSettings.General.DisableScrSvr then ActivateScreenSaver;    
+    if FSettings.General.DisableScrSvr then ActivateScreenSaver;
     Application.Title := Title;
+    ToolButtonLoad.Enabled := True;
+    ToolButtonSave.Enabled := True;
+    ToolButtonSettings.Enabled := True;
+    ToolButtonStart.Enabled := True;
+    ToolButtonClose.Enabled := True;
+    ToolButtonAbort.Enabled := False;
+    MainMenuStart.Enabled := True;
+    MainMenuFixate.Enabled := True;
+    MainMenuAbort.Enabled := False;
+
   end;
 end;
 
@@ -3868,8 +4037,11 @@ begin
     {ProDVD-Lizenz-Fehler}
     ShowMsgDlg(FLang.GMS('e002'), FLang.GMS('g001'), MB_cdrtfeError);
   if FExitCode <> 0 then
+  begin
     {sonstiger Fehler}
     ShowMsgDlg(FLang.GMS('e001'), FLang.GMS('g001'), MB_cdrtfeError);
+    if not FLogWindowShowing then ToggleLogWindow(True);
+  end;
   FExitCode := 0;
 end;
 {$ENDIF}
@@ -3974,8 +4146,8 @@ var GlyphArray    : TGlyphArray;
 
   procedure InitFileBrowser;
   begin
-    PanelBrowser.Top := PageControl1.Top;
-    PanelBrowser.Left := PageControl1.Left + 12;
+    PanelBrowser.Top := 8; //PageControl1.Top + 27;
+    PanelBrowser.Left := 8; // PageControl1.Left + 12;
     PanelBrowser.Width := PageControl1.Width - 12 - 36; //41;
     PanelBrowser.Height := FSettings.FileExplorer.Height;
     PanelBrowser.Color := clBackground;
@@ -3991,10 +4163,35 @@ var GlyphArray    : TGlyphArray;
     FileBrowser.ColCaptionModified := FLang.GMS('g015');
     FileBrowser.Init;
     FileBrowser.Show;
+    PanelTabSheet1.ParentBackground := True;
+    PanelTabSheet2.ParentBackground := True;
+    PanelTabSheet3.ParentBackground := True;
+    PanelTabSheet8.ParentBackground := True;
+  end;
+
+  procedure InitMainMenu;
+  begin
+    MainMenu1.Images := FImageLists.ToolButtonImages;
+    MainMenuClose.ImageIndex := 4;
+    MainMenuLoadProject.ImageIndex := 0;
+    MainMenuSaveProject.ImageIndex := 1;
+    MainMenuSettings.ImageIndex := 2;
+    MainMenuStart.ImageIndex := 3;
+    MainMenuAbort.ImageIndex := 5;
+  end;
+
+  procedure InitToolButtonHints;
+  begin
+    ToolButtonLoad.Hint := ReplaceString(MainMenuLoadProject.Caption, '&', '');
+    ToolButtonSave.Hint := ReplaceString(MainMenuSaveProject.Caption, '&', '');
+    ToolButtonSettings.Hint := ReplaceString(MainMenuSettings.Caption, '&', '');
+    ToolButtonStart.Hint := ReplaceString(MainMenuStart.Caption, '&', '');
+    ToolButtonAbort.Hint := ReplaceString(MainMenuAbort.Caption, '&', '');
+    ToolButtonClose.Hint := ReplaceString(MainMenuClose.Caption, '&', '');
   end;
 
 begin
-  SetDoubleBuffered(True);
+  //SetDoubleBuffered(True);
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
   DragAcceptFiles(Self.Handle, true);
@@ -4024,6 +4221,10 @@ begin
   DAEListView.SmallImages := FImageLists.IconImages;
   DAEListView.LargeImages := FImageLists.IconImages;
   VideoListView.SmallImages := FImageLists.SmallImages;
+  {ToolbarImages}
+  Toolbar1.Images := FImageLists.ToolButtonImages;
+  Toolbar1.DisabledImages := FImageLists.ToolButtonImagesD;
+  InitToolButtonHints;
   {OnClick-Event für Option-Labels zuweisen}
   {$IFDEF AllowToggle}
   RegisterLabelEvents;
@@ -4032,9 +4233,14 @@ begin
   InitLVArray;
   {FileBroser}
   InitFileBrowser;
+  {LogWindow}
+  FLogWindowShowing := True;
+  MainMenuToggleLogWindow.Checked := True;
   {Device-Events}
   DeviceChangeNotifier.OnDiskInserted := Self.DeviceArrival;
   DeviceChangeNotifier.OnDiskRemoved := Self.DeviceRemoval;
+  {Mainmenu-Icons}
+  InitMainMenu;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------
@@ -4046,7 +4252,8 @@ begin
   SpaceMeter := TSpaceMeter.Create(Self);
   SpaceMeter.Font := Self.Font;
   SpaceMeter.Captions := FLang.GMS('g014');
-  SpaceMeter.Init(Self, StatusBar.Top - 34, 8, 545, 30,
+  SpaceMeter.Init(Self, StatusBar.Top - 34, 8,
+                 {545}{Memo1.Width}PageControl1.Width, 30,
                   [akLeft, akRight, akBottom]);
   SpaceMeter.OnSpaceMeterTypeChange := SpaceMeterTypeChange;
 end;
@@ -4553,6 +4760,9 @@ begin
     end;
   end;
   SetWinPos;
+  {Gegebenenfalls Startmeldungen anzeigen}
+  if (Memo1.Lines.Count > 0) and not FLogWindowShowing then
+    ToggleLogWindow(True);
   {$IFDEF ShowStartupTime}
   TC.StopTimeCount;
   TLogWin.Inst.Add('StartupTime: ' + TC.TimeAsString);
@@ -4600,6 +4810,7 @@ end;
   für die Speedbuttons auf TabSheet3 (XCD).                                    }
 
 procedure TCdrtfeMainForm.FormResize(Sender: TObject);
+const cMinTaskHeight = 195;
 var TSHeight                 : Integer;
     CanShowFileExplorer      : Boolean;
     ShouldNotShowFileExplorer: Boolean;
@@ -4610,9 +4821,9 @@ begin
     {Resize bei kleiner Schriftart}
     if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
     begin
-      {Höhe des aktuellen TabSheets}
-      TSHeight := PageControl1.ActivePage.Height;
       {TabSheet3}
+      {Höhe des aktuellen TabSheets}
+      TSHeight := PanelTabSheet3.Height; // PageControl1.ActivePage.Height;
       PanelXCD.Top := TSHeight - 101;
       PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
       PanelXCDView.Width := XCDESpeedButton1.Left - 15;
@@ -4625,9 +4836,9 @@ begin
     {Resize mit großer Schriftart}
     if (Screen.PixelsPerInch > 96) and not Application.Terminated then
     begin
-      {Höhe des aktuellen TabSheets}
-      TSHeight := PageControl1.ActivePage.Height;
       {TabSheet3}
+      {Höhe des aktuellen TabSheets}
+      TSHeight := PanelTabSheet3.Height; //PageControl1.ActivePage.Height;
       PanelXCD.Top := TSHeight - 127;
       PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
       PanelXCDView.Width := XCDESpeedButton1.Left - 15;
@@ -4637,16 +4848,27 @@ begin
       XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
       XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
     end;
+    {FileExplorer anpassen}
+    FSettings.FileExplorer.Height := Round(TabSheet1.Height * 0.45);
+    FileExplorerHeight := FSettings.FileExplorer.Height + 4;
+    if FFileExplorerShowing then
+    begin
+      PanelBrowser.Height := FSettings.FileExplorer.Height;
+      SetPanelSize(True, FileExplorerHeight);
+    end;
     {In Abhängigkeit der Fensterhöhe FileExplorer zulassen oder nicht}
-    FileExplorerHeight := FSettings.FileExplorer.Height + 8;
-    CanShowFileExplorer := ((PageControl1.Height - FileExplorerHeight) >= 250);
+    CanShowFileExplorer :=
+      ((PanelTabSheet1.Height - FileExplorerHeight) >= cMinTaskHeight);
     if not FInstanceTermination then
       MainMenuToggleFileExplorer.Enabled := FFileExplorerShowing or
                                             CanShowFileExplorer;
-    {gegebenenfalls FileExplorer automatisch ausblenden}
-    ShouldNotShowFileExplorer := FFileExplorerShowing
-                    and not (CanShowFileExplorer or (PageControl1.Height >= 250));
-    if ShouldNotShowFileExplorer then ToggleFileExplorer(False);
+    {gegebenenfalls FileExplorer automatisch ausblenden oder anpassen}
+    ShouldNotShowFileExplorer := FFileExplorerShowing and
+      not (CanShowFileExplorer or (PanelTabSheet1.Height >= cMinTaskHeight));
+    if ShouldNotShowFileExplorer then
+    begin
+      ToggleFileExplorer(False);
+    end;
   end;
 end;
 
@@ -4854,6 +5076,11 @@ procedure TCdrtfeMainForm.HandleKeyboardShortcut(const Key: Word);
       MainMenuToggleFileExplorerClick(nil);
   end;
 
+  procedure HKSToggleLogWindow;
+  begin
+    MainMenuToggleLogWindowClick(nil);
+  end;
+
   procedure HKSSettings;
   begin
     MainMenuSettingsClick(nil);
@@ -4869,10 +5096,34 @@ procedure TCdrtfeMainForm.HandleKeyboardShortcut(const Key: Word);
     SpecialTab;
   end;
 
+  procedure HKSToggleExplorerLog;
+  begin
+    if FFileExplorerShowing and not FLogWindowShowing then
+    begin
+      ToggleFileExplorer(False);
+      ToggleLogWindow(True);
+    end else
+    if not FFileExplorerShowing and FLogWindowShowing then
+    begin
+      ToggleLogWindow(False);    
+      ToggleFileExplorer(True);
+    end else
+    if not FFileExplorerShowing and not FLogWindowShowing then
+    begin
+      ToggleLogWindow(True);
+    end else
+    if FFileExplorerShowing and FLogWindowShowing then
+    begin
+      ToggleLogWindow(False);
+    end;    
+  end;
+
 begin
   case Key of
     {VK_E}$45: HKSToggleFileExplorer;
     {VK_I}$49: HKSAddFolder;
+    {VK_J}$4A: HKSToggleExplorerLog;
+    {VK_K}$4B: HKSToggleLogWindow;
     {VK_L}$4C: HKSShowOutputWindow;
     {VK_O}$4F: HKSAddFiles;
     {VK_Q}$51: HKSSpecialTab;
@@ -4903,6 +5154,9 @@ begin
     {Bei Daten-CD nochmals einen Dateisystemchek.}
     if FSettings.General.Choice = cDataCD then CheckDataCDFS(True);
     FAction.Reset;
+    {Bei CD-Infos muß das LogWindow angezeigt werden}
+    if (FSettings.General.Choice = cCDInfos) and not FLogWindowShowing then
+      ToggleLogWindow(True);
     {Aktion ausführen}
     FAction.Action := FSettings.General.Choice;
     FAction.StartAction;
@@ -5243,8 +5497,48 @@ begin
   UpdateGauges;
 end;
 
-{ Ansicht/Dateiexplorer }
+{ Aktionen/Start }
 
+procedure TCdrtfeMainForm.MainMenuStartClick(Sender: TObject);
+begin
+  ButtonStartClick(nil);
+end;
+
+{ Aktionen/Abbrechen }
+
+procedure TCdrtfeMainForm.MainMenuAbortClick(Sender: TObject);
+begin
+  FAction.AbortAction;
+end;
+
+{ Aktionen/Fixieren }
+
+procedure TCdrtfeMainForm.MainMenuFixateClick(Sender: TObject);
+begin
+  SpeedButtonFixCDClick(nil);
+end;
+
+{ Aktionen/schnelles Löschen }
+
+procedure TCdrtfeMainForm.MainMenuEraseFastClick(Sender: TObject);
+begin
+  DoMenuEraseDisk(True);
+end;
+
+{ Aktionen/komplettes Löschen }
+
+procedure TCdrtfeMainForm.MainMenuEraseFullClick(Sender: TObject);
+begin
+  DoMenuEraseDisk(False);
+end;
+
+
+procedure TCdrtfeMainForm.MainMenuShowInfoClick(Sender: TObject);
+begin
+  DoMenuShowInfo((Sender as TMenuItem).Tag);
+end;
+
+{ Ansicht/Dateiexplorer }
 
 procedure TCdrtfeMainForm.MainMenuToggleFileExplorerClick(Sender: TObject);
 begin
@@ -5258,6 +5552,17 @@ begin
 end;
 
 { Ansicht/Ausgabefenster }
+
+procedure TCdrtfeMainForm.MainMenuToggleLogWindowClick(Sender: TObject);
+begin
+  if FLogWindowShowing then
+  begin
+    ToggleLogWindow(False);
+  end else
+  begin
+    ToggleLogWindow(True);
+  end;
+end;
 
 procedure TCdrtfeMainForm.MainMenuShowOutputWindowClick(Sender: TObject);
 begin
@@ -5312,17 +5617,76 @@ begin
   Application.HelpContext(1000);
 end;
 
-procedure TCdrtfeMainForm.MainMenuInfoClick(Sender: TObject);
+procedure TCdrtfeMainForm.MainMenuAboutClick(Sender: TObject);
 var AboutBox: TFormAbout;
 begin
   AboutBox := TFormAbout.Create(nil);
   try
-    AboutBox.Lang := FLang;
+    AboutBox.Lang := Flang;
     AboutBox.Portable := FSettings.General.PortableMode;
     AboutBox.ShowModal;
   finally
     AboutBox.Release;
   end;
+end;
+
+{ Hilfsfunktionen für Menü-Events -------------------------------------------- }
+
+{ DoMenuErase ------------------------------------------------------------------
+
+  setzt Einstellungen für das Löschen von Disks, wenn die Aktion aus dem Haupt-
+  mneü heraus aufgerufen wurde.                                                }
+
+procedure TCdrtfeMainForm.DoMenuEraseDisk(const FastErase: Boolean);
+begin
+  SetSettings;
+  FSettings.CDRW.Device := FDevices.CDWriter.Values[
+                             FDevices.CDWriter.Names[
+                               FSettings.General.TabSheetDrive[
+                                 FSettings.General.Choice]]];
+  FSettings.CDRW.Fast         := FastErase;
+  FSettings.CDRW.All          := not FastErase;
+  FSettings.CDRW.OpenSession  := False;
+  FSettings.CDRW.BlankSession := False;
+  FAction.Action := cCDRW;
+  FAction.StartAction;
+end;
+
+{ DoMenuShowInfo ---------------------------------------------------------------
+
+  setzt die Einstellungen für das Anzeigen der Geräte-/Diskinfos.              }
+
+procedure TCdrtfeMainForm.DoMenuShowInfo(const ID: Integer);
+begin
+  SetSettings;
+  FSettings.CDInfo.Device := FDevices.CDWriter.Values[
+                               FDevices.CDWriter.Names[
+                                 FSettings.General.TabSheetDrive[
+                                   FSettings.General.Choice]]];
+  with FSettings.CDInfo do
+  begin
+    Scanbus  := False;
+    Prcap    := False;
+    Toc      := False;
+    Atip     := False;
+    MSInfo   := False;
+    MInfo    := False;
+    CapInfo  := False;
+    MetaInfo := False;
+    case ID of
+      0: Scanbus  := True;
+      1: Prcap    := True;
+      2: Toc      := True;
+      3: Atip     := True;
+      4: MsInfo   := True;
+      5: MInfo    := True;
+      6: CapInfo  := True;
+      7: MetaInfo := True;
+    end;
+  end;
+  FAction.Action := cCDInfos;
+  FAction.StartAction;
+  if not FLogWindowShowing then ToggleLogWindow(True);  
 end;
 
 
@@ -5339,6 +5703,7 @@ begin
   CheckControls;
   UpdateGauges;
   UpdateOptionPanel;
+  SetFileBrowserParent;
   {Workaround for odd RadioButton behaviour}
   if FImageTabFirstShow and Self.Active and
      (PageControl1.ActivePage = TabSheet7) then
@@ -7028,6 +7393,16 @@ begin
   ActionUserSpecialTab.ShortCut := ShortCut($51{VK_Q}, [ssAlt]);
   ActionUserSpecialTab.OnExecute := ActionUserSpecialTabExecute;
   ActionUserSpecialTab.ActionList := ActionList;
+  {Actions erstellen - LogWindow ein- bzw. ausblenden}
+  ActionUserToggleLogWindow := TAction.Create(ActionList);
+  ActionUserToggleLogWindow.ShortCut :=  ShortCut($4B{VK_K}, [ssAlt]);
+  ActionUserToggleLogWindow.OnExecute := ActionUserToggleLogWindowExecute;
+  ActionUserToggleLogWindow.ActionList := ActionList;
+  {Actions erstellen - LogWindow und Explorer aus- und einblenden}
+  ActionUserToggleExplorerLog := TAction.Create(ActionList);
+  ActionUserToggleExplorerLog.ShortCut :=  ShortCut($4A{VK_J}, [ssAlt]);
+  ActionUserToggleExplorerLog.OnExecute := ActionUserToggleExplorerLogExecute;
+  ActionUserToggleExplorerLog.ActionList := ActionList;
 end;
 
 procedure TCdrtfeMainForm.ActionUserAddFileExecute(Sender: TObject);
@@ -7077,9 +7452,19 @@ end;
 
 procedure TCdrtfeMainForm.ActionUserSpecialTabExecute(Sender: TObject);
 begin
-    HandleKeyboardShortcut($51);
+  HandleKeyboardShortcut($51);
 end;
 
+procedure TCdrtfeMainForm.ActionUserToggleLogWindowExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($4B);
+end;
+
+procedure TCdrtfeMainForm.ActionUserToggleExplorerLogExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut($4A);
+end;
+                              
 { Hilfsfunktionen ------------------------------------------------------------ }
 
 { ExpandNodeDelayed ------------------------------------------------------------
