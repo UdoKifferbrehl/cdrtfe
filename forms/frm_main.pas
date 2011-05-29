@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.04.2011
+  letzte Änderung  29.05.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3976,6 +3976,7 @@ procedure TCdrtfeMainForm.SetButtons(const Status: TOnOff);
 {$J+}
 const Title: string = '';
 {$J-}
+
 begin
   if Status = oOff then
   begin
@@ -3994,9 +3995,12 @@ begin
     ToolButtonStart.Enabled := False;
     ToolButtonClose.Enabled := False;
     ToolButtonAbort.Enabled := True;
+    Projekt1.Enabled := False;
     MainMenuStart.Enabled := False;
+    MainMenuErase.Enabled := False;
     MainMenuFixate.Enabled := False;
     MainMenuAbort.Enabled := True;
+    MainMenuShowInfo.Enabled := False;
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
@@ -4018,10 +4022,12 @@ begin
     ToolButtonStart.Enabled := True;
     ToolButtonClose.Enabled := True;
     ToolButtonAbort.Enabled := False;
+    Projekt1.Enabled := True;
     MainMenuStart.Enabled := True;
+    MainMenuErase.Enabled := True;
     MainMenuFixate.Enabled := True;
     MainMenuAbort.Enabled := False;
-
+    MainMenuShowInfo.Enabled := True;
   end;
 end;
 
@@ -5404,7 +5410,7 @@ end;
 
 procedure TCdrtfeMainForm.MainMenuCloseClick(Sender: TObject);
 begin
-  Application.Terminate;
+  Self.Close; //Application.Terminate;
 end;
 
 { Projekt/Projekt laden }
