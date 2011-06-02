@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  29.05.2011
+  letzte Änderung  02.06.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3973,34 +3973,63 @@ end;
   der Bildschirmschoner deaktiviert.                                           }
 
 procedure TCdrtfeMainForm.SetButtons(const Status: TOnOff);
-{$J+}
-const Title: string = '';
-{$J-}
+
+const cCompCount = 22;
+      cCompInverted = 2;
+      {$J+}
+      Title: string = '';
+      {$J-}
+
+var CompArray: array[1..cCompCount] of TComponent;
+
+  procedure SetComponentArray;
+  begin
+    CompArray[1] := ToolButtonAbort;   // inverted
+    CompArray[2] := MainMenuAbort;     // inverted
+    CompArray[3] := ButtonStart;
+    CompArray[4] := ButtonCancel;
+    CompArray[5] := ButtonSettings;
+    CompArray[6] := SpeedButtonFixCD;
+    CompArray[7] := ToolButtonLoad;
+    CompArray[8] := ToolButtonSave;
+    CompArray[9] := ToolButtonSettings;
+    CompArray[10] := ToolButtonStart;
+    CompArray[11] := ToolButtonClose;
+    CompArray[12] := MainMenuLoadProject;
+    CompArray[13] := MainMenuSaveProject;
+    CompArray[14] := MainMenuLoadFileList;
+    CompArray[15] := MainMenuSaveFileList;
+    CompArray[16] := MainMenuReloadDefaults;
+    CompArray[17] := MainMenuReset;
+    CompArray[18] := MainMenuStart;
+    CompArray[19] := MainMenuErase;
+    CompArray[20] := MainMenuFixate;
+    CompArray[21] := MainMenuInfoDev;
+    CompArray[22] := MainMenuInfoDisk;
+  end;
+
+  procedure SwitchComponents(const Value: Boolean);
+  var i: Integer;
+      v: Boolean;
+  begin
+    for i := 1 to cCompCount do
+    begin
+      if i <= cCompInverted then v := not Value else v := Value;
+      if CompArray[i] is TControl then (CompArray[i] as TControl).Enabled := v;
+      if CompArray[i] is TMenuItem then (CompArray[i] as TMenuItem).Enabled := v;
+    end;
+  end;
 
 begin
+  SetComponentArray;
   if Status = oOff then
   begin
     FSettings.Environment.ProcessRunning := True;
-    ButtonStart.Enabled := False;
-    ButtonCancel.Enabled := False;
-    ButtonSettings.Enabled := False;
+    SwitchComponents(False);
     ButtonAbort.Visible := True;
-    SpeedButtonFixCD.Enabled := False;
     if FSettings.General.DisableScrSvr then DeactivateScreenSaver;
     if Title = '' then Title := Application.Title;
     Application.Title := FLang.GMS('g009') + ' ' + Title;
-    ToolButtonLoad.Enabled := False;
-    ToolButtonSave.Enabled := False;
-    ToolButtonSettings.Enabled := False;
-    ToolButtonStart.Enabled := False;
-    ToolButtonClose.Enabled := False;
-    ToolButtonAbort.Enabled := True;
-    Projekt1.Enabled := False;
-    MainMenuStart.Enabled := False;
-    MainMenuErase.Enabled := False;
-    MainMenuFixate.Enabled := False;
-    MainMenuAbort.Enabled := True;
-    MainMenuShowInfo.Enabled := False;
     Self.Update; {damit die Änderngen sofort wirksam werden}
   end else
   begin
@@ -4009,25 +4038,10 @@ begin
     TLogWin.Inst.TaskBarProgressIndicatorHide;
     {$ENDIF}
     FSettings.Environment.ProcessRunning := False;
-    ButtonStart.Enabled := True;
-    ButtonCancel.Enabled := True;
-    ButtonSettings.Enabled := True;
+    SwitchComponents(True);
     ButtonAbort.Visible := False;
-    SpeedButtonFixCD.Enabled := True;
     if FSettings.General.DisableScrSvr then ActivateScreenSaver;
     Application.Title := Title;
-    ToolButtonLoad.Enabled := True;
-    ToolButtonSave.Enabled := True;
-    ToolButtonSettings.Enabled := True;
-    ToolButtonStart.Enabled := True;
-    ToolButtonClose.Enabled := True;
-    ToolButtonAbort.Enabled := False;
-    Projekt1.Enabled := True;
-    MainMenuStart.Enabled := True;
-    MainMenuErase.Enabled := True;
-    MainMenuFixate.Enabled := True;
-    MainMenuAbort.Enabled := False;
-    MainMenuShowInfo.Enabled := True;
   end;
 end;
 
