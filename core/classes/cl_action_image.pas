@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.03.2011
+  letzte Änderung  11.06.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -114,7 +114,6 @@ var i         : Integer;
     SimulDev  : string;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  Ok := True;
   SimulDev := 'cdr';
   CMArgs.ForcedContinue := False;
   CMArgs.Choice := cCDImage;
@@ -263,6 +262,7 @@ begin
                      FSettings.Environment.EnvironmentBlock);
   end else
   begin
+    CleanUp(2);
     SendMessage(FFormHandle, WM_ButtonsOn, 0, 0);
   end;
 end;
