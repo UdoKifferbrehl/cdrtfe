@@ -4,7 +4,7 @@
 
   Copyright (c) 2008-2011 Oliver Valencia
 
-  letzte Änderung  19.03.2011
+  letzte Änderung  19.06.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -51,6 +51,9 @@ const cDiskTypeCount = 7;    // zählt von 0 an! counts from 0!
                             'BD 23.3 GiB',
                             'BD DL 46,6 GiB');
 
+      cDiskTypeStrings: array[0..4] of string =
+                          ('CD', 'DVD', 'DVD/DL', 'BD', 'BD DL');
+
       cUnitMiB: string = 'MiB';
       cUnitMin: string = 'min';
       {$J-}
@@ -68,6 +71,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        FSpaceMeterMode: TSpaceMeterMode;
        FUnitMiB       : string;
        FUnitMin       : string;
+       FDiskType      : string;
      protected
        procedure Paint; override;
      public
@@ -77,6 +81,7 @@ type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
        property SpaceMeterMode: TSpaceMeterMode read FSpaceMeterMode write FSpaceMeterMode;
        property UnitMiB: string read FUnitMiB write FUnitMib;
        property UnitMin: string read FUnitMin write FUnitMin;
+       property DiskType: string read FDiskType write FDiskType;
      end;
 
      TSpaceMeter = class(TPanel)
@@ -141,12 +146,14 @@ var TickCount : Integer;
     TickPos   : Integer;
     TickNumTxt: Integer;
     TickUnit  : string;
+    DiskText  : string;
     i         : Integer;
     TickWidth : Double;
     Divisor   : Integer;
     OutText   : string;
 begin
   Canvas.Font.Name := (Owner as TPanel).Font.Name;
+  DiskText := '[' + FDiskType + '] ';
   if FSpaceMeterMode = SMM_AudioCD then
   begin
     {AudioCD: Teilstrich = 60 sec}
@@ -157,6 +164,7 @@ begin
   begin
     Divisor := 10;
     TickUnit := '';
+    DiskText := '';
   end else
   begin
     {Daten-CD/DVD:
@@ -177,7 +185,8 @@ begin
   Canvas.Font.Color := clBlack;        //FTextColour;
   Canvas.Brush.Style := bsClear;
   {Einheit angeben}
-  Canvas.TextOut(0, Tick{10 + 1}, TickUnit);
+  OutText := DiskText + TickUnit;
+  Canvas.TextOut(0, Tick{10 + 1}, OutText);
   {Skala zeichnen}
   for i := 1 to TickCount do
   begin
@@ -233,14 +242,18 @@ var List   : TStringList;
 begin
   List := TStringList.Create;
   List.Text := Value;
-  MSCount := List.Count - 3; {die letzen beiden Einträge sind Einheiten}
-  for i := 0 to MSCount {cDiskTypeCount} do
+  MSCount := List.Count - 8; {die letzen sieben Einträge sind Einheiten und }
+  for i := 0 to MSCount {cDiskTypeCount} do                      {DiskTypen }
   begin
     cPopupMenuStrings[i] := List[i];
     FPopupMenu.Items[i].Caption := List[i];
    end;
   FScale.UnitMiB := List[MSCount {cDiskTypeCount} + 1];
   FScale.UnitMin := List[MSCount {cDiskTypeCount} + 2];
+  for i := MSCount + 3 to List.Count - 1 do
+  begin
+    cDiskTypeStrings[i - MSCount - 3] := List[i];
+  end;
   List.Free;
 end;
 
@@ -359,6 +372,18 @@ procedure TSpaceMeter.SetDiskSizeMax(Value: Integer);
 begin
   FDiskSizeMax := Value;
   FScale.Capacity := Value;
+  case FDiskType of
+    SMDT_CD650,
+    SMDT_CD700,
+    SMDT_CD800,
+    SMDT_CD870 : FScale.DiskType := cDiskTypeStrings[0];
+    SMDT_DVD   : FScale.DiskType := cDiskTypeStrings[1];
+    SMDT_DVD_DL: FScale.DiskType := cDiskTypeStrings[2];
+    SMDT_BD    : FScale.DiskType := cDiskTypeStrings[3];
+    SMDT_BD_DL : FScale.DiskType := cDiskTypeStrings[4];
+  else
+    FScale.DiskType := '';
+  end;
   UpdateProgressBar;
   UpdateRemainingSpace;
   FScale.Invalidate;
