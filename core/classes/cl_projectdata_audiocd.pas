@@ -2,10 +2,10 @@
 
   cl_projectdata_audiocd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.05.2010
+  letzte Änderung  19.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -749,9 +749,47 @@ end;
   sortiert die Trackliste nach den Dateinamen.                                 }
 
 procedure TAudioCD.SortTracks;
-//var i: Integer;
+var NameList: TStringList;
+    i       : Integer;
+
+  procedure AddSortPrefixToList(List: TStringList);
+  var Index: Integer;
+  begin
+    for Index := 0 to List.Count - 1 do
+    begin
+      List[Index] := NameList[Index] + '>' + List[Index];
+    end;
+  end;
+
+  procedure RemoveSortPrefixToList(List: TStringList);
+  var Index: Integer;
+      Temp : string;
+  begin
+    for Index := 0 to List.Count - 1 do
+    begin
+      Temp := List[Index];
+      Delete(Temp, 1, Pos('>', Temp));
+      List[Index] := Temp;
+    end;
+  end;
+
 begin
-  { noch zu implementieren }
+  NameList := TStringList.Create;
+  for i := 0 to FTrackList.Count - 1 do
+  begin
+    NameList.Add(
+      ChangeFileExt(ExtractFileName(StringLeft(FTrackList[i], '|')), ''));
+  end;
+  AddSortPrefixToList(FTrackList);
+  AddSortPrefixToList(FTextInfo);
+  AddSortPrefixToList(FPauseInfo);
+  NameList.Free;
+  FTrackList.Sort;
+  FTextInfo.Sort;
+  FPauseInfo.Sort;
+  RemoveSortPrefixToList(FTrackList);
+  RemoveSortPrefixToList(FTextInfo);
+  RemoveSortPrefixToList(FPauseInfo);
 end;
 
 end.

@@ -2352,6 +2352,15 @@ object CdrtfeMainForm: TCdrtfeMainForm
       Caption = 'Track nach unten verschieben'
       OnClick = AudioListViewPopupMoveDownClick
     end
+    object AudioListViewPopupN3: TMenuItem
+      Tag = 3
+      Caption = '-'
+    end
+    object AudioListViewPopupSort: TMenuItem
+      Tag = 3
+      Caption = 'Sortieren'
+      OnClick = AudioListViewPopupSortClick
+    end
     object AudioListViewPopupN2: TMenuItem
       Tag = 3
       Caption = '-'

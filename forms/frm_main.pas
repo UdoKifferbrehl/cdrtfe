@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.06.2011
+  letzte Änderung  19.06.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -320,6 +320,8 @@ type
     MainMenuInfoDiskInfo: TMenuItem;
     MainMenuInfoCap: TMenuItem;
     MainMenuInfoMeta: TMenuItem;
+    AudioListViewPopupN3: TMenuItem;
+    AudioListViewPopupSort: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -456,6 +458,7 @@ type
     procedure MainMenuEraseFastClick(Sender: TObject);
     procedure MainMenuEraseFullClick(Sender: TObject);
     procedure MainMenuShowInfoClick(Sender: TObject);
+    procedure AudioListViewPopupSortClick(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -556,6 +559,7 @@ type
     procedure UserMoveFile(SourceNode, DestNode: TTreeNode; View: TListView);
     procedure UserMoveFolder(SourceNode, DestNode: TTreeNode);
     procedure UserMoveTrack(List: TListView; const Direction: TDirection);
+    procedure UserSortTracks(List: TListView);
     procedure UserNewFolder(Tree: TTreeView);
     procedure UserOpenFile(List: TListView);
     procedure UserRenameFile(View: TListView);
@@ -2471,6 +2475,19 @@ begin
     FileList := FData.GetFileList('', FSettings.General.Choice);
     FormDebug.Memo2.Lines.Assign(FileList);
     {$ENDIF}
+  end;
+end;
+
+{ UserSortTracks ---------------------------------------------------------------
+
+  UserSortTracks sortiert die Trackliste nach Namen.                           }
+
+procedure TCdrtfeMainForm.UserSortTracks(List: TListView);
+begin
+  if List.Items.Count > 1 then
+  begin
+    FData.SortTracks(FSettings.General.Choice);
+    ShowTracks;
   end;
 end;
 
@@ -6906,6 +6923,15 @@ var ListView   : TListView;
     PlayVisible: Boolean;
 begin
   ListView := GetCurrentListView(Sender);
+  if (ListView.Items.Count < 2) or (ListView = VideoListView) then
+  begin
+    AudioListViewPopupN3.Visible := False;
+    AudioListViewPopupSort.Visible := False;
+  end else
+  begin
+    AudioListViewPopupN3.Visible := True;
+    AudioListViewPopupSort.Visible := True;
+  end;
   if ListView.SelCount = 0 then
   begin
     AudioListViewPopupAddTrack.Visible := True;
@@ -6992,6 +7018,17 @@ begin
   UserOpenFile(GetCurrentListView(GetPopupComp(Sender)));
 end;
 
+{ Audio-CD: Sort tracks}
+
+procedure TCdrtfeMainForm.AudioListViewPopupSortClick(Sender: TObject);
+var ListView: TListView;
+begin
+  ListView := GetCurrentListView(Sender);
+  if ListView.Items.Count > 0 then
+  begin
+    UserSortTracks(ListView);
+  end;
+end;
 
 { Kontextmenü, sonstiges  ------------------------------------------------------
 
