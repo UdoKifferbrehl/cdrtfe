@@ -4,7 +4,7 @@
 
   Copyright (c) 2007-2011 Oliver Valencia
 
-  letzte Änderung  11.06.2010
+  letzte Änderung  19.06.2010
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -179,7 +179,7 @@ begin
           Source := ExtractFileDir(FFileName) + '\' + Source; 
         
         Name := FSettings.General.TempFolder + '\' +
-                ExtractFileName(Name) + cExtWav;
+                ChangeFileExt(ExtractFileName(Name), cExtWav);
         FTempFiles.Add(Name);
         AddCommandLine(Source, Name);
         if Quoted then Name := QuotePath(Name); 
