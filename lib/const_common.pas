@@ -1,9 +1,9 @@
 { const_common.pas: allgemeine Konstanten-Deklaration
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.10.2008
+  letzte Änderung  11.07.2008
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -31,7 +31,7 @@ const {für KeyPress-Events}
       TVS_NoTooltips = $80;
 
       {Standard-Puffergröße}
-      cBufSize = $800;
+      cBufSize = $40000; //$800;
 
       {Dateiendungen}
       cExtExe          : string = '.exe';

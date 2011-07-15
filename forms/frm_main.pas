@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.06.2011
+  letzte Änderung  10.07.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -643,6 +643,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_xcd_options, frm_settings, frm_about, frm_output,
      frm_videocd_options, frm_dae_options,
      cl_cdrtfedata, cl_devicechange, cl_sessionimport,
+     {$IFDEF ShowTime} cl_timecount, {$ENDIF}
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      {$IFDEF ShowCDTextInfo} f_cdtext, {$ENDIF}
