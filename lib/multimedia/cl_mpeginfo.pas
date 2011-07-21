@@ -137,6 +137,8 @@ type TMPEGInfoError = (MIE_NoError, MIE_FileNotFound, MIE_InvalidMPEGFile);
 
 implementation
 
+uses const_common;
+
 const { MPEG Audio Version }
       MPEG_VER_UNKNOWN      = 0; { Unknown     }
       MPEG_VER_1            = 1; { Version 1   }
@@ -417,7 +419,7 @@ end;
 
 function TMPEGFile.FindFirstMPEGHeader(FileIn: TFileStream):Longint;
 const MaxHeader = 4;
-var Buffer       : array[0..8191] of Byte;
+var Buffer       : array[0..cBufSize - 1{8191}] of Byte;
     BytesRead    : Integer;
     FirstFramePos: Longint;
     TempPos      : Longint;
@@ -535,7 +537,7 @@ var FileIn       : TFileStream;
     BSize        : Integer;
     NBytes       : Integer;
     FrameLength  : Extended;
-    Buffer       : array[0..2048] of Byte;
+    Buffer       : array[0..cBufSize - 1{2048}] of Byte;
     MPEGFrameInfo: TMPEGFrameInfo;
     FirstFramePos: Longint;
     i            : Integer;

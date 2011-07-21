@@ -2401,6 +2401,9 @@ begin
       Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
       FileList.Assign(OpenDialog1.Files);
       FileList.Sort;
+      {$IFDEF ShowTimeAddTracks}
+      TC.StartTimeCount;
+      {$ENDIF}
       for i := 0 to FileList.Count - 1 do
       begin
         case FSettings.General.Choice of
@@ -2409,6 +2412,10 @@ begin
         end;
         HandleError(FData.LastError, FileList[i]);
       end;
+      {$IFDEF ShowTimeAddTracks}
+      TC.StopTimeCount;
+      TLogWin.Inst.Add('add Tracks: ' + TC.TimeAsString);
+      {$ENDIF}
       CacheFolderName(DialogID, OpenDialog1.FileName);
     end;
     OpenDialog1.Free;

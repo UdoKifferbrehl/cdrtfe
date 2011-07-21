@@ -205,6 +205,10 @@
 
 {$IFDEF ShowTime}
 
+{$DEFINE xShowTimeAddTracks}
+         // Dauer des Hinzufügens (und Analysierens} von Audio-/Video-Tracks
+         //   - betrifft: frm_main.pas
+
 {$DEFINE xShowVerifyTime}
          // Dauer des Vergleichs anzeigen
          //   - betrifft: cl_verifythread.pas
