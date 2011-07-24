@@ -2,9 +2,9 @@
 ;
 ;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.3.5
 ;
-;  Copyright (c) 2006-2010 Oliver Valencia
+;  Copyright (c) 2006-2011 Oliver Valencia
 ;
-;  letzte Änderung  10.10.2010
+;  letzte Änderung  24.07.2011
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,11 +12,11 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVerName "cdrtfe 1.3.9"
+#define MyAppVerName "cdrtfe 1.4"
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
-#define MyAppCopyright "Copyright © 2002-2010  O. Valencia, O. Kutsche"
+#define MyAppCopyright "Copyright © 2002-2011  O. Valencia, O. Kutsche"
 
 [Setup]
 ; Installer
@@ -33,11 +33,11 @@ UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
 ; Compiler
-VersionInfoVersion=1.3.9
+VersionInfoVersion=1.4
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
 ;OutputDir=J:\shared\cdrtfe
-OutputBaseFilename=cdrtfe-1.3.9
+OutputBaseFilename=cdrtfe-1.4
 ; Compression
 ;Compression=none
 Compression=lzma
@@ -76,8 +76,8 @@ Source: I:\cdrtfe\proto\cdrtfedbg.dll; DestDir: {app}; DestName: cdrtfedbg.dll; 
 Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: ignoreversion; Components: prog
 Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: ignoreversion; Components: prog; Check: IsWin64;
 Source: I:\cdrtfe\proto\cdrtfe.jdbg; DestDir: {app}; Flags: ignoreversion; Components: prog
-; Manifest
-Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
+; Manifest - seit Version 1.4 nicht mehr benötigt
+; Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
 ; Icons/Glyphs
 Source: I:\cdrtfe\proto\icons\*; DestDir: {app}\icons; Flags: ignoreversion; Components: prog
 ; Language files
