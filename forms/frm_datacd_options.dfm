@@ -4,7 +4,7 @@ object FormDataCDOptions: TFormDataCDOptions
   HelpContext = 1301
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'Daten-CD - Optionen'
+  Caption = 'Daten-Disk - Optionen'
   ClientHeight = 338
   ClientWidth = 458
   Color = clBtnFace
@@ -27,7 +27,7 @@ object FormDataCDOptions: TFormDataCDOptions
     Top = 224
     Width = 441
     Height = 73
-    Caption = 'CD'
+    Caption = 'Disk'
     TabOrder = 3
     object CheckBoxMulti: TCheckBox
       Left = 8
@@ -52,7 +52,7 @@ object FormDataCDOptions: TFormDataCDOptions
       Top = 24
       Width = 225
       Height = 17
-      Caption = 'CD abschlie'#223'en (keine weiteren Sessions)'
+      Caption = 'Disk abschlie'#223'en (keine weiteren Sessions)'
       TabOrder = 2
     end
     object CheckBoxSelectSess: TCheckBox
@@ -226,6 +226,7 @@ object FormDataCDOptions: TFormDataCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 5
+    TabStop = True
     ExplicitWidth = 458
     inherited Bevel1: TBevel
       Width = 458

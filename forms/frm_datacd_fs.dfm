@@ -147,7 +147,7 @@ object FormDataCDFS: TFormDataCDFS
         Top = 64
         Width = 265
         Height = 273
-        Caption = 'Boot-CD'
+        Caption = 'Boot-Disk'
         TabOrder = 5
         object LabelBootLoadSegAdr: TLabel
           Left = 56
@@ -178,7 +178,7 @@ object FormDataCDFS: TFormDataCDFS
           Top = 24
           Width = 113
           Height = 17
-          Caption = 'Boot-CD erstellen'
+          Caption = 'Boot-Disk erstellen'
           TabOrder = 0
           OnClick = CheckBoxClick
         end
@@ -582,6 +582,7 @@ object FormDataCDFS: TFormDataCDFS
     Height = 50
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
+    TabStop = True
     ExplicitWidth = 578
     ExplicitHeight = 50
     inherited Bevel1: TBevel

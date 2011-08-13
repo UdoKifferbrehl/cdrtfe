@@ -130,7 +130,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     OnChange = PageControl1Change
     object TabSheet1: TTabSheet
       HelpContext = 1300
-      Caption = 'Daten-CD'
+      Caption = 'Daten-Disk'
       DesignSize = (
         768
         317)
@@ -245,7 +245,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Top = 16
             Width = 75
             Height = 25
-            Caption = 'CD Optionen'
+            Caption = 'Disk-Optionen'
             TabOrder = 1
             OnClick = ButtonDataCDOptionsClick
           end
@@ -436,10 +436,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         768
         317)
@@ -649,10 +645,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         768
         317)
@@ -984,11 +976,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     end
     object TabSheet4: TTabSheet
       HelpContext = 1600
-      Caption = 'CD-RW'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      Caption = 'L'#246'schen'
       DesignSize = (
         768
         317)
@@ -998,14 +986,14 @@ object CdrtfeMainForm: TCdrtfeMainForm
         Width = 265
         Height = 177
         Anchors = []
-        Caption = 'CD-RW l'#246'schen'
+        Caption = 'Disk l'#246'schen'
         TabOrder = 0
         object RadioButtonCDRWBlankAll: TRadioButton
           Left = 24
           Top = 32
           Width = 233
           Height = 17
-          Caption = 'gesamte CD l'#246'schen'
+          Caption = 'gesamte Disk l'#246'schen'
           TabOrder = 0
         end
         object RadioButtonCDRWBlankFast: TRadioButton
@@ -1044,11 +1032,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     end
     object TabSheet5: TTabSheet
       HelpContext = 1700
-      Caption = 'CD-Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      Caption = 'Infos'
       DesignSize = (
         768
         317)
@@ -1131,10 +1115,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         768
         317)
@@ -1295,11 +1275,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     end
     object TabSheet7: TTabSheet
       HelpContext = 1900
-      Caption = 'CD-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      Caption = 'Disk-Image'
       DesignSize = (
         768
         317)
@@ -1316,7 +1292,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Top = 24
           Width = 257
           Height = 217
-          Caption = 'Image von CD erstellen'
+          Caption = 'Image von Disk erstellen'
           TabOrder = 0
           object LabelReadCDRetries: TLabel
             Left = 136
@@ -1426,7 +1402,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Top = 24
           Width = 257
           Height = 217
-          Caption = 'ISO-/CUE-Image auf CD schreiben'
+          Caption = 'ISO-/CUE-Image auf Disk schreiben'
           TabOrder = 1
           object EditImageIsoPath: TEdit
             Left = 16
@@ -1572,10 +1548,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         768
         317)
@@ -1739,10 +1711,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         768
         317)

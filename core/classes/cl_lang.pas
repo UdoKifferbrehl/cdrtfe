@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.06.2010
+  letzte Änderung  13.08.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -165,8 +165,8 @@ begin
     Add('c002=Brenner');
     Add('c003=Laufwerk');
     Add('c004=Lesegeschwindigkeit');
-    Add('c005=ISO-/CUE-Image auf CD schreiben');
-    Add('c006=ISO-Image auf CD schreiben');
+    Add('c005=ISO-/CUE-Image auf Disk schreiben');
+    Add('c006=ISO-Image auf Disk schreiben');
     Add('e101=Name für die Image-Datei fehlt!');
     Add('e102=Keine Dateien oder Ordner ausgewählt!');
     Add('e103=Keine Titel ausgewählt!');
@@ -254,9 +254,9 @@ begin
     Add('mpref06=Einstellungen gelöscht.');
     Add('mpref07=Lade Projekt-Datei: %s');
     Add('mpref08=Lade Einstellungen ...');
-    Add('mpref09=Daten-CD: Lade Verzeichnisstruktur ...');
+    Add('mpref09=Daten-Disk: Lade Verzeichnisstruktur ...');
     Add('mpref10=Initialisiere Dateilisten ...');
-    Add('mpref11=Daten-CD: Lade Dateien ...');
+    Add('mpref11=Daten-Disk: Lade Dateien ...');
     Add('mpref12=Audio-CD: Lade Tracks ...');
     Add('mpref13=XCD: Lade Verzeichnisstruktur ...');
     Add('mpref14=XCD: Lade Dateien ...');
@@ -275,21 +275,21 @@ begin
     Add('minit02=Ohne die Datei sh.exe ist unter Win9x, ME ein on-the-fly-Brennen nicht möglich.\nSiehe readme.txt für Download-Link.\n ');
     Add('minit03=Ohne die Datei mode2cdmaker.exe kann keine XCDs (Mode 2 Form 2)\nerstellt werden.\n ');
     Add('minit04=Um CUE-Images oder XCDs schreiben zu können, sind die cdrtools ab\nder Version 2.01a24 oder cdrdao.exe nötig.\n ');
-    Add('minit05=Es wurde kein CD-Brenner gefunden!\nImages (Daten-CD, XCD) können dennoch erstellt werden.\n ');
-    Add('minit06=Ohne die Datei readcd.exe können keine Images von CDs angelegt weerden.\n ');
-    Add('minit07=Mit der Mingw32-Version der cdrtools unter Win9x, ME kann cdrtfe zur\nZeit keine CDs on-the-fly schreiben.\n ');
+    Add('minit05=Es wurde kein Brenner gefunden!\nImages (Daten-Disk, XCD) können dennoch erstellt werden.\n ');
+    Add('minit06=Ohne die Datei readcd.exe können keine Images von Disks angelegt weerden.\n ');
+    Add('minit07=Mit der Mingw32-Version der cdrtools unter Win9x, ME kann cdrtfe zur\nZeit keine Disks on-the-fly schreiben.\n ');
     Add('minit08=Ohne die Datei vcdimager.exe können keine Video-CDs erstellt werden.\n ');
     Add('minit09=Ohne mpg123.exe werden MP3-Tracks nicht unterstützt.\n ');
     Add('minit10=Ohne oggdec.exe werden Ogg-Vorbis-Tracks nicht unterstützt.\n ');
     Add('minit11=Ohne flac.exe werden FLAC-Tracks nicht unterstützt.\n ');
     Add('minit12=Ohne mac.exe werden APE-Tracks nicht unterstützt.\n ');            
     {Messages - Burning}
-    Add('eburn01=Es ist keine CD eingelegt!');
-    Add('eburn02=Diese CD kann nicht beschrieben werden. Entweder handelt es sich\num eine CD-ROM oder die CD-R(W) wurde bereits abgeschlossen.');
-    Add('eburn03=Diese CD enthält bereits Daten und könnte fortgesetzt werden. Dafür\ndie Option ''vorhandene Sessions importieren'' aktivieren. Geschieht\ndies nicht, werden die vorhandenen Sessions unsichtbar.');
-    Add('eburn04=Auf dieser CD sind keine Sessions vorhanden. Trotzdem fortfahren?');
+    Add('eburn01=Es ist keine Disk eingelegt!');
+    Add('eburn02=Diese Disk kann nicht beschrieben werden. Entweder handelt es sich\num eine CD/DVD/BD-ROM oder die Disk wurde bereits abgeschlossen.');
+    Add('eburn03=Diese Disk enthält bereits Daten und könnte fortgesetzt werden. Dafür\ndie Option ''vorhandene Sessions importieren'' aktivieren. Geschieht\ndies nicht, werden die vorhandenen Sessions unsichtbar.');
+    Add('eburn04=Auf dieser Disk sind keine Sessions vorhanden. Trotzdem fortfahren?');
     Add('eburn05=Sessions einlesen fehlgeschlagen');
-    Add('eburn06=Nicht genügend Speicher auf der CD!\n');
+    Add('eburn06=Nicht genügend Speicher auf der Disk!\n');
     Add('eburn07=%s MiByte sind verfügbar.');
     Add('eburn08=Diese CD enthält bereits eine Daten-Session.\nAudio-Tracks können nicht hinzugefügt werden.');
     Add('eburn09=Erste zu schreibende Adresse konnte nicht gelesen werden.\nFalls es sich um eine CD-RW handelt, muß diese erst gelöscht werden.');
@@ -299,23 +299,23 @@ begin
     Add('eburn13=Sie können auch die Art des Mediums angeben.');
     Add('eburn14=\n%s MiByte (%d Sektoren) zuviel.');
     Add('eburn15=\n%s MiByte werden benötigt.');
-    Add('eburn16=Soll die CD/DVD-RW automatisch gelöscht werden?');
+    Add('eburn16=Soll die Disk automatisch gelöscht werden?');
     Add('eburn17=Diese DVD+RW enthält Daten. Soll sie überschrieben werden?');
     Add('eburn18=Sie sind dabei, cdrtfe zu beenden, obwohl noch ein Kommando-\nzeilenprogramm läuft. Dies könnte Probleme verursachen (z.B.\nSysteminstabilitäten).\nTrotzdem beenden?');
     Add('eburn19=Bei DVD+R(W)s ist keine Simulation möglich.');
     Add('eburn20=Image kann nicht geschrieben werden.\nNicht genügend Speicher auf Laufwerk %s.');
-    Add('eburn21=Es soll eine Multisession-CD im Disk-at-Once-Modus (DAO) geschrieben werden.\nDies wird nicht von allen Laufwerken unterstützt und kann zu unerwünschenten\nErgebnissen führen. Trotzdem fortfahren?');
+    Add('eburn21=Es soll eine Multisession-Disk im Disk-at-Once-Modus (DAO) geschrieben werden.\nDies wird nicht von allen Laufwerken unterstützt und kann zu unerwünschenten\nErgebnissen führen. Trotzdem fortfahren?');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');
     Add('mburn04=%s verfügbar.');
-    Add('mburn05=Alles bereit. Soll der Vorgang gestartet werden?\nDaten auf der CD werden unwiederbringlich gelöscht!');
-    Add('mburn06=CD-RW löschen?');
+    Add('mburn05=Alles bereit. Soll der Vorgang gestartet werden?\nDaten auf der Disk werden unwiederbringlich gelöscht!');
+    Add('mburn06=Disk löschen?');
     Add('mburn07=Gesamtkapazität: %s MiByte; %s:%s min');
     Add('mburn08=noch verfügbar : %s MiByte; %s:%s min');
-    Add('mburn09=Diese CD ist bereits fixiert.');
+    Add('mburn09=Diese Disk ist bereits fixiert.');
     Add('mburn10=Mode2CDMaker wird mit folgenden Optionen gestartet:');
-    Add('mburn11=CD fixieren?');
+    Add('mburn11=Disk fixieren?');
     Add('mburn12=Image-Größe ermitteln ...');
     Add('mburn13=Überprüfe Disk ...');
     Add('mburn14=%s MiByte zu schreiben; %s MiByte verbleibend.\n\n');
@@ -325,13 +325,13 @@ begin
     Add('mverify01=Vergleiche Dateien ...');
     Add('mverify02=%d Fehler gefunden.');
     Add('mverify03=Vergleich durch Anwender abgebrochen!');
-    Add('mverify04=Lese Inhaltsverzeichnis der CD ein. Bitte warten ...');
+    Add('mverify04=Lese Inhaltsverzeichnis der Disk ein. Bitte warten ...');
     Add('mverify05=%d Dateien werden mit den Quelldateien verglichen.');
-    Add('everify01=Konnte CD nicht finden, Vergleich abgebrochen!');
+    Add('everify01=Konnte Disk nicht finden, Vergleich abgebrochen!');
     Add('everify02=Fehler! Dateien nicht identisch: %s <-> %s');
-    Add('everify03=Konnte Reload nicht durchführen.\nLegen Sie die CD manuell ein und wählen Sie ''OK'', um den Vergleich zu starten.\nOder wählen Sie ''Abbrechen'', um den Vergleich nicht durchzuführen.');
-    Add('everify04=Fehler beim Einlesen der CD');
-    Add('everify05=Fehler beim erneuten Einlesen der CD. Vergleich abgebrochen.');
+    Add('everify03=Konnte Reload nicht durchführen.\nLegen Sie die Disk manuell ein und wählen Sie ''OK'', um den Vergleich zu starten.\nOder wählen Sie ''Abbrechen'', um den Vergleich nicht durchzuführen.');
+    Add('everify04=Fehler beim Einlesen der Disk');
+    Add('everify05=Fehler beim erneuten Einlesen der Disk. Vergleich abgebrochen.');
     Add('everify06=Fehler! Datei nicht gefunden   : %s');
     {Messages - CD Text}
     Add('ccdtext01=Titel');
@@ -361,11 +361,11 @@ begin
     Add('msess03=Session');
     {Dialog-Beschreibungen}
     Add('desc01=Ausgabe der Kommandozeilenprogramme');
-    Add('desc02=Einstellungen für das Dateisystem der CD/DVD');
-    Add('desc03=Einstellungen für das Schreiben der CD/DVD');
+    Add('desc02=Einstellungen für das Dateisystem der Disk');
+    Add('desc03=Einstellungen für das Schreiben der Disk');
     Add('desc04=Einstellungen für das Schreiben von Audio-CDs');
     Add('desc05=Eigenschaften der einzelnen Audio-Tracks');
-    Add('desc06=Potentielle Fehler im Dateisystem der CD/DVD korrigieren');
+    Add('desc06=Potentielle Fehler im Dateisystem der Disk korrigieren');
     Add('desc07=Einstellungen für das Auslesen von Audio-CD-Tracks');
     Add('desc08=Einstellungen für die Erstellung von XCDs');
     Add('desc09=Einstellungen für das Schreiben von (S)VCDs');
