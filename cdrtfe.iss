@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2011 Oliver Valencia
 ;
-;  letzte Änderung  24.07.2011
+;  letzte Änderung  14.08.2011
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -57,6 +57,7 @@ Name: de; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cd
 Name: fr; MessagesFile: compiler:Languages\French.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_fr.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_fr.rtf
 Name: it; MessagesFile: compiler:Languages\Italian.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_it.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_it.rtf
 Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pl.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pl.rtf
+Name: nl; MessagesFile: compiler:Languages\Dutch.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
 
 [Tasks]
 ; Desktop icon
@@ -128,9 +129,9 @@ Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
 Source: I:\cdrtfe\misc\scripts\copycyg.bat; DestDir: {tmp}; Tasks: copycyg
 ; Readme cdrtfe
 Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
-Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl
+Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl
 Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
-Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl
+Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl
 Source: I:\cdrtfe\cdrtfe\doc\changes\changes.txt; DestDir: {app}\doc; Flags: ignoreversion;
 ; Licenses
 Source: I:\cdrtfe\cdrtfe\doc\license\COPYING.txt; DestDir: {app}\doc\license; Flags: ignoreversion
@@ -138,7 +139,7 @@ Source: I:\cdrtfe\cdrtfe\doc\license\CDDL.Schily.txt; DestDir: {app}\doc\license
 Source: I:\cdrtfe\cdrtfe\doc\license\license_tools.txt; DestDir: {app}\doc\license; Flags: ignoreversion
 ; Readme m2f2extract
 Source: I:\delphi\m2f2extract\doc\m2f2extract_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de; Components: tools\xcd
-Source: I:\delphi\m2f2extract\doc\m2f2extract_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl; Components: tools\xcd
+Source: I:\delphi\m2f2extract\doc\m2f2extract_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl; Components: tools\xcd
 ; source files
 Source: I:\cdrtfe\cdrtfe\source\*; DestDir: {app}\source\cdrtfe; Excludes: COPYING.txt,forms.pas,controls.pas,inifiles.pas; Flags: ignoreversion recursesubdirs; Components: src
 Source: I:\cdrtfe\cdrtfe\shellex\cdrtfeShlEx\*; DestDir: {app}\source\cdrtfeShlEx; Flags: ignoreversion recursesubdirs; Components: src
@@ -153,7 +154,7 @@ Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd; MinVersi
 Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.bat; MinVersion: 1, 0
 ; Help file
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_german.chm; Languages: de
-Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl
+Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl nl
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_french.chm; Languages: fr
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_italian.chm; Languages: it
 ; Readme files
@@ -161,10 +162,10 @@ Name: {group}\Changes; Filename: {app}\doc\changes.txt;
 Name: {group}\Readme; Filename: {app}\doc\readme_de.txt; Languages: de
 Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_de.txt; Languages: de
 Name: {group}\Readme; Filename: {app}\doc\readme_en.txt; Languages: en fr it pl
-Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl
+Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl nl
 Name: {group}\Readme Icons; Filename: {app}\icons\readme.txt;
 Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_de.txt; Languages: de; Components: tools\xcd
-Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl; Components: tools\xcd
+Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl nl; Components: tools\xcd
 ; Source files
 Name: {group}\{cm:IconSourceFiles}; Filename: {app}\source; Components: src
 ; Uninstall
@@ -182,9 +183,9 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cm
 
 [Run]
 Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
-Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl; Flags: shellexec postinstall skipifsilent unchecked
+Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl nl; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
-Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl; Flags: shellexec postinstall skipifsilent unchecked
+Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl nl; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\readme_dvd_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\changes.txt"; Flags: shellexec postinstall skipifsilent unchecked
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
@@ -199,7 +200,7 @@ Name: custom; Description: cdrtfe Setup; Flags: iscustom
 [Components]
 ; cdrtfe
 Name: prog; Description: {cm:CompProg}; Flags: fixed; Types: custom
-Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl
+Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl nl
 Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Languages: de
 ; Tools
 Name: tools; Description: {cm:CompTools}; Flags: fixed; Types: custom;
@@ -417,6 +418,7 @@ end;
 ; LangSuffix (from cdrtfe_lang.ini)
 de.LangSuffix=Lang1
 en.LangSuffix=Lang2
+nl.LangSuffix=Lang3
 pl.LangSuffix=Lang4
 fr.LangSuffix=Lang5
 it.LangSuffix=Lang8
@@ -550,4 +552,28 @@ pl.IconHelpFile=Pomoc cdrtfe
 pl.IconSourceFiles=Pliki Ÿród³owe
 pl.SpecialTask=special Tasks:
 pl.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
-
+; Dutch
+nl.CompLang=Meertalige ondersteuning (nodig voor andere talen dan Duits)
+nl.CompTools=Opdrachtregel-tools
+nl.CompM2CDMex=m2cdm (gewijzigde Mode2CDMaker)
+nl.CompRrenc=aanvullende XCD-foutbescherming
+nl.CompXCD=XCD-extractiegereedschap (dat2file, d2fgui, M2F2Extract)
+nl.CompAudio=MP3-, OGG- en FLAC-ondersteuning
+nl.CompSrc={#MyAppVerName} bronbestanden
+nl.TaskAllUsers=Voor alle gebruikers
+nl.TaskCurrentUser=Alleen voor deze gebruiker
+nl.CygwinHeader=Cygwin
+nl.CygwinHeader2=Cygwin1.dll werd op uw systeem gevonden.
+nl.CygwinText=Welke cygwin dll wilt u gebruiken?
+nl.CygwinText2=Opmerking: de bestanden cygiconv-2.dll en cygintl-3.dll konden niet teruggevonden worden in het zoekpad.
+nl.CygwinText3=Waarschuwing: het bestand cygwin1.dll werd teruggevonden in een Windows-systeemmap. Het gebruik van de bijgeleverde dll kan niet geforceerd worden.
+nl.CygwinOpt1=Gebruik de reeds geïnstalleerde dll om versieconflicten te vermijden.
+nl.CygwinOpt2=Gebruik de bijgeleverde dll.
+nl.CygwinReadyHeader=Cygwin dll's:
+nl.CygwinReadyUsePrev=Cygwin dll's van zoekpad gebruiken.
+nl.CygwinReadyUseOwn=Bijgeleverde cygwin dll's gebruiken.
+nl.OldVersionError=Er werd een oudere versie gevonden. Gelieve deze eerst te deïnstalleren.
+nl.IconHelpFile=cdrtfe Help
+nl.IconSourceFiles=Bronbestanden
+nl.SpecialTask=special Tasks:
+nl.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
