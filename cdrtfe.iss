@@ -58,6 +58,7 @@ Name: fr; MessagesFile: compiler:Languages\French.isl; LicenseFile: I:\cdrtfe\cd
 Name: it; MessagesFile: compiler:Languages\Italian.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_it.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_it.rtf
 Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pl.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pl.rtf
 Name: nl; MessagesFile: compiler:Languages\Dutch.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
+Name: ptbr; MessagesFile: compiler:Languages\BrazilianPortuguese.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pt-br.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pt-br.rtf
 
 [Tasks]
 ; Desktop icon
@@ -129,9 +130,9 @@ Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
 Source: I:\cdrtfe\misc\scripts\copycyg.bat; DestDir: {tmp}; Tasks: copycyg
 ; Readme cdrtfe
 Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
-Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl
+Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr
 Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
-Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl
+Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr
 Source: I:\cdrtfe\cdrtfe\doc\changes\changes.txt; DestDir: {app}\doc; Flags: ignoreversion;
 ; Licenses
 Source: I:\cdrtfe\cdrtfe\doc\license\COPYING.txt; DestDir: {app}\doc\license; Flags: ignoreversion
@@ -139,7 +140,7 @@ Source: I:\cdrtfe\cdrtfe\doc\license\CDDL.Schily.txt; DestDir: {app}\doc\license
 Source: I:\cdrtfe\cdrtfe\doc\license\license_tools.txt; DestDir: {app}\doc\license; Flags: ignoreversion
 ; Readme m2f2extract
 Source: I:\delphi\m2f2extract\doc\m2f2extract_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de; Components: tools\xcd
-Source: I:\delphi\m2f2extract\doc\m2f2extract_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl; Components: tools\xcd
+Source: I:\delphi\m2f2extract\doc\m2f2extract_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr; Components: tools\xcd
 ; source files
 Source: I:\cdrtfe\cdrtfe\source\*; DestDir: {app}\source\cdrtfe; Excludes: COPYING.txt,forms.pas,controls.pas,inifiles.pas; Flags: ignoreversion recursesubdirs; Components: src
 Source: I:\cdrtfe\cdrtfe\shellex\cdrtfeShlEx\*; DestDir: {app}\source\cdrtfeShlEx; Flags: ignoreversion recursesubdirs; Components: src
@@ -154,18 +155,18 @@ Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd; MinVersi
 Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.bat; MinVersion: 1, 0
 ; Help file
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_german.chm; Languages: de
-Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl nl
+Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl nl ptbr
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_french.chm; Languages: fr
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_italian.chm; Languages: it
 ; Readme files
 Name: {group}\Changes; Filename: {app}\doc\changes.txt;
 Name: {group}\Readme; Filename: {app}\doc\readme_de.txt; Languages: de
 Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_de.txt; Languages: de
-Name: {group}\Readme; Filename: {app}\doc\readme_en.txt; Languages: en fr it pl
-Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl nl
+Name: {group}\Readme; Filename: {app}\doc\readme_en.txt; Languages: en fr it pl ptbr
+Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl nl ptbr
 Name: {group}\Readme Icons; Filename: {app}\icons\readme.txt;
 Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_de.txt; Languages: de; Components: tools\xcd
-Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl nl; Components: tools\xcd
+Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl nl ptbr; Components: tools\xcd
 ; Source files
 Name: {group}\{cm:IconSourceFiles}; Filename: {app}\source; Components: src
 ; Uninstall
@@ -183,10 +184,10 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cm
 
 [Run]
 Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
-Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl nl; Flags: shellexec postinstall skipifsilent unchecked
-Filename: "{app}\doc\readme_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
-Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl nl; Flags: shellexec postinstall skipifsilent unchecked
-Filename: "{app}\doc\readme_dvd_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
+;Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl nl ptbr; Flags: shellexec postinstall skipifsilent unchecked
+;Filename: "{app}\doc\readme_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
+;Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl nl ptbr; Flags: shellexec postinstall skipifsilent unchecked
+;Filename: "{app}\doc\readme_dvd_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\changes.txt"; Flags: shellexec postinstall skipifsilent unchecked
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
 
@@ -200,7 +201,7 @@ Name: custom; Description: cdrtfe Setup; Flags: iscustom
 [Components]
 ; cdrtfe
 Name: prog; Description: {cm:CompProg}; Flags: fixed; Types: custom
-Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl nl
+Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl nl ptbr
 Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Languages: de
 ; Tools
 Name: tools; Description: {cm:CompTools}; Flags: fixed; Types: custom;
@@ -422,6 +423,7 @@ nl.LangSuffix=Lang3
 pl.LangSuffix=Lang4
 fr.LangSuffix=Lang5
 it.LangSuffix=Lang8
+ptbr.LangSuffix=Lang14
 ; Common
 CompProg={#MyAppVerName}
 CompCdrt=cdrtools
@@ -575,5 +577,30 @@ nl.CygwinReadyUseOwn=Bijgeleverde cygwin dll's gebruiken.
 nl.OldVersionError=Er werd een oudere versie gevonden. Gelieve deze eerst te deïnstalleren.
 nl.IconHelpFile=cdrtfe Help
 nl.IconSourceFiles=Bronbestanden
-nl.SpecialTask=special Tasks:
-nl.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
+nl.SpecialTask=speciale taken:
+nl.CopyCygwin=Cygwin dll's en scripts kopiëren (alleen voor experts, niet aangeraden)
+; Brazilian-portuguese
+ptbr.CompLang=Suporte a múltiplas linguagens (necessário para outras linguagens além do alemão)
+ptbr.CompTools=Ferramentas em linha de comando
+ptbr.CompM2CDMex=m2cdm (Mode2CDMaker modificado)
+ptbr.CompRrenc=Proteção adicional aos erros do XCD
+ptbr.CompXCD=Ferramentas de extração XCD (dat2file, d2fgui, M2F2Extract)
+ptbr.CompAudio=Suporte a MP3, OGG e FLAC
+ptbr.CompSrc=Código fonte do {#MyAppVerName}
+ptbr.TaskAllUsers=Para todos os usuários
+ptbr.TaskCurrentUser=Apenas para este usuário
+ptbr.CygwinHeader=Cygwin
+ptbr.CygwinHeader2=O arquivo cygwin1.dll foi encontrado.
+ptbr.CygwinText=Qual dll do cygwin você deseja usar?
+ptbr.CygwinText2=Nota: Os arquivos cygiconv-2.dll e cygintl-3.dll não puderam ser encontrados no diretório pesquisado.
+ptbr.CygwinText3=Aviso: O arquivo cygwin1.dll foi encontrado numa pasta de sistema do Windows. Impossível forçar o uso da DLL incluída.
+ptbr.CygwinOpt1=Use a DLL já instalada para evitar conflitos entre versões.
+ptbr.CygwinOpt2=Use a DLL incluída.
+ptbr.CygwinReadyHeader=DLLs do Cygwin:
+ptbr.CygwinReadyUsePrev=Usando DLLs do cygwin encontrado no diretório pesquisado.
+ptbr.CygwinReadyUseOwn=Usando DLLs incluídas do cygwin.
+ptbr.OldVersionError=Uma versão mais antiga foi encontrada. Por favor, desinstale-o primeiro.
+ptbr.IconHelpFile=Ajuda do cdrtfe
+ptbr.IconSourceFiles=Códigos fonte
+ptbr.SpecialTask=Tarefas especiais:
+ptbr.CopyCygwin=Copiar os scripts e as DLLs do Cygwin (apenas para usuários avançados, não recomendado)
