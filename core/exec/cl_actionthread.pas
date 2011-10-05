@@ -2,10 +2,10 @@
 
   cl_actionthread.pas: Kommandozeilenprogramme in einem eigenen Thread starten
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.11.2010
+  letzte Änderung  05.10.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -396,7 +396,7 @@ begin
   CommandLineList.Text := FCommandLine;
   for i := 0 to CommandLineList.Count - 1 do
   begin
-    if not Terminated {FTerminate} then
+    if not Terminated {FTerminate} and (FExitCode = 0) then
     begin
       FCommandLine := CommandLineList[i];
       StartExecution;
