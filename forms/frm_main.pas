@@ -3327,9 +3327,12 @@ end;
 
 procedure TCdrtfeMainForm.SetFileBrowserParent;
 var ActivePage: Integer;
+    TempPath  : string;
 begin
   if FFileExplorerShowing then
   begin
+    TempPath := FileBrowser.Path;
+    PanelBrowser.Visible := False;
     ActivePage := GetActivePage;
     case ActivePage of
       cDataCD,
@@ -3339,6 +3342,8 @@ begin
     else
       PanelBrowser.Parent := PageControl1.Pages[0];
     end;
+    FileBrowser.Path := TempPath;
+    PanelBrowser.Visible := True;
   end;
 end;
 
