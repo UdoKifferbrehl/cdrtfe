@@ -489,6 +489,7 @@ type
     ActionUserSettings : TAction;
     ActionUserShowOutputWindow: TAction;
     ActionUserSpecialTab: TAction;
+    ActionUserStart: TAction;
     ActionUserToggleLogWindow: TAction;
     ActionUserToggleExplorerLog: TAction;
     FImageTabFirstShow  : Boolean;
@@ -621,6 +622,7 @@ type
     procedure ActionUserSettingsExecute(Sender: TObject);
     procedure ActionUserShowOutputWindowExecute(Sender: TObject);
     procedure ActionUserSpecialTabExecute(Sender: TObject);
+    procedure ActionUserStartExecute(Sender: TObject);
     procedure ActionUserToggleLogWindowExecute(Sender: TObject);
     procedure ActionUserToggleExplorerLogExecute(Sender: TObject);
     procedure ImageTabInitRadioButtons;
@@ -5141,6 +5143,11 @@ procedure TCdrtfeMainForm.HandleKeyboardShortcut(const Key: Word);
     SpecialTab;
   end;
 
+  procedure HKSStart;
+  begin
+    ButtonStartClick(nil);
+  end;
+
   procedure HKSToggleExplorerLog;
   begin
     if FFileExplorerShowing and not FLogWindowShowing then
@@ -5150,7 +5157,7 @@ procedure TCdrtfeMainForm.HandleKeyboardShortcut(const Key: Word);
     end else
     if not FFileExplorerShowing and FLogWindowShowing then
     begin
-      ToggleLogWindow(False);    
+      ToggleLogWindow(False);
       ToggleFileExplorer(True);
     end else
     if not FFileExplorerShowing and not FLogWindowShowing then
@@ -5160,7 +5167,7 @@ procedure TCdrtfeMainForm.HandleKeyboardShortcut(const Key: Word);
     if FFileExplorerShowing and FLogWindowShowing then
     begin
       ToggleLogWindow(False);
-    end;    
+    end;
   end;
 
 begin
@@ -5180,6 +5187,7 @@ begin
     VK_Delete: HKSDeleteAll;
     VK_UP    : HKSTrackUp;
     VK_DOWN  : HKSTrackDown;
+    VK_RETURN: HKSStart;
   end;
 end;
 
@@ -7458,6 +7466,11 @@ begin
   ActionUserSpecialTab.ShortCut := ShortCut($51{VK_Q}, [ssAlt]);
   ActionUserSpecialTab.OnExecute := ActionUserSpecialTabExecute;
   ActionUserSpecialTab.ActionList := ActionList;
+  {Actions erstellen - Start Aktion ausführen}
+  ActionUserStart := TAction.Create(ActionList);
+  ActionUserStart.ShortCut := ShortCut(VK_RETURN, [ssAlt, ssCtrl]);
+  ActionUserStart.OnExecute := ActionUserStartExecute;
+  ActionUserStart.ActionList := ActionList;
   {Actions erstellen - LogWindow ein- bzw. ausblenden}
   ActionUserToggleLogWindow := TAction.Create(ActionList);
   ActionUserToggleLogWindow.ShortCut :=  ShortCut($4B{VK_K}, [ssAlt]);
@@ -7518,6 +7531,11 @@ end;
 procedure TCdrtfeMainForm.ActionUserSpecialTabExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($51);
+end;
+
+procedure TCdrtfeMainForm.ActionUserStartExecute(Sender: TObject);
+begin
+  HandleKeyboardShortcut(VK_RETURN);
 end;
 
 procedure TCdrtfeMainForm.ActionUserToggleLogWindowExecute(Sender: TObject);
