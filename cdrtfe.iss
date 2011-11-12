@@ -40,7 +40,7 @@ OutputDir=i:\cdrtfe\proto2
 OutputBaseFilename=cdrtfe-1.4
 ; Compression
 ;Compression=none
-Compression=lzma
+Compression=lzma2
 SolidCompression=yes
 ; Cosmetic
 ;WizardSmallImageFile=compiler:wizmodernsmallimage-IS.bmp
