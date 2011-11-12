@@ -2,10 +2,10 @@
 
   cl_settings_general.pas: Objekt für allgemeine Einstellungen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.09.2010
+  letzte Änderung  12.11.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,8 +53,9 @@
                  MPlayerOpt    : string
                  FileInfoTitle : Boolean
                  SpaceMeter    : Boolean
-                 DisableScrSvr : Boolean;
-                 ShowFolderSize: Boolean;
+                 DisableScrSvr : Boolean
+                 ShowFolderSize: Boolean
+                 WarnModified  : Boolean
 
     Methoden     Init
                  Load(MIF: TMemIniFile)
@@ -109,6 +110,7 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
        FSpaceMeter    : Boolean;
        FDisableScrSvr : Boolean;
        FShowFolderSize: Boolean;
+       FWarnModified  : Boolean;
        function GetTabSheetDrive(Index: Integer): Integer;
        function GetTabSheetSpeed(Index: Integer): Integer;
        function GetTabSheetSMType(Index: Integer): Integer;
@@ -156,6 +158,7 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
        property SpaceMeter    : Boolean read FSpaceMeter write FSpaceMeter;
        property DisableScrSvr : Boolean read FDisableScrSvr write FDisableScrSvr;
        property ShowFolderSize: Boolean read FShowFolderSize write FShowFolderSize;
+       property WarnModified  : Boolean read FWarnModified write FWarnModified;
      end;
 
 implementation
@@ -276,6 +279,7 @@ begin
   FSpaceMeter := True;
   FDisableScrSvr := False;
   FShowFolderSize := False;
+  FWarnModified := False;
 end;
 
 { Load -------------------------------------------------------------------------
@@ -320,6 +324,7 @@ begin
     FSpaceMeter := ReadBool(Section, 'SpaceMeter', True);
     FDisableScrSvr := ReadBool(Section, 'DisableScrSvr', False);
     FShowFolderSize := ReadBool(Section, 'ShowFolderSize', False);
+    FWarnModified := ReadBool(Section, 'WarnModified', False);
     if FAsInifile then
     begin
       {Defaultwerte für FolderNameCache}
@@ -378,6 +383,7 @@ begin
     WriteBool(Section, 'SpaceMeter', FSpaceMeter);
     WriteBool(Section, 'DisableScrSvr', FDisableScrSvr);
     WriteBool(Section, 'ShowFolderSize', FShowFolderSize);
+    WriteBool(Section, 'WarnModified', FWarnModified);
     if FAsIniFile then
     begin
       if PortableMode then

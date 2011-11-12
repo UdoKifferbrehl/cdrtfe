@@ -498,6 +498,7 @@ type
     FFileExplorerShowing: Boolean;
     FOutputWindowShowing: Boolean;
     FLogWindowShowing   : Boolean;
+    FFileListModified   : Boolean;
     FLVArray: array[0..cLVCount] of TListView;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
@@ -1453,6 +1454,7 @@ begin
       FData.SaveToFile(SaveDialog1.FileName);
     end;
     CacheFolderName(DialogID, SaveDialog1.FileName);
+    FFileListModified := False;
   end;
   SaveDialog1.Free;
 end;
@@ -1492,6 +1494,7 @@ begin
       FData.LoadFromFile(OpenDialog1.FileName);
     end;
     CacheFolderName(DialogID, OpenDialog1.FileName);
+    FFileListModified := False;
   end;
   OpenDialog1.Free;
   if not ListsOnly then
@@ -1734,6 +1737,7 @@ begin
   FData.AddToPathlist(FileName, Path, FSettings.General.Choice);
   {Fehler auswerten}
   HandleError(FData.LastError, FileName);
+  FFileListModified := True;
 end;
 
 { AddToPathlistSort ------------------------------------------------------------
@@ -1833,6 +1837,7 @@ begin
         ShowMsgDlg(Format(FLang.GMS('e112'), [OpenDialog1.Files[i]]),
                    FLang.GMS('g001'), MB_cdrtfeError);
       end;
+      FFileListModified := True;
     end;
     CacheFolderName(DialogID, OpenDialog1.FileName);
     {Dateiliste sortieren}
@@ -1919,6 +1924,7 @@ begin
                    MB_cdrtfeError);
       end else
       begin
+        FFileListModified := True;
         {Änderungen im GUI nachvollziehen}
         CheckDataCDFS(False);
         UserAddFolderUpdateTree(Tree);
@@ -1932,7 +1938,7 @@ end;
 { UserAddFolderUpdateTree ------------------------------------------------------
 
   Nach dem Hinzufügen eines Ordners muß die Baumstruktur auf den neuesten Stand
-  gebraht werden.                                                              }
+  gebracht werden.                                                              }
 
 procedure TCdrtfeMainForm.UserAddFolderUpdateTree(Tree: TTreeView);
 var Path: string;
@@ -2027,6 +2033,7 @@ begin
               end;
               {Änderung im GUI nachvollziehen}
               View.Items[i].Delete;
+              FFileListModified := True;
             end;
           end;
         end;
@@ -2078,6 +2085,7 @@ begin
       FData.DeleteFolder(Path, FSettings.General.Choice);
       {entsprechenden Tree-Node löschen}
       Tree.Selected.Delete;
+      FFileListModified := True;
       UpdateGauges;
     end;
   end;
@@ -2177,6 +2185,7 @@ begin
            View.Items.BeginUpdate;
            View.Items[i].Delete;
            View.Items.EndUpdate;
+           FFileListModified := True;
          end;
        end;
      end;
@@ -2221,6 +2230,7 @@ begin
      DestNode.AlphaSort;
      SourceNode.ImageIndex := FImageLists.IconFolder;  // <- sonst manchmal Dar-
      (DestNode.TreeView as TTreeView).Items.EndUpdate; //    stellungsfehler
+     FFileListModified := True;
    end;
 end;
 
@@ -2365,6 +2375,7 @@ begin
   Tree.Selected.Focused := True;
   Tree.Selected.EditText;
   UpdateGauges;
+  FFileListModified := True;
 end;
 
 { UserAddTrack -----------------------------------------------------------------
@@ -2419,6 +2430,7 @@ begin
       TLogWin.Inst.Add('add Tracks: ' + TC.TimeAsString);
       {$ENDIF}
       CacheFolderName(DialogID, OpenDialog1.FileName);
+      FFileListModified := True;
     end;
     OpenDialog1.Free;
     ShowTracks;
@@ -2460,6 +2472,7 @@ begin
         begin
           List.Scroll(0, -40);
         end;
+        FFileListModified := True;
       end;
     end else
     if Direction = dDown then
@@ -2479,6 +2492,7 @@ begin
         begin
           List.Scroll(0, 40);
         end;
+        FFileListModified := True;
       end;
     end;
     {$IFDEF DebugFileLists}
@@ -4681,6 +4695,7 @@ begin
         AddToPathlist(StartUpDir + cD2FGuiBin);
       end;
       AddToPathlistSort(False);
+      FFileListModified := False;
       FSettings.General.Choice := TempChoice;
       {Einstellungen in GUI übernehmen}
       GetSettings;
@@ -4927,6 +4942,9 @@ procedure TCdrtfeMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean)
 begin
   if FSettings.Environment.ProcessRunning then
     CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
+                           MB_cdrtfeWarningYN) = ID_YES;
+  if FFileListModified and FSettings.General.WarnModified then
+    CanClose := ShowMsgDlg(FLang.GMS('e120'), FLang.GMS('g003'),
                            MB_cdrtfeWarningYN) = ID_YES;
 end;
 
@@ -5987,6 +6005,7 @@ begin
                    end;
         end;
       end;
+      FFileListModified := True;
     end else
     begin
       Temp := S;
@@ -6024,6 +6043,7 @@ begin
     begin
       {Änderung im GUI nachvollziehen}
       Node.Text := S;
+      FFileListModified := True;
     end else
     begin
       if Length(S) > 32 then
@@ -6135,6 +6155,7 @@ begin
           cXCD   : ;
         end;
       end;
+      FFileListModified := True;
     end else
     begin
       Temp := S;
@@ -6248,6 +6269,7 @@ begin
          not (ItemIsFolder((Source as TListView).Items[i])) then
       begin
         FData.ChangeForm2Status((Source as TListView).Items[i].Caption, Path);
+        FFileListModified := True;
       end;
     end;
     FData.SortFileList(Path, cXCD);
@@ -6268,7 +6290,7 @@ end;
 
 { XCDEListView1: OnEditing -----------------------------------------------------
 
-  Der Mode2CDMaker unterstütz zur Zeit die Änderung vo Dateinamen nicht. Daher
+  Der Mode2CDMaker unterstützt zur Zeit die Änderung von Dateinamen nicht. Daher
   dürfen die Dateinamen nicht geändert werden.                                 }
 
 procedure TCdrtfeMainForm.XCDEListView1Editing(Sender: TObject; Item: TListItem;

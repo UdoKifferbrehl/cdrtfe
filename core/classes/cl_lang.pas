@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.08.2011
+  letzte Änderung  12.11.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -186,6 +186,7 @@ begin
     Add('e117=Dateien oder Ordner aus vorigen Sessions können nicht\nverschoben oder umbenannt werden.');
     Add('e118=Keine neuen Dateien/Ordner.\nKeine Veränderungen.');
     Add('e119=Um Dateien ab 4 GiB zu schreiben, muß\nzusätzlich ISO Level 3 oder 4 verwendet werden.');
+    Add('e120=Dateizusammenstellung verändert.\nTrotzdem beenden?');
     Add('m101=Image auswählen');
     Add('m102=Image speichern unter');
     Add('m103=Dateien auswählen');
