@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.06.2010
+  letzte Änderung  26.11.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -489,8 +489,9 @@ begin
             CDText := AutoCDText(CDTextArgs);
           end;
         end;
+        Ok := (OggFile.SampleRate = 44100) and (Oggfile.ChannelModeID = 2) and
+              (TrackLength > 0);
         OggFile.Free;
-        Ok := TrackLength > 0;
         if not Ok then
         begin
           FError := CD_InvalidOggFile;
@@ -514,8 +515,8 @@ begin
         CDTextArgs.FileName := Name;
         CDTextArgs.IsWave := Wave;
         CDText := AutoCDText(CDTextArgs);
+        Ok := FLACFile.IsCDFormat and (TrackLength > 0);
         FLACFile.Free;
-        Ok := TrackLength > 0;
         if not Ok then
         begin
           FError := CD_InvalidFLACFile;
@@ -539,8 +540,9 @@ begin
         CDTextArgs.FileName := Name;
         CDTextArgs.IsWave := Wave;
         CDText := AutoCDText(CDTextArgs);
+        Ok := (ApeFile.SampleRate = 44100) and (ApeFile.Channels = 2) and
+              (ApeFile.Bits = 16) and (TrackLength > 0);
         ApeFile.Free;
-        Ok := TrackLength > 0;
         if not Ok then
         begin
           FError := CD_InvalidApeFile;

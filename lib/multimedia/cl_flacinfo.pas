@@ -1,8 +1,8 @@
 { cl_flacinfo.pas: Funktionen für FLAC-Audio-Dateien
 
-  Copyright (c) 2006-2010 Oliver Valencia
+  Copyright (c) 2006-2011 Oliver Valencia
 
-  letzte Änderung  09.01.2010
+  letzte Änderung  26.11.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,6 +20,7 @@
   TFLACFile: Objekt, das die Infos über die Datei enthält
 
     Properties   FileName
+                 IsCDFormat
                  LastError
                  Length
                  TagTitle
@@ -103,6 +104,7 @@ type TFLACInfoError = (FIE_NoError, FIE_FileNotFound, FIE_InvalidFLACFile);
        FFLACTags  : TFLACTags;
        FLastError : TFLACInfoError;
        FLength    : Extended;
+       FIsCDFormat: Boolean;
        FOk        : Boolean;
        FStreamInfo: TStreamInfo;
        FVendor    : string;
@@ -121,6 +123,7 @@ type TFLACInfoError = (FIE_NoError, FIE_FileNotFound, FIE_InvalidFLACFile);
        property FileName  : string read FFileName;
        property LastError : TFLACInfoError read GetLastError;
        property Length    : Extended read FLength;
+       property IsCDFormat: Boolean read FIsCDFormat;
        {Tags}
        property TagTitle  : string read FFLACTags.Title;
        property TagArtist : string read FFLACTags.Artist;
@@ -365,7 +368,9 @@ begin
       {Achtung: Hier werden nur 32 von 36 Bit für die Anzahl der Samples be-
        rücksichtigt. Die restlichen 4 Bits stecken in SampleInfo[0].}
       Samples       := ChangeByteOrderInt(MDBSI.SampleInfo[1]);
-      FLength       := Samples/SampleRate; 
+      FLength       := Samples/SampleRate;
+      FIsCDFormat   := (Channels = 2) and (BitsPerSample = 16) and
+                       (SampleRate = 44100);
     end;
   finally
     FileIn.Free;
@@ -445,6 +450,7 @@ begin
   inherited Create;
   ZeroMemory(@FBlockList, SizeOf(FBlockList));
   FLength := 0;
+  FIsCDFormat := False;
   if FileExists(Name) then
   begin
     FLastError := FIE_NoError;
