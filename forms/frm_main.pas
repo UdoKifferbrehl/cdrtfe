@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.11.2011
+  letzte Änderung  17.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,7 +21,7 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
-     ActnList, ShellCtrls, Clipbrd, XPMan, ToolWin,
+     ActnList, ShellCtrls, Clipbrd, ToolWin,
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
@@ -276,7 +276,6 @@ type
     LabelReadCDRetries: TLabel;
     EditReadCDRetries: TEdit;
     MainMenuToggleLogWindow: TMenuItem;
-    XPManifest1: TXPManifest;
     PanelTabSheet1: TPanel;
     PanelTabSheet2: TPanel;
     PanelTabSheet3: TPanel;
@@ -640,6 +639,7 @@ implementation
 {$R ../resource/buttons.res}
 {$R ../resource/toolbuttons.res}
 {$R ../resource/logo.res}
+{$R ../resource/manifest.res}
 
 uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
