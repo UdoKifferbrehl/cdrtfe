@@ -2,10 +2,10 @@
 
   cl_settings_fileflags.pas: Objekt für Flags bzgl. der Tools
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.10.2010
+  letzte Änderung  11.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,7 @@
                  MPlayerOk  : Boolean
                  UseOwnDLLs : Boolean
                  CygInPath  : Boolean
+                 HelperOk   : Boolean
 
     Methoden     Init
 
@@ -86,6 +87,7 @@ type TFileFlags = class(TCdrtfeData)
        FMPlayerOk  : Boolean;
        FUseOwnDLLs : Boolean;
        FCygInPath  : Boolean;    // cygwin1.dll found in searchpath
+       FHelperOk   : Boolean;
      public
        constructor Create;
        destructor Destroy; override;
@@ -118,6 +120,7 @@ type TFileFlags = class(TCdrtfeData)
        property MPlayerOk  : Boolean read FMplayerOk write FMplayerOk;
        property UseOwnDLLs : Boolean read FUseOwnDLLs write FUseOwnDLLs;
        property CygInPath  : Boolean read FCygInPath write FCygInPath;
+       property HelperOk   : Boolean read FHelperOk write FHelperOk;
      end;
 
 implementation
@@ -173,6 +176,7 @@ begin
   FMPlayerOk   := True;
   FUseOwnDLLs  := True;
   FCygInPath   := False;
+  FHelperOk    := True;
 end;
 
 end.

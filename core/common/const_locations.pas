@@ -2,10 +2,10 @@
 
   const_locations.pas: Konstanten-Deklaration, Dateinamen und Ordner
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.10.2010
+  letzte Änderung  11.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,7 @@ const {Dateinamen - Kommandozeilenprogramme}
       cCdrtfeShlExDll  : string = '\cdrtfeShlEx.dll';
       cCdrtfeShlExDll64: string = '\cdrtfeShlEx64.dll';
       cCdrtfeResDll    : string = '\cdrtferes.dll';
+      cCdrtfeHelper    : string = '\cdrtfeHelper.exe';
       {$J+}
       cM2F2ExtractBin  : string = '\m2f2extract.exe';
       cDat2FileBin     : string = '\dat2file.exe';
