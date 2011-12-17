@@ -1,9 +1,9 @@
 { f_wininfo.pas: Windows-System-Informationen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.08.2010
+  letzte Änderung  11.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -30,6 +30,7 @@
     IsWow64: Boolean
     PlatformWinNT: Boolean
     PlatformWin2kXP: Boolean
+    PlatformWinVista: Boolean
     WinInstCompanyName: string
     WinInstOwnerName: string
     WinInstProductID: string;
@@ -54,6 +55,7 @@ function IsFullAdmin: Boolean;
 function IsWow64: Boolean;
 function PlatformWinNT: Boolean;
 function PlatformWin2kXP: Boolean;
+function PlatformWinVista: Boolean;
 function WinInstCompanyName: string;
 function WinInstOwnerName: string;
 function WinInstProductID: string;
@@ -191,12 +193,22 @@ end;
 
 { PlatformWin2kXP --------------------------------------------------------------
 
-  True, wenn es sich um Win2k oder WinXP handelt (Win32Platform = 2 und
+  True, wenn es sich um Win2k, WinXP oder neuer handelt (Win32Platform = 2 und
   Win32MajorVersion > 4).                                                      }
 
 function PlatformWin2kXP: Boolean;
 begin
   Result := (Win32Platform = 2) and (Win32MajorVersion > 4);
+end;
+
+{ PlatformWinVista -------------------------------------------------------------
+
+  True, wenn es sich um WinVista oder neuer handelt (Win32Platform = 2 und
+  Win32MajorVersion > 4).                                                      }
+
+function PlatformWinVista: Boolean;
+begin
+  Result := (Win32Platform = 2) and (Win32MajorVersion > 5);
 end;
 
 { WinInstProductID -------------------------------------------------------------

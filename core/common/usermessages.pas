@@ -2,10 +2,10 @@
 
   user_messages.pas: Deklaration von User-Messages
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.09.2010
+  letzte Änderung  17.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,8 +22,7 @@ interface
 uses Messages;
 
 const WM_CDRTFE           = WM_APP;
-      {Definition von Window Messages, mod by oli: 0-3}
-      WM_UPDATEGAUGES     = WM_CDRTFE +  0;
+      WM_UPDATEGAUGES     = WM_CDRTFE +  0;  // mod by oli (0-3)
       WM_ACTIVATEDATATAB  = WM_CDRTFE +  1;
       WM_ACTIVATEAUDIOTAB = WM_CDRTFE +  2;
       WM_ACTIVATEXCDTAB   = WM_CDRTFE +  3;
@@ -43,6 +42,7 @@ const WM_CDRTFE           = WM_APP;
       WM_ACTIVATEDVDTAB   = WM_CDRTFE + 17;
       WM_DriveSettings    = WM_CDRTFE + 18;
       WM_SplashScreen     = WM_CDRTFE + 19;
+      WM_ShlExSet         = WM_CDRTFE + 20;
 
       {Parameter-Konstanten für WM_DriveSettings}
       wmwpDrvSetSCSIChange = 1; // anderes Interface -> Rescan

@@ -1,9 +1,9 @@
 { f_process.pas: Prozesse, Fenster, ...
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  11.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,6 +22,7 @@
     GetProcessWindow(const TargetProcessID: Cardinal): HWnd
     KillProcessSoftly(const hProcess: Cardinal; var uExitCode: Cardinal): Boolean
     KillChildProcessesByName(const Name: string; const ParentID: DWORD): Boolean
+    RunAsAdmin(hWnd: HWND; Filename: string; Parameters: string): Boolean
     ShlExecute(const Cmd, Opt: string)
 
 }
@@ -39,6 +40,7 @@ function GetChildProcessByModuleName(const Name: string; const ParentID: DWORD):
 function GetProcessWindow(const TargetProcessID: Cardinal): HWnd;
 function KillProcessSoftly(const hProcess: Cardinal; var uExitCode: Cardinal): Boolean;
 function KillChildProcessesByName(const Name: string; const ParentID: DWORD): Boolean;
+function RunAsAdmin(hWnd: HWND; Filename: string; Parameters: string): Boolean;
 procedure ShlExecute(const Cmd, Opt: string);
 
 implementation
@@ -321,5 +323,25 @@ begin
   end;
   Result := Found;
 end;
+
+{ RunAsAdmin -------------------------------------------------------------------
+
+  startet das angegebene Programm als Administrator.                           }
+
+function RunAsAdmin(hWnd: HWND; Filename: string; Parameters: string): Boolean;
+var sei: TShellExecuteInfo;
+begin
+  ZeroMemory(@sei, SizeOf(sei));
+  sei.cbSize := SizeOf(TShellExecuteInfo);
+  sei.Wnd := hwnd;
+  sei.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI;
+  sei.lpVerb := PChar('runas');
+  sei.lpFile := PChar(Filename); // PAnsiChar;
+  if parameters <> '' then
+    sei.lpParameters := PChar(parameters); // PAnsiChar;
+  sei.nShow := SW_SHOWNORMAL; //Integer;
+  Result := ShellExecuteEx(@sei);
+end;
+
 
 end.

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.11.2011
+  letzte Änderung  13.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -141,6 +141,8 @@ begin
     Add('g014=CD 650 MiB (74 min)\nCD 700 MiB (80 min)\nCD 800 MiB (90 min)\nCD 870 MiB (99 min)\nDVD 4.38 GiB\nDVD/DL 7.96 GiB\nBD 23.3 GiB\nBD DL 46,6 GiB\nMiB\nmin\nCD\nDVD\nDVD/DL\nBD\nBD DL');
     Add('g015=Geändert am');
     Add('g016=Quelldateien');
+    Add('g017=Aktivieren');
+    Add('g018=Deaktivieren');
     {$IFDEF ShowCmdError}
     Add('e001=Es ist ein Fehler aufgetreten!');
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');

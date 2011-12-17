@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 10.08.2010
+  letzte Änderung 17.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -22,7 +22,7 @@ interface
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ExtCtrls, FileCtrl, ComCtrls,
      {eigene Klassendefinitionen/Units}
-     cl_lang, cl_settings, userevents, c_frametopbanner;
+     cl_lang, cl_settings, userevents, usermessages, c_frametopbanner;
 
 type
   TFormSettings = class(TForm)
@@ -101,6 +101,7 @@ type
     RadioButtonUseSearchPathDLL: TRadioButton;
     LabelUseDLL: TLabel;
     FrameTopBanner1: TFrameTopBanner;
+    ButtonSetShlExElevated: TButton;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -112,6 +113,8 @@ type
     procedure ButtonCustOptDeleteClick(Sender: TObject);
     procedure ButtonTempFolderBrowseClick(Sender: TObject);
     procedure EditTempFolderExit(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure ButtonSetShlExElevatedClick(Sender: TObject);
   private
     { Private declarations }
     FOnMessageShow: TMessageShowEvent;
@@ -130,6 +133,8 @@ type
     procedure SetSettings;
     {Events}
     procedure MessageShow(const s: string);
+    {Messagehandler}
+    procedure WMShlExSet(var Msg: TMessage); message WM_ShlExSet;
   public
     { Public declarations }
     property Lang: TLang read FLang write FLang;
@@ -146,9 +151,30 @@ implementation
 {$R *.DFM}
 
 uses f_shellext, f_wininfo, f_filesystem, f_cygwin, f_foldernamecache,
-     usermessages, f_window, const_common, const_tabsheets, const_locations;
+     f_window, const_common, const_tabsheets, const_locations, f_locations,
+     f_process;
 
 {var}
+
+{ WMShlExSet -------------------------------------------------------------------
+
+  Wenn WM_FTerminated empfangen wird, ist der Thread, der Dateiduplikate sucht
+  beendet worden.                                                              }
+
+procedure TFormSettings.WMShlExSet(var Msg: TMessage);
+begin
+  FShellExtIsSet := ShellExtensionsRegistered;
+  CheckBoxShellExt.Checked := FShellExtIsSet;
+  if FShellExtIsSet then
+  begin
+    ButtonSetShlExElevated.Caption := FLang.GMS('g018');
+    MessageShow(FLang.GMS('mpref01'));
+  end else
+  begin
+    ButtonSetShlExElevated.Caption := FLang.GMS('g017');
+    MessageShow(FLang.GMS('mpref02'));
+  end;
+end;
 
 { ActivateTab ------------------------------------------------------------------
 
@@ -220,8 +246,7 @@ var ShlExtOk: Boolean;
 begin
   ShlExtOk := (FSettings.FileFlags.ShlExtDllOk and IsFullAdmin) or
                not PlatformWinNT;
-  CheckBoxShellExt.Enabled := ShlExtOk;
-  StaticText4.Enabled := ShlExtOk;     
+  CheckBoxShellExt.Enabled := ShlExtOk and not FSettings.General.PortableMode;
   CheckBoxAutoSaveOnExit.Checked := FSettings.General.AutoSaveOnExit;
   EditTempFolder.Text := FSettings.General.TempFolder;
   CheckBoxShellExt.Checked           := FShellExtIsSet;
@@ -519,8 +544,28 @@ begin
   EditTempFolderExit(EditTempFolder)
 end;
 
+{ Set ShellExtensions, run cdrtfeHelper.exe elevated }
+
+procedure TFormSettings.ButtonSetShlExElevatedClick(Sender: TObject);
+begin
+  // RunAsAdmin(0, StartUpDir + cCdrtfeHelper, '');
+  if FShellExtIsSet then
+    RunAsAdmin(0, Application.ExeName, '/unregister')
+  else
+    RunAsAdmin(0, Application.ExeName, '/register');
+end;
+
 
 { Form-Events ---------------------------------------------------------------- }
+
+{ OnCreate ---------------------------------------------------------------------
+
+  setzt Controls.                                                              }
+
+procedure TFormSettings.FormCreate(Sender: TObject);
+begin
+  //
+end;
 
 { OnFormShow -------------------------------------------------------------------
 
@@ -528,12 +573,26 @@ end;
   entsprechend gesetzt werden.                                                 }
 
 procedure TFormSettings.FormShow(Sender: TObject);
+var ElevationRequired: Boolean;
 begin
   SetFont(Self);
-  FLang.SetFormLang(Self);  
+  FLang.SetFormLang(Self);
   FrameTopBanner1.Init(Self.Caption, FLang.GMS('desc10'), 'grad1');
   StaticText5.Caption := FLang.GMS('m302');
   FShellExtIsSet := ShellExtensionsRegistered;
+  ElevationRequired := PlatformWinVista and not IsFullAdmin
+                                        and not FSettings.General.PortableMode;
+  ButtonSetShlExElevated.Visible := ElevationRequired;
+  if FShellExtIsSet then
+    ButtonSetShlExElevated.Caption := FLang.GMS('g018')
+  else
+    ButtonSetShlExElevated.Caption := FLang.GMS('g017');
+  CheckBoxShellExt.Visible := not ElevationRequired;
+  if ElevationRequired then
+  begin
+    SendMessage(ButtonSetShlExElevated.Handle, BCM_SETSHIELD, 0, 1);
+  end;
+  
   GetSettings;
   CheckControls(Sender);
   {Sonderbehandlung cygwin1.dll-Optionen}

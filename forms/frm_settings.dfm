@@ -14,6 +14,7 @@ object FormSettings: TFormSettings
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
+  OnCreate = FormCreate
   OnShow = FormShow
   DesignSize = (
     489
@@ -75,6 +76,15 @@ object FormSettings: TFormSettings
             'er das Kontextmen'#252' des Explorers direkt an cdrtfe gesendet werde' +
             'n.'
           TabOrder = 1
+        end
+        object ButtonSetShlExElevated: TButton
+          Left = 8
+          Top = 25
+          Width = 89
+          Height = 25
+          Caption = 'Einstellen'
+          TabOrder = 2
+          OnClick = ButtonSetShlExElevatedClick
         end
       end
       object GroupBoxConfirm: TGroupBox

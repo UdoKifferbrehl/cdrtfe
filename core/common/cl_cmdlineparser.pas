@@ -81,7 +81,7 @@ type TCmdLineParser = class(TObject)
 
 implementation
 
-uses f_instance, usermessages, const_tabsheets, f_shellext;
+uses f_instance, usermessages, const_tabsheets, f_shellext, f_window;
 
 { TCmdLineParser ------------------------------------------------------------- }
 
@@ -360,12 +360,14 @@ end;
   übergeben. Die zweite Instanz wird dann geschlossen.                         }
 
 procedure TCmdLineParser.ExecuteCommandLine;
-var i: integer;
-    Instance: HWnd;
+var i        : integer;
+    Instance : HWnd;
     aCopyData: TCopyDataStruct;
-    pcBuffer: PChar;
-    IsFirst: Boolean;
+    pcBuffer : PChar;
+    IsFirst  : Boolean;
+    ShlExSet : Boolean;
 begin
+  ShlExSet := False;
   {Handle der vorigen Instanz holen: der Befehlsblock zur Erkennung der vorigen
   Instanz ist in die Funktion FirstInstance in Unit f_instance.pas gewandert.}
   IsFirst := IsFirstInstance(Instance, 'TCdrtfeMainForm', FFormCaption);
@@ -396,10 +398,18 @@ begin
   if FRegisterShlEx and FSettings.FileFlags.ShlExtDllOk then
   begin
     RegisterShellExtensions;
+    ShlExSet := True;
   end;
   if FUnRegisterShlEx then
   begin
     UnRegisterShellExtensions;
+    ShlExSet := True;
+  end;
+  {Aufrufer signalisieren, dass Status der ShellExtension geändert wurde.}
+  if ShlExSet then
+  begin
+    Instance := FindWindowEx(0, 0, 'TFormSettings', nil);
+    SendMessage(Instance, WM_ShlExSet, 0, 0);
   end;
 
   {Dateien ohne Option hinzufügen}
