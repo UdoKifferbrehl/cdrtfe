@@ -2,10 +2,10 @@
 
   cl_cmdlineparser.pas: Kommandozeilenparser
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.07.2010
+  letzte Änderung  13.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -62,6 +62,8 @@ type TCmdLineParser = class(TObject)
        FNoCheck           : Boolean;
        FHide              : Boolean;
        FMinimize          : Boolean;
+       FRegisterShlEx     : Boolean;
+       FUnregisterShlEx   : Boolean;
        FTabToActivate     : Byte;
        function GetLastError: Byte;
        procedure AddToList(const AddTo, FileName: string);
@@ -79,7 +81,7 @@ type TCmdLineParser = class(TObject)
 
 implementation
 
-uses f_instance, usermessages, const_tabsheets;
+uses f_instance, usermessages, const_tabsheets, f_shellext;
 
 { TCmdLineParser ------------------------------------------------------------- }
 
@@ -186,6 +188,8 @@ begin
   FExecute            := False;
   FHide               := False;
   FMinimize           := False;
+  FRegisterShlEx      := False;
+  FUnregisterShlEx    := False;
 end;
 
 { ParseCommandLine -------------------------------------------------------------
@@ -266,17 +270,17 @@ begin
         end;
       end;
     end else
-    {Die Optionen /register und /unregister wurden gestrichen
+    {Die Optionen /register und /unregister werden wieder benötigt.}
     if Par = '/register' then
     begin
-      ParsedCmdLine.RegisterShellEx := True;
-      ParsedCmdLine.UnRegisterShellEx := False;
+      FRegisterShlEx := True;
+      FUnRegisterShlEx := False;
     end else
     if Par = '/unregister' then
     begin
-      ParsedCmdLine.RegisterShellEx := False;
-      ParsedCmdLine.UnRegisterShellEx := True;
-    end else                                                 }
+      FRegisterShlEx := False;
+      FUnRegisterShlEx := True;
+    end else
     if Par = '/execute' then
     begin
       FExecute := True;
@@ -386,15 +390,16 @@ begin
         FData.LoadFromFile(FProjectFileToLoad + '.files');
       end;
     end;
-    {gestrichen ShellExtensions registrieren/löschen?
-    if ParsedCmdLine.RegisterShellEx and not NoShellExtDll then
-    begin
-      RegisterShellExtensions('register');
-    end;
-    if ParsedCmdLine.UnRegisterShellEx then
-    begin
-      RegisterShellExtensions('unregister');
-    end;                                             }
+  end;
+
+  {ShellExtensions registrieren/löschen?}
+  if FRegisterShlEx and FSettings.FileFlags.ShlExtDllOk then
+  begin
+    RegisterShellExtensions;
+  end;
+  if FUnRegisterShlEx then
+  begin
+    UnRegisterShellExtensions;
   end;
 
   {Dateien ohne Option hinzufügen}
