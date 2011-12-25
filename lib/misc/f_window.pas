@@ -1,9 +1,9 @@
 { f_window.pas: Funktionnen für Fenster und Dialoge
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  08.07.2010
+  letzte Änderung  25.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,7 +29,7 @@ unit f_window;
 interface
 
 uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages, Dialogs, Classes,
-     MMSystem, StdCtrls;
+     MMSystem, StdCtrls, Graphics;
 
 function FlagIsSet(const Mask, Flag: Longint): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
@@ -206,10 +206,12 @@ const BannerHeight = 33;
 var Dlg           : TForm;
     FrameTopBanner: TFrameTopBanner;
     Component     : TComponent;
+    MessageLabel  : TStaticText;
     i             : Integer;
     SoundString   : string;
     BannerCap     : string;
     BannerBG      : string;
+    DlgLabel      : TLabel;
 begin
   BannerBG := 'grad1';
   case DlgType of
@@ -229,6 +231,7 @@ begin
   if SoundString = '' then Sound := False;
   Dlg := CreateMessageDialog(Text, DlgType, Buttons);
   try
+
     Dlg.BorderStyle := bsSingle;
     Dlg.BorderIcons := [biSystemMenu];
     if Caption = '' then BannerCap := Dlg.Caption else BannerCap := Caption;
@@ -244,6 +247,12 @@ begin
       if Component is TGraphicControl then
        (Component as TGraphicControl).Top :=
          (Component as TGraphicControl).Top + BannerHeight;
+      {Workaround für Screenreader wie NVDA, kann manche Label nicht lesen}
+      if Component is TLabel then
+      begin
+        DlgLabel := Component as TLabel;
+      end;
+
     end;
     FrameTopBanner := TFrameTopBanner.Create(nil);
     FrameTopBanner.Parent := Dlg;
@@ -256,6 +265,16 @@ begin
     FrameTopBanner.Init(BannerCap, '', BannerBG);
     if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
     TranslateMsgDlgButtons(Dlg);
+    {Workaround für Screenreader wie NVDA, kann manche Label nicht lesen}
+    DlgLabel.Visible := False;
+    MessageLabel := TStaticText.Create(Dlg);
+    MessageLabel.Parent := Dlg;
+    MessageLabel.Caption := Text;
+    MessageLabel.Top := DlgLabel.Top;
+    MessageLabel.Left :=DlgLabel.Left;
+    MessageLabel.Width := DlgLabel.Width;
+    MessageLabel.Height :=DlgLabel.Height;
+
     Dlg.ShowModal;
     Result := Dlg.ModalResult
   finally
