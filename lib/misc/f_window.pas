@@ -213,6 +213,7 @@ var Dlg           : TForm;
     BannerBG      : string;
     DlgLabel      : TLabel;
 begin
+  DlgLabel := nil;
   BannerBG := 'grad1';
   case DlgType of
     mtWarning     : begin
@@ -266,7 +267,7 @@ begin
     if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
     TranslateMsgDlgButtons(Dlg);
     {Workaround für Screenreader wie NVDA, kann manche Label nicht lesen}
-    DlgLabel.Visible := False;
+    if DlgLabel <> nil then DlgLabel.Visible := False;
     MessageLabel := TStaticText.Create(Dlg);
     MessageLabel.Parent := Dlg;
     MessageLabel.Caption := Text;
