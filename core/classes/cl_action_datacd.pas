@@ -5,7 +5,7 @@
   Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.03.2011
+  letzte Änderung  30.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -264,8 +264,8 @@ begin
     begin
       Temp := QuotePath(MakePathCygwinConform(DummyFileName));
       CmdM := CmdM + ' -hide ' + Temp;
-      CmdM := CmdM + ' -hide-joliet ' + Temp;
-      if HaveHideUDF then CmdM := CmdM + ' -hide-udf ' + Temp;
+      if Joliet then CmdM := CmdM + ' -hide-joliet ' + Temp;
+      if UDF and HaveHideUDF then CmdM := CmdM + ' -hide-udf ' + Temp;
     end;
     if HideRRMoved and RockRidge then
                         CmdM := CmdM + ' -hide-rr-moved';
