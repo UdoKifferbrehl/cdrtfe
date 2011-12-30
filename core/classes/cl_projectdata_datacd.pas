@@ -2,10 +2,10 @@
 
   cl_projectdata_datacd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2011 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.05.2010
+  letzte Änderung  30.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -102,6 +102,8 @@ type TCheckFSArgs = record     {zur Vereinfachung der Parameterübergabe}
        FPrevSessDelList: TStringList;
        FPrevSessSize: Int64;
        FHasImportedSessions: Boolean;
+       FReplacePrevSessFile: Boolean;
+       FPrevSessChanged: Boolean;
        FRoot: TNode;
        function CountFiles(Root: TNode): Integer;
        function CountFilesPrevSess(Root: TNode): Integer;
@@ -573,14 +575,15 @@ end;
   fügt wurden und aus einer alten Session stammen.
   Das Vorzeichen wird als Flag verwendet:
     positiv     keine der alten Dateien/Ordner soll versteckt werden
-    negativ     Dateien oder Ordner wurden gelöscht                            }
+    negativ     Dateien oder Ordner wurden gelöscht oder ersetzt               }
 
 function TCD.GetFileCountPrevSess: Integer;
 begin
   if FHasImportedSessions then
   begin
     Result := CountFilesPrevSess(FRoot);
-    if FPrevSessDelList.Count > 0 then Result := Result * -1;
+    if (FPrevSessDelList.Count > 0) or FPrevSessChanged then
+      Result := Result * -1;
   end else
     Result := 0;
 end;
@@ -871,6 +874,8 @@ begin
   FPrevSessDelList := TStringList.Create;
   FHasImportedSessions := False;
   FPrevSessSize := 0;
+  FReplacePrevSessFile := False;
+  FPrevSessChanged := False;;
   {Wurzel erzeugen}
   FRoot := TNode.Create(nil);
   FRoot.Text := 'CD';
@@ -1095,7 +1100,10 @@ begin
         if IsPreviousSessionFile(TPList(DestFolder.Data)^[Index]) then
         begin
           {alte Dateien können durch neue gleichen Namens ersetzt werden}
+          FReplacePrevSessFile := True;
           DeleteFromPathlistByIndex(Index, DestPath);
+          FReplacePrevSessFile := False;
+          FPrevSessChanged := True;
           NodeAddFile(AddName, DestFolder);
           InvalidateCounters;
         end else
@@ -1143,7 +1151,7 @@ begin
   FileList := GetFileList(Path);
   if (Index > -1) and (Index < FileList.Count) then
   begin
-    if IsPreviousSessionFile(FileList[Index]) then
+    if IsPreviousSessionFile(FileList[Index]) and not FReplacePrevSessFile then
     begin
       {Verstecken einer bereits vorhandenen Datei}
       FPrevSessDelList.Add(Path + FileList[Index]);
@@ -1216,7 +1224,8 @@ begin
   InvalidateCounters;
   FPrevSessDelList.Clear;
   FHasImportedSessions := False;
-  FPrevSessSize := 0;  
+  FPrevSessSize := 0;
+  FPrevSessChanged := False;
 end;
 
 { MoveFileByIndex --------------------------------------------------------------
