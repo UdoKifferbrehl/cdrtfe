@@ -168,7 +168,7 @@ kerberos002@arcor.de</VersionInfoKeys>
 			<VersionInfoKeys Name="FileDescription">cdrtools/Mode2CDMaker/VCDImager Frontend</VersionInfoKeys>
 			<VersionInfoKeys Name="FileVersion">1.4.0.2</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">cdrtfe</VersionInfoKeys>
-			<VersionInfoKeys Name="LegalCopyright">Copyright © 2002-2011  O. Valencia, O. Kutsche</VersionInfoKeys>
+			<VersionInfoKeys Name="LegalCopyright">Copyright © 2002-2012  O. Valencia, O. Kutsche</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
 			<VersionInfoKeys Name="OriginalFilename">cdrtfe.exe</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">cdrtools Frontend</VersionInfoKeys>
