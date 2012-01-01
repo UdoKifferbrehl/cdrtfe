@@ -2,10 +2,10 @@
 
   frm_audiocd_tracks.pas: Audio-CD: Track-Eigenschaften
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  01.01.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -92,6 +92,7 @@ var PreviousControl: TObject;
   vorhanden sind.                                                              }
 
 function TFormAudioCDTracks.InputOk: Boolean;
+var i: Integer;
 begin
   Result := True;
   {Eingabe für Pausenlänge überprüfen}
@@ -101,6 +102,21 @@ begin
     Result := False;
     EditPause.SetFocus;
     EditPause.SelectAll;
+  end;
+  {benutzerdefinierte Pausen}
+  if RadioButtonUserdefinedPause.Checked then
+  begin
+    i := 0;
+    while Result and (i <= FTrackCount - 1) do
+    begin
+      if (StrToIntDef(GridTextData.Cells[3, i + 1], -1) = -1) and
+         (GridTextData.Cells[3, i + 1] <> '') then
+      begin
+        ShowMsgDlg(FLang.GMS('epause01'), FLang.GMS('g001'), MB_cdrtfeError);
+        Result := False;
+      end;
+      Inc(i);
+    end;
   end;
 end;
 
