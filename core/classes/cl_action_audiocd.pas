@@ -2,10 +2,10 @@
 
   cl_action_audiocd.pas: Audio-CD
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.06.2010
+  letzte Änderung  01.01.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -269,7 +269,7 @@ begin
         end else
         begin
           {Umrechnen: Sekunden -> Sektoren}
-          Temp := IntToStr(StrToInt(Temp) * 75);
+          Temp := IntToStr(StrToIntDef(Temp, 0) * 75);
           Cmd := Cmd + ' padsize=' + Temp + 's';
         end;
       end;
