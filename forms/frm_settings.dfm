@@ -4,7 +4,7 @@ object FormSettings: TFormSettings
   HelpContext = 1200
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'cdrtools Frontend - Einstellungen'
-  ClientHeight = 385
+  ClientHeight = 394
   ClientWidth = 489
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,12 +18,12 @@ object FormSettings: TFormSettings
   OnShow = FormShow
   DesignSize = (
     489
-    385)
+    394)
   PixelsPerInch = 96
   TextHeight = 13
   object ButtonOk: TButton
-    Left = 326
-    Top = 352
+    Left = 325
+    Top = 361
     Width = 75
     Height = 25
     Caption = 'Ok'
@@ -32,7 +32,7 @@ object FormSettings: TFormSettings
   end
   object ButtonCancel: TButton
     Left = 406
-    Top = 352
+    Top = 361
     Width = 75
     Height = 25
     Cancel = True
@@ -44,17 +44,18 @@ object FormSettings: TFormSettings
     Left = 8
     Top = 56
     Width = 473
-    Height = 289
+    Height = 297
     ActivePage = TabSheetCdrtfe
     TabOrder = 2
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
       Caption = 'cdrtfe'
+      ExplicitHeight = 261
       object GroupBoxShellExt: TGroupBox
         Left = 8
         Top = 8
-        Width = 241
-        Height = 129
+        Width = 449
+        Height = 97
         Caption = 'ShellExtensions'
         TabOrder = 0
         object CheckBoxShellExt: TCheckBox
@@ -66,8 +67,8 @@ object FormSettings: TFormSettings
           TabOrder = 0
         end
         object StaticText4: TStaticText
-          Left = 8
-          Top = 56
+          Left = 224
+          Top = 24
           Width = 209
           Height = 65
           AutoSize = False
@@ -79,7 +80,7 @@ object FormSettings: TFormSettings
         end
         object ButtonSetShlExElevated: TButton
           Left = 8
-          Top = 25
+          Top = 24
           Width = 89
           Height = 25
           Caption = 'Einstellen'
@@ -87,45 +88,18 @@ object FormSettings: TFormSettings
           OnClick = ButtonSetShlExElevatedClick
         end
       end
-      object GroupBoxConfirm: TGroupBox
-        Left = 8
-        Top = 144
-        Width = 241
-        Height = 113
-        Caption = 'Best'#228'tigung'
-        TabOrder = 1
-        object CheckBoxNoConfirm: TCheckBox
-          Left = 8
-          Top = 24
-          Width = 220
-          Height = 17
-          Caption = 'Alle (!) Sicherheitsabfragen abschalten'
-          TabOrder = 0
-        end
-        object StaticText2: TStaticText
-          Left = 8
-          Top = 56
-          Width = 201
-          Height = 41
-          AutoSize = False
-          Caption = 
-            'Ein Klick auf '#39'Start'#39' f'#252'hrt die gew'#228'hlte Aktion sofort ohne weit' +
-            'ere Nachfrage aus.'
-          TabOrder = 1
-        end
-      end
       object GroupBoxSettings: TGroupBox
-        Left = 256
-        Top = 8
-        Width = 201
-        Height = 153
+        Left = 8
+        Top = 111
+        Width = 449
+        Height = 90
         Caption = 'Einstellungen speichern'
-        TabOrder = 2
+        TabOrder = 1
         object StaticText5: TStaticText
-          Left = 8
-          Top = 56
-          Width = 185
-          Height = 65
+          Left = 224
+          Top = 24
+          Width = 222
+          Height = 63
           AutoSize = False
           Caption = 
             'Die aktuellen Einstellungen (mit Ausnahme der Datei- Listen) k'#246'n' +
@@ -152,7 +126,7 @@ object FormSettings: TFormSettings
         end
         object CheckBoxAutoSaveOnExit: TCheckBox
           Left = 8
-          Top = 128
+          Top = 64
           Width = 185
           Height = 17
           Caption = 'beim Beenden speichern'
@@ -160,23 +134,23 @@ object FormSettings: TFormSettings
         end
       end
       object GroupBoxTempFolder: TGroupBox
-        Left = 256
-        Top = 168
-        Width = 201
-        Height = 65
+        Left = 8
+        Top = 207
+        Width = 449
+        Height = 59
         Caption = 'tempor'#228're Dateien'
-        TabOrder = 3
+        TabOrder = 2
         object EditTempFolder: TEdit
           Left = 8
           Top = 24
-          Width = 105
+          Width = 337
           Height = 21
           TabOrder = 0
           OnExit = EditTempFolderExit
           OnKeyPress = ComboBoxKeyPress
         end
         object ButtonTempFolderBrowse: TButton
-          Left = 120
+          Left = 360
           Top = 24
           Width = 75
           Height = 25
@@ -186,18 +160,67 @@ object FormSettings: TFormSettings
         end
       end
     end
+    object TabSheetCdrtfe2: TTabSheet
+      Caption = 'cdrtfe (2)'
+      ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 29
+      ExplicitHeight = 261
+      object GroupBoxConfirm: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 449
+        Height = 81
+        Caption = 'Best'#228'tigung'
+        TabOrder = 0
+        object CheckBoxNoConfirm: TCheckBox
+          Left = 8
+          Top = 24
+          Width = 225
+          Height = 17
+          Caption = 'Alle (!) Sicherheitsabfragen abschalten'
+          TabOrder = 0
+        end
+        object StaticText2: TStaticText
+          Left = 239
+          Top = 24
+          Width = 201
+          Height = 41
+          AutoSize = False
+          Caption = 
+            'Ein Klick auf '#39'Start'#39' f'#252'hrt die gew'#228'hlte Aktion sofort ohne weit' +
+            'ere Nachfrage aus.'
+          TabOrder = 1
+        end
+      end
+      object GroupBoxWarning: TGroupBox
+        Left = 8
+        Top = 95
+        Width = 449
+        Height = 58
+        Caption = 'Warnungen'
+        TabOrder = 1
+        object CheckBoxWarnChanges: TCheckBox
+          Left = 8
+          Top = 24
+          Width = 425
+          Height = 17
+          Caption = 'Vor Beenden warnen, wenn Dateiliste ge'#228'ndert wurde'
+          TabOrder = 0
+        end
+      end
+    end
     object TabSheetDrives: TTabSheet
       HelpContext = 1206
       Caption = 'Laufwerke'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitLeft = 8
+      ExplicitTop = 29
+      ExplicitHeight = 261
       object GroupBoxDetectSpeeds: TGroupBox
         Left = 8
         Top = 8
         Width = 449
-        Height = 49
+        Height = 57
         Caption = 'Geschwindigkeiten'
         TabOrder = 0
         object CheckBoxDetectSpeeds: TCheckBox
@@ -211,9 +234,9 @@ object FormSettings: TFormSettings
       end
       object GroupBoxSCSI: TGroupBox
         Left = 8
-        Top = 64
+        Top = 71
         Width = 449
-        Height = 49
+        Height = 57
         Caption = 'SCSI-Interface'
         TabOrder = 1
         object RadioButtonSCSIAuto: TRadioButton
@@ -245,10 +268,7 @@ object FormSettings: TFormSettings
     object TabSheetCdrecord: TTabSheet
       HelpContext = 1202
       Caption = 'cdrecord'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 261
       object GroupBoxAdditionalCmdLineOptions: TGroupBox
         Left = 8
         Top = 120
@@ -261,7 +281,7 @@ object FormSettings: TFormSettings
           Top = 24
           Width = 225
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 1
           OnExit = ComboBoxExit
           OnKeyPress = ComboBoxKeyPress
@@ -271,7 +291,7 @@ object FormSettings: TFormSettings
           Top = 56
           Width = 225
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 4
           OnExit = ComboBoxExit
           OnKeyPress = ComboBoxKeyPress
@@ -392,10 +412,7 @@ object FormSettings: TFormSettings
     object TabSheetCdrecord2: TTabSheet
       HelpContext = 1203
       Caption = 'cdrecord (2)'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 261
       object GroupBoxCdrecordWritingSpeed: TGroupBox
         Left = 8
         Top = 8
@@ -472,10 +489,7 @@ object FormSettings: TFormSettings
     object TabSheetCdrdao: TTabSheet
       HelpContext = 1204
       Caption = 'cdrdao'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 261
       object GroupBoxCdrdaoDriver: TGroupBox
         Left = 8
         Top = 64
@@ -522,10 +536,7 @@ object FormSettings: TFormSettings
     object TabSheetAudioCD: TTabSheet
       HelpContext = 1205
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 261
       object GroupBoxAudioCDText: TGroupBox
         Left = 8
         Top = 8
@@ -615,10 +626,7 @@ object FormSettings: TFormSettings
     end
     object TabSheetCygwin: TTabSheet
       Caption = 'Cygwin'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 261
       object GroupBoxCygwinDLL: TGroupBox
         Left = 8
         Top = 8

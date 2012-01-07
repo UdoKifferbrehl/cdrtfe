@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 17.12.2011
+  letzte Änderung 07.01.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,9 +33,6 @@ type
     GroupBoxShellExt: TGroupBox;
     CheckBoxShellExt: TCheckBox;
     StaticText4: TStaticText;
-    GroupBoxConfirm: TGroupBox;
-    CheckBoxNoConfirm: TCheckBox;
-    StaticText2: TStaticText;
     GroupBoxSettings: TGroupBox;
     TabSheetCdrecord: TTabSheet;
     GroupBoxAdditionalCmdLineOptions: TGroupBox;
@@ -102,6 +99,12 @@ type
     LabelUseDLL: TLabel;
     FrameTopBanner1: TFrameTopBanner;
     ButtonSetShlExElevated: TButton;
+    TabSheetCdrtfe2: TTabSheet;
+    GroupBoxConfirm: TGroupBox;
+    CheckBoxNoConfirm: TCheckBox;
+    StaticText2: TStaticText;
+    GroupBoxWarning: TGroupBox;
+    CheckBoxWarnChanges: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -251,6 +254,7 @@ begin
   EditTempFolder.Text := FSettings.General.TempFolder;
   CheckBoxShellExt.Checked           := FShellExtIsSet;
   CheckBoxNoConfirm.Checked          := FSettings.General.NoConfirm;
+  CheckBoxWarnChanges.Checked        := FSettings.General.WarnModified;
   CheckBoxForceGenericMMC.Checked    := FSettings.Cdrdao.ForceGenericMmc;
   CheckBoxForceGenericMMCRaw.Checked := FSettings.Cdrdao.ForceGenericMmcRaw;
   CheckBoxCdrdaoCueImage.Checked     := FSettings.Cdrdao.WriteCueImages;
@@ -302,6 +306,7 @@ procedure TFormSettings.SetSettings;
 begin
   FShellExtToSet                      := CheckBoxShellExt.Checked;
   FSettings.General.NoConfirm         := CheckBoxNoConfirm.Checked;
+  FSettings.General.WarnModified      := CheckBoxWarnChanges.Checked;
   FSettings.Cdrdao.ForceGenericMmc    := CheckBoxForceGenericMMC.Checked;
   FSettings.Cdrdao.ForceGenericMmcRaw := CheckBoxForceGenericMMCRaw.Checked;
   FSettings.Cdrdao.WriteCueImages     := CheckBoxCdrdaoCueImage.Checked;
