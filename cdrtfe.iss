@@ -1,10 +1,10 @@
 ; cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 ;
-;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.3.5
+;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.4.0
 ;
 ;  Copyright (c) 2006-2012 Oliver Valencia
 ;
-;  letzte Änderung  01.01.2012
+;  letzte Änderung  10.01.2012
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -60,6 +60,7 @@ Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cd
 Name: nl; MessagesFile: compiler:Languages\Dutch.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
 Name: ptbr; MessagesFile: compiler:Languages\BrazilianPortuguese.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pt-br.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pt-br.rtf
 Name: el; MessagesFile: compiler:Languages\Greek.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_el.rtf
+Name: sv; MessagesFile: compiler:Languages\Swedish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_sv.rtf
 
 [Tasks]
 ; Desktop icon
@@ -131,10 +132,10 @@ Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
 Source: I:\cdrtfe\misc\scripts\copycyg.bat; DestDir: {tmp}; Tasks: copycyg
 ; Readme cdrtfe
 Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
-Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr el
+Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr el sv
 Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
 Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_el.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: el
-Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr
+Source: I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr sv
 Source: I:\cdrtfe\cdrtfe\doc\changes\changes.txt; DestDir: {app}\doc; Flags: ignoreversion;
 ; Licenses
 Source: I:\cdrtfe\cdrtfe\doc\license\COPYING.txt; DestDir: {app}\doc\license; Flags: ignoreversion
@@ -142,7 +143,7 @@ Source: I:\cdrtfe\cdrtfe\doc\license\CDDL.Schily.txt; DestDir: {app}\doc\license
 Source: I:\cdrtfe\cdrtfe\doc\license\license_tools.txt; DestDir: {app}\doc\license; Flags: ignoreversion
 ; Readme m2f2extract
 Source: I:\delphi\m2f2extract\doc\m2f2extract_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de; Components: tools\xcd
-Source: I:\delphi\m2f2extract\doc\m2f2extract_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr el; Components: tools\xcd
+Source: I:\delphi\m2f2extract\doc\m2f2extract_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr el sv; Components: tools\xcd
 ; source files
 Source: I:\cdrtfe\cdrtfe\source\*; DestDir: {app}\source\cdrtfe; Excludes: COPYING.txt,forms.pas,controls.pas,inifiles.pas; Flags: ignoreversion recursesubdirs; Components: src
 Source: I:\cdrtfe\cdrtfe\shellex\cdrtfeShlEx\*; DestDir: {app}\source\cdrtfeShlEx; Flags: ignoreversion recursesubdirs; Components: src
@@ -157,7 +158,7 @@ Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd; MinVersi
 Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.bat; MinVersion: 1, 0
 ; Help file
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_german.chm; Languages: de
-Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl nl ptbr
+Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl nl ptbr sv
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_french.chm; Languages: fr
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_italian.chm; Languages: it
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_greek.chm; Languages: el
@@ -166,11 +167,11 @@ Name: {group}\Changes; Filename: {app}\doc\changes.txt;
 Name: {group}\Readme; Filename: {app}\doc\readme_de.txt; Languages: de
 Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_de.txt; Languages: de
 Name: {group}\Readme; Filename: {app}\doc\readme_en.txt; Languages: en fr it pl ptbr
-Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl nl ptbr
+Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl nl ptbr sv
 Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_el.txt; Languages: el
 Name: {group}\Readme Icons; Filename: {app}\icons\readme.txt;
 Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_de.txt; Languages: de; Components: tools\xcd
-Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl nl ptbr el; Components: tools\xcd
+Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl nl ptbr el sv; Components: tools\xcd
 ; Source files
 Name: {group}\{cm:IconSourceFiles}; Filename: {app}\source; Components: src
 ; Uninstall
@@ -205,7 +206,7 @@ Name: custom; Description: cdrtfe Setup; Flags: iscustom
 [Components]
 ; cdrtfe
 Name: prog; Description: {cm:CompProg}; Flags: fixed; Types: custom
-Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl nl ptbr el
+Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl nl ptbr el sv
 Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Languages: de
 ; Tools
 Name: tools; Description: {cm:CompTools}; Flags: fixed; Types: custom;
@@ -429,6 +430,7 @@ fr.LangSuffix=Lang5
 it.LangSuffix=Lang8
 ptbr.LangSuffix=Lang14
 el.LangSuffix=Lang16
+sv.LangSuffix=Lang18
 ; Common
 CompProg={#MyAppVerName}
 CompCdrt=cdrtools
@@ -634,3 +636,28 @@ el.IconHelpFile=cdrtfe ÂïÞèåéá
 el.IconSourceFiles=Ðçãáßá áñ÷åßá
 el.SpecialTask=åéäéêÜ ¸ñãá:
 el.CopyCygwin=ÁíôéãñáöÞ ôùí Cygwin DLLs êáé ôùí scripts (ìüíï ãéá experts, äåí óõíßóôáôáé)
+; Swedish
+sv.CompLang=Språkstöd (Nödvändigt för andra språk än Tyska)
+sv.CompTools=Kommandoradsverktyg
+sv.CompM2CDMex=m2cdm (modifierad Mode2CDMaker)
+sv.CompRrenc=Extra XCD felskydd
+sv.CompXCD=XCD extraheringsverktyg (dat2file, d2fgui, M2F2Extract)
+sv.CompAudio=MP3-, OGG- och FLAC-stöd
+sv.CompSrc={#MyAppVerName} källfiler
+sv.TaskAllUsers=För alla användare
+sv.TaskCurrentUser=Endast för mig
+sv.CygwinHeader=Cygwin
+sv.CygwinHeader2=En befintlig cygwin1.dll har upptäckts i systemet.
+sv.CygwinText=Vilken cygwin dll vill du använda?
+sv.CygwinText2=Notis: cygiconv-2.dll och cygintl-3.dll kan inte hittas i systemet.
+sv.CygwinText3=Varning! cygwin1.dll har hittats i Windows systemkatalog. Användning av den, i installationsprogrammet, inkluderade DLL-filen kan inte genomföras.
+sv.CygwinOpt1=Använd den redan installerade DLL-filen för att undvika versionskonflikter.
+sv.CygwinOpt2=Använd den, i installationsprogrammet, inkluderade DLL-filen.
+sv.CygwinReadyHeader=Cygwin DLL-filer:
+sv.CygwinReadyUsePrev=Använder redan installerade cygwin DLL-filer.
+sv.CygwinReadyUseOwn=Använder installationsprogrammets cygwin DLL-filer.
+sv.OldVersionError=En äldre version har hittats. Avinstallera den först.
+sv.IconHelpFile=cdrtfe Hjälp
+sv.IconSourceFiles=Källfiler
+sv.SpecialTask=Särskilda uppgifter:
+sv.CopyCygwin=Kopiera Cygwin DLL-filer och script (endast för experter, rekommenderas inte)
