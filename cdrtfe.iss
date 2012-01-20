@@ -1,10 +1,10 @@
 ; cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 ;
-;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.4.0
+;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.4.3
 ;
 ;  Copyright (c) 2006-2012 Oliver Valencia
 ;
-;  letzte Änderung  10.01.2012
+;  letzte Änderung  20.01.2012
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,8 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVerName "cdrtfe 1.4.1"
+#define MyAppVer "1.4.1"
+#define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
@@ -32,12 +33,15 @@ AllowNoIcons=yes
 UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
+;Unistaller
+SignedUninstaller=yes
+SignedUninstallerDir=I:\cdrtfe\setupscript\inno\signeduninstaller
 ; Compiler
-VersionInfoVersion=1.4.1
+VersionInfoVersion={#MyAppVer} 
 VersionInfoCopyright={#MyAppCopyright}
 OutputDir=i:\cdrtfe\proto2
 ;OutputDir=J:\shared\cdrtfe
-OutputBaseFilename=cdrtfe-1.4.1
+OutputBaseFilename=cdrtfe-{#MyAppVer}
 ; Compression
 ;Compression=none
 Compression=lzma2
