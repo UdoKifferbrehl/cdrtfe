@@ -75,7 +75,7 @@ implementation
 uses f_filesystem, f_window, const_common;
 
 const Cdrtfe_Name        = 'cdrtfe';
-      Cdrtfe_Version     = 'cdrtfe 1.4'
+      Cdrtfe_Version     = 'cdrtfe 1.4.1'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Portable    = ' portable';
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
