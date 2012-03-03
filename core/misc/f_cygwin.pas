@@ -1,8 +1,8 @@
 { f_cygwin.pas: cygwin-Funktionen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
 
-  letzte Änderung  10.11.2010
+  letzte Änderung  26.02.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -35,17 +35,20 @@ uses Windows, SysUtils, Registry, IniFiles;
 
 function CheckForActiveCygwinDLL: Boolean;
 function GetCygwinPathPrefix: string;
+function GetCygwinPathPrefixEx: string;
 function MakePathCygwinConform(Path: string; GraftPoints: Boolean = False): string;
 function MakePathMkisofsConform(const Path: string):string;
 function MakePathMingwMkisofsConform(const Path: string): string;
 function UseOwnCygwinDLLs: Boolean;
 procedure CleanRegistryPortable;
 procedure SetUseOwnCygwinDLLs(Value: Boolean);
+procedure InitCygwinPathPrefix;
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}   // debug: f_window,
+     f_getdosoutput,
      cl_cdrtfedata, f_strings, f_filesystem, f_locations, const_locations;
 
 { 'statische' Variablen }
@@ -161,6 +164,128 @@ begin
   finally
     Reg.Free;
   end;
+end;
+
+{ GetCygwinPathPrefixEx --------------------------------------------------------
+
+  liefert den Cygwin-Mountpoint für Windowslaufwerke (normalerweise /cygdrive).
+
+  Zur Zeit wird hierfür ein externes Programm (cygpathprefix.exe) aufgerufen,
+  das das Prefix nach StdOut ausgibt. Es wäre natürlich schöner, dies durch
+  direkten Aufruf der entsprechenden Funktion der cygwin1.dll zu erledigen,
+  aber hierfür muß der Stack manipuliert werden (unterste 4K sichern und an-
+  schließend wiederherstellen, sonst überschreibt cygwin_dll_init diesen
+  Bereich).                                                                    }
+(*
+type TCygwinGetinfoTypes = (
+       CW_LOCK_PINFO,
+       CW_UNLOCK_PINFO,
+       CW_GETTHREADNAME,
+       CW_GETPINFO,
+       CW_SETPINFO,
+       CW_SETTHREADNAME,
+       CW_GETVERSIONINFO,
+       CW_READ_V1_MOUNT_TABLES,
+       CW_USER_DATA,
+       CW_PERFILE,
+       CW_GET_CYGDRIVE_PREFIXES,
+       CW_GETPINFO_FULL,
+       CW_INIT_EXCEPTIONS,
+       CW_GET_CYGDRIVE_INFO,
+       CW_SET_CYGWIN_REGISTRY_NAME,
+       CW_GET_CYGWIN_REGISTRY_NAME,
+       CW_STRACE_TOGGLE,
+       CW_STRACE_ACTIVE,
+       CW_CYGWIN_PID_TO_WINPID,
+       CW_EXTRACT_DOMAIN_AND_USER,
+       CW_CMDLINE,
+       CW_CHECK_NTSEC,
+       CW_GET_ERRNO_FROM_WINERROR,
+       CW_GET_POSIX_SECURITY_ATTRIBUTE,
+       CW_GET_SHMLBA,
+       CW_GET_UID_FROM_SID,
+       CW_GET_GID_FROM_SID,
+       CW_GET_BINMODE,
+       CW_HOOK,
+       CW_ARGV,
+       CW_ENVP,
+       CW_DEBUG_SELF,
+       CW_SYNC_WINENV,
+       CW_CYGTLS_PADSIZE);
+
+     TInitCygDLL = procedure; stdcall;
+     TCygInternal = procedure(InfoType: TCygwinGetinfoTypes;
+                              user, system, u_flags, s_flags: Pointer); stdcall;
+
+function GetCygwinPathPrefixEx: string;
+var CygDLLHandle: THandle;
+    InitCygDLL  : TInitCygDLL;
+    CygInternal : TCygInternal;
+    DLLName     : string;
+    user, system,
+    u_flags,
+    s_flags     : array[0..MAX_PATH] of Char;
+    Prefix,
+    pu, ps      : string;
+begin
+  Prefix := '';
+  CygDLLHandle := 0;
+  ZeroMemory(@system, SizeOf(system));
+  try
+    DLLName := cCygwin1Dll;
+    CygDLLHandle := LoadLibrary(PChar(DLLName));
+    if CygDLLHandle > 0 then
+    begin
+      @InitCygDLL  := GetProcAddress(CygDLLHandle, 'cygwin_dll_init');
+      @CygInternal := GetProcAddress(CygDLLHandle, 'cygwin_internal');
+      {cygwin1.dll initialisieren}
+      InitCygDLL;
+      {Infos abrufen}
+      CygInternal(CW_GET_CYGDRIVE_INFO, @user, @system, @u_flags, @s_flags);
+      ps := StrPas(@system);
+      pu := StrPas(@user);
+      {$IFDEF WriteLogfile}
+      AddLog('cygwin path prefix (system): ' + ps, 0);
+      AddLog('cygwin path prefix (user)  : ' + pu, 0);
+      {$ENDIF}
+      if ps <> '' then Prefix := ps else Prefix := pu;
+    end;
+  finally
+    if CygDLLHandle > 0 then FreeLibrary(CygDLLHandle);
+    if Prefix = '/' then Prefix := '' else
+    if Prefix = '' then Prefix := '/cygdrive';
+  end;
+  Result := Prefix;
+  {$IFDEF WriteLogfile}
+  AddLog('cygwin path prefix         : ' + Prefix + #13#10 + ' ', 0);
+  {$ENDIF}
+end;
+*)
+function GetCygwinPathPrefixEx: string;
+var Cmd    : string;
+    Output : string;
+    Prefix : string;
+    i      : Integer;
+begin
+  Result := '';
+  Cmd := StartUpDir + cCygPathPref;
+  Cmd := QuotePath(Cmd);
+  Output := GetDosOutput(PChar(Cmd), True, True, 3);
+  Prefix := Output;
+  i := LastDelimiter('/', Prefix);
+  if i > 1 then Delete(Prefix, 1, i - 1);
+  Prefix := Trim(Prefix);
+  if Prefix = '/' then Prefix := '' else
+  if Prefix = '' then Prefix := '/cygdrive';
+  Result := Prefix;
+  {$IFDEF WriteLogfile}
+  AddLog('cygwin path prefix         : ' + Prefix + #13#10 + ' ', 0);
+  {$ENDIF}
+end;                            
+
+procedure InitCygwinPathPrefix;
+begin
+  if CygPathPrefix = 'unknown' then CygPathPrefix := GetCygwinPathPrefixEx;
 end;
 
 { MakePathCygwinConform --------------------------------------------------------

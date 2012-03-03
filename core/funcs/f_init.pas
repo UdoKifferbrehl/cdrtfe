@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.12.2011
+  letzte Änderung  26.02.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -141,6 +141,7 @@ begin
     cM2F2ExtractBin  := Path + cXCDDir       + cM2F2ExtractBin;
     cDat2FileBin     := Path + cXCDDir       + cDat2FileBin;
     cD2FGuiBin       := Path + cXCDDir       + cD2FGuiBin;
+    cCygPathPref     := Path + cHelperDir    + cCygPathPref;
   end;
   {Angaben aus der cdrtfe_tools.ini haben jedoch Vorrang.}
   if FileExists(StartUpDir + cIniFileTools) then
@@ -280,6 +281,7 @@ begin
     begin
       Path := ExtractFilePath(Temp) + ';' + OldPath;
       SetEnvVarValue(cPath, Path);
+      cCygwin1Dll := Temp;
       {$IFDEF WriteLogfile}
       AddLogCode(1261);
       AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3);
@@ -375,6 +377,8 @@ begin
       Application.Terminate;
     end else
     begin
+      {Cygwin Path Prefix initialisieren}
+      InitCygwinPathPrefix;
       {Version und Lauffähigkeit von cdrecord/mkisofs prüfen.}
       Result := Result and CheckVersion(Settings, Lang);
       {Ist cdda2wav da? Wenn nicht, dann kein DAE.}
@@ -607,6 +611,8 @@ begin
   Cmd := QuotePath(Cmd);
   Cmd := Cmd + ' -version';
   Output := GetDosOutput(PChar(Cmd),True, True, 3);
+  if Pos('Cdrecord-', Output) > 1 then
+    Delete(Output, 1, Pos('Cdrecord-', Output) - 1);
   VersionString := GetVersionString(Output);
   VersionValue := GetVersionValue(VersionString);
   {ab cdrecord 2.01a24 ist die CUE-Image-Unterstützung ausreichend}
@@ -639,8 +645,10 @@ begin
     Cmd := QuotePath(Cmd);
     Cmd := Cmd + ' -version';
     Output := GetDosOutput(PChar(Cmd), True, True, 3);
-    if Output <> '' then
-      if Output[1] <> 'm' then Delete(Output, 1, Pos(LF, Output));
+//    if Output <> '' then
+//      if Output[1] <> 'mkisofs ' then Delete(Output, 1, Pos(LF, Output));
+    if Pos('mkisofs ', Output) > 1 then
+      Delete(Output, 1, Pos('mkisofs ', Output) - 1);
     VersionString := GetVersionString(Output);
     VersionValue := GetVersionValue(VersionString);
     {ab mkisofs 2.01.01a31 gibt es -no-limit-pathtables}
@@ -651,7 +659,7 @@ begin
       VersionValue >= GetVersionValue('2.01.01a32');
     {Prüfen, ob mkisofs funktionierte}
     Result := Result and CdrtoolsWorking(Output);
-  end;
+  end;                                             
 end;
 
 { CheckEnvironment -------------------------------------------------------------

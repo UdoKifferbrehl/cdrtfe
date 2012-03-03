@@ -2,10 +2,10 @@
 
   const_locations.pas: Konstanten-Deklaration, Dateinamen und Ordner
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.12.2011
+  letzte Änderung  29.02.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -51,6 +51,7 @@ const {Dateinamen - Kommandozeilenprogramme}
       cDat2FileBin     : string = '\dat2file.exe';
       cD2FGuiBin       : string = '\d2fgui.exe';
       cCygwin1Dll      : string = 'cygwin1.dll';
+      cCygPathPref     : string = '\cygpathprefix.exe';
       {$J-}
 
       {Dateinamen}
@@ -86,6 +87,7 @@ const {Dateinamen - Kommandozeilenprogramme}
       cSiconvDir       : string = '\siconv';
       cLangDir         : string = '\translations';
       cHelpDir         : string = '\help';
+      cHelperDir       : string = '\helper';
 
       {Umgebungsvariablen}
       cCDRSEC          : string = 'CDR_SECURITY';
