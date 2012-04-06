@@ -163,7 +163,7 @@ begin
     Next := Process32First(hSnapshot, pe);
     while Next do
     begin
-      if (AnsiCompareText(StrPas(@pe.szExeFile), Name) = 0) {and
+      if (AnsiCompareText(StrPas(PChar(@pe.szExeFile)), Name) = 0) {and
          (pe.th32ParentProcessID = ParentID) } then
       begin
         Result := pe.th32ProcessID;

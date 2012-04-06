@@ -1,7 +1,7 @@
 { Unit for accessing Windows PCM wave file informations
   By Ulli Conrad <uconrad@gmx.net>
 
-  Modified by Oliver Valencia, Nov. 2002, Feb. & May 2005
+  Modified by Oliver Valencia, Nov. 2002, Feb. & May 2005, Apr. 2012
 
   This Unit (W32Waves.pas) is not explicitly published under the terms of the
   GNU General Public License. However, the original author (Ulli Conrad) has
@@ -114,8 +114,8 @@ begin
     exit;
 
   {Read the format chunk.}
-  if (mmioRead(hdmmio, PChar(@fmt), Longint(sizeof(TCommWaveFmtHeader)))
-     <> Longint(sizeof(TCommWaveFmtHeader))) then
+  if (mmioRead(hdmmio, PAnsiChar(@Fmt), Longint(SizeOf(TCommWaveFmtHeader)))
+     <> Longint(SizeOf(TCommWaveFmtHeader))) then
     exit;
 
   Info^.WaveFormat := fmt.wFormatTag;
