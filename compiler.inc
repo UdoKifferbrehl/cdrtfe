@@ -66,6 +66,14 @@
   {$DEFINE Delphi2010}
 {$ENDIF}
 
+{$IFDEF VER220}
+  {$DEFINE DelphiXE}
+{$ENDIF}
+
+{$IFDEF VER230}
+  {$DEFINE DelphiXE2}
+{$ENDIF}
+
 (* -------------------------------------------------------------------------- *)
 
 {$DEFINE Delphi3Up}
@@ -79,6 +87,8 @@
 {$DEFINE Delphi2007Up}
 {$DEFINE Delphi2009Up}
 {$DEFINE Delphi2010Up}
+{$DEFINE DelphiXEUp}
+{$DEFINE DelphiXE2Up}
 
 {$IFDEF Delphi3}
   {$UNDEF Delphi4Up}
@@ -91,6 +101,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi4}
@@ -103,6 +115,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi5}
@@ -114,6 +128,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi6}
@@ -124,6 +140,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi7}
@@ -133,6 +151,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi8}
@@ -141,6 +161,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi2005}
@@ -148,6 +170,8 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 
@@ -155,15 +179,30 @@
   {$UNDEF Delphi2007Up}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi2007}
   {$UNDEF Delphi2009Up}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 {$IFDEF Delphi2009}
   {$UNDEF Delphi2010Up}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
+{$ENDIF}
+
+{$IFDEF Delphi2010}
+  {$UNDEF DelphiXEUp}
+  {$UNDEF DelphiXE2Up}
+{$ENDIF}
+
+{$IFDEF DelphiXE}
+  {$UNDEF DelphiXE2Up}
 {$ENDIF}
 
 
