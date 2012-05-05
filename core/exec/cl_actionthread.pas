@@ -2,10 +2,10 @@
 
   cl_actionthread.pas: Kommandozeilenprogramme in einem eigenen Thread starten
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.10.2011
+  letzte Änderung  28.04.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,7 +38,7 @@ unit cl_actionthread;
 
 interface
 
-uses Classes, Forms, Windows, SysUtils,
+uses Classes, Forms, StdCtrls, Windows, SysUtils,
      cl_lang;
 
 type TActionThread = class(TThread)
@@ -64,12 +64,12 @@ type TActionThread = class(TThread)
        procedure StartExecution;
      protected
        procedure Execute; override;
-       procedure DAddLine;
-       procedure DAddToLine;
-       procedure DDeleteFromLine;
-       procedure DClearLine;
-       procedure DOutputErrorMessage;
-       procedure SendTerminationMessage;
+       procedure DAddLine; virtual;
+       procedure DAddToLine; virtual;
+       procedure DDeleteFromLine; virtual;
+       procedure DClearLine; virtual;
+       procedure DOutputErrorMessage; virtual;
+       procedure SendTerminationMessage; virtual;
      public
        constructor Create(const CmdLine, CurrentDir: string; const Suspended: Boolean);
        property Commandline: string read FCommandline;
@@ -80,6 +80,24 @@ type TActionThread = class(TThread)
        property PHandle: THandle read FPHandle;
        property StdIn: THandle read FPStdIn;
      end;
+
+     TActionThreadEx = class(TActionThread)
+     private
+       FMemo    : TMemo;
+       FThreadID: Integer;
+     protected
+       procedure DAddLine; override;
+       procedure DAddToLine; override;
+       procedure DDeleteFromLine; override;
+       procedure DClearLine; override;
+       procedure DOutputErrorMessage; override;
+       procedure SendTerminationMessage; override;
+     public
+       property OutputMemo: TMemo read FMemo write FMemo;
+       property ThreadID: Integer read FThreadID write FThreadID;
+       property MessageHandle: THandle write FHandle;
+     end;
+
 
 procedure DisplayDOSOutput(const CommandLine: string; var Thread: TActionThread; Lang: TLang; const EnvironmentBlock: Pointer);
 procedure TerminateExecution(Thread: TActionThread);
@@ -428,6 +446,74 @@ begin
     FlpCurrentDir := nil;
   {$IFDEF ShowCmdError}
   FExitCode := 0;
+  {$ENDIF}
+end;
+
+
+{ TActionThreadEx ------------------------------------------------------------ }
+
+{ TActionThreadEx - private/protected }
+
+{ Methoden für den VCL-Zugriff -------------------------------------------------
+
+  Zugriffe auf die VCL müssen über Synchronize erfolgen. Methoden, die für die
+  Anzeige von Daten zuständig sind beginnen mit 'D'.                           }
+
+procedure TActionThreadEx.DOutputErrorMessage;
+var i    : Integer;
+    Temp : string;
+    List : TStringList;
+begin
+  Temp := '  Info   : ';
+  FMemo.Lines.Add('A Win32 API error has occurred:');
+  FMemo.Lines.Add('  Code   : ' + IntToStr(FWinLastError));
+  FMemo.Lines.Add('  Message: ' + SysErrorMessage(FWinLastError));
+  List := TStringList.Create;
+  List.Text := FErrorInfo;
+  for i := 0 to List.Count - 1 do
+  begin
+    FMemo.Lines.Add(Temp + List[i]);
+    Temp := '           ';    
+  end;
+  List.Free;
+  FMemo.Lines.Add('');
+end;
+
+procedure TActionThreadEx.DAddLine;
+begin
+  {Wenn nötig, Platz schaffen}
+  if not PlatformWin2kXP and (Length(FMemo.Lines.Text) > 25000) then
+  begin
+    FMemo.Clear;
+    FMemo.Lines.Add('');
+  end;
+  FMemo.Lines.Add(FLine);
+end;
+
+procedure TActionThreadEx.DAddToLine;
+begin
+  FMemo.Lines[FMemo.Lines.Count - 1] := FMemo.Lines[FMemo.Lines.Count - 1] + FLine;
+end;
+
+procedure TActionThreadEx.DDeleteFromLine;
+var Temp: string;
+begin
+  Temp := Copy(FMemo.Lines[FMemo.Lines.Count - 1], 1,
+               Length(FMemo.Lines[FMemo.Lines.Count - 1]) - FBSCount);
+  FMemo.Lines[FMemo.Lines.Count - 1] := Temp;
+end;
+
+procedure TActionThreadEx.DClearLine;
+begin
+  FMemo.Lines[FMemo.Lines.Count - 1] := '';
+end;
+
+procedure TActionThreadEx.SendTerminationMessage;
+begin
+  {$IFDEF ShowCmdError}
+  SendMessage(FHandle, WM_TTerminated, FExitCode, FThreadID);
+  {$ELSE}
+  SendMessage(FHandle, WM_TTerminated, 0, FThreadID);
   {$ENDIF}
 end;
 
