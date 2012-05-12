@@ -1,9 +1,9 @@
 { cl_imagelists.pas: Zugriff auf SytemImageList und Icons
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.08.2010
+  letzte Änderung  12.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,7 +20,7 @@
 
     Variablen    LargeImages, SmallImages, IconImages, ToolButtonImages,
                  ToolButtonImagesD, IconFolder, IconFolderSelected, IconCD,
-                 IconCDA
+                 IconCDA, IconCDDrive
 
     Methoden     Create(AOwner: TComponent)
                  LoadGlyphs(Glyphs: TGlyphArray)
@@ -57,6 +57,7 @@ type TGlyphArray = array[1..cGlyphCount] of TBitmap;
        IconWarning       : Integer;
        IconError         : Integer;
        IconWinlogo       : Integer;
+       IconCDDrive       : Integer;
        constructor Create(AOwner: TComponent);
        destructor Destroy; override;
        procedure LoadGlyphs(Glyphs: TGlyphArray);
@@ -64,7 +65,7 @@ type TGlyphArray = array[1..cGlyphCount] of TBitmap;
 
 implementation
 
-uses f_locations, const_locations, const_common;
+uses f_locations, f_filesystem, const_locations, const_common;
 
 { TImageLists ---------------------------------------------------------------- }
 
@@ -83,6 +84,7 @@ var Icon    : TIcon;
     IconFile: string;
     Ok      : Boolean;
     Info    : TSHFileInfo;
+    Drives  : TStringList;
 begin
   {eigene Icons aus der Exe laden}
   IconImages := TImageList.Create(AOwner);
@@ -138,6 +140,18 @@ begin
                 SHGFI_ICON or SHGFI_SMALLICON or SHGFI_OPENICON);
   Icon.Handle := Info.hIcon;
   IconImages.AddIcon(Icon);
+  {Laufwerksicon für CD-Laufwerke}
+  Drives := TStringList.Create;
+  if GetDriveList(DRIVE_CDROM, Drives) > 0 then
+  begin
+    IconFile := Drives[0];
+  end;
+  Drives.Free;
+  SHGetFileInfo(PChar(IconFile), 0, Info,
+                SizeOf(TSHFileInfo),
+                SHGFI_ICON or SHGFI_SMALLICON);
+  Icon.Handle := Info.hIcon;
+  IconImages.AddIcon(Icon);
 
   Icon.Free;
   Bitmap.Free;
@@ -151,6 +165,7 @@ begin
   IconWarning        :=  6;
   IconError          :=  7;
   IconWinlogo        :=  8;
+  IconCDDrive        := 11;
 end;
 
 { InitToolButtonImages ---------------------------------------------------------
