@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.12.2011
+  letzte Änderung  12.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -143,6 +143,7 @@ begin
     Add('g016=Quelldateien');
     Add('g017=Aktivieren');
     Add('g018=Deaktivieren');
+    Add('g019=mehrere Brenner');
     {$IFDEF ShowCmdError}
     Add('e001=Es ist ein Fehler aufgetreten!');
     Add('e002=cdrecord-ProDVD: Lizenzfehler!');

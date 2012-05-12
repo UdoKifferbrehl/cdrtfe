@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005-2010 Oliver Valencia
+  Copyright (c) 2005-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.09.2010
+  letzte Änderung  12.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,10 +20,12 @@
     Properties   CDDevices
                  CDReader
                  CDWriter
+                 CDWriterCount
                  LocalDrives
                  UseRSCSI
                  RemoteDrives
                  RSCSIHost
+                 Lang
 
     Variablen    -
 
@@ -62,6 +64,9 @@ type TDevices = class(TObject)
        FUseRSCSI           : Boolean;
        FAssignManually     : Boolean;
        FForcedInterface    : string;
+       FAllowMultipleWriter: Boolean;
+       FMultipleWriterName : string;
+       FCDWriterCount      : Integer;
        function GetCDDevices    : TStringList;
        function GetCDReader     : TStringList;
        function GetCDWriter     : TStringList;
@@ -71,6 +76,7 @@ type TDevices = class(TObject)
        procedure ClearLists;
        procedure DetectCDDrives(CDWriter, CDReader, CDDevices, CDDriveLetter, CDSpeedList: TStringList);
        procedure GetDriveSpeeds(PrcapInfo, CDSpeedList: TStringList; Dev, DevName: string; IsWriter: Boolean);
+       procedure SetAllowMultipleWriter(Value: Boolean);
        {$IFDEF WriteLogfile}
        procedure WriteLog;
        {$ENDIF}
@@ -93,6 +99,9 @@ type TDevices = class(TObject)
        property UseRSCSI: Boolean read FUseRSCSI write FUseRSCSI;
        property AssignManually: Boolean read FAssignManually write FAssignManually;
        property ForcedInterface: string read FForcedInterface write FForcedInterface;
+       property MultipleWriterName: string read FMultipleWriterName write FMultipleWriterName;
+       property AllowMultipleWriter: Boolean read FAllowMultipleWriter write SetAllowMultipleWriter;
+       property CDWriterCount: Integer read FCDWriterCount;
      end;
 
 implementation
@@ -510,6 +519,7 @@ begin
       s := 'dev='+CDReader.Values[CDReader.Names[i]]+': '+CDReader.Names[i];  }
   { Sollten keine Laufwerke gefunden werden, Listen mit Dummyeinträgen füllen
     Flag setzten.}
+  FCDWriterCount := CDWriter.Count;
   if CDWriter.Count = 0 then
   begin
     CDWriter.Add('');
@@ -545,6 +555,26 @@ begin
   CDReader.Add('dummyr 2=' + Dev + '2,0,5');
   CDWriter.Add('dummyw 2=' + Dev + '2,0,6');
   {$ENDIF}
+end;
+
+{ SetAllowMultipleWrite --------------------------------------------------------
+
+  setzt oder löscht den Eintrag für gleichzeitiges Schreiben auf mehrere
+  Brenner.                                                                     }
+
+procedure TDevices.SetAllowMultipleWriter(Value: Boolean);
+var i: Integer;
+begin
+  if Value then
+  begin
+    if (CDWriterCount > 1) and not FAllowMultipleWriter then
+      CDWriter.Add(FMultipleWriterName + '=mult');
+  end else
+  begin
+    i := CDWriter.IndexOf(FMultipleWriterName + '=mult');
+    if i >= 0 then CDWriter.Delete(i);
+  end;
+  FAllowMultipleWriter := Value;
 end;
 
 { TDevices - public }
@@ -706,6 +736,9 @@ begin
   FRSCSIHost           := '';
   FUseRSCSI            := False;
   FAssignManually      := False;
+  FAllowMultipleWriter := False;
+  FMultipleWriterName  := 'Multiple Writers';
+  FCDWriterCount       := 0;
 end;
 
 destructor TDevices.Destroy;

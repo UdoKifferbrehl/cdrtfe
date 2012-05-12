@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.12.2011
+  letzte Änderung  12.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3963,8 +3963,19 @@ procedure TCdrtfeMainForm.CheckControls;
     end;
   end;
 
+  {Schreiben auf mehrere Brenner nicht bei allen Projekten}
+  procedure CheckAllowMultipleWriter;
+  begin
+    if (FSettings.General.Choice = cCDRW) or
+       (False {FSettings.General.Choice = cCDImage}) then
+      FDevices.AllowMultipleWriter := True
+    else
+      FDevices.AllowMultipleWriter := False;
+  end;
+
 begin
   FCheckingControls := True;
+  CheckAllowMultipleWriter;
   case FSettings.General.Choice of
     cDataCD  : SetDrives(FDevices.CDWriter);
     cAudioCD : SetDrives(FDevices.CDWriter);
@@ -4679,7 +4690,8 @@ begin
         AssignManually := FSettings.Drives.AssignManually;
         ForcedInterface := FSettings.Drives.SCSIInterface;
         DetectDrives;
-        if (CDWriter.Count = 1) and (CDWriter[0] = '') then
+        MultipleWriterName := FLang.GMS('g019');
+        if CDWriterCount = 0 then
         begin
           TLogWin.Inst.Add(FLang.GMS('g003') + CRLF + FLang.GMS('minit05'));
         end;
