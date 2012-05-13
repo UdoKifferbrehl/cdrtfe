@@ -5,7 +5,7 @@
   Copyright (c) 2005-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.05.2012
+  letzte Änderung  13.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,7 +15,7 @@
 
 
   TDevices: Objekt, das die Laufwerkslisten enthält und für die Erkennung
-             lokaler und entfernter Laufwerke zuständig ist.
+            lokaler und entfernter Laufwerke zuständig ist.
 
     Properties   CDDevices
                  CDReader
@@ -36,6 +36,15 @@
                  SetDummyDevices
                  UpdateSpeedLists(const Drive: string);
 
+
+  TFormSelectWriter: Form Zur Auswahl der zu nutzenden Brenner
+
+    Properties   -
+
+    Variablen    -
+
+    Methoden
+
 }
 
 unit cl_devices;
@@ -44,7 +53,8 @@ unit cl_devices;
 
 interface
 
-uses Classes, SysUtils;
+uses Classes, SysUtils, Forms, StdCtrls, Controls, ComCtrls, cl_lang,
+     c_frametopbanner, cl_imagelists;
 
 type TDevices = class(TObject)
      private
@@ -104,13 +114,37 @@ type TDevices = class(TObject)
        property CDWriterCount: Integer read FCDWriterCount;
      end;
 
+     TFormSelectWriter = class(TForm)
+       StaticText  : TStaticText;
+       ComboBox    : TComboBox;
+       ListView    : TListView;
+       ButtonOk    : TButton;
+       ButtonCancel: TButton;
+       FrameTopBanner1: TFrameTopBanner;
+       procedure FormShow(Sender: TObject);
+       procedure ButtonClick(Sender: TObject);
+       procedure ButtonCancelClick(Sender: TObject);
+       procedure FormDestroy(Sender: TObject);
+     private
+       FLang       : TLang;
+       FImageLists : TImageLists;
+       FCDWriter   : TStringList;
+       FSelDevices : string;
+     public
+       procedure Init;
+       property Lang           : TLang write FLang;
+       property ImageLists     : TImageLists write FImageLists;
+       property CDWriter       : TStringList write FCDWriter;
+       property SelectedDevices: string read FSelDevices;
+     end;
+
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      cl_cdrtfedata, cl_deviceenum, const_common, f_locations, const_locations,
      f_filesystem, f_strings, f_Stringlist, f_getdosoutput, f_helper,
-     f_dischelper;
+     f_dischelper, f_window;
 
 const DefaultSpeedList : string
                          = ',0,1,2,4,6,8,10,12,16,20,24,32,36,40,42,48,50,52';
@@ -755,5 +789,114 @@ begin
   FRemoteCDSpeedList.Free;
   inherited Destroy;
 end;
+
+
+{ TFormSelectWriter ---------------------------------------------------------- }
+
+{ TFormSelectWriter - private }
+
+procedure TFormSelectWriter.Init;
+var i      : Integer;
+    NewItem: TListItem;
+begin
+  FSelDevices := '';
+  SetFont(Self);
+  {Form}
+  Caption := FLang.GMS('mselw01');
+  Position := poScreenCenter;
+  BorderIcons := [biSystemMenu];
+  ClientHeight := 180;
+  ClientWidth := 280;
+  OnShow := FormShow;
+  OnDestroy := FormDestroy;
+  {Banner}
+  FrameTopBanner1 := TFrameTopBanner.Create(Self);
+  FrameTopBanner1.Parent := Self;
+  FrameTopBanner1.Top := 0;
+  FrameTopBanner1.Left := 0;
+  FrameTopBanner1.Width := ClientWidth;
+  FrameTopBanner1.Init(Self.Caption, FLang.GMS('mselw02'), 'grad1');
+  {ListView}
+  ListView := TListView.Create(Self);
+  with ListView do
+  begin
+    Parent := Self;
+    Left := 8;
+    Top := 61;
+    Height := 76;
+    Width := 264;
+    CheckBoxes := True;
+    Visible := True;
+    ViewStyle := vsReport;
+    ShowColumnHeaders := False;
+    Columns.Add;
+    Columns.Items[0].AutoSize := True;
+    SmallImages := FImageLists.IconImages;
+  end;
+  {Ok-Button}
+  ButtonOk := TButton.Create(Self);
+  with ButtonOk do
+  begin
+    Parent := Self;
+    Left := 117;
+    Top := 145;
+    Height := 25;
+    Width := 75;
+    Caption := FLang.GMS('mlang02');
+    OnClick := ButtonClick;
+  end;
+  {Cancel-Button}
+  ButtonCancel := TButton.Create(Self);
+  with ButtonCancel do
+  begin
+    Parent := Self;
+    Left := 197;
+    Top := 145; // 40;
+    Height := 25;
+    Width := 75;
+    Caption := FLang.GMS('mlang03');
+    ModalResult := mrCancel;
+    Cancel := True;
+    OnClick := ButtonCancelClick;
+  end;
+  {ListView füllen}
+  for i := 0 to FCDWriter.Count - 2 do
+  begin
+    NewItem := ListView.Items.Add;
+    NewItem.Caption := FCDWriter.Names[i] + ' (' + FCDWriter.ValueFromIndex[i] + ')';
+    NewItem.ImageIndex := FImageLists.IconCDDrive;
+  end;
+end;
+
+procedure TFormSelectWriter.FormShow(Sender: TObject);
+begin
+  ButtonCancel.SetFocus;
+end;
+
+procedure TFormSelectWriter.ButtonClick(Sender: TObject);
+var i   : Integer;
+    Temp: TStringList;
+begin
+  ModalResult := mrOk;
+  Temp := TStringList.Create;
+  for i := 0 to ListView.Items.Count - 1 do
+  begin
+    if ListView.Items[i].Checked then Temp.Add(FCDWriter.ValueFromIndex[i]);
+  end;
+  FSelDevices := Temp.Text;
+  Temp.Free;
+end;
+
+procedure TFormSelectWriter.ButtonCancelClick(Sender: TObject);
+begin
+
+end;
+
+procedure TFormSelectWriter.FormDestroy;
+begin
+
+end;
+
+{ TFormSelectWriter - public }
 
 end.

@@ -363,6 +363,9 @@ begin
     Add('msess01=Session auswählen');
     Add('msess02=Fortzusetzende Session:');
     Add('msess03=Session');
+    {Messages - Select Writer}
+    Add('mselw01=Brennerauswahl');
+    Add('mselw02=Bitte die zu nutzenden Brenner auswählen');
     {Dialog-Beschreibungen}
     Add('desc01=Ausgabe der Kommandozeilenprogramme');
     Add('desc02=Einstellungen für das Dateisystem der Disk');

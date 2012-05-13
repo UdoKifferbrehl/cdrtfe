@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.05.2012
+  letzte Änderung  13.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -498,6 +498,7 @@ type
     FOutputWindowShowing: Boolean;
     FLogWindowShowing   : Boolean;
     FFileListModified   : Boolean;
+    FSelectedDevice     : string;
     FLVArray: array[0..cLVCount] of TListView;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
@@ -1266,8 +1267,9 @@ var i   : Integer;
         end;
       end;
       Index := FSettings.General.TabSheetDrive[Choice];
-      // Result := DeviceList.Values[DeviceList.Names[Index]];
       Result := GetValueFromString(DeviceList[Index]);
+      if FSettings.General.Choice = Choice then
+        FSelectedDevice := Result;
     end;
   end;
 
@@ -4593,6 +4595,7 @@ begin
   FCheckingControls    := False;
   FFileExplorerShowing := False;
   FOutputWindowShowing := False;
+  FSelectedDevice      := '';
   InitActions;
   {$IFDEF WriteLogfile} AddLogCode(1051); {$ENDIF}
   SetFont(Self);
@@ -5232,6 +5235,7 @@ end;
 { Button 'Start' }
 
 procedure TCdrtfeMainForm.ButtonStartClick(Sender: TObject);
+var FormSelectWriter: TFormSelectWriter;
 begin
   {$IFDEF ShowExecutionTime}
   TC2.StartTimeCount;
@@ -5246,8 +5250,27 @@ begin
     if (FSettings.General.Choice = cCDInfos) and not FLogWindowShowing then
       ToggleLogWindow(True);
     {Aktion ausführen}
-    FAction.Action := FSettings.General.Choice;
-    FAction.StartAction;
+    if FSelectedDevice <> 'mult' then
+    begin
+      FAction.Action := FSettings.General.Choice;
+      FAction.StartAction;
+    end else
+    begin
+      {wir wollen mehrere Brenner nutzen...}
+      FormSelectWriter := TFormSelectWriter.CreateNew(nil);
+      try
+        FormSelectWriter.Lang := FLang;
+        FormSelectWriter.ImageLists := FImageLists;
+        FormSelectWriter.CDWriter := FDevices.CDWriter;
+        FormSelectWriter.Init;
+        FormSelectWriter.ShowModal;
+
+        TLogWin.Inst.Add(FormSelectWriter.SelectedDevices);
+
+      finally
+        FormSelectWriter.Release;
+      end;
+    end;
   end;
 end;
 
