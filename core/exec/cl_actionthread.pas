@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.04.2012
+  letzte Änderung  13.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,7 +53,6 @@ type TActionThread = class(TThread)
        FBSCount: Integer;
        FMessageOk: string;
        FMessageAborted: string;
-       FHandle: THandle;    // Handle des Fensters, das das Ende-Signal erhält
        FPHandle: THandle;   // Handle des Prozesses
        FPStdIn: THandle;    // Handle der StdIn-Pipe des Prozesses
        FPID: DWORD;         // Prozess-ID
@@ -63,6 +62,7 @@ type TActionThread = class(TThread)
        function ProcessOutput(Line: string; var BeginNewLine: Boolean):string;
        procedure StartExecution;
      protected
+       FHandle: THandle;    // Handle des Fensters, das das Ende-Signal erhält
        procedure Execute; override;
        procedure DAddLine; virtual;
        procedure DAddToLine; virtual;
