@@ -645,7 +645,7 @@ implementation
 uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
      frm_xcd_options, frm_settings, frm_about, frm_output,
-     frm_videocd_options, frm_dae_options,
+     frm_videocd_options, frm_dae_options, frm_maoutput,
      cl_cdrtfedata, cl_devicechange, cl_sessionimport,
      {$IFDEF ShowTime} cl_timecount, {$ENDIF}
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
@@ -5235,7 +5235,7 @@ end;
 { Button 'Start' }
 
 procedure TCdrtfeMainForm.ButtonStartClick(Sender: TObject);
-var FormSelectWriter: TFormSelectWriter;
+var FormMAOutput: TFormMAoutput;
 begin
   {$IFDEF ShowExecutionTime}
   TC2.StartTimeCount;
@@ -5257,18 +5257,15 @@ begin
     end else
     begin
       {wir wollen mehrere Brenner nutzen...}
-      FormSelectWriter := TFormSelectWriter.CreateNew(nil);
+      FormMAOutput := TFormMAOutput.Create(nil);
       try
-        FormSelectWriter.Lang := FLang;
-        FormSelectWriter.ImageLists := FImageLists;
-        FormSelectWriter.CDWriter := FDevices.CDWriter;
-        FormSelectWriter.Init;
-        FormSelectWriter.ShowModal;
+        FormMAOutput.Lang       := FLang;
+        FormMAOutput.Devices    := FDevices;
+        FormMAOutput.ImageLists := FImageLists;
 
-        TLogWin.Inst.Add(FormSelectWriter.SelectedDevices);
-
+        if FormMAOutput.SelectDevices then FormMAOutput.ShowModal;
       finally
-        FormSelectWriter.Release;
+        FormMAOutput.Release;
       end;
     end;
   end;

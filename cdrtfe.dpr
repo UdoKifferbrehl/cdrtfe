@@ -160,7 +160,8 @@ uses
   c_spacemeter in 'import\spacemeter\c_spacemeter.pas',
   QProgBar in 'import\spacemeter\QProgBar.pas',
   w32waves in 'import\w32waves.pas',
-  atl_oggvorbis in 'import\atl_oggvorbis.pas';
+  atl_oggvorbis in 'import\atl_oggvorbis.pas',
+  frm_maoutput in 'forms\frm_maoutput.pas' {FormMAOutput};
 
 { verwendete externe Komponenten/Units:
   -------------------------------------
