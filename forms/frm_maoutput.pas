@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  17.05.2012
+  letzte Änderung  19.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,22 +21,29 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs,
   {eigene Klassendefinitionen/Units}
-  cl_lang, cl_devices, cl_imagelists, c_frametopbanner;
+  cl_lang, cl_devices, cl_imagelists, c_frametopbanner, StdCtrls, ComCtrls;
   
 type
   TFormMAOutput = class(TForm)
     FrameTopBanner1: TFrameTopBanner;
+    Memo1: TMemo;
+    Button1: TButton;
+    PageControl: TPageControl;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private-Deklarationen }
     FLang           : TLang;
     FDevices        : TDevices;
     FImageLists     : TImageLists;
     FSelectedDevices: TStringList;
+    FSelDevCount    : Integer;
+    procedure CreateControls;
   public
     { Public-Deklarationen }
+    procedure StartActionShowModal;
     function SelectDevices: Boolean;
     property Lang      : TLang write FLang;
     property ImageLists: TImageLists write FImageLists;
@@ -58,7 +65,6 @@ uses f_window;
 
 procedure TFormMAOutput.FormCreate(Sender: TObject);
 begin
-  SetFont(Self);
   FSelectedDevices := TStringList.Create;
 end;
 
@@ -78,7 +84,8 @@ end;
 
 procedure TFormMAOutput.FormShow(Sender: TObject);
 begin
-  FLang.SetFormLang(self);
+  SetFont(Self);
+  FLang.SetFormLang(Self);
   {Banner}
   FrameTopBanner1.Init(Self.Caption, ''{FLang.GMS('desc01')}, 'grad1');
 //  {falls vorhanden, alte Größe und Position wiederherstellen}
@@ -101,9 +108,65 @@ begin
 //    if OutMaximized then self.WindowState := wsMaximized;
 end;
 
+{ Button-Events -------------------------------------------------------------- }
+
+procedure TFormMAOutput.Button1Click(Sender: TObject);
+begin
+  Memo1.Lines.Add('test');
+  Memo1.Lines.Add('Tab2Owner: ' +  PageControl.Pages[0].Owner.Name);
+  Memo1.Lines.Add('Tab2.Parent: ' + PageControl.Pages[0].Parent.Name);
+end;
+
 { TFormMAOutput - private }
 
+{ CreateControls ---------------------------------------------------------------
+
+  CreateControls erzeugt in Abhängigkeit der Anzahl der ausgewählten Laufwerke
+  Controls zur Anzeige der Ausgabe.                                            }
+
+procedure TFormMAOutput.CreateControls;
+var i       : Integer;
+    TabSheet: TTabSheet;
+    Memo    : TMemo;
+    DevLabel: TLabel;
+begin
+  for i := 0 to FSelDevCount - 1 do
+  begin
+    {TabSheet}
+    TabSheet := TTabSheet.Create(Self);
+    TabSheet.Parent := PageControl;
+    TabSheet.PageControl := PageControl;
+    TabSheet.Caption := FLang.GMS('c003') + ' ' + IntToStr(i);
+    {Label}
+    DevLabel := TLabel.Create(Self);
+    DevLabel.Parent := TabSheet;
+    DevLabel.Top := 4;
+    DevLabel.Left := 4;
+    DevLabel.Caption := FLang.GMS('c003') + ' ' +
+                          FDevices.GetDriveLetter(FSelectedDevices[i]) +
+                          ' (' + FSelectedDevices[i] + ')';
+    {Memo}
+    Memo := TMemo.Create(Self);
+    Memo.Parent := TabSheet;
+    Memo.Top := DevLabel.Top + DevLabel.Height + 4;
+    Memo.Left := 4;
+    Memo.Width := TabSheet.ClientWidth - 8;
+    Memo.Height := TabSheet.ClientHeight - 8;
+    Memo.ScrollBars := ssBoth;
+  end;
+end;
+
 { TFormMAOutput - public }
+
+{ StartActionShowModal ---------------------------------------------------------
+
+  startet den Brennvorgang und zeigt das Ausgabefenster an.                    }
+
+procedure TFormMAOutput.StartActionShowModal;
+begin
+  CreateControls;
+  Self.ShowModal;
+end;
 
 { SelectDevices ----------------------------------------------------------------
 
@@ -123,7 +186,8 @@ begin
   finally
     FormSelectWriter.Release;
   end;
-  Result := FSelectedDevices.Count > 0;
+  FSelDevCount := FSelectedDevices.Count;
+  Result := FSelDevCount > 0;
 end;
 
 end.

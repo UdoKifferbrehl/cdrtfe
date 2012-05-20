@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.05.2012
+  letzte Änderung  19.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5262,8 +5262,12 @@ begin
         FormMAOutput.Lang       := FLang;
         FormMAOutput.Devices    := FDevices;
         FormMAOutput.ImageLists := FImageLists;
-
-        if FormMAOutput.SelectDevices then FormMAOutput.ShowModal;
+        if FormMAOutput.SelectDevices then
+        begin
+          // Self.Hide;
+          FormMAOutput.StartActionShowModal;
+          // Self.Show;
+        end;
       finally
         FormMAOutput.Release;
       end;
