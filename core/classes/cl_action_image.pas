@@ -2,10 +2,10 @@
 
   cl_action_image.pas: Disk-Images
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.06.2011
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,12 +43,16 @@ type TCdrtfeActionImage = class(TCdrtfeAction)
        FReload            : Boolean;
        FVList             : TStringList;
        FVerificationThread: TVerificationThread;
+       function GetCommandLine: string;
+       function GetCommandLineWriteImage: string;
+       function GetCommandLineReadImage: string;
        procedure ReadImage;
        procedure WriteImage;
        procedure WriteImageCopy;
      protected
      public
        constructor Create;
+       function GetCommandLineString: string; override;
        destructor Destroy; override;
        procedure AbortAction; override;
        procedure CleanUp(const Phase: Byte); override;
@@ -68,15 +72,31 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 { TCdrtfeActionImage - private }
 
-{ ReadImage --------------------------------------------------------------------
+{ GetCommandLine ---------------------------------------------------------------
 
-  Image von einer CD erstellen.                                                }
+  erzeugt die auszuführende Kommandozeile.                                     }
 
-procedure TCdrtfeActionImage.ReadImage;
+function TCdrtfeActionImage.GetCommandLine: string;
+begin
+  case FSettings.General.ImageRead of
+    True : case FSettings.General.CDCopy of
+             True: begin
+                     // Result := GetCommandLineWriteImageCopy;
+                     FSettings.General.CDCopy := False;
+                   end;
+             False: Result := GetCommandLineReadImage;
+           end;
+    False: Result := GetCommandLineWriteImage;
+  end;
+end;
+
+{ GetCommandLineReadImage ------------------------------------------------------
+
+  erzeugt die Kommandozeile zum Lesen eines Images von Disk.                   }
+
+function TCdrtfeActionImage.GetCommandLineReadImage;
 var Cmd: string;
 begin
-  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  {Kommandozeile zusammenstellen}
   Cmd := StartUpDir + cReadcdBin;
   Cmd := QuotePath(Cmd);
   with FSettings.Readcd do
@@ -97,38 +117,19 @@ begin
     if Range   then Cmd := Cmd + ' sectors=' + Startsec + '-' + Endsec;
     Cmd := Cmd + ' f=' + QuotePath(MakePathConform(IsoPath));
   end;
-  DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
+  Result := Cmd;
 end;
 
-{ WriteImage -------------------------------------------------------------------
+{ GetCommandLineWriteImage -----------------------------------------------------
 
-  ISO- oder CUE-Images aud CD schreiben.                                       }
+  erzeugt die Kommandozeile zum Schreiben eines Images auf Disk.               }
 
-procedure TCdrtfeActionImage.WriteImage;
+function TCdrtfeActionImage.GetCommandLineWriteImage: string;
 var i         : Integer;
     Cmd,
     Temp, Name: string;
     CueFile   : TCueFile;
-    CMArgs    : TCheckMediumArgs;
-    Ok        : Boolean;
-    SimulDev  : string;
 begin
-  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  SimulDev := 'cdr';
-  CMArgs.ForcedContinue := False;
-  CMArgs.Choice := cCDImage;
-  {Größe der Daten ermitteln}
-  //FData.GetProjectInfo(Count, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
-  {Infos über eingelegte CD einlesen}
-  SetPanels('<>', FLang.GMS('mburn13'));
-  FDisk.GetDiskInfo(FSettings.Image.Device, False);
-  SetPanels('<>', '');
-  {Zusammenstellung prüfen}
-  Ok := FDisk.CheckMedium(CMArgs);
-  {Bei DVD als Simulationstreiber dvd_simul verwenden.}
-  if FDisk.IsDVD then SimulDev := 'dvd';
-  if FDisk.IsBD  then SimulDev := 'bd';
-  {Kommandozeile zusammenstellen}
   if Pos(cExtCue, LowerCase(FSettings.Image.IsoPath)) = 0 then
   begin
     with FSettings.Cdrecord, FSettings.Image do
@@ -138,7 +139,7 @@ begin
       Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
       if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
       if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
-      if SimulDrv    then Cmd := Cmd + ' driver=' + SimulDev + '_simul';
+      if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
       Cmd := Cmd + GetDriverOpts;
       if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
         Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
@@ -212,7 +213,7 @@ begin
         Cmd := Cmd + ' gracetime=5 dev=' + SCSIIF(Device);
         if Speed <> '' then Cmd := Cmd + ' speed=' + Speed;
         if FIFO        then Cmd := Cmd + ' fs=' + IntToStr(FIFOSize) + 'm';
-        if SimulDrv    then Cmd := Cmd + ' driver=' + SimulDev + '_simul';
+        if SimulDrv    then Cmd := Cmd + ' driver=cdr_simul';
         Cmd := Cmd + GetDriverOpts;
         if CdrecordUseCustOpts and (CdrecordCustOptsIndex > -1) then
           Cmd := Cmd + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
@@ -235,8 +236,57 @@ begin
 
       end;
     end;
-    Ok := Ok and CueFile.CueOk;
+    {im Falle eines ungültigen CUE-Sheets leeres Kommando zurückgeben}
+    if not CUEFile.CueOk then Result := '';    
+    // Ok := Ok and CueFile.CueOk;
     CueFile.Free;
+  end;
+  Result := Cmd;
+end;
+
+{ ReadImage --------------------------------------------------------------------
+
+  Image von einer CD erstellen.                                                }
+
+procedure TCdrtfeActionImage.ReadImage;
+var Cmd: string;
+begin
+  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  {Kommandozeile zusammenstellen}
+  Cmd := GetCommandLineReadImage;
+  DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
+end;
+
+{ WriteImage -------------------------------------------------------------------
+
+  ISO- oder CUE-Images aud CD schreiben.                                       }
+
+procedure TCdrtfeActionImage.WriteImage;
+var i         : Integer;
+    Cmd       : string;
+    CMArgs    : TCheckMediumArgs;
+    Ok        : Boolean;
+begin
+  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  CMArgs.ForcedContinue := False;
+  CMArgs.Choice := cCDImage;
+  {Größe der Daten ermitteln}
+  //FData.GetProjectInfo(Count, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
+  {Infos über eingelegte CD einlesen}
+  SetPanels('<>', FLang.GMS('mburn13'));
+  FDisk.GetDiskInfo(FSettings.Image.Device, False);
+  SetPanels('<>', '');
+  {Zusammenstellung prüfen}
+  Ok := FDisk.CheckMedium(CMArgs);
+  {Kommandozeile zusammenstellen}
+  Cmd := GetCommandLineWriteImage;
+  {falls das CUE-File ungültig war, wird ein leeres Kommando zurückgegeben}
+  Ok := Ok and (Cmd <> '');
+  {Bei DVD als Simulationstreiber dvd_simul verwenden.}
+  if Ok and FSettings.Cdrecord.SimulDrv then
+  begin
+    if FDisk.IsDVD then Cmd := ReplaceString(Cmd, 'cdr_simul', 'dvd_simul');
+    if FDisk.IsBD  then Cmd := ReplaceString(Cmd, 'cdr_simul', 'bd_simul');
   end;
   {Kommando ausführen}
   if not Ok then
@@ -341,6 +391,15 @@ destructor TCdrtfeActionImage.Destroy;
 begin
   FVList.Free;
   inherited Destroy;
+end;
+
+{ GetCommandLineString ---------------------------------------------------------
+
+  liefert die auszuführende(n) Kommandozeile(n).                               }
+
+function TCdrtfeActionImage.GetCommandLineString: string;
+begin
+  Result := GetCommandLine;
 end;
 
 { AbortAction ------------------------------------------------------------------

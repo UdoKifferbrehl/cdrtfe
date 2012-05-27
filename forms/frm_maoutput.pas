@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  19.05.2012
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -19,9 +19,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs,
+  Dialogs, StdCtrls, ComCtrls,
   {eigene Klassendefinitionen/Units}
-  cl_lang, cl_devices, cl_imagelists, c_frametopbanner, StdCtrls, ComCtrls;
+  cl_lang, cl_action, cl_devices, cl_imagelists, c_frametopbanner;
   
 type
   TFormMAOutput = class(TForm)
@@ -29,22 +29,28 @@ type
     Memo1: TMemo;
     Button1: TButton;
     PageControl: TPageControl;
+    Button2: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private-Deklarationen }
+    FAction         : TCDAction;
     FLang           : TLang;
     FDevices        : TDevices;
     FImageLists     : TImageLists;
     FSelectedDevices: TStringList;
     FSelDevCount    : Integer;
+    FCommandLines   : TStringList;
     procedure CreateControls;
+    procedure CreateCommandLines;
   public
     { Public-Deklarationen }
     procedure StartActionShowModal;
     function SelectDevices: Boolean;
+    property CDAction  : TCDAction write FAction;
     property Lang      : TLang write FLang;
     property ImageLists: TImageLists write FImageLists;
     property Devices   : TDevices write FDevices;
@@ -52,7 +58,7 @@ type
 
 implementation
 
-uses f_window;
+uses f_window, f_strings;
 
 {$R *.dfm}
 
@@ -66,6 +72,7 @@ uses f_window;
 procedure TFormMAOutput.FormCreate(Sender: TObject);
 begin
   FSelectedDevices := TStringList.Create;
+  FCommandLines := TStringList.Create;
 end;
 
 { FormDestroy ------------------------------------------------------------------
@@ -75,6 +82,7 @@ end;
 procedure TFormMAOutput.FormDestroy(Sender: TObject);
 begin
   FSelectedDevices.Free;
+  FCommandLines.Free;
 end;
 
 { FormShow ---------------------------------------------------------------------
@@ -112,9 +120,18 @@ end;
 
 procedure TFormMAOutput.Button1Click(Sender: TObject);
 begin
-  Memo1.Lines.Add('test');
-  Memo1.Lines.Add('Tab2Owner: ' +  PageControl.Pages[0].Owner.Name);
-  Memo1.Lines.Add('Tab2.Parent: ' + PageControl.Pages[0].Parent.Name);
+//  Memo1.Lines.Add('test');
+//  Memo1.Lines.Add('Tab2Owner: ' +  PageControl.Pages[0].Owner.Name);
+//  Memo1.Lines.Add('Tab2.Parent: ' + PageControl.Pages[0].Parent.Name);
+  Memo1.Lines.Add(FAction.GetCommandLineString);
+  Memo1.Lines.Add('');
+  CreateCommandLines;
+  Memo1.Lines.Add(FCommandLines.Text);
+end;
+
+procedure TFormMAOutput.Button2Click(Sender: TObject);
+begin
+  //
 end;
 
 { TFormMAOutput - private }
@@ -151,8 +168,27 @@ begin
     Memo.Top := DevLabel.Top + DevLabel.Height + 4;
     Memo.Left := 4;
     Memo.Width := TabSheet.ClientWidth - 8;
-    Memo.Height := TabSheet.ClientHeight - 8;
+    Memo.Height := TabSheet.ClientHeight - Memo.Top - 4;
     Memo.ScrollBars := ssBoth;
+  end;
+end;
+
+{ CreateCommandLines -----------------------------------------------------------
+
+  erzeugt die Kommandozeilen für die gleichzeitige Ausführung.                 }
+
+procedure TFormMAOutput.CreateCommandLines;
+var i      : Integer;
+    CmdLine: string;
+    Temp   : string;
+begin
+  {gemeinsame Kommandzeile erzeugen}
+  CmdLine := FAction.GetCommandLineString;
+  {für jedes Laufwerk anpassen}
+  for i := 0 to FSelDevCount - 1 do
+  begin
+    Temp := ReplaceString(CmdLine, 'dev=mult', 'dev=' + FSelectedDevices[i]);
+    FCommandLines.Add(Temp);
   end;
 end;
 

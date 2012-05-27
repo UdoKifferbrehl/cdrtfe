@@ -2,10 +2,10 @@
 
   cl_abstractbaseaction.pas: abstrakte Basisklasse für Projekt
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.09.2010
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -73,6 +73,7 @@ type TCdrtfeAction = class(TObject)
        procedure MessageShow(const s: string);
        procedure UpdatePanels(const s1, s2: string);
      public
+       function GetCommandLineString: string; virtual; abstract;
        procedure AbortAction; virtual;
        procedure CleanUp(const Phase: Byte); virtual; abstract;
        procedure Reset; virtual; abstract;

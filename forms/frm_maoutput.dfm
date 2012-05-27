@@ -70,4 +70,13 @@ object FormMAOutput: TFormMAOutput
     Height = 372
     TabOrder = 3
   end
+  object Button2: TButton
+    Left = 527
+    Top = 90
+    Width = 75
+    Height = 25
+    Caption = 'Button2'
+    TabOrder = 4
+    OnClick = Button2Click
+  end
 end

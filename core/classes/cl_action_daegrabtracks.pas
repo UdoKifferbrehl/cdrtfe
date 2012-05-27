@@ -2,10 +2,10 @@
 
   cl_action_daegrabtracks.pas: Audio-CD auslesen
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.08.2011
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,6 +52,7 @@ type TCdrtfeActionDAEGrabTracks = class(TCdrtfeAction)
      protected
      public
        constructor Create;
+       function GetCommandLineString: string; override;
        procedure CleanUp(const Phase: Byte); override;
        procedure Reset; override;
        procedure StartAction; override;
@@ -563,6 +564,15 @@ end;
 constructor TCdrtfeActionDAEGrabTracks.Create;
 begin
   inherited Create;
+end;
+
+{ GetCommandLineString ---------------------------------------------------------
+
+  liefert die auszuführende(n) Kommandozeile(n).                               }
+
+function TCdrtfeActionDAEGrabTracks.GetCommandLineString: string;
+begin
+  Result := '';
 end;
 
 { CleanUp ----------------------------------------------------------------------

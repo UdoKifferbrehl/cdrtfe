@@ -2,10 +2,10 @@
 
   cl_action_erase.pas: Disks löschen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -38,10 +38,12 @@ uses Windows, SysUtils, cl_actionthread, cl_abstractbaseaction;
 
 type TCdrtfeActionErase = class(TCdrtfeAction)
      private
+       function GetCommandLine: string;
        procedure DeleteCDRW;
      protected
      public
        constructor Create;
+       function GetCommandLineString: string; override;
        procedure CleanUp(const Phase: Byte); override;
        procedure Reset; override;
        procedure StartAction; override;
@@ -57,22 +59,13 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 { TCdrtfeActionErase - private }
 
-{ DeleteCDRW -------------------------------------------------------------------
+{ GetCommandLine ---------------------------------------------------------------
 
-  DeleteCDRW löscht CD-RWs bzw. Teile davon.                                   }
+  erzeugt die auszuführende Kommandozeile.                                     }
 
-procedure TCdrtfeActionErase.DeleteCDRW;
-var i     : Integer;
-    Cmd   : string;
-    Ok    : Boolean;
-    CMArgs: TCheckMediumArgs;
+function TCdrtfeActionErase.GetCommandLine: string;
+var Cmd: string;
 begin
-  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  CMArgs.Choice := cCDRW;
-  SetPanels('<>', FLang.GMS('mburn13'));
-  FDisk.GetDiskInfo(FSettings.CDRW.Device, False);
-  SetPanels('<>', '');
-  Ok := FDisk.CheckMedium(CMArgs);
   {Kommandozeile zusammenstellen}
   with FSettings.CDRW do
   begin
@@ -93,6 +86,27 @@ begin
     if Verbose     then Cmd := Cmd + ' -v';
     if Dummy       then Cmd := Cmd + ' -dummy';
   end;
+  Result := Cmd;
+end;
+
+{ DeleteCDRW -------------------------------------------------------------------
+
+  DeleteCDRW löscht CD-RWs bzw. Teile davon.                                   }
+
+procedure TCdrtfeActionErase.DeleteCDRW;
+var i     : Integer;
+    Cmd   : string;
+    Ok    : Boolean;
+    CMArgs: TCheckMediumArgs;
+begin
+  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  CMArgs.Choice := cCDRW;
+  SetPanels('<>', FLang.GMS('mburn13'));
+  FDisk.GetDiskInfo(FSettings.CDRW.Device, False);
+  SetPanels('<>', '');
+  Ok := FDisk.CheckMedium(CMArgs);
+  {Kommandozeile zusammenstellen}
+  Cmd := GetCommandLine;
   {Kommando ausführen}
   if not Ok then
   begin
@@ -128,6 +142,15 @@ end;
 constructor TCdrtfeActionErase.Create;
 begin
   inherited Create;
+end;
+
+{ GetCommandLineString ---------------------------------------------------------
+
+  liefert die auszuführende(n) Kommandozeile(n).                               }
+
+function TCdrtfeActionErase.GetCommandLineString: string;
+begin
+  Result := GetCommandLine;
 end;
 
 { CleanUp ----------------------------------------------------------------------

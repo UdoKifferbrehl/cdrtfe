@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  01.01.2012
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,6 +43,7 @@ type TCdrtfeActionAudioCD = class(TCdrtfeAction)
      protected
      public
        constructor Create;
+       function GetCommandLineString: string; override;
        destructor Destroy; override;
        procedure CleanUp(const Phase: Byte); override;
        procedure Reset; override;
@@ -324,6 +325,15 @@ destructor TCdrtfeActionAudioCD.Destroy;
 begin
   FVList.Free;
   inherited Destroy;
+end;
+
+{ GetCommandLineString ---------------------------------------------------------
+
+  liefert die auszuführende(n) Kommandozeile(n).                               }
+
+function TCdrtfeActionAudioCD.GetCommandLineString: string;
+begin
+  Result := '';
 end;
 
 { CleanUp ----------------------------------------------------------------------

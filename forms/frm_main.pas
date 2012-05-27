@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  19.05.2012
+  letzte Änderung  27.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1267,9 +1267,11 @@ var i   : Integer;
         end;
       end;
       Index := FSettings.General.TabSheetDrive[Choice];
-      Result := GetValueFromString(DeviceList[Index]);
-      if FSettings.General.Choice = Choice then
-        FSelectedDevice := Result;
+      if Index < DeviceList.Count then
+        Result := GetValueFromString(DeviceList[Index])
+      else
+        Result := GetValueFromString(DeviceList[0]);
+      if FSettings.General.Choice = Choice then FSelectedDevice := Result;
     end;
   end;
 
@@ -3969,7 +3971,7 @@ procedure TCdrtfeMainForm.CheckControls;
   procedure CheckAllowMultipleWriter;
   begin
     if (FSettings.General.Choice = cCDRW) or
-       (False {FSettings.General.Choice = cCDImage}) then
+       (FSettings.General.Choice = cCDImage) then
       FDevices.AllowMultipleWriter := True
     else
       FDevices.AllowMultipleWriter := False;
@@ -5246,13 +5248,13 @@ begin
     {Bei Daten-CD nochmals einen Dateisystemchek.}
     if FSettings.General.Choice = cDataCD then CheckDataCDFS(True);
     FAction.Reset;
+    FAction.Action := FSettings.General.Choice;
     {Bei CD-Infos muß das LogWindow angezeigt werden}
     if (FSettings.General.Choice = cCDInfos) and not FLogWindowShowing then
       ToggleLogWindow(True);
     {Aktion ausführen}
     if FSelectedDevice <> 'mult' then
     begin
-      FAction.Action := FSettings.General.Choice;
       FAction.StartAction;
     end else
     begin
@@ -5260,6 +5262,7 @@ begin
       FormMAOutput := TFormMAOutput.Create(nil);
       try
         FormMAOutput.Lang       := FLang;
+        FormMAOutput.CDAction   := FAction;
         FormMAOutput.Devices    := FDevices;
         FormMAOutput.ImageLists := FImageLists;
         if FormMAOutput.SelectDevices then
