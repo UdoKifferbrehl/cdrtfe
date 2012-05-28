@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  28.05.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -15,13 +15,16 @@
 
 unit frm_maoutput;
 
+{$I directives.inc}
+
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls,
+  Dialogs, StdCtrls, ComCtrls, Contnrs,
   {eigene Klassendefinitionen/Units}
-  cl_lang, cl_action, cl_devices, cl_imagelists, c_frametopbanner;
+  cl_lang, cl_action, cl_actionthread, cl_devices, cl_imagelists,
+  c_frametopbanner, const_core, usermessages;
   
 type
   TFormMAOutput = class(TForm)
@@ -29,23 +32,39 @@ type
     Memo1: TMemo;
     Button1: TButton;
     PageControl: TPageControl;
-    Button2: TButton;
+    ButtonStart: TButton;
+    ButtonAbort: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure ButtonStartClick(Sender: TObject);
+    procedure ButtonAbortClick(Sender: TObject);
+    procedure PageControlChange(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { Private-Deklarationen }
-    FAction         : TCDAction;
-    FLang           : TLang;
-    FDevices        : TDevices;
-    FImageLists     : TImageLists;
-    FSelectedDevices: TStringList;
-    FSelDevCount    : Integer;
-    FCommandLines   : TStringList;
+    FAction          : TCDAction;
+    FLang            : TLang;
+    FDevices         : TDevices;
+    FImageLists      : TImageLists;
+    FSelectedDevices : TStringList;
+    FSelDevCount     : Integer;
+    FCommandLines    : TStringList;
+    FCommandLinesPrep: TStringList;
+    FThreadList      : TObjectList;
+    FThreadPrep      : TActionThreadEx;
+    FMemoList        : TObjectList;
+    FProcessRunning  : Boolean;
+    FThreadRunning   : Array of Boolean;
+    FPrepNeeded      : Boolean;
     procedure CreateControls;
     procedure CreateCommandLines;
+    procedure CreateThreads;
+    procedure StartThreads;
+    procedure TerminateThreads;
+    procedure SetButtons(const Status: TOnOff);
+    procedure WMTTerminated(var Msg: TMessage); message WM_TTerminated;
   public
     { Public-Deklarationen }
     procedure StartActionShowModal;
@@ -58,9 +77,52 @@ type
 
 implementation
 
-uses f_window, f_strings;
+uses f_window, f_strings, f_helper, const_common;
 
 {$R *.dfm}
+
+{ Messagehandler ------------------------------------------------------------- }
+
+{ WMTTerminated ----------------------------------------------------------------
+
+  Wenn WM_TTerminated empfangen wird, ist der zweite Thread beendet worden.    }
+
+procedure TFormMAOutput.WMTTerminated(var Msg: TMessage);
+var Ok           : Boolean;
+    ActiveThreads: Boolean;
+    ID, ExitCode : Integer;
+    i            : Integer;
+    Temp, Info   : string;
+begin
+  {$IFDEF ShowCmdError}
+  ExitCode := Msg.wParam;
+  Ok := ExitCode = 0;
+  {$ENDIF}
+  ID := Msg.LParam;
+  if ID <> 100 then
+  begin
+    FThreadRunning[ID] := False;
+    ActiveThreads := False;
+    for i := 0 to FSelDevCount - 1 do
+      ActiveThreads := ActiveThreads or FThreadRunning[i];
+    FProcessRunning := ActiveThreads;
+    if not FProcessRunning then
+    begin
+      FAction.CleanUp(2);
+      SetButtons(oOn);
+    end;
+    if Ok then Temp := 'ok' else Temp := 'error';
+    Info := FLang.GMS('c003') + ' ' +
+            FDevices.GetDriveLetter(FSelectedDevices[ID]) + ' (' +
+            FSelectedDevices[ID] + '): ' + FLang.GMS('moutput01') +
+            ' ExitCode: ' + IntToStr(ExitCode);
+    Memo1.Lines.Add(Info );
+  end else
+  begin
+    FPrepNeeded := False;
+    StartThreads;
+  end;
+end;
 
 { Form-Events ---------------------------------------------------------------- }
 
@@ -73,6 +135,24 @@ procedure TFormMAOutput.FormCreate(Sender: TObject);
 begin
   FSelectedDevices := TStringList.Create;
   FCommandLines := TStringList.Create;
+  FCommandLinesPrep := TStringList.Create;
+  FMemoList := TObjectList.Create;
+  FMemoList.OwnsObjects := False;
+  FThreadList := TObjectList.Create;
+  FThreadList.OwnsObjects := True;
+  FProcessRunning := False;
+  FPrepNeeded := False;
+end;
+
+{ FormCloseQuery ---------------------------------------------------------------
+
+  Schließen nur erlaubt, wenn keine Threads mehr laufen.                       }
+
+procedure TFormMAOutput.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if FProcessRunning then
+    CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
+                           MB_cdrtfeWarningYN) = ID_YES;
 end;
 
 { FormDestroy ------------------------------------------------------------------
@@ -83,6 +163,9 @@ procedure TFormMAOutput.FormDestroy(Sender: TObject);
 begin
   FSelectedDevices.Free;
   FCommandLines.Free;
+  FCommandLinesPrep.Free;
+  FMemoList.Free;
+  FThreadList.Free;
 end;
 
 { FormShow ---------------------------------------------------------------------
@@ -116,25 +199,55 @@ begin
 //    if OutMaximized then self.WindowState := wsMaximized;
 end;
 
+{ PageControl-Events --------------------------------------------------------- }
+
+procedure TFormMAOutput.PageControlChange(Sender: TObject);
+var i   : Integer;
+    Memo: TMemo;
+begin
+  i := (Sender as TPageControl).ActivePageIndex;
+  Memo := FMemoList[i] as TMemo;
+  Memo.Perform(EM_LineScroll, 0, Memo.Lines.Count - 1)
+end;
+
 { Button-Events -------------------------------------------------------------- }
 
 procedure TFormMAOutput.Button1Click(Sender: TObject);
 begin
-//  Memo1.Lines.Add('test');
-//  Memo1.Lines.Add('Tab2Owner: ' +  PageControl.Pages[0].Owner.Name);
-//  Memo1.Lines.Add('Tab2.Parent: ' + PageControl.Pages[0].Parent.Name);
-  Memo1.Lines.Add(FAction.GetCommandLineString);
-  Memo1.Lines.Add('');
   CreateCommandLines;
-  Memo1.Lines.Add(FCommandLines.Text);
 end;
 
-procedure TFormMAOutput.Button2Click(Sender: TObject);
+procedure TFormMAOutput.ButtonStartClick(Sender: TObject);
 begin
-  //
+  SetButtons(oOff);
+  CreateCommandLines;
+  CreateThreads;
+  StartThreads;
+end;
+
+procedure TFormMAOutput.ButtonAbortClick(Sender: TObject);
+begin
+  TerminateThreads;
 end;
 
 { TFormMAOutput - private }
+
+{ SetButtons -------------------------------------------------------------------
+
+  (de)aktiviert die Buttons.                                                   }
+
+procedure TFormMAOutput.SetButtons(const Status: TOnOff);
+begin
+  if Status = oOff then
+  begin
+    ButtonStart.Enabled := False;
+    ButtonAbort.Visible := True;
+  end else
+  begin
+    ButtonStart.Enabled := True;
+    ButtonAbort.Visible := False;
+  end;
+end;
 
 { CreateControls ---------------------------------------------------------------
 
@@ -170,6 +283,7 @@ begin
     Memo.Width := TabSheet.ClientWidth - 8;
     Memo.Height := TabSheet.ClientHeight - Memo.Top - 4;
     Memo.ScrollBars := ssBoth;
+    FMemoList.Add(Memo);
   end;
 end;
 
@@ -178,17 +292,113 @@ end;
   erzeugt die Kommandozeilen für die gleichzeitige Ausführung.                 }
 
 procedure TFormMAOutput.CreateCommandLines;
-var i      : Integer;
-    CmdLine: string;
-    Temp   : string;
+var i       : Integer;
+    CmdLine : string;
+    Temp    : string;
 begin
   {gemeinsame Kommandzeile erzeugen}
   CmdLine := FAction.GetCommandLineString;
+  {falls mehrere Kommandozeilen enthalten sind, müssen diese getrennt werden}
+  if Pos(CR, CmdLine) > 0 then
+  begin
+    FCommandLinesPrep.Text := CmdLine;
+    i := FCommandLinesPrep.Count;
+    if i > 1 then
+    begin
+      CmdLine := FCommandLinesPrep[i - 1];
+      FCommandLinesPrep.Delete(i - 1);
+    end;
+  end;
   {für jedes Laufwerk anpassen}
   for i := 0 to FSelDevCount - 1 do
   begin
     Temp := ReplaceString(CmdLine, 'dev=mult', 'dev=' + FSelectedDevices[i]);
     FCommandLines.Add(Temp);
+  end;
+
+  {debug}
+  Memo1.Lines.Add('FCommandLinesPrep.Count: ' + IntToStr(FCommandLinesPrep.Count));
+  for i := 0 to FCommandLinesPrep.Count - 1 do Memo1.Lines.Add(FCommandLinesPrep[i]);
+  Memo1.Lines.Add('');
+  Memo1.Lines.Add('FCommandLines.Count    : ' + IntToStr(FCommandLines.Count));
+  for i := 0 to FCommandLines.Count - 1 do Memo1.Lines.Add(FCommandLines[i]);
+  Memo1.Lines.Add('');  
+end;
+
+{ CreateThreads ----------------------------------------------------------------
+
+  erzeugt die Threads für die gleichzeitige Ausführung.                        }
+
+procedure TFormMAOutput.CreateThreads;
+var i         : Integer;
+    Thread    : TActionThreadEx;
+    Cmd       : string;
+    CurrentDir: string;
+begin
+  SetLength(FThreadRunning, FSelDevCount);
+  for i := 0 to FSelDevCount - 1 do
+  begin
+    Cmd := FCommandLines[i];
+    CurrentDir := GetCurrentFolder(Cmd);
+    Thread := TActionThreadEx.Create(Cmd, CurrentDir, True);
+    Thread.MessageOk := FLang.GMS('moutput01');
+    Thread.MessageAborted := FLang.GMS('moutput02');
+    Thread.ThreadID := i;
+    Thread.MessageHandle := Self.Handle;
+    Thread.OutputMemo := (FMemoList[i] as TMemo);
+    // Thread.FreeOnTerminate := True;
+    FThreadList.Add(Thread);
+  end;
+  if FCommandLinesPrep.Count > 0 then
+  begin
+    Cmd := '';
+    for i := 0 to FCommandLinesPrep.Count - 1 do
+    begin
+      Cmd := Cmd + FCommandLinesPrep[i];
+      if i < (FCommandLinesPrep.Count - 1) then Cmd := Cmd + CR;
+    end;
+    FThreadPrep := TActionThreadEx.Create(Cmd, CurrentDir, True);
+    FThreadPrep.MessageOk := FLang.GMS('moutput01');
+    FThreadPrep.MessageAborted := FLang.GMS('moutput02');
+    FThreadPrep.ThreadID := 100;
+    FThreadPrep.MessageHandle := Self.Handle;
+    FThreadPrep.OutputMemo := (FMemoList[0] as TMemo);
+    FThreadPrep.FreeOnTerminate := True;
+    FPrepNeeded := True;
+  end;
+end;
+
+{ StartThreads -----------------------------------------------------------------
+
+  startet die Threads zur gleichzeitigen Ausführung.                           }
+
+procedure TFormMAOutput.StartThreads;
+var i         : Integer;
+begin
+  if FPrepNeeded then
+  begin
+    FThreadPrep.Resume;
+  end else
+  begin
+    for i := 0 to FSelDevCount - 1 do
+    begin
+      (FThreadList[i] as TActionThreadEx).Resume;
+      FThreadRunning[i] := True;
+    end;
+  end;
+  FProcessRunning := True;
+end;
+
+{ TerminateThreads -------------------------------------------------------------
+
+  beendet die Threads.                                                         }
+
+procedure TFormMAOutput.TerminateThreads;
+var i         : Integer;
+begin
+  for i := 0 to FSelDevCount - 1 do
+  begin
+    TerminateExecution(FThreadList[i] as TActionThreadEx);
   end;
 end;
 

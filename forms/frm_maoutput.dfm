@@ -13,6 +13,7 @@ object FormMAOutput: TFormMAOutput
   KeyPreview = True
   OldCreateOrder = True
   Position = poMainFormCenter
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -52,11 +53,12 @@ object FormMAOutput: TFormMAOutput
     Top = 59
     Width = 513
     Height = 89
+    ScrollBars = ssBoth
     TabOrder = 1
   end
   object Button1: TButton
     Left = 527
-    Top = 59
+    Top = 121
     Width = 75
     Height = 25
     Caption = 'Button1'
@@ -69,14 +71,25 @@ object FormMAOutput: TFormMAOutput
     Width = 592
     Height = 372
     TabOrder = 3
+    OnChange = PageControlChange
   end
-  object Button2: TButton
+  object ButtonStart: TButton
+    Left = 527
+    Top = 59
+    Width = 75
+    Height = 25
+    Caption = 'Start'
+    TabOrder = 4
+    OnClick = ButtonStartClick
+  end
+  object ButtonAbort: TButton
     Left = 527
     Top = 90
     Width = 75
     Height = 25
-    Caption = 'Button2'
-    TabOrder = 4
-    OnClick = Button2Click
+    Caption = 'Abbrechen'
+    TabOrder = 5
+    Visible = False
+    OnClick = ButtonAbortClick
   end
 end
