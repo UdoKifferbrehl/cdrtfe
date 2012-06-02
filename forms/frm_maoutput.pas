@@ -30,14 +30,14 @@ type
   TFormMAOutput = class(TForm)
     FrameTopBanner1: TFrameTopBanner;
     Memo1: TMemo;
-    Button1: TButton;
+    ButtonCancel: TButton;
     PageControl: TPageControl;
     ButtonStart: TButton;
     ButtonAbort: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure ButtonCancelClick(Sender: TObject);
     procedure ButtonStartClick(Sender: TObject);
     procedure ButtonAbortClick(Sender: TObject);
     procedure PageControlChange(Sender: TObject);
@@ -80,7 +80,7 @@ type
 
 implementation
 
-uses f_window, f_strings, f_helper, const_common;
+uses f_window, f_strings, f_helper, cl_logwindow, const_common;
 
 {$R *.dfm}
 
@@ -172,8 +172,21 @@ end;
   die Infos aus den Memos ind das Memo des Hauptfenster übernehmen.            }
 
 procedure TFormMAOutput.FormClose(Sender: TObject; var Action: TCloseAction);
+var i: Integer;
 begin
-  //
+  if Memo1.Lines.Count > 0 then
+  begin
+    TLogWin.Inst.Add(Memo1.Lines.Text);
+    TLogWin.Inst.Add('');
+  end;
+  for i := 0 to FMemoList.Count - 1 do
+  begin
+    if (FMemoList[i] as TMemo).Lines.Count > 0 then
+    begin
+      TLogWin.Inst.Add((FMemoList[i] as TMemo).Lines.Text);
+      TLogWin.Inst.Add('');
+    end;
+  end;
 end;
 
 
@@ -234,10 +247,9 @@ end;
 
 { Button-Events -------------------------------------------------------------- }
 
-procedure TFormMAOutput.Button1Click(Sender: TObject);
+procedure TFormMAOutput.ButtonCancelClick(Sender: TObject);
 begin
-  CreateCommandLines;
-  FAction.CleanUp(2);
+  Self.Close;
 end;
 
 procedure TFormMAOutput.ButtonStartClick(Sender: TObject);
@@ -265,10 +277,12 @@ begin
   if Status = oOff then
   begin
     ButtonStart.Enabled := False;
+    ButtonCancel.Enabled := False;
     ButtonAbort.Visible := True;
   end else
   begin
     ButtonStart.Enabled := True;
+    ButtonCancel.Enabled := True;
     ButtonAbort.Visible := False;
   end;
 end;
@@ -307,6 +321,7 @@ begin
     Memo.Width := TabSheet.ClientWidth - 8;
     Memo.Height := TabSheet.ClientHeight - Memo.Top - 4;
     Memo.ScrollBars := ssBoth;
+    Memo.Anchors := [akLeft,akTop,akRight,akBottom];
     FMemoList.Add(Memo);
   end;
 end;

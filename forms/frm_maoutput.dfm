@@ -54,24 +54,27 @@ object FormMAOutput: TFormMAOutput
     Top = 59
     Width = 513
     Height = 89
+    Anchors = [akLeft, akTop, akRight]
     ScrollBars = ssBoth
-    TabOrder = 1
+    TabOrder = 5
   end
-  object Button1: TButton
+  object ButtonCancel: TButton
     Left = 527
     Top = 121
     Width = 75
     Height = 25
-    Caption = 'Button1'
-    TabOrder = 2
-    OnClick = Button1Click
+    Anchors = [akTop, akRight]
+    Caption = 'Beenden'
+    TabOrder = 3
+    OnClick = ButtonCancelClick
   end
   object PageControl: TPageControl
     Left = 8
     Top = 154
     Width = 592
     Height = 372
-    TabOrder = 3
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    TabOrder = 4
     OnChange = PageControlChange
   end
   object ButtonStart: TButton
@@ -79,8 +82,9 @@ object FormMAOutput: TFormMAOutput
     Top = 59
     Width = 75
     Height = 25
+    Anchors = [akTop, akRight]
     Caption = 'Start'
-    TabOrder = 4
+    TabOrder = 1
     OnClick = ButtonStartClick
   end
   object ButtonAbort: TButton
@@ -88,8 +92,9 @@ object FormMAOutput: TFormMAOutput
     Top = 90
     Width = 75
     Height = 25
+    Anchors = [akTop, akRight]
     Caption = 'Abbrechen'
-    TabOrder = 5
+    TabOrder = 2
     Visible = False
     OnClick = ButtonAbortClick
   end
