@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  28.05.2012
+  letzte Änderung  02.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -58,11 +58,13 @@ type
     FProcessRunning  : Boolean;
     FThreadRunning   : Array of Boolean;
     FPrepNeeded      : Boolean;
+    FTerminatedByUser: Boolean;
     procedure CreateControls;
     procedure CreateCommandLines;
     procedure CreateThreads;
     procedure StartThreads;
     procedure TerminateThreads;
+    procedure ResetStatus;
     procedure SetButtons(const Status: TOnOff);
     procedure WMTTerminated(var Msg: TMessage); message WM_TTerminated;
   public
@@ -88,7 +90,7 @@ uses f_window, f_strings, f_helper, const_common;
   Wenn WM_TTerminated empfangen wird, ist der zweite Thread beendet worden.    }
 
 procedure TFormMAOutput.WMTTerminated(var Msg: TMessage);
-var Ok           : Boolean;
+var //Ok           : Boolean;
     ActiveThreads: Boolean;
     ID, ExitCode : Integer;
     i            : Integer;
@@ -96,9 +98,12 @@ var Ok           : Boolean;
 begin
   {$IFDEF ShowCmdError}
   ExitCode := Msg.wParam;
-  Ok := ExitCode = 0;
+  // Ok := ExitCode = 0;
   {$ENDIF}
   ID := Msg.LParam;
+  if FTerminatedByUser then Temp := FLang.GMS('moutput02') else
+    Temp := FLang.GMS('moutput01');
+  Temp := Temp + ' ExitCode: ' + IntToStr(ExitCode);
   if ID <> 100 then
   begin
     FThreadRunning[ID] := False;
@@ -111,16 +116,22 @@ begin
       FAction.CleanUp(2);
       SetButtons(oOn);
     end;
-    if Ok then Temp := 'ok' else Temp := 'error';
     Info := FLang.GMS('c003') + ' ' +
             FDevices.GetDriveLetter(FSelectedDevices[ID]) + ' (' +
-            FSelectedDevices[ID] + '): ' + FLang.GMS('moutput01') +
-            ' ExitCode: ' + IntToStr(ExitCode);
-    Memo1.Lines.Add(Info );
+            FSelectedDevices[ID] + '): ' + Temp;
+    Memo1.Lines.Add(Info);
   end else
   begin
+    Memo1.Lines.Add(Temp);
     FPrepNeeded := False;
-    StartThreads;
+    if not FTerminatedByUser then
+    begin
+      StartThreads;
+    end else
+    begin
+      SetButtons(oOn);
+      FProcessRunning := False;
+    end;
   end;
 end;
 
@@ -142,6 +153,7 @@ begin
   FThreadList.OwnsObjects := True;
   FProcessRunning := False;
   FPrepNeeded := False;
+  FTerminatedByUser := False;
 end;
 
 { FormCloseQuery ---------------------------------------------------------------
@@ -215,11 +227,13 @@ end;
 procedure TFormMAOutput.Button1Click(Sender: TObject);
 begin
   CreateCommandLines;
+  FAction.CleanUp(2);
 end;
 
 procedure TFormMAOutput.ButtonStartClick(Sender: TObject);
 begin
   SetButtons(oOff);
+  ResetStatus;
   CreateCommandLines;
   CreateThreads;
   StartThreads;
@@ -375,6 +389,7 @@ end;
 procedure TFormMAOutput.StartThreads;
 var i         : Integer;
 begin
+  FTerminatedByUser := False;
   if FPrepNeeded then
   begin
     FThreadPrep.Resume;
@@ -396,10 +411,30 @@ end;
 procedure TFormMAOutput.TerminateThreads;
 var i         : Integer;
 begin
+  FTerminatedByUser := True;
+  if FPrepNeeded then
+  begin
+    TerminateExecution(FThreadPrep);
+  end;
   for i := 0 to FSelDevCount - 1 do
   begin
     TerminateExecution(FThreadList[i] as TActionThreadEx);
   end;
+end;
+
+{ ResetStatus ------------------------------------------------------------------
+
+  setzt die Variablen zurück, so daß ein weiterer Durchlauf gestartet werden
+  kann.                                                                        }
+
+procedure TFormMAOutput.ResetStatus;
+begin
+  FCommandLines.Clear;
+  FCommandLinesPrep.Clear;
+  FThreadList.Clear;
+  FProcessRunning := False;
+  FPrepNeeded := False;
+  FTerminatedByUser := False;
 end;
 
 { TFormMAOutput - public }
