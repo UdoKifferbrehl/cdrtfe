@@ -13,6 +13,7 @@ object FormMAOutput: TFormMAOutput
   KeyPreview = True
   OldCreateOrder = True
   Position = poMainFormCenter
+  OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy

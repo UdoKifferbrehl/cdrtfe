@@ -42,6 +42,7 @@ type
     procedure ButtonAbortClick(Sender: TObject);
     procedure PageControlChange(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private-Deklarationen }
     FAction          : TCDAction;
@@ -111,11 +112,6 @@ begin
     for i := 0 to FSelDevCount - 1 do
       ActiveThreads := ActiveThreads or FThreadRunning[i];
     FProcessRunning := ActiveThreads;
-    if not FProcessRunning then
-    begin
-      FAction.CleanUp(2);
-      SetButtons(oOn);
-    end;
     Info := FLang.GMS('c003') + ' ' +
             FDevices.GetDriveLetter(FSelectedDevices[ID]) + ' (' +
             FSelectedDevices[ID] + '): ' + Temp;
@@ -129,9 +125,13 @@ begin
       StartThreads;
     end else
     begin
-      SetButtons(oOn);
       FProcessRunning := False;
     end;
+  end;
+  if not FProcessRunning then
+  begin
+    FAction.CleanUp(2);
+    SetButtons(oOn);
   end;
 end;
 
@@ -166,6 +166,16 @@ begin
     CanClose := ShowMsgDlg(FLang.GMS('eburn18'), FLang.GMS('g003'),
                            MB_cdrtfeWarningYN) = ID_YES;
 end;
+
+{ FormClose --------------------------------------------------------------------
+
+  die Infos aus den Memos ind das Memo des Hauptfenster übernehmen.            }
+
+procedure TFormMAOutput.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  //
+end;
+
 
 { FormDestroy ------------------------------------------------------------------
 
