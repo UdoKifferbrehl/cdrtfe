@@ -23,8 +23,8 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, Contnrs,
   {eigene Klassendefinitionen/Units}
-  cl_lang, cl_action, cl_actionthread, cl_devices, cl_imagelists,
-  c_frametopbanner, const_core, usermessages;
+  cl_lang, cl_settings, cl_action, cl_actionthread, cl_devices, cl_diskinfo,
+  cl_imagelists, c_frametopbanner, const_core, usermessages;
   
 type
   TFormMAOutput = class(TForm)
@@ -47,6 +47,7 @@ type
     { Private-Deklarationen }
     FAction          : TCDAction;
     FLang            : TLang;
+    FSettings        : TSettings;
     FDevices         : TDevices;
     FImageLists      : TImageLists;
     FSelectedDevices : TStringList;
@@ -57,9 +58,15 @@ type
     FThreadPrep      : TActionThreadEx;
     FMemoList        : TObjectList;
     FProcessRunning  : Boolean;
-    FThreadRunning   : Array of Boolean;
+    FThreadRunning   : array of Boolean;
+    FCMArgList       : array of TCheckMediumArgs;
+    FSimulDrvList    : array of string;
     FPrepNeeded      : Boolean;
     FTerminatedByUser: Boolean;
+    FDisk            : TDiskInfo;
+    FDiskA           : TDiskInfoA;
+    FDiskM           : TDiskInfoM;
+    function CheckDisks: Boolean;
     procedure CreateControls;
     procedure CreateCommandLines;
     procedure CreateThreads;
@@ -67,6 +74,7 @@ type
     procedure TerminateThreads;
     procedure ResetStatus;
     procedure SetButtons(const Status: TOnOff);
+    procedure SetFDisk;
     procedure WMTTerminated(var Msg: TMessage); message WM_TTerminated;
   public
     { Public-Deklarationen }
@@ -76,6 +84,7 @@ type
     property Lang      : TLang write FLang;
     property ImageLists: TImageLists write FImageLists;
     property Devices   : TDevices write FDevices;
+    property Settings  : TSettings write FSettings;
   end;
 
 implementation
@@ -154,6 +163,8 @@ begin
   FProcessRunning := False;
   FPrepNeeded := False;
   FTerminatedByUser := False;
+  FDiskA := TDiskInfoA.Create;
+  FDiskM := TDiskInfoM.Create;
 end;
 
 { FormCloseQuery ---------------------------------------------------------------
@@ -201,6 +212,8 @@ begin
   FCommandLinesPrep.Free;
   FMemoList.Free;
   FThreadList.Free;
+  FDiskA.Free;
+  FDiskM.Free;
 end;
 
 { FormShow ---------------------------------------------------------------------
@@ -253,17 +266,34 @@ begin
 end;
 
 procedure TFormMAOutput.ButtonStartClick(Sender: TObject);
+var i: Integer;
+    Ok: Boolean;
 begin
+  i := 1;
   SetButtons(oOff);
   ResetStatus;
-  CreateCommandLines;
-  CreateThreads;
-  StartThreads;
+  Ok := CheckDisks;
+  if Ok then
+  begin
+    if not FSettings.General.NoConfirm then
+    begin
+      {Brennvorgang starten?}
+      i := ShowMsgDlg(FLang.GMS('mburn01'), FLang.GMS('mburn02'),
+           MB_cdrtfeConfirmS);
+    end;
+    if i = 1 then
+    begin
+      CreateCommandLines;
+      CreateThreads;
+      StartThreads;
+    end;
+  end;
+  if not Ok or (i <> 1) then SetButtons(oOn);
 end;
 
 procedure TFormMAOutput.ButtonAbortClick(Sender: TObject);
 begin
-  TerminateThreads;
+  if FProcessRunning then TerminateThreads;
 end;
 
 { TFormMAOutput - private }
@@ -284,6 +314,18 @@ begin
     ButtonStart.Enabled := True;
     ButtonCancel.Enabled := True;
     ButtonAbort.Visible := False;
+  end;
+end;
+
+{ SetFDisk ---------------------------------------------------------------------
+
+  wähl je nach cdrecord-Fähigkeiten das passende FDisk[A|M].                   }
+
+procedure TFormMAOutput.SetFDisk;
+begin
+  case FSettings.Cdrecord.HaveMediaInfo of
+    True : FDisk := FDiskM;
+    False: FDisk := FDiskA;
   end;
 end;
 
@@ -326,6 +368,42 @@ begin
   end;
 end;
 
+{ CheckDisks -------------------------------------------------------------------
+
+  prüft für jedes gewählte Laufwerk die eingelegte Disk.                       }
+
+function TFormMAOutput.CheckDisks: Boolean;
+var i   : Integer;
+    Ok  : Boolean;
+    Temp: string;
+begin
+  SetLength(FCMArgList, FSelDevCount);
+  SetLength(FSimulDrvList, FSelDevCount);
+  Ok := True;
+  i := 0;
+  while (i < FSelDevCount) and Ok do
+  begin
+    Temp := FLang.GMS('c003') + ' ' +
+            FDevices.GetDriveLetter(FSelectedDevices[i]) + ' (' +
+            FSelectedDevices[i] + '): ' + FLang.GMS('mburn13');
+    FCMArgList[i].ForcedContinue := False;
+    FCMArgList[i].Choice := FSettings.General.Choice; //cCDImage;
+    {Größe der Daten ermitteln}
+    //FData.GetProjectInfo(Count, DummyI, CMArgs.CDSize, DummyE, DummyI, cDataCD);
+    {Infos über eingelegte CD einlesen}
+    Memo1.Lines.Add(Temp);
+    FDisk.GetDiskInfo(FSelectedDevices[i], False);
+    FSimulDrvList[i] := '';
+    if FDisk.IsDVD then FSimulDrvList[i] := 'dvd_simul';
+    if FDisk.IsBD then FSimulDrvList[i] := 'bd_simul';
+    {Zusammenstellung prüfen}
+    Ok := FDisk.CheckMedium(FCMArgList[i]);
+    Inc(i);
+  end;
+  Result := Ok;
+  Memo1.Lines.Add('');
+end;
+
 { CreateCommandLines -----------------------------------------------------------
 
   erzeugt die Kommandozeilen für die gleichzeitige Ausführung.                 }
@@ -352,6 +430,11 @@ begin
   for i := 0 to FSelDevCount - 1 do
   begin
     Temp := ReplaceString(CmdLine, 'dev=mult', 'dev=' + FSelectedDevices[i]);
+    if FSettings.Cdrecord.SimulDrv then
+    begin
+      if FSimulDrvList[i] <> '' then
+        Temp := ReplaceString(Temp, 'cdr_simul', FSimulDrvList[i]);
+    end;
     FCommandLines.Add(Temp);
   end;
 
@@ -471,6 +554,7 @@ end;
 procedure TFormMAOutput.StartActionShowModal;
 begin
   CreateControls;
+  SetFDisk;
   Self.ShowModal;
 end;
 

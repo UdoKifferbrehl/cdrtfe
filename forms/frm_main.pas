@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  02.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5262,6 +5262,7 @@ begin
       FormMAOutput := TFormMAOutput.Create(nil);
       try
         FormMAOutput.Lang       := FLang;
+        FormMAOutput.Settings   := FSettings;
         FormMAOutput.CDAction   := FAction;
         FormMAOutput.Devices    := FDevices;
         FormMAOutput.ImageLists := FImageLists;
