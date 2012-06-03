@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  02.06.2012
+  letzte Änderung  03.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -183,7 +183,8 @@ end;
   die Infos aus den Memos ind das Memo des Hauptfenster übernehmen.            }
 
 procedure TFormMAOutput.FormClose(Sender: TObject; var Action: TCloseAction);
-var i: Integer;
+var i   : Integer;
+    Temp: string;
 begin
   if Memo1.Lines.Count > 0 then
   begin
@@ -194,10 +195,16 @@ begin
   begin
     if (FMemoList[i] as TMemo).Lines.Count > 0 then
     begin
-      TLogWin.Inst.Add((FMemoList[i] as TMemo).Lines.Text);
-      TLogWin.Inst.Add('');
+      if i < FMemoList.Count - 1 then
+      begin
+        Temp := Temp + (FMemoList[i] as TMemo).Lines.Text + CRLF;
+      end else
+      begin
+        Temp := (FMemoList[i] as TMemo).Lines.Text + CRLF + Temp;
+      end;
     end;
   end;
+  if Temp <> '' then TLogWin.Inst.Add(Temp);
 end;
 
 
@@ -340,21 +347,27 @@ var i       : Integer;
     Memo    : TMemo;
     DevLabel: TLabel;
 begin
-  for i := 0 to FSelDevCount - 1 do
+  for i := 0 to FSelDevCount {- 1} do
   begin
     {TabSheet}
     TabSheet := TTabSheet.Create(Self);
     TabSheet.Parent := PageControl;
     TabSheet.PageControl := PageControl;
-    TabSheet.Caption := FLang.GMS('c003') + ' ' + IntToStr(i);
+    if i < FSelDevCount then
+      TabSheet.Caption := FLang.GMS('c003') + ' ' + IntToStr(i)
+    else
+      TabSheet.Caption := FLang.GMS('maoutput01');
     {Label}
     DevLabel := TLabel.Create(Self);
     DevLabel.Parent := TabSheet;
     DevLabel.Top := 4;
     DevLabel.Left := 4;
-    DevLabel.Caption := FLang.GMS('c003') + ' ' +
-                          FDevices.GetDriveLetter(FSelectedDevices[i]) +
-                          ' (' + FSelectedDevices[i] + ')';
+    if i < FselDevCount then
+      DevLabel.Caption := FLang.GMS('c003') + ' ' +
+                            FDevices.GetDriveLetter(FSelectedDevices[i]) +
+                            ' (' + FSelectedDevices[i] + ')'
+    else
+      DevLabel.Caption := FLang.GMS('maoutput02');
     {Memo}
     Memo := TMemo.Create(Self);
     Memo.Parent := TabSheet;
@@ -484,7 +497,7 @@ begin
     FThreadPrep.MessageAborted := FLang.GMS('moutput02');
     FThreadPrep.ThreadID := 100;
     FThreadPrep.MessageHandle := Self.Handle;
-    FThreadPrep.OutputMemo := (FMemoList[0] as TMemo);
+    FThreadPrep.OutputMemo := (FMemoList[FSelDevCount] as TMemo);
     FThreadPrep.FreeOnTerminate := True;
     FPrepNeeded := True;
   end;
@@ -500,9 +513,11 @@ begin
   FTerminatedByUser := False;
   if FPrepNeeded then
   begin
+    PageControl.ActivePageIndex := FSelDevCount;
     FThreadPrep.Resume;
   end else
   begin
+    PageControl.ActivePageIndex := 0;
     for i := 0 to FSelDevCount - 1 do
     begin
       (FThreadList[i] as TActionThreadEx).Resume;

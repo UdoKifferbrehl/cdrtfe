@@ -366,6 +366,9 @@ begin
     {Messages - Select Writer}
     Add('mselw01=Brennerauswahl');
     Add('mselw02=Bitte die zu nutzenden Brenner auswählen');
+    {Messages - MAOutput}
+    Add('maoutput01=Vorbereitung');
+    Add('maoutput02=Imageerstellung/Dateikonvertierung');
     {Dialog-Beschreibungen}
     Add('desc01=Ausgabe der Kommandozeilenprogramme');
     Add('desc02=Einstellungen für das Dateisystem der Disk');
