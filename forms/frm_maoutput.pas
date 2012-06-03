@@ -63,6 +63,7 @@ type
     FSimulDrvList    : array of string;
     FPrepNeeded      : Boolean;
     FTerminatedByUser: Boolean;
+    FFirstRun        : Boolean;
     FDisk            : TDiskInfo;
     FDiskA           : TDiskInfoA;
     FDiskM           : TDiskInfoM;
@@ -139,7 +140,8 @@ begin
   end;
   if not FProcessRunning then
   begin
-    FAction.CleanUp(2);
+    Memo1.Lines.Add('');
+    //FAction.CleanUp(2);
     SetButtons(oOn);
   end;
 end;
@@ -162,6 +164,7 @@ begin
   FThreadList.OwnsObjects := True;
   FProcessRunning := False;
   FPrepNeeded := False;
+  FFirstRun := True;
   FTerminatedByUser := False;
   FDiskA := TDiskInfoA.Create;
   FDiskM := TDiskInfoM.Create;
@@ -186,6 +189,7 @@ procedure TFormMAOutput.FormClose(Sender: TObject; var Action: TCloseAction);
 var i   : Integer;
     Temp: string;
 begin
+  FAction.CleanUp(2);
   if Memo1.Lines.Count > 0 then
   begin
     TLogWin.Inst.Add(Memo1.Lines.Text);
@@ -484,7 +488,7 @@ begin
     // Thread.FreeOnTerminate := True;
     FThreadList.Add(Thread);
   end;
-  if FCommandLinesPrep.Count > 0 then
+  if (FCommandLinesPrep.Count > 0) and FFirstRun then
   begin
     Cmd := '';
     for i := 0 to FCommandLinesPrep.Count - 1 do
@@ -511,7 +515,7 @@ procedure TFormMAOutput.StartThreads;
 var i         : Integer;
 begin
   FTerminatedByUser := False;
-  if FPrepNeeded then
+  if FPrepNeeded and FFirstRun then
   begin
     PageControl.ActivePageIndex := FSelDevCount;
     FThreadPrep.Resume;
@@ -523,6 +527,7 @@ begin
       (FThreadList[i] as TActionThreadEx).Resume;
       FThreadRunning[i] := True;
     end;
+    FFirstRun := False;
   end;
   FProcessRunning := True;
 end;
