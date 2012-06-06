@@ -174,10 +174,10 @@ kerberos002@arcor.de</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">cdrtools Frontend</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductVersion">1.4.1</VersionInfoKeys>
 			<VersionInfoKeys Name="Comments">getestet mit:
-  cdrtools 2.0 - 3.01a06
+  cdrtools 2.0 - 3.01a07
   mode2cdmaker 1.5.1
   vcdimager 0.6.2
-  mpg123 1.12.5
+  mpg123 1.14.2
   lame 3.98
   oggdec, oggenc 1.0.1
   flac 1.2.1
