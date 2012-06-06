@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.05.2012
+  letzte Änderung  06.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -368,7 +368,7 @@ begin
     Add('mselw02=Bitte die zu nutzenden Brenner auswählen');
     {Messages - MAOutput}
     Add('maoutput01=Vorbereitung');
-    Add('maoutput02=Imageerstellung/Dateikonvertierung');
+    Add('maoutput02=Dateikonvertierung');
     {Dialog-Beschreibungen}
     Add('desc01=Ausgabe der Kommandozeilenprogramme');
     Add('desc02=Einstellungen für das Dateisystem der Disk');
