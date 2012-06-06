@@ -128,7 +128,7 @@ begin
     Memo1.Lines.Add(Info);
   end else
   begin
-    Memo1.Lines.Add(Temp);
+    Memo1.Lines.Add(FLang.GMS('maoutput02') + ': ' + Temp);
     FPrepNeeded := False;
     if not FTerminatedByUser then
     begin
