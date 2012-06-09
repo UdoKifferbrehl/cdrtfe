@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  03.06.2012
+  letzte Änderung  09.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -64,6 +64,7 @@ type
     FPrepNeeded      : Boolean;
     FTerminatedByUser: Boolean;
     FFirstRun        : Boolean;
+    FDoCleanUp       : Boolean;
     FDisk            : TDiskInfo;
     FDiskA           : TDiskInfoA;
     FDiskM           : TDiskInfoM;
@@ -165,6 +166,7 @@ begin
   FProcessRunning := False;
   FPrepNeeded := False;
   FFirstRun := True;
+  FDoCleanUp := False;
   FTerminatedByUser := False;
   FDiskA := TDiskInfoA.Create;
   FDiskM := TDiskInfoM.Create;
@@ -189,7 +191,7 @@ procedure TFormMAOutput.FormClose(Sender: TObject; var Action: TCloseAction);
 var i   : Integer;
     Temp: string;
 begin
-  FAction.CleanUp(2);
+  if FDoCleanUp then FAction.CleanUp(2);
   if Memo1.Lines.Count > 0 then
   begin
     TLogWin.Inst.Add(Memo1.Lines.Text);
@@ -297,6 +299,7 @@ begin
       CreateCommandLines;
       CreateThreads;
       StartThreads;
+      FDoCleanUp := True;
     end;
   end;
   if not Ok or (i <> 1) then SetButtons(oOn);
