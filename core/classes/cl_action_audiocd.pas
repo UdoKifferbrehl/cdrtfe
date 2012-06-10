@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  10.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,6 +39,7 @@ uses Windows, Classes, SysUtils, cl_actionthread, cl_abstractbaseaction;
 type TCdrtfeActionAudioCD = class(TCdrtfeAction)
      private
        FVList             : TStringList;
+       function GetCommandLine(BurnList, CopyList: TStringList): string;
        procedure CreateAudioCD;
      protected
      public
@@ -54,27 +55,22 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}         
      f_strings, f_init, usermessages, f_locations, const_locations, f_helper,
-     f_window, cl_diskinfo, const_tabsheets, const_common;
+     f_window, f_environment, cl_diskinfo, const_tabsheets, const_common;
 
 { TCdrtfeActionAudioCD ------------------------------------------------------- }
 
 { TCdrtfeActionAudioCD - private }
 
-{ CreateAudioCD ----------------------------------------------------------------
+{ GetCommandLine ---------------------------------------------------------------
 
-  Eine Audio-CD erstellen.                                                     }
+  erzeugt die auszuführende Kommandozeile und nötige temporäre Dateien.        }
 
-procedure TCdrtfeActionAudioCD.CreateAudioCD;
+function TCdrtfeActionAudioCD.GetCommandLine(BurnList,
+                                           CopyList: TStringList): string;
 var i         : Integer;
-    Ok        : Boolean;
-    CMArgs    : TCheckMediumArgs;
-    DummyI    : Integer;
-    DummyL    : Int64;
     Temp      : string;
     Cmd, CmdMP: string;
     CmdRG     : string;
-    BurnList  : TStringList;
-    CopyList  : TStringList;
 
   { PrepareCompressedToWavConversion -------------------------------------------
 
@@ -129,7 +125,7 @@ var i         : Integer;
     end;
   end;
 
-  { PrepareCopyWaveFiles, PrepareWaveGain, CopyWaveFiles -----------------------
+  { PrepareCopyWaveFiles, PrepareWaveGain --------------------------------------
 
     Da WaveGain die Originaldateien verändert müssen Wave-Dateien vorher kopiert
     werden.                                                                    }
@@ -151,19 +147,6 @@ var i         : Integer;
         FVList.Add(Target);
         CopyList.Add(Source + '|' + Target);
       end;
-    end;
-  end;
-
-  procedure CopyWaveFiles;
-  var j             : Integer;
-      Source, Target: string;
-  begin
-    for j := 0 to CopyList.Count - 1 do
-    begin
-      SplitString(CopyList[j], '|', Source, Target);
-      MessageShow(FLang.GMS('m125'));
-      MessageShow('  ' + Source + ' -> ' + Target + CRLF);
-      Copyfile(PChar(Source), PChar(Target), False);
     end;
   end;
 
@@ -189,21 +172,6 @@ var i         : Integer;
   end;
 
 begin
-  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
-  BurnList := TStringList.Create;
-  CopyList := TStringList.Create;
-  FData.CreateBurnList(BurnList, cAudioCD);
-  CMArgs.Choice := cAudioCD;
-  {$IFDEF ShowBurnList}
-  FormDebug.Memo2.Lines.Assign(BurnList);
-  {$ENDIF}
-  {Spielzeit ermitteln}
-  FData.GetProjectInfo(DummyI, DummyI, DummyL, CMArgs.CDTime, DummyI, cAudioCD);
-  {Infos über eingelegte CD einlesen}
-  SetPanels('<>', FLang.GMS('mburn13'));
-  FDisk.GetDiskInfo(FSettings.AudioCD.Device, True);
-  SetPanels('<>', '');
-  Ok := FDisk.CheckMedium(CMArgs);
   {Falls WaveGain verwendet wird, müssen WAV-Dateien kopiert werden!}
   if FSettings.AudioCD.ReplayGain then PrepareCopyWaveFiles;
   {falls komprimierte Audio-Dateien vorhanden sind, Konvertierung vorbereiten}
@@ -265,7 +233,7 @@ begin
                           Temp := FData.GetTrackPause(i);
         if PauseSector then
         begin
-          {Länge lieft bereits in Sektoren vor}
+          {Länge liegt bereits in Sektoren vor}
           Cmd := Cmd + ' padsize=' + Temp + 's';
         end else
         begin
@@ -279,6 +247,61 @@ begin
       Cmd := Cmd + ' ' + BurnList[i];
     end;
   end;
+  if CmdRG <> '' then Cmd := CmdRG + Cmd;
+  if CmdMP <> '' then Cmd := CmdMP + Cmd;
+  Result := Cmd;
+end;
+
+{ CreateAudioCD ----------------------------------------------------------------
+
+  Eine Audio-CD erstellen.                                                     }
+
+procedure TCdrtfeActionAudioCD.CreateAudioCD;
+var i         : Integer;
+    Ok        : Boolean;
+    CMArgs    : TCheckMediumArgs;
+    DummyI    : Integer;
+    DummyL    : Int64;
+    Cmd       : string;
+    BurnList  : TStringList;
+    CopyList  : TStringList;
+
+  { CopyWaveFiles --------------------------------------------------------------
+
+    Da WaveGain die Originaldateien verändert müssen Wave-Dateien vorher kopiert
+    werden.                                                                    }
+
+  procedure CopyWaveFiles;
+  var j             : Integer;
+      Source, Target: string;
+  begin
+    for j := 0 to CopyList.Count - 1 do
+    begin
+      SplitString(CopyList[j], '|', Source, Target);
+      MessageShow(FLang.GMS('m125'));
+      MessageShow('  ' + Source + ' -> ' + Target + CRLF);
+      Copyfile(PChar(Source), PChar(Target), False);
+    end;
+  end;
+
+begin
+  SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
+  BurnList := TStringList.Create;
+  CopyList := TStringList.Create;
+  FData.CreateBurnList(BurnList, cAudioCD);
+  {$IFDEF ShowBurnList}
+  FormDebug.Memo2.Lines.Assign(BurnList);
+  {$ENDIF}
+  CMArgs.Choice := cAudioCD;
+  {Spielzeit ermitteln}
+  FData.GetProjectInfo(DummyI, DummyI, DummyL, CMArgs.CDTime, DummyI, cAudioCD);
+  {Infos über eingelegte CD einlesen}
+  SetPanels('<>', FLang.GMS('mburn13'));
+  FDisk.GetDiskInfo(FSettings.AudioCD.Device, True);
+  SetPanels('<>', '');
+  Ok := FDisk.CheckMedium(CMArgs);
+  {Kommandozeile zusammenstellen}
+  Cmd := GetCommandLine(BurnList, CopyList);
   BurnList.Free;
   {Kommando ausführen}
   if not Ok then
@@ -299,9 +322,7 @@ begin
   end;
   if i = 1 then
   begin
-    if Fsettings.AudioCD.ReplayGain then CopyWaveFiles;
-    if CmdRG <> '' then Cmd := CmdRG + Cmd;   
-    if CmdMP <> '' then Cmd := CmdMP + Cmd;
+    if FSettings.AudioCD.ReplayGain then CopyWaveFiles;
     DisplayDOSOutput(Cmd, FActionThread, FLang, nil);
   end else
   begin
@@ -332,8 +353,35 @@ end;
   liefert die auszuführende(n) Kommandozeile(n).                               }
 
 function TCdrtfeActionAudioCD.GetCommandLineString: string;
+var Cmd       : string;
+    BurnList  : TStringList;
+    CopyList  : TStringList;
+
+  function GetCopyCommand: string;
+  var j             : Integer;
+      Source, Target: string;
+      CmdCopy       : string;
+      Temp          : string;
+  begin
+    CmdCopy := '';
+    Temp := GetEnvVarValue(cComSpec) + ' /c ';
+    for j := 0 to CopyList.Count - 1 do
+    begin
+      SplitString(CopyList[j], '|', Source, Target);
+      CmdCopy := Temp + '"' + 'copy /y ' + QuotePath(Source) + ' ' + QuotePath(Target) + '"' + CR;
+    end;
+    Result := CmdCopy;
+  end;
+
 begin
-  Result := '';
+  BurnList := TStringList.Create;
+  CopyList := TStringList.Create;
+  FData.CreateBurnList(BurnList, cAudioCD);
+  Cmd := GetCommandLine(BurnList, CopyList);
+  if FSettings.AudioCD.ReplayGain then Cmd := GetCopyCommand + Cmd;
+  BurnList.Free;
+  CopyList.Free;
+  Result := Cmd;
 end;
 
 { CleanUp ----------------------------------------------------------------------

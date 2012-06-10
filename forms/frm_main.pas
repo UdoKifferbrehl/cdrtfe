@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.06.2012
+  letzte Änderung  10.06.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3970,7 +3970,8 @@ procedure TCdrtfeMainForm.CheckControls;
   {Schreiben auf mehrere Brenner nicht bei allen Projekten}
   procedure CheckAllowMultipleWriter;
   begin
-    if (FSettings.General.Choice = cCDRW) or
+    if (FSettings.General.Choice = cAudioCD) or
+       (FSettings.General.Choice = cCDRW) or
        (FSettings.General.Choice = cCDImage) then
       FDevices.AllowMultipleWriter := True
     else
