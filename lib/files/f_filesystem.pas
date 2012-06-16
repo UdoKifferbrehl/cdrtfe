@@ -1,9 +1,9 @@
 { f_filesystem.pas: Dateisystemfunktionen
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  24.04.2011
+6  letzte Änderung  16.04.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,6 +21,7 @@
     * Infos über Laufwerke (Name, Dateisystem, Seriennummer, ...)
     * Zugriff auf Datei prüfen
     * Dateiversion
+    * Ziel einer Verknüpfung
 
 
   exportierte Funktionen/Prozeduren:
@@ -43,6 +44,7 @@
     GetFreeSpaceDisk(Drive: string): Int64
     GetLastDirFromPath(Path: string; const Delimiter: Char):string
     GetShellFolder(ID: Integer): string
+    GetShellLinkTarget(const LinkName: string): string
     GetVolumeInfo(var VolInfo: TVolumeInfo)
     IsUNCPath(const Path: string): Boolean
     MakeFileNameValid(Name: string): string
@@ -56,7 +58,7 @@ unit f_filesystem;
 interface
 
 uses Forms, Windows, Classes, SysUtils, ShlObj, ShellAPI, FileCtrl, ActiveX,
-     Registry;
+     Registry, JclShell;
 
 const {IDs für spezielle Ordner}
       CSIDL_DESKTOP              = $0000;
@@ -96,6 +98,7 @@ function GetFileVersionNumbers(const Filename: string; var V1, V2, V3, V4: Word)
 function GetFileVersionString(const FileName: string): string;
 function GetFreeSpaceDisk(Drive: string): Int64;
 function GetShellFolder(ID: Integer): string;
+function GetShellLinkTarget(const LinkName: string): string;
 function GetLastDirFromPath(Path: string; const Delimiter: Char):string;
 function IsUNCPath(const Path: string): Boolean;
 function MakeFileNameValid(Name: string): string;
@@ -653,6 +656,22 @@ begin
   end;
   if WmDrpFiles then DragFinish(Handle);
   List.Sort;
+end;
+
+{ GetShellLinkTarget -----------------------------------------------------------
+
+  ermittelt das Ziel einer angegebenen Verknüfung. Im Fehlerfalle wird ein
+  leerer String zurückgegeben.                                                 }
+
+function GetShellLinkTarget(const LinkName: string): string;
+var ShellLink: TShellLink;
+begin
+  ShellLink.IdList := nil;
+  if ShellLinkResolve(LinkName, ShellLink) = S_OK then
+    Result := ShellLink.Target
+  else
+    Result := '';
+  ShellLinkFree(ShellLink);
 end;
 
 end.
