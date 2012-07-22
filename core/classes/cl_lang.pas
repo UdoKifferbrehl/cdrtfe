@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.06.2012
+  letzte Änderung  21.07.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -73,6 +73,7 @@ type TLangChangeEvent = procedure of object;
      public
        constructor Create;
        destructor Destroy; override;
+       function GCS(const id: string): string;
        function GMS(const id: string): string;
        function SelectLanguage: Boolean;
        procedure CreateLangSubMenu(MenuItem: TMenuItem);
@@ -636,10 +637,22 @@ begin
   inherited Destroy;
 end;
 
+{ GCS --------------------------------------------------------------------------
+
+  GMS (GetComponentString) ermöglicht den Zugriff auf einzelne Strings aus der
+  StringList ComponentStrings über die zugehörige ID.                             }
+
+function TLang.GCS(const id: string): string;
+const CRLF = #13#10;
+begin
+  Result := FComponentStrings.Values[id];
+  Result := ReplaceString(Result, '\n', CRLF);
+end;
+
 { GMS --------------------------------------------------------------------------
 
   GMS (GetMessageString) ermöglicht den Zugriff auf einzelne Strings aus der
-  StringList MessageString über die zugehörige ID.                             }
+  StringList MessageStrings über die zugehörige ID.                             }
 
 function TLang.GMS(const id: string): string;
 const CRLF = #13#10;
