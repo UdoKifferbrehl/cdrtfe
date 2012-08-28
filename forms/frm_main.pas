@@ -500,6 +500,7 @@ type
     FFileListModified   : Boolean;
     FSelectedDevice     : string;
     FLVArray: array[0..cLVCount] of TListView;
+    FInitDone           : Boolean;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
     function GetCurrentTreeView: TTreeView;
@@ -673,11 +674,14 @@ procedure TCdrtfeMainForm.WMCopyData(var Msg: TWMCopyData);
 var temp: PChar;
     FolderAdded: Boolean;
 begin
-  temp := Msg.CopyDataStruct.lpData;
-  AddToPathList(string(temp));
-  {Flag setzen, wenn Order hinzugefügt wurde}
-  FolderAdded := DirectoryExists(string(temp));
-  AddToPathlistSort(FolderAdded);
+  if FInitDone then
+  begin
+    temp := Msg.CopyDataStruct.lpData;
+    AddToPathList(string(temp));
+    {Flag setzen, wenn Order hinzugefügt wurde}
+    FolderAdded := DirectoryExists(string(temp));
+    AddToPathlistSort(FolderAdded);
+  end;
 end;
 
 { WMDROPFILES ------------------------------------------------------------------
@@ -891,33 +895,36 @@ end;
 
 procedure TCdrtfeMainForm.WMActivateDataTab(var Msg: TMessage);
 begin
-  ActivateTab(cDataCD);
+  if FInitDone then ActivateTab(cDataCD);
 end;
 
 procedure TCdrtfeMainForm.WMActivateAudioTab(var Msg: TMessage);
 begin
-  ActivateTab(cAudioCD);
+  if FInitDone then ActivateTab(cAudioCD);
 end;
 
 procedure TCdrtfeMainForm.WMActivateXcdTab(var Msg: TMessage);
 begin
-  ActivateTab(cXCD);
+  if FInitDone then ActivateTab(cXCD);
 end;
 
 procedure TCdrtfeMainForm.WMActivateVcdTab(var Msg: TMessage);
 begin
-  ActivateTab(cVideoCD);
+  if FInitDone then ActivateTab(cVideoCD);
 end;
 
 procedure TCdrtfeMainForm.WMActivateImgTab(var Msg: TMessage);
 begin
-  ActivateTab(cCDImage);
-  RadioButtonImageWrite.Checked := True;
+  if FInitDone then
+  begin
+    ActivateTab(cCDImage);
+    RadioButtonImageWrite.Checked := True;
+  end;
 end;
 
 procedure TCdrtfeMainForm.WMActivateDVDTab(var Msg: TMessage);
 begin
-  ActivateTab(cDVDVideo);
+  if FInitDone then ActivateTab(cDVDVideo);
 end;
 
 { WMUpdateGauges ---------------------------------------------------------------
@@ -927,7 +934,7 @@ end;
 
 procedure TCdrtfeMainForm.WMUpdateGauges(var Msg: TMessage);
 begin
-  UpdateGauges;
+  if FInitDone then UpdateGauges;
 end;
 
 { WMExecute --------------------------------------------------------------------
@@ -936,8 +943,11 @@ end;
 
 procedure TCdrtfeMainForm.WMExecute(var Msg: TMessage);
 begin
-  FSettings.CmdLineFlags.ExecuteProject := True;
-  Self.Activate;
+  if FInitDone then
+  begin
+    FSettings.CmdLineFlags.ExecuteProject := True;
+    Self.Activate;
+  end;
 end;
 
 { WMExitAfterExecute -----------------------------------------------------------
@@ -966,7 +976,7 @@ end;
 
 procedure TCdrtfeMainForm.WMCheckDataFS(var Msg: TMessage);
 begin
-  CheckDataCDFS(False);
+  if FInitDone then CheckDataCDFS(False);
 end;
 
 { WMMinimize -------------------------------------------------------------------
@@ -4591,6 +4601,7 @@ procedure TCdrtfeMainForm.FormCreate(Sender: TObject);
 var DummyHandle: HWND;
     TempChoice : Byte;
 begin
+  FInitDone := False;
   {Fix für Win7-Vista-Alt-Bug}
   TVistaAltFix.Create(Self);
   FImageTabFirstShow   := True;
@@ -4750,6 +4761,7 @@ begin
       FormShow(Self);
       FormActivate(Self);
     end;
+    FInitDone := True;
   end else
   begin {es gibt eine weitere Instanz}
     {verhindern, daß diese Instanz angezeigt wird}
