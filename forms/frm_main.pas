@@ -5,7 +5,7 @@
   Copyright (c) 2004-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.06.2012
+  letzte Änderung  31.08.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -5778,7 +5778,7 @@ begin
   FSettings.CDRW.OpenSession  := False;
   FSettings.CDRW.BlankSession := False;
   FAction.Action := cCDRW;
-  FAction.StartAction;
+  if FSelectedDevice <> 'mult' then FAction.StartAction;
 end;
 
 { DoMenuShowInfo ---------------------------------------------------------------
@@ -5814,7 +5814,7 @@ begin
     end;
   end;
   FAction.Action := cCDInfos;
-  FAction.StartAction;
+  if (FSelectedDevice <> 'mult') or (ID = 0) then FAction.StartAction;
   if not FLogWindowShowing then ToggleLogWindow(True);  
 end;
 
@@ -6653,7 +6653,7 @@ begin
                                       FSettings.General.TabSheetDrive[
                                         FSettings.General.Choice]]];
   FAction.Action := cFixCD;
-  FAction.StartAction;
+  if FSelectedDevice <> 'mult' then FAction.StartAction;
 end;
 
 
