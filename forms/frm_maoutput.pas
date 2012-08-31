@@ -5,7 +5,7 @@
 
   Copyright (c) 2012 Oliver Valencia
 
-  letzte Änderung  21.07.2012
+  letzte Änderung  31.08.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -235,13 +235,17 @@ end;
   sind, aber in FormCreate noch nicht ausgeführt werden können.                }
 
 procedure TFormMAOutput.FormShow(Sender: TObject);
+var Temp: string;
 begin
   SetFont(Self);
   FLang.SetFormLang(Self);
   {Button caption aus CdrtfeMainForm übernehmen}
-  ButtonStart.Caption := FLang.GCS('CdrtfeMainForm.ButtonStart.Caption');
-  ButtonAbort.Caption := FLang.GCS('CdrtfeMainForm.ButtonAbort.Caption');
-  ButtonCancel.Caption := FLang.GCS('CdrtfeMainForm.ButtonCancel.Caption');
+  Temp := FLang.GCS('CdrtfeMainForm.ButtonStart.Caption');
+  if Temp <> '' then ButtonStart.Caption := Temp;
+  Temp := FLang.GCS('CdrtfeMainForm.ButtonAbort.Caption');
+  if Temp <> '' then ButtonAbort.Caption := Temp;
+  Temp := FLang.GCS('CdrtfeMainForm.ButtonCancel.Caption');
+  if Temp <> '' then ButtonCancel.Caption := Temp;
   {Banner}
   FrameTopBanner1.Init(Self.Caption, ''{FLang.GMS('desc01')}, 'grad1');
 //  {falls vorhanden, alte Größe und Position wiederherstellen}
