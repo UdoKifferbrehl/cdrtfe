@@ -5,7 +5,7 @@
   Copyright (c) 2005-2012 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  13.05.2012
+  letzte Änderung  20.10.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -501,7 +501,7 @@ begin
   for i := 0 to (DeviceList.Count - 1) do
   begin
     {SCSI-ID extrahieren}
-    Dev := Copy(DeviceList.Strings[i], 0, 5);
+    Dev := Copy(DeviceList.Strings[i], 0, Pos(#9, DeviceList.Strings[i]) - 1);
     if FUseRSCSI  then Dev := FRSCSIHost + Dev;
     CommandLine := StartUpDir + cCdrecordBin;
     CommandLine := QuotePath(CommandLine);
