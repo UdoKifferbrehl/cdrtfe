@@ -2,9 +2,9 @@
 
   cl_logwindow.pas: Singleton für einfachen Zugriff auf das Ausgabefenster
 
-  Copyright (c) 2006-2010 Oliver Valencia
+  Copyright (c) 2006-2012 Oliver Valencia
 
-  letzte Änderung  26.12.2010
+  letzte Änderung  23.11.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -122,10 +122,20 @@ uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
 {$IFDEF Win7Comp}
 procedure TLogWin.TaskBarProgressIndicatorInit;
 begin
-  FTaskBarProgressIndicator := TdwTaskbarProgressIndicator.Create(nil);
-  FTaskBarProgressIndicator.Min := 0;
-  FTaskBarProgressIndicator.Max := 100;
-  FTaskBarProgressIndicator.ShowInTaskbar := False;
+  {Unter Windows7 PE könnte dies fehlschlagen, daher Exception abfanngen und
+   im Fehlerfalle auf nil setzten. Alle weiteren Zugriffe dürfen nur nach
+   Prüfung mit Assigned() stattfinden.}
+  try
+    FTaskBarProgressIndicator := TdwTaskbarProgressIndicator.Create(nil);
+  except
+    FTaskBarProgressIndicator := nil;
+  end;
+  if Assigned(FTaskBarProgressIndicator) then
+  begin
+    FTaskBarProgressIndicator.Min := 0;
+    FTaskBarProgressIndicator.Max := 100;
+    FTaskBarProgressIndicator.ShowInTaskbar := False;
+  end;
 end;
 {$ENDIF}
 
