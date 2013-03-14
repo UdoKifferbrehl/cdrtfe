@@ -2,10 +2,10 @@
 
   cl_action_datacd.pas: Daten-Disk
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  10.03.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -106,6 +106,7 @@ var i              : Integer;
     CmdC, CmdM,
     CmdOnTheFly,
     CmdFormat      : string;
+    MSOptions      : string;
     FHPathList,
     FHShCmd        : TextFile;
     CMArgs         : TCheckMediumArgs;
@@ -289,10 +290,20 @@ begin
     CmdM := CmdM + ' -path-list '
                  + QuotePath(MakePathConform(PathListName));
     if FSplitOutput then CmdM := CmdM + ' -split-output';
+    {Multisession-Optionen für mkisofs}
+    MSOptions := '';
+    if Multi then
+    begin
+      if FDisk.MsInfo <> '' then
+      begin
+        MSOptions := MSOptions + ' -cdrecord-params '  + FDisk.MsInfo;
+        if ContinueCD then MSOptions := MSOptions + ' -dev ' + SCSIIF(Device);
+      end;
+    end;
     {Anzahl der benötigten Sektoren ermitteln}
     if not (FDisk.DiskType in [DT_None, DT_ManualNone]) then
     begin
-      CMArgs.SectorsNeededS := GetSectorNumber(CmdM);
+      CMArgs.SectorsNeededS := GetSectorNumber(CmdM + MSOptions);
       CMArgs.SectorsNeededI := StrToIntDef(CMArgs.SectorsNeededS, -1);
       {Wenn TAO, kommen am Ende noch 2 Sektoren dazu.}
       CMArgs.TaoEndSecCount := Integer(FSettings.DataCD.TAO) * 2;
@@ -312,11 +323,7 @@ begin
      dürfen diese Parameter nicht verwendet werden.}
     if Multi and not CMArgs.ForcedContinue then
     begin
-      if ContinueCD  then CmdM := CmdM + ' -cdrecord-params ' + FDisk.MsInfo
-                                       + ' -prev-session ' + SCSIIF(Device);
-      if not ContinueCD and (FDisk.MsInfo <> '') then
-                          CmdM := CmdM + ' -cdrecord-params '  + FDisk.MsInfo;
-
+      CmdM := CmdM + MSOptions;
     end;
     {cdrecord-Kommandozeile zusammenstellen}
     CmdC := ' gracetime=5 dev=' + SCSIIF(Device);
