@@ -1,6 +1,6 @@
 { spti.pas: SPTI and IOCTL definitions
 
-  letzte Änderung  05.01.2010
+  letzte Änderung  04.01.2012
 
 }
 
@@ -86,6 +86,50 @@ type SCSI_PASS_THROUGH = record
 
      PSCSI_ADAPTER_BUS_INFO = ^SCSI_ADAPTER_BUS_INFO;
 
+     STORAGE_QUERY_TYPE = (PropertyStandardQuery = 0,
+                           PropertyExistsQuery,
+                           PropertyMaskQuery,
+                           PropertyQueryMaxDefined);
+
+     STORAGE_PROPERTY_ID = (StorageDeviceProperty = 0,
+                            StorageAdapterProperty);
+
+     STORAGE_PROPERTY_QUERY = packed record
+       PropertyId          : STORAGE_PROPERTY_ID;
+       QueryType           : STORAGE_QUERY_TYPE;
+       AdditionalParameters: array[0..9] of AnsiChar;
+     end;
+
+     STORAGE_BUS_TYPE = (BusTypeUnknown = 0,
+                         BusTypeScsi,
+                         BusTypeAtapi,
+                         BusTypeAta,
+                         BusType1394,
+                         BusTypeSsa,
+                         BusTypeFibre,
+                         BusTypeUsb,
+                         BusTypeRAID,
+                         BusTypeiScsi,
+                         BusTypeSas,
+                         BusTypeSata,
+                         BusTypeMaxReserved = $7F);
+
+     STORAGE_DEVICE_DESCRIPTOR = packed record
+       Version              : DWORD;
+       Size                 : DWORD;
+       DeviceType           : Byte;
+       DeviceTypeModifier   : Byte;
+       RemovableMedia       : Boolean;
+       CommandQueueing      : Boolean;
+       VendorIdOffset       : DWORD;
+       ProductIdOffset      : DWORD;
+       ProductRevisionOffset: DWORD;
+       SerialNumberOffset   : DWORD;
+       BusType              : STORAGE_BUS_TYPE;
+       RawPropertiesLength  : DWORD;
+       RawDeviceProperties  : array[0..0] of AnsiChar;
+     end;
+
 
 { Konstanten-Deklaration ----------------------------------------------------- }
 
@@ -116,6 +160,7 @@ const { Method constants ----------------------------------------------------- }
       IOCTL_SCSI_GET_CAPABILITIES = $41010;
       IOCTL_SCSI_PASS_THROUGH_DIRECT = $4D014;
       IOCTL_SCSI_GET_ADDRESS = $41018;
+      IOCTL_STORAGE_QUERY_PROPERTY = $002D1400;
 
 implementation
 

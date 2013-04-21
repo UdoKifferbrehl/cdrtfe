@@ -1,10 +1,10 @@
 { cl_deviceenum.pas: Implementierung eines einfachen SCSI-Device-Enumerators
 
-  Copyright (c) 2004-2005, 2007-2010 Oliver Valencia
+  Copyright (c) 2004-2005, 2007-2012 Oliver Valencia
 
-  Version          1.3
+  Version          1.4
   erstellt         23.11.2004
-  letzte Änderung  10.09.2010
+  letzte Änderung  05.12.2012
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -460,18 +460,22 @@ end;
   SPTIGetDriveInformation ermittelt Informationen über ein Laufwerk.           }
 
 function TSCSIDevices.SPTIGetDriveInformation(var CurrDev: DeviceInfo): Boolean;
-var FH         : THandle;
-    DriveName  : array[0..31] of char;
-    Buffer     : array[0..1023] of char;
-    inqData    : array[0..99] of char;
-    Ok         : Bool;
-    PSWB       : PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER;
-    pscsiAddr  : PSCSI_ADDRESS;
-    Length     : Integer;
-    Returned   : Cardinal;
-    dwFlags    : Cardinal;
-    DriveString: PChar;
-    s          : string;
+var FH          : THandle;
+    DriveName   : array[0..31] of char;
+    Buffer      : array[0..1023] of char;
+    inqData     : array[0..99] of char;
+    SPQuery     : STORAGE_PROPERTY_QUERY;
+    SDD         : STORAGE_DEVICE_DESCRIPTOR absolute Buffer;
+    BusType     : STORAGE_BUS_TYPE;
+    Ok          : Bool;
+    PSWB        : PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER;
+    pscsiAddr   : PSCSI_ADDRESS;
+    Length      : Integer;
+    Returned    : Cardinal;
+    dwFlags     : Cardinal;
+    dwAccessMode: Cardinal;
+    DriveString : PChar;
+    s           : string;
 begin
   Result := True;
   {$IFDEF EnableLogging}
@@ -479,10 +483,15 @@ begin
                   [CurrDev.DriveLetter]));
   {$ENDIF}
   dwFlags := GENERIC_READ;
-  if PlatformWin2kXP then dwFlags := dwFlags or GENERIC_WRITE;
+  dwAccessMode := FILE_SHARE_READ;
+  if PlatformWin2kXP then
+  begin
+    dwFlags := dwFlags or GENERIC_WRITE;
+    dwAccessMode := dwAccessMode or FILE_SHARE_WRITE;
+  end;
   {Dateinamen zusammenstellen und Datei öffnen}
   StrPCopy(@DriveName, Format( '\\.\%s:', [CurrDev.DriveLetter]));
-  FH := CreateFile(DriveName, dwFlags, FILE_SHARE_READ, nil, OPEN_EXISTING,
+  FH := CreateFile(DriveName, dwFlags, dwAccessMode, nil, OPEN_EXISTING,
                    0, 0);
   if FH <> INVALID_HANDLE_VALUE then
   begin
@@ -521,49 +530,51 @@ begin
       CurrDev.Name       := Trim(CurrDev.Vendor) + ' ' +
                             Trim(CurrDev.ProductID); { + ' ' +
                             Trim(CurrDev.Revision);   }
-      {Adresse (path/tgt/lun) des Laufwerks mit IOCTL_SCSI_GET_ADDRESS}
+      {Bustype des Laufwerks ermitteln}
       ZeroMemory(@Buffer, 1024);
-      pscsiAddr         := PSCSI_ADDRESS(@Buffer);
-      pscsiAddr^.Length := SizeOf(SCSI_ADDRESS);
-      if DeviceIoControl(FH, IOCTL_SCSI_GET_ADDRESS, nil, 0,
-                         pscsiAddr, SizeOf(SCSI_ADDRESS), Returned, nil) then
+      FillChar(SPQuery, SizeOf(SPQuery), 0);
+      SDD.Size := SizeOf(Buffer);
+      SPQuery.PropertyId := StorageDeviceProperty;
+      SPQuery.QueryType := PropertyStandardQuery;
+      if DeviceIoControl(FH, IOCTL_STORAGE_QUERY_PROPERTY,
+                         @SPQuery, SizeOf(SPQuery), @Buffer, SizeOf(Buffer),
+                         Returned, nil) then
       begin
-        CurrDev.HA         := pscsiAddr^.PortNumber;
-        CurrDev.ID         := pscsiAddr^.TargetId;
-        CurrDev.LUN        := pscsiAddr^.Lun;
-        CurrDev.PathID     := pscsiAddr^.PathId;
-        CurrDev.PortNumber := pscsiAddr^.PortNumber;
-        Result := True;
+        BusType := SDD.BusType;
         {$IFDEF EnableLogging}
-        s := IntToStr(CurrDev.HA) + ',' +
-             IntToStr(CurrDev.ID) + ',' +
-             IntToStr(CurrDev.LUN);
-        FLog.Add('     Get SCSI address ... ok');
-        FLog.Add('       Device ID        : ' + s);
-        FLog.Add('       PathID           : ' + IntToStr(CurrDev.PathID));
-        FLog.Add('       PortNumber       : ' + IntToStr(CurrDev.PortNumber));
-        FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
-        FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
-        FLog.Add('       Device Revision  : ' + CurrDev.Revision);
-        FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
-       {$ENDIF}
+        FLog.Add('     Get bus type ... ok');
+        FLog.Add('       bus type         : ' + IntToStr(Ord(BusType)));
+        {$ENDIF}
       end else
       begin
-        // USB/FW drives:
-        if Windows.GetLastError = 50 then
+        BusType := BusTypeUnknown;
+        {$IFDEF EnableLogging}
+        FLog.Add('     Get bus type failed. Set to BusTypeUnknown.');
+        {$ENDIF}
+      end;
+      if not (BusType in [BusTypeUsb, BusType1394]) then
+      begin
+        {$IFDEF EnableLogging}
+        FLog.Add('     Drive is not an USB/FW device.');
+        {$ENDIF}
+        {Adresse (path/tgt/lun) des Laufwerks mit IOCTL_SCSI_GET_ADDRESS}
+        ZeroMemory(@Buffer, 1024);
+        pscsiAddr         := PSCSI_ADDRESS(@Buffer);
+        pscsiAddr^.Length := SizeOf(SCSI_ADDRESS);
+        if DeviceIoControl(FH, IOCTL_SCSI_GET_ADDRESS, nil, 0,
+                           pscsiAddr, SizeOf(SCSI_ADDRESS), Returned, nil) then
         begin
-          CurrDev.HA         := Ord(CurrDev.DriveLetter[1]) - 65;
-          CurrDev.ID         := 0;
-          CurrDev.LUN        := 0;
-          CurrDev.PathID     := 0;
-          CurrDev.PortNumber := CurrDev.HA + 64;
+          CurrDev.HA         := pscsiAddr^.PortNumber;
+          CurrDev.ID         := pscsiAddr^.TargetId;
+          CurrDev.LUN        := pscsiAddr^.Lun;
+          CurrDev.PathID     := pscsiAddr^.PathId;
+          CurrDev.PortNumber := pscsiAddr^.PortNumber;
+          Result := True;
           {$IFDEF EnableLogging}
           s := IntToStr(CurrDev.HA) + ',' +
                IntToStr(CurrDev.ID) + ',' +
                IntToStr(CurrDev.LUN);
-          FLog.Add('     Get SCSI address ... failed.');
-          FLog.Add('       Probably an USB/FW device.');
-          FLog.Add('       Set drive letter as ID.');
+          FLog.Add('     Get SCSI address ... ok');
           FLog.Add('       Device ID        : ' + s);
           FLog.Add('       PathID           : ' + IntToStr(CurrDev.PathID));
           FLog.Add('       PortNumber       : ' + IntToStr(CurrDev.PortNumber));
@@ -571,7 +582,7 @@ begin
           FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
           FLog.Add('       Device Revision  : ' + CurrDev.Revision);
           FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
-          {$ENDIF}
+         {$ENDIF}
         end else
         begin
           CurrDev.HA  := -1;
@@ -586,8 +597,30 @@ begin
          {$ENDIF}
           Result := False;
         end;
+        CloseHandle(FH);
+      end else
+      begin
+        CurrDev.HA         := Ord(CurrDev.DriveLetter[1]) - 65;
+        CurrDev.ID         := 0;
+        CurrDev.LUN        := 0;
+        CurrDev.PathID     := 0;
+        CurrDev.PortNumber := CurrDev.HA + 64;
+        {$IFDEF EnableLogging}
+        s := IntToStr(CurrDev.HA) + ',' +
+             IntToStr(CurrDev.ID) + ',' +
+             IntToStr(CurrDev.LUN);
+        FLog.Add('     Drive is an USB/FW device.');
+        FLog.Add('       Set drive letter as ID.');
+        FLog.Add('       Device ID        : ' + s);
+        FLog.Add('       PathID           : ' + IntToStr(CurrDev.PathID));
+        FLog.Add('       PortNumber       : ' + IntToStr(CurrDev.PortNumber));
+        FLog.Add('       Device Vendor    : ' + CurrDev.Vendor);
+        FLog.Add('       Device ProductID : ' + CurrDev.ProductID);
+        FLog.Add('       Device Revision  : ' + CurrDev.Revision);
+        FLog.Add('       Device VendorSpec: ' + CurrDev.VendorSpec + #13#10);
+        {$ENDIF}
+        CloseHandle(FH);
       end;
-      CloseHandle(FH);
     end else
     begin
       {$IFDEF EnableLogging}
@@ -782,7 +815,10 @@ begin
   {Alle SCSI-Busse und -Adapter ermitteln}
   SPTIDetectAdapters;
   {Laufwerksliste erstellen: (Festplatten und CD-Laufwerke)}
-  GetDriveList(DRIVE_CDROM, DriveList); // GetDriveList(DRIVE_FIXED, DriveList);
+  GetDriveList(DRIVE_CDROM, DriveList);
+  GetDriveList(DRIVE_FIXED, DriveList);
+  GetDriveList(DRIVE_REMOVABLE, DriveList);
+  DriveList.Sort;
   {für jedes Laufwerk Infos abrufen}
   for i := 0 to DriveList.Count - 1 do
   begin
