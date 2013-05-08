@@ -1,9 +1,9 @@
 { f_window.pas: Funktionnen für Fenster und Dialoge
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.12.2011
+  letzte Änderung  08.05.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,11 +29,12 @@ unit f_window;
 interface
 
 uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages, Dialogs, Classes,
-     MMSystem, StdCtrls, Graphics;
+     MMSystem, StdCtrls, Graphics, ExtCtrls;
 
 function FlagIsSet(const Mask, Flag: Longint): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
-function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound: Boolean): Integer; overload;
+function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound, Task: Boolean): Integer; overload;
+function ShowTimedMsgDlg(const Text, Caption: string; const Flags: Longint; const TimeOut, TimeOutResult: Integer): Integer;
 procedure SetButtonCaptions(const Ok, Cancel, Yes, No: string);
 procedure SetFont(Control: TWinControl);
 procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
@@ -41,6 +42,7 @@ procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 
 const MB_cdrtfeDlgEx	   = $01000000;
       MB_cdrtfeDlgSnd	   = $02000000;
+      MB_cdrtfeDlgTask   = $04000000;
       MB_cdrtfeDlgExSnd  = MB_cdrtfeDlgEx or MB_cdrtfeDlgSnd;
       MB_cdrtfeInfo      = MB_OK or MB_ICONINFORMATION or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
       MB_cdrtfeError     = MB_OK or MB_ICONSTOP or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
@@ -53,6 +55,15 @@ const MB_cdrtfeDlgEx	   = $01000000;
 implementation
 
 uses f_wininfo, c_frametopbanner;
+
+type TMsgTimer = class(TTimer)
+       Parent : TForm;
+       procedure TimedOut(Sender: TObject);
+     public
+       PCaption     : string;
+       TimeOut      : Integer;
+       TimeOutResult: Integer;
+     end;
 
 var StrNewOk, StrNewCancel, StrNewYes, StrNewNo: string;
 
@@ -137,6 +148,157 @@ begin
   end;
 end;
 
+{ GetMsgDlgProperties ----------------------------------------------------------
+
+  ermittelt aus den Flags die Eigenschaften des Dialogs.                       }
+
+procedure GetMsgDlgProperties(const Flags: Longint; var Sound, Task: Boolean;
+                              var DlgType: TMsgDlgType;
+                              var Buttons:TMsgDlgButtons);
+begin
+  Sound := FlagIsSet(Flags, MB_cdrtfeDlgSnd);
+  Task := FlagIsSet(Flags, MB_cdrtfeDlgTask);
+  case Flags and $000000F0 of
+    MB_ICONSTOP       : DlgType := mtError;
+    MB_ICONQUESTION   : DlgType := mtConfirmation;
+    MB_ICONWARNING    : DlgType := mtWarning;
+    MB_ICONINFORMATION: DlgType := mtInformation;
+  else
+    DlgType := mtCustom;
+  end;
+  case Flags and $0000000F of
+    MB_OK              : Buttons := [mbOK];
+    MB_OKCANCEL        : Buttons := mbOKCancel;
+    MB_ABORTRETRYIGNORE: Buttons := mbAbortRetryIgnore;
+    MB_YESNOCANCEL     : Buttons := mbYesNoCancel;
+    MB_YESNO           : Buttons := [mbYes, mbNo];
+    MB_RETRYCANCEL     : Buttons := [mbRetry, mbCancel];
+    MB_HELP            : Buttons := [mbHelp];
+  else
+    Buttons := [mbOK];
+  end;
+end;
+
+{ CreateMsgDlg -----------------------------------------------------------------
+
+  erzeugt mittels CreateMessageDialog einen Dialog mit den angegebenen
+  Eigenschaften.                                                               }
+
+function CreateMsgDlg(const Text, Caption: string;
+                      const DlgType: TMsgDlgType;
+                      const Buttons: TMsgDlgButtons;
+                      Sound, Task: Boolean): TForm;
+const BannerHeight = 33;
+var Dlg           : TForm;
+    FrameTopBanner: TFrameTopBanner;
+    Component     : TComponent;
+    Panel         : TPanel;
+    MessageLabel  : TStaticText;
+    i             : Integer;
+    ImageHeight   : Integer;
+    MessageHeight : Integer;
+    SoundString   : string;
+    BannerCap     : string;
+    BannerBG      : string;
+    DlgLabel      : TLabel;
+    DlgImage      : TImage;
+    
+begin
+  DlgLabel := nil;
+  DlgImage := nil;
+  ImageHeight := 0;
+  BannerBG := 'grad1';
+  case DlgType of
+    mtWarning     : begin
+                      SoundString := 'SystemExclamation';
+                      BannerBG := 'grad2';
+                    end;
+    mtError       : begin
+                      SoundString := 'SystemHand';
+                      BannerBG := 'grad3';
+                    end;
+    mtInformation : SoundString := 'SystemNotification';
+    mtConfirmation: SoundString := 'SystemQuestion';
+  else
+    SoundString := '';
+  end;
+  if SoundString = '' then Sound := False;
+  Dlg := CreateMessageDialog(Text, DlgType, Buttons);
+  try
+    Dlg.BorderStyle := bsSingle;
+    Dlg.BorderIcons := [biSystemMenu];
+    if Caption = '' then BannerCap := Dlg.Caption else BannerCap := Caption;
+    Dlg.Caption := Application.MainForm.Caption;
+    if Dlg.Caption = '' then Dlg.Caption := Application.Title;
+    {Komponenten nach unten verschieben}
+    Dlg.Height := Dlg.Height + BannerHeight;
+    for i := 0 to Dlg.ComponentCount - 1 do
+    begin
+      Component := Dlg.Components[i];
+      if Component is TWinControl then
+       (Component as TWinControl).Top :=
+         (Component as TWinControl).Top + BannerHeight;
+      if Component is TGraphicControl then
+       (Component as TGraphicControl).Top :=
+         (Component as TGraphicControl).Top + BannerHeight;
+      if Component is TGraphicControl then
+        if (Component as TGraphicControl) is TImage then
+          DlgImage := (Component as TGraphicControl) as TImage;
+      if Component is TLabel then
+        DlgLabel := Component as TLabel;
+    end;
+    {FrameTopBanner einfügen}
+    FrameTopBanner := TFrameTopBanner.Create(nil);
+    FrameTopBanner.Parent := Dlg;
+    FrameTopBanner.Top := 0;
+    FrameTopBanner.Left := 0;
+    FrameTopBanner.Width := Dlg.ClientWidth;
+    FrameTopBanner.Height := BannerHeight;
+    FrameTopBanner.Image2.Left := 0;
+    FrameTopBanner.Image2.Width := FrameTopBanner.ClientWidth;
+    FrameTopBanner.Init(BannerCap, '', BannerBG);
+    {Sound abspielen, Buttons übersetzen}
+    if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
+    TranslateMsgDlgButtons(Dlg);
+    {Workaround für Screenreader wie NVDA, kann manche Label nicht lesen}
+    DlgLabel.Visible := False;
+    MessageLabel := TStaticText.Create(Dlg);
+    MessageLabel.Parent := Dlg;
+    MessageLabel.Caption := Text;
+    MessageLabel.Top := DlgLabel.Top;
+    MessageLabel.Left :=DlgLabel.Left;
+    MessageLabel.Width := DlgLabel.Width;
+    MessageLabel.Height :=DlgLabel.Height;
+
+    {Vista-Taskdialog nachahmen - ein wenig ;-) }
+    if Task then
+    begin
+      Panel := TPanel.Create(nil);
+      Panel.Parent := Dlg;
+      Panel.Color := clWhite;
+      Panel.Top := FrameTopBanner.Height - 1;
+      Panel.Width := Dlg.ClientWidth;
+      Panel.BevelInner := bvNone;
+      Panel.BevelOuter := bvRaised;
+      if DlgImage <> nil then
+      begin
+        DlgImage.Parent := Panel;
+        DlgImage.Top := DlgImage.Top - BannerHeight;
+        ImageHeight := DlgImage.Top * 2 + DlgImage.Height;
+      end;
+      MessageLabel.Parent := Panel;
+      MessageLabel.Top := MessageLabel.Top - BannerHeight;
+      MessageHeight := MessageLabel.Top * 2 + MessageLabel.Height;
+      if ImageHeight > MessageHeight then
+        Panel.Height := ImageHeight
+      else
+        Panel.Height := MessageHeight;
+    end;
+  finally
+    Result := Dlg;
+  end;
+end;
+
 { ShowMsgDlg -------------------------------------------------------------------
 
   zeigt einen Dialog an. Verwendet Application.MessageBox.
@@ -153,6 +315,7 @@ end;
 
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer;
 var Sound  : Boolean;
+    Task   : Boolean;
     DlgType: TMsgDlgType;
     Buttons: TMsgDlgButtons;
 begin
@@ -161,27 +324,8 @@ begin
     Result := Application.MessageBox(PChar(Text), PChar(Caption), Flags);
   end else
   begin
-    Sound := FlagIsSet(Flags, MB_cdrtfeDlgSnd);
-    case Flags and $000000F0 of
-      MB_ICONSTOP       : DlgType := mtError;
-      MB_ICONQUESTION   : DlgType := mtConfirmation;
-      MB_ICONWARNING    : DlgType := mtWarning;
-      MB_ICONINFORMATION: DlgType := mtInformation;
-    else
-      DlgType := mtCustom;
-    end;
-    case Flags and $0000000F of
-      MB_OK              : Buttons := [mbOK];
-      MB_OKCANCEL        : Buttons := mbOKCancel;
-      MB_ABORTRETRYIGNORE: Buttons := mbAbortRetryIgnore;
-      MB_YESNOCANCEL     : Buttons := mbYesNoCancel;
-      MB_YESNO           : Buttons := [mbYes, mbNo];
-      MB_RETRYCANCEL     : Buttons := [mbRetry, mbCancel];
-      MB_HELP            : Buttons := [mbHelp];
-    else
-      Buttons := [mbOK];
-    end;
-    Result := ShowMsgDlg(Text, Caption, DlgType, Buttons, Sound);
+    GetMsgDlgProperties(Flags, Sound, Task, DlgType, Buttons);
+    Result := ShowMsgDlg(Text, Caption, DlgType, Buttons, Sound, Task);
   end;
 end;
 
@@ -201,85 +345,64 @@ end;
 function ShowMsgDlg(const Text, Caption: string;
                     const DlgType: TMsgDlgType;
                     const Buttons: TMsgDlgButtons;
-                    Sound: Boolean): Integer;
-const BannerHeight = 33;
-var Dlg           : TForm;
-    FrameTopBanner: TFrameTopBanner;
-    Component     : TComponent;
-    MessageLabel  : TStaticText;
-    i             : Integer;
-    SoundString   : string;
-    BannerCap     : string;
-    BannerBG      : string;
-    DlgLabel      : TLabel;
+                    Sound, Task: Boolean): Integer;
+var Dlg: TForm;
 begin
-  DlgLabel := nil;
-  BannerBG := 'grad1';
-  case DlgType of
-    mtWarning     : begin
-                      SoundString := 'SystemExclamation';
-                      BannerBG := 'grad2';
-                    end;
-    mtError       : begin
-                      SoundString := 'SystemHand';
-                      BannerBG := 'grad3';
-                    end;
-    mtInformation : SoundString := 'SystemNotification';
-    mtConfirmation: SoundString := 'SystemQuestion';
-  else
-    SoundString := '';
-  end;
-  if SoundString = '' then Sound := False;
-  Dlg := CreateMessageDialog(Text, DlgType, Buttons);
+  Dlg := CreateMsgDlg(Text, Caption, DlgType, Buttons, Sound, Task);
   try
-
-    Dlg.BorderStyle := bsSingle;
-    Dlg.BorderIcons := [biSystemMenu];
-    if Caption = '' then BannerCap := Dlg.Caption else BannerCap := Caption;
-    Dlg.Caption := Application.MainForm.Caption;
-    if Dlg.Caption = '' then Dlg.Caption := Application.Title;
-    Dlg.Height := Dlg.Height + BannerHeight;
-    for i := 0 to Dlg.ComponentCount - 1 do
-    begin
-      Component := Dlg.Components[i];
-      if Component is TWinControl then
-       (Component as TWinControl).Top :=
-         (Component as TWinControl).Top + BannerHeight;
-      if Component is TGraphicControl then
-       (Component as TGraphicControl).Top :=
-         (Component as TGraphicControl).Top + BannerHeight;
-      {Workaround für Screenreader wie NVDA, kann manche Label nicht lesen}
-      if Component is TLabel then
-      begin
-        DlgLabel := Component as TLabel;
-      end;
-
-    end;
-    FrameTopBanner := TFrameTopBanner.Create(nil);
-    FrameTopBanner.Parent := Dlg;
-    FrameTopBanner.Top := 0;
-    FrameTopBanner.Left := 0;
-    FrameTopBanner.Width := Dlg.ClientWidth;
-    FrameTopBanner.Height := BannerHeight;
-    FrameTopBanner.Image2.Left := 0;
-    FrameTopBanner.Image2.Width := FrameTopBanner.ClientWidth;
-    FrameTopBanner.Init(BannerCap, '', BannerBG);
-    if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
-    TranslateMsgDlgButtons(Dlg);
-    {Workaround für Screenreader wie NVDA, kann manche Label nicht lesen}
-    if DlgLabel <> nil then DlgLabel.Visible := False;
-    MessageLabel := TStaticText.Create(Dlg);
-    MessageLabel.Parent := Dlg;
-    MessageLabel.Caption := Text;
-    MessageLabel.Top := DlgLabel.Top;
-    MessageLabel.Left :=DlgLabel.Left;
-    MessageLabel.Width := DlgLabel.Width;
-    MessageLabel.Height :=DlgLabel.Height;
-
     Dlg.ShowModal;
     Result := Dlg.ModalResult
   finally
     Dlg.Release;
+  end;
+end;
+
+{ ShowTimedMsgDlg --------------------------------------------------------------
+
+  zeigt einen Dialog an. Wie ShowMsgDlg. Zusätzlich wird der Dialog nach einem
+  Timeout geschlossen. Ist immer vom Typ MB_cdrtfeDlgEx.                       }
+
+function ShowTimedMsgDlg(const Text, Caption: string;
+                         const Flags: Longint;
+                         const TimeOut, TimeOutResult: Integer): Integer;
+var Dlg    : TForm;
+    T      : TMsgTimer;
+    Sound  : Boolean;
+    Task   : Boolean;
+    DlgType: TMsgDlgType;
+    Buttons: TMsgDlgButtons;    
+begin
+  GetMsgDlgProperties(Flags, Sound, Task, DlgType, Buttons);
+  Dlg := CreateMsgDlg(Text, Caption, DlgType, Buttons, Sound, Task);
+
+  T := TMsgTimer.Create(Dlg);
+  T.Parent := Dlg;
+  T.PCaption := Dlg.Caption;
+  T.Parent.Caption := T.PCaption + ' (' + IntToStr(TimeOut) + ')';
+  T.Interval := 1000; // 1 Sekkunde
+  T.TimeOut := TimeOut;
+  T.TimeOutResult := TimeOutResult;
+  T.Enabled := True;
+  T.OnTimer := T.TimedOut;
+  try
+   Dlg.ShowModal;
+   Result := Dlg.ModalResult;
+  finally
+    Dlg.Release;
+    T.Free;
+  end;
+end;
+
+procedure TMsgTimer.TimedOut (Sender: TObject);
+begin
+  Dec(TimeOut);
+  if TimeOut = 0 then  
+  begin
+    if (Parent.ModalResult = 0) then // only if not yet set by button
+      Parent.ModalResult := TimeOutResult;
+  end else
+  begin
+    Parent.Caption := PCaption + ' (' + IntToStr(TimeOut) + ')';
   end;
 end;
 
