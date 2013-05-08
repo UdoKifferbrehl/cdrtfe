@@ -43,14 +43,14 @@ procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
 const MB_cdrtfeDlgEx	   = $01000000;
       MB_cdrtfeDlgSnd	   = $02000000;
       MB_cdrtfeDlgTask   = $04000000;
-      MB_cdrtfeDlgExSnd  = MB_cdrtfeDlgEx or MB_cdrtfeDlgSnd;
+      MB_cdrtfeDlgExSnd  = MB_cdrtfeDlgEx or MB_cdrtfeDlgSnd or MB_cdrtfeDlgTask;
       MB_cdrtfeInfo      = MB_OK or MB_ICONINFORMATION or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
       MB_cdrtfeError     = MB_OK or MB_ICONSTOP or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
       MB_cdrtfeWarning   = MB_OK or MB_ICONWARNING or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
       MB_cdrtfeWarningOC = MB_OKCANCEL or MB_ICONWARNING or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
       MB_cdrtfeWarningYN = MB_YESNO or MB_ICONWARNING or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
       MB_cdrtfeConfirm   = MB_OKCANCEL or MB_ICONQUESTION or MB_SYSTEMMODAL or MB_cdrtfeDlgExSnd;
-      MB_cdrtfeConfirmS  = MB_OKCANCEL or MB_ICONQUESTION or MB_SYSTEMMODAL or MB_cdrtfeDlgEx;
+      MB_cdrtfeConfirmS  = MB_OKCANCEL or MB_ICONQUESTION or MB_SYSTEMMODAL or MB_cdrtfeDlgEx or MB_cdrtfeDlgTask;
 
 implementation
 
@@ -275,11 +275,13 @@ begin
     begin
       Panel := TPanel.Create(nil);
       Panel.Parent := Dlg;
+      Panel.ParentBackground := false;
       Panel.Color := clWhite;
       Panel.Top := FrameTopBanner.Height - 1;
       Panel.Width := Dlg.ClientWidth;
+      Panel.BorderStyle := bsNone;
       Panel.BevelInner := bvNone;
-      Panel.BevelOuter := bvRaised;
+      Panel.BevelOuter := bvNone;
       if DlgImage <> nil then
       begin
         DlgImage.Parent := Panel;
