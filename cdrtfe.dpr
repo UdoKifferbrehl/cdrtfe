@@ -2,10 +2,10 @@
 
   cdrtfe.dpr: Hauptprogramm
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.09.2010
+  letzte Änderung  09.06.2013
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -155,8 +155,6 @@ uses
   f_system in 'lib\system\f_system.pas',
   cl_exceptionlog in 'import\exceptionlog\cl_exceptionlog.pas',
   frm_exceptdlg in 'import\exceptionlog\frm_exceptdlg.pas',
-  DropTarget in 'import\oledragdrop\DropTarget.pas',
-  DropSource in 'import\oledragdrop\DropSource.pas',
   c_spacemeter in 'import\spacemeter\c_spacemeter.pas',
   QProgBar in 'import\spacemeter\QProgBar.pas',
   w32waves in 'import\w32waves.pas',

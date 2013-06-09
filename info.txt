@@ -25,16 +25,14 @@ Credits
   JVCL portions are licensed from Project JEDI, the source code can
   be obtained from http://jvcl.sourceforge.net
 
-  Vampyre Imaging Library: © 2004-2007 Marek Mauder,
+  Vampyre Imaging Library: © 2004-2012 Marek Mauder,
   http://imaginglib.sourceforge.net/ 
 
   TQProgressBar (v 1.1) © 2004 by Olivier Touzot "QnnO". 
 
   Windows 7 Component Library by Daniel Wischnewski.
 
-  TDropFileTarget - Drag and Drop of files into an application - 
-  from Drag and Drop Component Suite. © 1997-2005 Angus Johnson &
-  Anders Melander. 
+  Drag and Drop Component Suite 5.2. © 1997-2010 Anders Melander.
 
   W32waves.pas - Unit for accessing Windows PCM wave file 
   information - by Ulli Conrad. 

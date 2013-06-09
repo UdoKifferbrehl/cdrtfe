@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.08.2012
+  letzte Änderung  09.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -26,7 +26,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
-     DropTarget, DropSource, VistaAltFixUnit,
+     {DropTarget, DropSource,} DragDrop, DragDropFile, VistaAltFixUnit,
      c_filebrowser,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
@@ -1038,8 +1038,12 @@ end;
 
 procedure TCdrtfeMainForm.FreeDropTargets;
 begin
-  DropFileTargetCDETreeView.UnregisterAll;
-  DropFileTargetXCDETreeView.UnregisterAll;  
+  // DropFileTargetCDETreeView.UnregisterAll;
+  // DropFileTargetXCDETreeView.UnregisterAll;
+  DropFileTargetCDETreeView.Unregister(CDETreeView);
+  DropFileTargetXCDETreeView.Unregister(XCDETreeView);
+  DropFileTargetCDETreeView.Free;
+  DropFileTargetXCDETreeView.Free;
 end;
 
 { DropFileTargetTreeView-Events ---------------------------------------------- }
