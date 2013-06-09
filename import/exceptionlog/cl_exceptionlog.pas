@@ -21,7 +21,7 @@
   Get call stack and other information when an exception occurs. Based on the
   JEDI Code Library (JCL).
 
-  Last modified: 2010/06/11
+  Last modified: 09.06.2013
 
 }
 
@@ -59,7 +59,7 @@ var ExceptionLogClass: TExceptionLogClass = TExceptionLog;
 
 implementation
 
-uses JclHookExcept, JclSysUtils, JclFileUtils, JclStrings, JclPeImage,
+uses JclHookExcept, JclSysUtils, JclFileUtils, JclStrings, JclPeImage, JclWin32,
      JclSysinfo,
      frm_exceptdlg;
 
@@ -257,7 +257,7 @@ procedure TExceptionLog.CreateReport;
       i           : Integer;
       ModuleName  : TFileName;
       ModuleBase  : Cardinal;
-      NtHeaders   : PImageNtHeaders;
+      NtHeaders   : PImageNtHeaders32;
       ImageBaseStr: string;
   begin
     SL := TStringList.Create;
@@ -271,7 +271,7 @@ procedure TExceptionLog.CreateReport;
           ModuleName := SL[i];
           ModuleBase := Cardinal(SL.Objects[I]);
           FReport.Add(Format('[%.8x] %s', [ModuleBase, ModuleName]));
-          NtHeaders := PeMapImgNtHeaders(Pointer(ModuleBase));
+          NtHeaders := PeMapImgNtHeaders32(Pointer(ModuleBase));
           if (NtHeaders <> nil) and
              (NtHeaders^.OptionalHeader.ImageBase <> ModuleBase) then
             ImageBaseStr := Format('<%.8x> ',
@@ -344,8 +344,8 @@ procedure TExceptionLog.CreateReport;
     begin
       for i := 0 to StackList.Count - 1 do
       begin
-        GetLocationInfo(StackList.Items[i].CallerAdr, StackInfo);
-        s := IntToHex(Integer(StackList.Items[i].CallerAdr), 8) + '|';
+        GetLocationInfo(StackList.Items[i].CallerAddr, StackInfo);
+        s := IntToHex(Integer(StackList.Items[i].CallerAddr), 8) + '|';
         s := s + '$' + Format('%.3x', [StackInfo.OffsetFromProcName]) + '|';
         s := s + StackInfo.ProcedureName + '|';
         s := s + ExtractFileName(StackInfo.SourceName) + '|';
