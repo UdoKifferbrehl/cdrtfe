@@ -2,9 +2,9 @@
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
 
-  letzte Änderung  20.11.2010
+  letzte Änderung  15.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,10 +52,18 @@
 {$IFDEF Delphi6Up}
   {$DEFINE UseImagingLib}
 {$ENDIF}
-
          // Für die Darstellung von jpeg-Dateien nicht Borlands jpeg.pas ver-
          // wenden, sondern die Routinen von ImagingLib
          //    - betrifft: frm_splash_screen.pas, frm_about.pas
+
+
+(* ------------------------------------------------------ Virtual Shell Tools *)
+
+{$IFDEF Delphi7Up}
+  {$DEFINE xUseVirtualShellTools}
+{$ENDIF}
+         // Verwendet zur Darstellung der Exploreransichten die Virtual Shell
+         // Tools anstelle der Delphi Shell Controls
 
 
 (* -------------------------------------------- expliziter Hinweis auf Fehler *)

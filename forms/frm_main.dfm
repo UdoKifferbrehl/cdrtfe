@@ -131,10 +131,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet1: TTabSheet
       HelpContext = 1300
       Caption = 'Daten-Disk'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         768
         317)
@@ -2012,7 +2008,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Height = 21
     Style = csDropDownList
     Anchors = [akTop, akRight]
-    ItemHeight = 0
+    ItemHeight = 13
     PopupMenu = MiscPopupMenu
     TabOrder = 9
     OnChange = ComboBoxChange

@@ -5,7 +5,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.06.2013
+  letzte Änderung  15.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -21,12 +21,17 @@ interface
 
 uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      StdCtrls, ComCtrls, ExtCtrls, ShellAPI, Menus, FileCtrl, CommCtrl, Buttons,
-     ActnList, ShellCtrls, Clipbrd, ToolWin,
+     ActnList, Clipbrd, ToolWin,
+     {$IFDEF UseVirtualShellTools}
+     VirtualExplorerTree, VirtualTrees,
+     {$ELSE}
+     ShellCtrls,
+     {$ENDIF}
      {$IFDEF Delphi2005Up}
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
-     {DropTarget, DropSource,} DragDrop, DragDropFile, VistaAltFixUnit,
+     DragDrop, DragDropFile, VistaAltFixUnit,
      c_filebrowser,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
@@ -472,8 +477,8 @@ type
     {$IFDEF ShowCmdError}
     FExitCode: Integer;
     {$ENDIF}
-    DropFileTargetCDETreeView: TDropFileTarget;
-    DropFileTargetXCDETreeView: TDropFileTarget;
+    DropFileTargetTreeView: TDropFileTarget;
+    DropFileTargetListView: TDropFileTarget;
     SpaceMeter: TSpaceMeter;
     FileBrowser: TFrameFileBrowser;
     StayOnTopState: Boolean;
@@ -509,6 +514,9 @@ type
     procedure ActivateTab(const PageToActivate: Byte);
     procedure AddFromClipboard;
     procedure AddListToPathList(List: TStringList);
+    {$IFDEF UseVirtualShellTools}
+    procedure AddSelectedFilesFromFileBrowser(Source: TObject);
+    {$ENDIF}
     procedure AddToPathList(const Filename: string);
     procedure AddToPathListSort(const FolderAdded: Boolean);
     procedure AddItemToListView(const Item: string; ListView: TListView);
@@ -612,6 +620,7 @@ type
     procedure DropFileTargetTreeViewDragOver(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     procedure DropFileTargetTreeViewLeave(Sender: TObject);
+    procedure DropFileTargetListViewDrop(Sender: TObject; ShiftState: TShiftState; Point: TPoint; var Effect: Integer);
     {ActionList/Actions}
     procedure InitActions;
     procedure ActionUserAddFileExecute(Sender: TObject);
@@ -1017,19 +1026,24 @@ end;
 procedure TCdrtfeMainForm.InitDropTargets;
 begin
   {CDETreeView}
-  DropFileTargetCDETreeView := TDropFileTarget.Create(Self);
-  DropFileTargetCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
-  DropFileTargetCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
-  DropFileTargetCDETreeView.OnLeave := DropFileTargetTreeViewLeave;
-  DropFileTargetCDETreeView.Dragtypes := [dtCopy];
-  DropFileTargetCDETreeView.Register(CDETreeView);
-  {XCDETreeView}
-  DropFileTargetXCDETreeView := TDropFileTarget.Create(Self);
-  DropFileTargetXCDETreeView.OnDragOver := DropFileTargetTreeViewDragOver;
-  DropFileTargetXCDETreeView.OnDrop := DropFileTargetTreeViewDrop;
-  DropFileTargetXCDETreeView.OnLeave := DropFileTargetTreeViewLeave;
-  DropFileTargetXCDETreeView.Dragtypes := [dtCopy];
-  DropFileTargetXCDETreeView.Register(XCDETreeView);
+  DropFileTargetTreeView := TDropFileTarget.Create(Self);
+  DropFileTargetTreeView.OnDragOver := DropFileTargetTreeViewDragOver;
+  DropFileTargetTreeView.OnDrop := DropFileTargetTreeViewDrop;
+  DropFileTargetTreeView.OnLeave := DropFileTargetTreeViewLeave;
+  DropFileTargetTreeView.Dragtypes := [dtCopy];
+  DropFileTargetTreeView.MultiTarget := True;
+  DropFileTargetTreeView.Register(CDETreeView);
+  DropFileTargetTreeView.Register(XCDETreeView);
+  {ListViews}
+  DropFileTargetListView := TDropFileTarget.Create(Self);
+  DropFileTargetListView.OnDrop := DropFileTargetListViewDrop;
+  DropFileTargetListView.Dragtypes := [dtCopy];
+  DropFileTargetListView.MultiTarget := True;
+  DropFileTargetListView.Register(CDEListView);
+  DropFileTargetListView.Register(XCDEListView1);
+  DropFileTargetListView.Register(XCDEListView2);
+  DropFileTargetListView.Register(AudioListView);
+  DropFileTargetListView.Register(VideoListView);
 end;
 
 { FreeDropTargets --------------------------------------------------------------
@@ -1038,12 +1052,15 @@ end;
 
 procedure TCdrtfeMainForm.FreeDropTargets;
 begin
-  // DropFileTargetCDETreeView.UnregisterAll;
-  // DropFileTargetXCDETreeView.UnregisterAll;
-  DropFileTargetCDETreeView.Unregister(CDETreeView);
-  DropFileTargetXCDETreeView.Unregister(XCDETreeView);
-  DropFileTargetCDETreeView.Free;
-  DropFileTargetXCDETreeView.Free;
+  DropFileTargetTreeView.Unregister(CDETreeView);
+  DropFileTargetTreeView.Unregister(XCDETreeView);
+  DropFileTargetTreeView.Free;
+  DropFileTargetListView.Unregister(CDEListView);
+  DropFileTargetListView.Unregister(XCDEListView1);
+  DropFileTargetListView.Unregister(XCDEListView2);
+  DropFileTargetListView.Unregister(AudioListView);
+  DropFileTargetListView.Unregister(VideoListView);
+  DropFileTargetListView.Free;
 end;
 
 { DropFileTargetTreeView-Events ---------------------------------------------- }
@@ -1105,14 +1122,12 @@ var FolderAdded: Boolean;
     i          : Integer;
     FileName   : string;
     Tree       : TTreeView;
-    // OldNode    : TTreeNode;
 begin
   FolderAdded := False;
   Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
   {aktuellen Knoten bestimmen}
   Tree := ((Sender as TDropFileTarget).Target as TTreeView);;
   SelectRootIfNoneSelected(Tree);
-  // OldNode := Tree.Selected;
   if Tree.DropTarget <> nil then Tree.Selected := Tree.DropTarget;
   {Dateien hinzufügen}
   for i := 0 to (Sender as TDropFileTarget).Files.Count - 1 do
@@ -1135,6 +1150,36 @@ procedure TCdrtfeMainForm.DropFileTargetTreeViewLeave(Sender: TObject);
 begin
   CDETreeView.DropTarget := nil;
   XCDETreeView.DropTarget := nil;
+end;
+
+{ DropFileTargetListView-Events ---------------------------------------------- }
+
+ { DropFileTargetListViewDrop ---------------------------------------------------
+
+  regelt das Verhalten bei OLE-Drop-Ereignissen.                               }
+
+procedure TCdrtfeMainForm.DropFileTargetListViewDrop(Sender: TObject;
+                                            ShiftState: TShiftState;
+                                            Point: TPoint; var Effect: Integer);
+var FolderAdded: Boolean;
+    i          : Integer;
+    FileName   : string;
+begin
+  FolderAdded := False;
+  Self.StatusBar.Panels[0].Text := FLang.GMS('m116');
+  {Dateien hinzufügen}
+  for i := 0 to (Sender as TDropFileTarget).Files.Count - 1 do
+  begin
+    FileName := (Sender as TDropFileTarget).Files[i];
+    AddToPathList(FileName);
+    {Flag setzen, wenn Order hinzugefügt wurde}
+    if not FolderAdded then
+    begin
+      if DirectoryExists(FileName) then FolderAdded := True;
+    end;
+  end;
+  {Ordner sortieren}
+  AddToPathlistSort(FolderAdded);
 end;
 
 
@@ -1695,6 +1740,45 @@ begin
     end;
   end;
 end;
+
+{ AddSelectedFilesFromFileBrowser ----------------------------------------------
+
+  fügt die im FileBrowser ausgewählten Dateien und Ordner zum Projekt hinzu,
+  wenn die Aktion über F11 oder Alt-Einfg ausgelöst wurde. Wird nur genutzt,
+  wenn die VirtualShellTools verwendet werden.                                 }
+
+{$IFDEF UseVirtualShellTools}
+procedure TCdrtfeMainForm.AddSelectedFilesFromFileBrowser(Source: TObject);
+var Tree       : TVirtualExplorerTreeView;
+    List       : TVirtualExplorerListView;
+    FileName   : string;
+    i          : Integer;
+    FolderAdded: Boolean;
+begin
+  if (Source is TVirtualExplorerTreeView) then
+  begin
+    Tree := Source as TVirtualExplorerTreeView;
+    AddToPathlist(Tree.SelectedPath);
+    AddToPathListSort(True);
+  end else
+  if (Source is TVirtualExplorerListView) then
+  begin
+    FolderAdded := False;
+    List := Source as TVirtualExplorerListView;
+    for i := 0 to List.SelectedPaths.Count - 1 do
+    begin
+      FileName := List.SelectedPaths[i];
+      AddToPathlist(FileName);
+      {Flag setzen, wenn Order hinzugefügt wurde}
+      if not FolderAdded then
+      begin
+        if DirectoryExists(FileName) then FolderAdded := True;
+      end;
+    end;
+    AddToPathListSort(FolderAdded);
+  end;
+end;
+{$ENDIF}
 
 { AddListToPathList ------------------------------------------------------------
 
@@ -4290,7 +4374,10 @@ begin
   //SetDoubleBuffered(True);
   Application.Title := LowerCase(Application.Title);
   {Drag'n'Drop für dieses Fenster zulassen}
+  {$IFDEF UseVirtualShellTools}
+  {$ELSE}
   DragAcceptFiles(Self.Handle, true);
+  {$ENDIF}
   {Constraints für minimale Fenstergröße}
   if (Screen.PixelsPerInch <= 96) then
   begin
@@ -4451,6 +4538,9 @@ end;
 
 procedure TCdrtfeMainForm.FileBrowserSelected(Sender: TObject);
 begin
+  {$IFDEF UseVirtualShellTools}
+  AddSelectedFilesFromFileBrowser(Sender);
+  {$ELSE}
   case FSettings.General.Choice of
     cDataCD,
     cAudioCD,
@@ -4459,6 +4549,7 @@ begin
     cVideoCD : CDEListViewDragDrop(Sender, Sender, 0, 0);
     cXCD     : XCDEListView1DragDrop(Sender, Sender, 0, 0);
   end;
+  {$ENDIF}
 end;
 
 { LangChange -------------------------------------------------------------------
@@ -5935,8 +6026,12 @@ var Tree     : TTreeView;
 begin
   DoRepaint := False;
   Tree := (Sender as TTreeView);
+  {$IFDEF UseVirtualShellTools}
+  if (Source is TTreeView) or (Source is TListView) then
+  {$ELSE}
   if (Source is TTreeView) or (Source is TListView) or
      (Source is TShellTreeView) or (Source is TShellListView) then
+  {$ENDIF}
   begin
     Accept := True;
     {da THETreeView nicht mehr benutzt wird, muß hier gescrollt werden}
@@ -6001,11 +6096,15 @@ begin
     end;
   end;
   {FileExplorer -> TreeView}
+  {$IFDEF UseVirtualShellTools}
+  // wird nich benötig, da VirtualShellTools Ole-Drag-Drop nutzen
+  {$ELSE}
   if (Source is TShellTreeView) or (Source is TShellListView) then
   begin
     if DestNode <> nil then DestNode.Selected := True;
     CDEListViewDragDrop(Sender, Source, 0 ,0);
   end;
+  {$ENDIF}
 end;
 
 { TreeView: OnKeyDown ----------------------------------------------------------
@@ -6259,6 +6358,11 @@ end;
   entgegenmehmen von Dateien und Ordnern vom FileExplorer.                     }
 
 procedure TCdrtfeMainForm.CDEListViewDragDrop(Sender, Source: TObject; X, Y: Integer);
+{$IFDEF UseVirtualShellTools}
+begin
+  // nicht benötigt, da VirtualShellTools Ole-Drag-Drop verwenden
+end;
+{$ELSE}
 var Tree       : TShellTreeView;
     List       : TShellListView;
     Folder     : TShellFolder;
@@ -6293,6 +6397,7 @@ begin
     AddToPathListSort(FolderAdded);
   end;
 end;
+{$ENDIF}
 
 { ListViewDragOver -------------------------------------------------------------
 
@@ -6301,7 +6406,11 @@ end;
 procedure TCdrtfeMainForm.CDEListViewDragOver(Sender, Source: TObject; X, Y: Integer;
                                      State: TDragState; var Accept: Boolean);
 begin
+  {$IFDEF UseVirtualShellTools}
+  // nicht benötig, da VirtualShellTools Ole-Drag-Drop verwenden
+  {$ELSE}
   Accept := (Source is TShellListView) or (Source is TShellTreeView);
+  {$ENDIF}
 end;
 
 { XCDEListView1: OnDragDrop ----------------------------------------------------
@@ -6314,10 +6423,14 @@ var Path: string;
     i: Integer;
 begin
   Path := GetPathFromNode(XCDETreeView.Selected);
+  {$IFDEF UseVirtualShellTools}
+  // nicht benötigt, da VirtualShellTools Ole-Drag-Drop verwenden
+  {$ELSE}
   if (Source is TShellListView) or (Source is TShellTreeView) then
   begin
     CDEListViewDragDrop(Sender, Source, X, Y);
   end else
+  {$ENDIF}
   if {Form1 -> Form2}
      ((Source as TListView) = XCDEListView1) and
      ((Sender as TListView) = XCDEListView2) or
@@ -6346,8 +6459,12 @@ end;
 procedure TCdrtfeMainForm.XCDEListView1DragOver(Sender, Source: TObject; X, Y: Integer;
                                        State: TDragState; var Accept: Boolean);
 begin
+  {$IFDEF UseVirtualShellTools}
+  Accept := (Source is TListView);
+  {$ELSE}
   Accept := (Source is TShellListView) or (Source is TShellTreeView) or
             (Source is TListView);
+  {$ENDIF}
 end;
 
 { XCDEListView1: OnEditing -----------------------------------------------------
@@ -7658,11 +7775,9 @@ begin
       if Node = NodeToExpand then
       begin
         NodeToExpand.Expand(False);
-        DropFileTargetCDETreeView.ShowImage := False;
-        DropFileTargetXCDETreeView.ShowImage := False;
+        DropFileTargetTreeView.ShowImage := False;
         NodeToExpand.TreeView.Repaint;
-        DropFileTargetCDETreeView.ShowImage := True;
-        DropFileTargetXCDETreeView.ShowImage := True;
+        DropFileTargetTreeView.ShowImage := True;
       end;
     end;
     NodeToExpand := nil;

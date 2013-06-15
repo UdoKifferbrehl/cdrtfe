@@ -1,8 +1,8 @@
 { dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
-  Copyright (c) 2007-2009 Oliver Valencia
+  Copyright (c) 2007-2013 Oliver Valencia
 
-  letzte Änderung  01.08.2010
+  letzte Änderung  15.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -13,7 +13,7 @@
     * Auswahl der anzuzeigenden Ordner und des Startordners
     * Möglichkeit einen oder auch mehrere Ordner auszuwählen
     * Statt der ShellShock-Komponenten verwendet der Dialog jetzt die Delphi-
-      ShellControls.
+      ShellControls oder die VirtualShellTools
     * Die Verwendung der ShellShock-Komponenten setzt die Datei comctl32.dll in
       der Version 5.81 oder höher voraus. Bei niedrigeren Versionen wird der
       Standard-Auswahldialog für einen einzelnen Ordner verwendet.
@@ -50,12 +50,21 @@ unit dlg_folderbrowse;
 interface
 
 uses Classes, Windows, Forms, StdCtrls, Controls, FileCtrl, SysUtils, ComCtrls,
-     ShlObj, ActiveX, ShellCtrls;
+     ShlObj, ActiveX,
+     {$IFDEF UseVirtualShellTools}
+     VirtualExplorerTree
+     {$ELSE}
+     ShellCtrls
+     {$ENDIF};
 
 type TFolderBrowser = class(TComponent)
        {Dialog und dessen Komponenten}
        FBDialog        : TForm;
-       FBShellTreeView : TShellTreeView;
+       FBShellTreeView : {$IFDEF UseVirtualShellTools}
+                         TVirtualExplorerTreeView
+                         {$ELSE}
+                         TShellTreeView
+                         {$ENDIF};
        FBListView      : TListView;
        FBLabelTitle    : TLabel;
        FBButtonOk      : TButton;
@@ -248,7 +257,11 @@ begin
   *)
   if ((ssAlt in Shift) and (Key = VK_INSERT)) or
      (Key = VK_F11) then
+    {$IFDEF UseVirtualShellTools}
+    InsertFolder(FBShellTreeView.SelectedPath);
+    {$ELSE}
     InsertFolder(FBShellTreeView.SelectedFolder.PathName);
+    {$ENDIF}
 end;
 
 { Listview - OnKeyDown ---------------------------------------------------------
@@ -373,31 +386,48 @@ begin
     end;
 
     {ShellTreeView}
-    FBShellTreeView := TShellTreeView.Create(Self);
+    FBShellTreeView := {$IFDEF UseVirtualShellTools}
+                       TVirtualExplorerTreeView.Create(Self);
+                       {$ELSE}
+                       TShellTreeView.Create(Self);
+                       {$ENDIF}
     with FBShellTreeView do
     begin
       SetBounds(8, NewTop, FWidth - 16, FHeight - NewTop - (FHeight - NewBottom));
       Parent := FBDialog;
+      {$IFDEF UseVirtualShellTools}
+      RootFolder := rfDesktop;
+      Active := True;
+      {$ELSE}
       HideSelection    := False;
+      ObjectTypes      := [otFolders, otHidden];
+      {$ENDIF}
       OnClick          := STVClick;
       OnKeyDown        := STVKeyDown;
-      ObjectTypes      := [otFolders, otHidden];      
       if DirectoryExists(FRoot) then
       begin
         Root := FRoot;
       end;
       if Length(FInitialDir) > 0 then
       begin
+        {$IFDEF UseVirtualShellTools}
+        FBShellTreeView.BrowseTo(FInitialDir, False, False, True, False);
+        {$ELSE}
         FBShellTreeView.Path := FInitialDir;
         FBShellTreeView.Selected.Expand(False);
+        {$ENDIF}
       end else
       begin
         DefaultPath := 'c:\';
         if not DirectoryExists(DefaultPath) then
           DefaultPath := ExtractFileDrive(Application.ExeName) + '\';
+        {$IFDEF UseVirtualShellTools}
+        FBShellTreeView.BrowseTo(DefaultPath, False, False, True, False);
+        {$ELSE}
         FBShellTreeView.Path := DefaultPath;
         FBShellTreeView.Selected.Parent.Selected := True;
-      end;
+        {$ENDIF}
+      end;                                                    
     end;
 
     {TabOrder}
@@ -409,7 +439,11 @@ begin
     Result := FBDialog.ShowModal = mrOK;
     if FBDialog.ModalResult = mrOK then
     begin
+      {$IFDEF UseVirtualShellTools}
+      FPath := FBShellTreeView.SelectedPath;
+      {$ELSE}
       FPath := FBShellTreeView.SelectedFolder.PathName;
+      {$ENDIF}
       if FPathList.Count = 0 then InsertFolder(FPath);
     end;
   end else

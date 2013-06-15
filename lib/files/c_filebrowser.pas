@@ -1,8 +1,8 @@
 { c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
 
-  Copyright (c) 2009-2010 Oliver Valencia
+  Copyright (c) 2009-2013 Oliver Valencia
 
-  letzte Änderung  01.08.2010
+  letzte Änderung  15.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -34,10 +34,13 @@ unit c_filebrowser;
 
 interface
 
-uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, ComCtrls,
-  ShellCtrls;
+uses Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+     Dialogs, StdCtrls, ExtCtrls, ComCtrls, ShlObj,
+     {$IFDEF UseVirtualShellTools}
+     VirtualExplorerTree, VirtualTrees
+     {$ELSE}
+     ShellCtrls
+     {$ENDIF};
 
 type
   TFFBSelectedEvent = procedure(Source: TObject) of object;
@@ -50,8 +53,16 @@ type
     PanelFiles: TPanel;
   private
     { Private-Deklarationen }
-    FBShellTreeView : TShellTreeView;
-    FBShellListView : TShellListView;
+    FBShellTreeView : {$IFDEF UseVirtualShellTools}
+                      TVirtualExplorerTreeView
+                      {$ELSE}
+                      TShellTreeView
+                      {$ENDIF};
+    FBShellListView : {$IFDEF UseVirtualShellTools}
+                      TVirtualExplorerListView
+                      {$ELSE}
+                      TShellListView
+                      {$ENDIF};
     FLabelCaption: string;
     FColCaptionName: string;
     FColCaptionSize: string;
@@ -63,7 +74,12 @@ type
     function GetTreeViewFocused: Boolean;
     function GetListViewFocused: Boolean;
     procedure FFBKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    {$IFDEF UseVirtualShellTools}
+    procedure FFBDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
+    procedure FFBTVChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    {$ELSE}
     procedure FFBTVChange(Sender: TObject; Node: TTreeNode);
+    {$ENDIF}
     procedure SetPath(const NewPath: string);
   public
     { Public-Deklarationen }
@@ -87,7 +103,14 @@ implementation
 
 {$R *.dfm}
 
-procedure TFrameFileBrowser.FFbKeyDown(Sender: TObject; var Key: Word;
+{$IFDEF UseVirtualShellTools}
+procedure TFrameFileBrowser.FFBDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
+begin
+  Accept := False;
+end;
+{$ENDIF}
+
+procedure TFrameFileBrowser.FFBKeyDown(Sender: TObject; var Key: Word;
                                        Shift: TShiftState);
 begin
   if ((ssAlt in Shift) and (Key = VK_INSERT)) or
@@ -97,22 +120,38 @@ begin
   end;
 end;
 
+{$IFDEF UseVirtualShellTools}
+procedure TFrameFileBrowser.FFBTVChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+{$ELSE}
 procedure TFrameFileBrowser.FFBTVChange(Sender: TObject; Node: TTreeNode);
+{$ENDIF}
 begin
+  {$IFDEF UseVirtualShellTools}
+  FPath := FBShellTreeView.SelectedPath;
+  {$ELSE}
   FPath := FBShellTreeView.Path;
+  {$ENDIF}
 end;
 
 procedure TFrameFileBrowser.SetPath(const NewPath: string);
-var CurrentFolder: TTreeNode;
-    DefaultPath  : string;
+var DefaultPath  : string;
+    {$IFDEF UseVirtualShellTools}
+    PIDL         : PItemIDList;
+    {$ELSE}
+    CurrentFolder: TTreeNode;
+    {$ENDIF}
 begin
   if DirectoryExists(NewPath) then
   begin
     FPath := NewPath;
+    {$IFDEF UseVirtualShellTools}
+    FBShellTreeView.BrowseTo(NewPath, False, True, True, False);
+    {$ELSE}
     FBShellTreeView.Path := NewPath;
     CurrentFolder := FBShellTreeView.Selected;
     FBShellTreeView.Selected.Parent.Selected := True;
     CurrentFolder.Selected := True;
+    {$ENDIF}
   end else
   begin
     {Defaultpath ist c:\, wenn nicht vorhanden, auf aktuelles Laufwerk setzen}
@@ -120,9 +159,15 @@ begin
     if not DirectoryExists(DefaultPath) then
       DefaultPath := ExtractFileDrive(Application.ExeName) + '\';    
     {Arbeitsplatz öffnen}
+    {$IFDEF UseVirtualShellTools}
+    SHGetSpecialFolderLocation(Self.Handle, CSIDL_DRIVES, PIDL);
+    FBShellTreeView.BrowseToByPIDL(PIDL, True, True, True, False);
+    //FBShellTreeView.BrowseTo(DefaultPath, False, True, True, False);
+    {$ELSE}
     FBShellTreeView.Path := DefaultPath;
     //FBShellTreeView.Selected.Expand(False);
     FBShellTreeView.Selected.Parent.Selected := True;
+    {$ENDIF}
   end;
 end;
 
@@ -149,6 +194,9 @@ end;
 procedure TFrameFileBrowser.UpdateTranslation;
 begin
   {Spaltennamen setzen}
+  {$IFDEF UseVirtualShellTools}
+    // für VirtualExplorerListView nicht notwendig
+  {$ELSE}
   if FColCaptionName <> '' then
     FBShellListView.Column[0].Caption := FColCaptionName;
   if FColCaptionSize <> '' then
@@ -157,6 +205,7 @@ begin
     FBShellListView.Column[1].Caption := FColCaptionType;
   if FColCaptionModified <> '' then
     FBShellListView.Column[3].Caption := FColCaptionModified;
+  {$ENDIF}
 end;
 
 procedure TFrameFileBrowser.Init;
@@ -168,32 +217,60 @@ begin
   Label1.Font.Style := [fsBold];
 
   {FolderTreeView}
-  FBShellTreeView := TShellTreeView.Create(Self);
+  FBShellTreeView := {$IFDEF UseVirtualShellTools}
+                     TVirtualExplorerTreeView.Create(Self);
+                     {$ELSE}
+                     TShellTreeView.Create(Self);
+                     {$ENDIF}
+
   with FBShellTreeView do
   begin
     Parent := PanelFolder;
     Align := alClient;
     Anchors := [akLeft, akTop, akRight, akBottom];
-    HideSelection := False;
     DragMode := dmAutomatic;
     OnKeyDown := FFBKeyDown;
     OnChange := FFBTVChange;
+    {$IFDEF UseVirtualShellTools}
+    RootFolder := rfDesktop;
+    Active := True;
+    TreeOptions.VETShellOptions := [toDragDrop, toContextMenus, toRightAlignSizeColumn];
+    OnDragOver := FFBDragOver;
+    {$ELSE}
+    HideSelection := False;
+    {$ENDIF}
   end;
 
   {FileListView}
-  FBShellListView := TShellListView.Create(Self);
+  FBShellListView := {$IFDEF UseVirtualShellTools}
+                     TVirtualExplorerListView.Create(Self);
+                     {$ELSE}
+                     TShellListView.Create(Self);
+                     {$ENDIF}
+
   with FBShellListView do
   begin
     Parent := PanelFiles;
     Align := alCLient;
-    ViewStyle := vsReport;
-    Multiselect := True;
     DragMode := dmAutomatic;
     OnKeyDown := FFBKeyDown;
+    {$IFDEF UseVirtualShellTools}
+    Active := True;
+    TreeOptions.VETShellOptions := [toDragDrop, toContextMenus, toRightAlignSizeColumn];
+    OnDragOver := FFBDragOver;
+    {$ELSE}
+    ViewStyle := vsReport;
+    Multiselect := True;
+    {$ENDIF}
   end;
 
+  {$IFDEF UseVirtualShellTools}
+  FBShellTreeView.VirtualExplorerListview := FBShellListView;
+  FBShellListView.VirtualExplorerTreeview := FBShellTreeView;
+  {$ELSE}
   FBShellTreeView.ShellListView := FBShellListView;
   FBShellListView.ShellTreeView := FBShellTreeView;
+  {$ENDIF}
 
   {Anfangsverzeichnis}
   SetPath(FPath);
