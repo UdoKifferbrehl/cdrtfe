@@ -4373,11 +4373,12 @@ var GlyphArray    : TGlyphArray;
 begin
   //SetDoubleBuffered(True);
   Application.Title := LowerCase(Application.Title);
-  {Drag'n'Drop für dieses Fenster zulassen}
-  {$IFDEF UseVirtualShellTools}
-  {$ELSE}
-  DragAcceptFiles(Self.Handle, true);
-  {$ENDIF}
+  {Ole-Drag-Drop für gesamtes Fenster zulassen (Explorer -> cdrtfe)}
+//  {$IFDEF UseVirtualShellTools}
+//  DragAcceptFiles(Self.Handle, true);
+//  {$ELSE}
+  DragAcceptFiles(Self.Handle, True);
+//  {$ENDIF}
   {Constraints für minimale Fenstergröße}
   if (Screen.PixelsPerInch <= 96) then
   begin

@@ -35,7 +35,7 @@ unit c_filebrowser;
 interface
 
 uses Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-     Dialogs, StdCtrls, ExtCtrls, ComCtrls, ShlObj,
+     Dialogs, StdCtrls, ExtCtrls, ComCtrls, ShlObj, ShellApi,
      {$IFDEF UseVirtualShellTools}
      VirtualExplorerTree, VirtualTrees
      {$ELSE}
@@ -77,6 +77,8 @@ type
     {$IFDEF UseVirtualShellTools}
     procedure FFBDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
     procedure FFBTVChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure FFBStartDrag(Sender: TObject; var DragObject: TDragObject);
+    procedure FFBEndDrag(Sender: TObject; Target: TObject; x: Integer; y: Integer);
     {$ELSE}
     procedure FFBTVChange(Sender: TObject; Node: TTreeNode);
     {$ENDIF}
@@ -104,9 +106,25 @@ implementation
 {$R *.dfm}
 
 {$IFDEF UseVirtualShellTools}
+{ cdrtfe läßt für das gesamte Fenster Ole-Drag-Drop-Operationen aus dem Explorer
+  zu. Die VirtualShellTools nutzen ebenfalls Ole-Drag-Drop. Allerdings sollen
+  als Ziele nur die Tree- und Listviews zugelassen werden. Daher muß für die
+  Dauer der Operation das gesamte Fenster als Ziel gesperrt werden. Die zu-
+  gelassenen Ziele sind über DropFileTargets zugänglich.                       }
+
 procedure TFrameFileBrowser.FFBDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
 begin
   Accept := False;
+end;
+
+procedure TFrameFileBrowser.FFBStartDrag(Sender: TObject; var DragObject: TDragObject);
+begin
+  DragAcceptFiles(Application.MainForm.Handle, False);
+end;
+
+procedure TFrameFileBrowser.FFBEndDrag(Sender: TObject; Target: TObject; x: Integer; y: Integer);
+begin
+  DragAcceptFiles(Application.MainForm.Handle, True);
 end;
 {$ENDIF}
 
@@ -236,6 +254,8 @@ begin
     Active := True;
     TreeOptions.VETShellOptions := [toDragDrop, toContextMenus, toRightAlignSizeColumn];
     OnDragOver := FFBDragOver;
+    OnStartDrag := FFBStartDrag;
+    OnEndDrag := FFBEndDrag;
     {$ELSE}
     HideSelection := False;
     {$ENDIF}
@@ -258,6 +278,8 @@ begin
     Active := True;
     TreeOptions.VETShellOptions := [toDragDrop, toContextMenus, toRightAlignSizeColumn];
     OnDragOver := FFBDragOver;
+    OnStartDrag := FFBStartDrag;
+    OnEndDrag := FFBEndDrag;
     {$ELSE}
     ViewStyle := vsReport;
     Multiselect := True;
