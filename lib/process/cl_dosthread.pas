@@ -194,7 +194,7 @@ var lpPipeAttributes        : TSecurityAttributes;
     lpNumberOfBytesRead     : DWORD;
     lpNumberOfBytesAvailable: DWORD;
 //  Buffer                  : array[0..10] of Char;
-    Buffer                  : PChar;
+    Buffer                  : PAnsiChar;
     Temp                    : string;
     Changed                 : Boolean;
     ExitCode                : Cardinal;
@@ -247,7 +247,7 @@ begin
           GetExitCodeProcess(lpProcessInformation.hProcess, ExitCode);
           if Changed then
           begin
-            FOutput := FOutput + Buffer;
+            FOutput := FOutput + string(Buffer);
             CheckOutput;
           end;
 

@@ -290,7 +290,7 @@ var lpPipeAttributes     : TSecurityAttributes;
     lpNumberOfBytesRead  : DWORD;
     lpNumberOfBytesAvail : DWORD;
     BytesToRead          : DWORD;
-    Buffer               : array[0..10] of Char;
+    Buffer               : array[0..10] of AnsiChar;
     Temp                 : string;
     StartWithNewLine     : Boolean;
     OnlyBS               : Boolean;
@@ -328,10 +328,11 @@ begin
         FPHandle := lpProcessInformation.hProcess;
         FPStdIn := WriteStdIn;
         FPID := lpProcessInformation.dwProcessId;
-        Buffer[0] := #0;
+        // Buffer[0] := #0;
+        ZeroMemory(@Buffer, SizeOf(Buffer));
         Temp := '';
         repeat
-          Temp := Temp + Buffer;
+          Temp := Temp + string(Buffer);
 
           PeekNamedPipe(ReadStdOut, @Buffer, SizeOf(Buffer) - 1,
                         @lpNumberOfBytesRead, @lpNumberOfBytesAvail, nil);
