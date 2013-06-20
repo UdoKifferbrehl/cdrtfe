@@ -31,7 +31,7 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
-     DragDrop, DragDropFile, VistaAltFixUnit,
+     DragDrop, DragDropFile, {VistaAltFixUnit,}
      c_filebrowser,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
@@ -795,7 +795,7 @@ begin
   {EnvironmentBlock entsorgen, falls nötig}
   if FSettings.Environment.EnvironmentSize > 0 then CheckEnvironment(FSettings);
   {Aufräumen: aufgrund des Multithreadings hierher verschoben}
-  FAction.CleanUp(2);  
+  FAction.CleanUp(2);
   {Thread zu Vergleichen der Dateien starten}
   if not Ok then
   begin
@@ -1235,7 +1235,7 @@ begin
     RadioButtonToc.Checked      := Toc;
     RadioButtonAtip.Checked     := Atip;
     RadioButtonMSInfo.Checked   := MSInfo;
-    RadioButtonMInfo.Checked    := MInfo;    
+    RadioButtonMInfo.Checked    := MInfo;
     RadioButtonCapacity.Checked := CapInfo;
     RadioButtonMetaData.Checked := MetaInfo;
   end;
@@ -1246,7 +1246,7 @@ begin
   end;
   {Image}
   RadioButtonImageRead.Checked := FSettings.General.ImageRead;
-  RadioButtonImageWrite.Checked := not FSettings.General.ImageRead;  
+  RadioButtonImageWrite.Checked := not FSettings.General.ImageRead;
   with FSettings.Readcd do
   begin
     EditReadCDIsoPath.Text          := IsoPath;
@@ -1435,7 +1435,7 @@ begin
     TAO        := RadioButtonImageTAO.Checked;
     DAO        := RadioButtonImageDAO.Checked;
     RAW        := RadioButtonImageRAW.Checked;
-    Verify     := CheckBoxISOVerify.Checked;                
+    Verify     := CheckBoxISOVerify.Checked;
     if RadioButtonImageRaw96r.Checked then
     begin
       RawMode := 'raw96r';
@@ -1572,7 +1572,7 @@ begin
   XCDETreeView.Items[0].Expand(False);
   FSettings.General.Choice := cAudioCD;
   ShowTracks;
-  FSettings.General.Choice := cDAE;    
+  FSettings.General.Choice := cDAE;
   ShowTracksDAE;
   FSettings.General.Choice := cVideoCD;
   ShowTracks;
@@ -1732,7 +1732,7 @@ begin
       if Handle <> 0 then
       begin
         GetDragQueryFileList(Handle, FileList, False);
-        AddListToPathList(FileList);        
+        AddListToPathList(FileList);
       end;
     finally
       Clipboard.Close;
@@ -2000,7 +2000,7 @@ begin
     {$IFDEF MultipleFolderBrowsing}
     Dir := PathList[i];
     {$ENDIF}
-    Name := Dir;    
+    Name := Dir;
     Delete(Name, 1, LastDelimiter('\', Name));
     if Name <> '' then
     begin
@@ -2760,7 +2760,7 @@ begin
         Size := 0;
     end else
       ExtractFileInfoFromEntry(Item, Caption, Name, Size);
-    NewItem := ListView.Items.Add;             
+    NewItem := ListView.Items.Add;
     NewItem.Caption := Caption;
     FFileTypeInfo.GetFileInfo(Name, IconIndex, Filetype);
     NewItem.ImageIndex := IconIndex;
@@ -2810,7 +2810,7 @@ var i         : Integer;
     Path      : string;
     FileList  : TStringList;
     SubFolders: TStringList;
-begin                              
+begin
   FileList := nil;
   SubFolders := TStringList.Create;
   {Pfad des gewählten Knotens feststellen}
@@ -3970,7 +3970,7 @@ procedure TCdrtfeMainForm.CheckControls;
     end;
     {Image schreiben: Controls hängen auch vom Typ des Images ab, Prüfung aber
      nur vornehmen, wenn cdrdao oder cdrecord ab 2.01a24 vorhanden ist .}
-    CUEImage := False; 
+    CUEImage := False;
     if FSettings.FileFlags.CdrdaoOk or FSettings.Cdrecord.CanWriteCueImage then
     begin
       GroupBoxImage.Caption := FLang.GMS('c005');
@@ -4103,7 +4103,7 @@ begin
     cDVDVideo: SetDrives(FDevices.CDWriter);
   end;
   CheckControlsSpeeds;
-  FCheckingControls := False;  
+  FCheckingControls := False;
 end;
 
 { SetGlobalWriter --------------------------------------------------------------
@@ -4699,7 +4699,7 @@ var DummyHandle: HWND;
 begin
   FInitDone := False;
   {Fix für Win7-Vista-Alt-Bug}
-  TVistaAltFix.Create(Self);
+  //TVistaAltFix.Create(Self);
   FImageTabFirstShow   := True;
   FImageTabFirstWrite  := True;
   FCheckingControls    := False;
@@ -4787,7 +4787,7 @@ begin
       FData.AcceptApe := FSettings.FileFlags.MonkeyOk;
       {Einstellungen laden: Ini}
       FSettings.LoadFromFile(cIniFile);
-      if FSettings.General.PortableMode then      
+      if FSettings.General.PortableMode then
         SendMessage(FindWindow('TFormSplashScreen', 'FormSplashScreen'),
           WM_SplashScreen, wmwpSetPortable, 0);
       {Datenverzeichnis anlegen (WinNT/2k/XP)}
@@ -5911,7 +5911,7 @@ begin
   end;
   FAction.Action := cCDInfos;
   if (FSelectedDevice <> 'mult') or (ID = 0) then FAction.StartAction;
-  if not FLogWindowShowing then ToggleLogWindow(True);  
+  if not FLogWindowShowing then ToggleLogWindow(True);
 end;
 
 
@@ -6271,7 +6271,7 @@ begin
     Ord('V')  : if Shift = [ssCtrl] then
                 begin
                   AddFromClipboard;
-                end;                
+                end;
     VK_F2     : if FSettings.General.Choice = cDataCD then
                 begin
                   {nur bei Daten-CDs dürfen Dateien umbenannt werden}
@@ -6508,7 +6508,7 @@ begin
     Ord('V')   : if Shift = [ssCtrl] then
                  begin
                    AddFromClipboard;
-                 end;                 
+                 end;
     VK_ADD     : UserMoveTrack(AudioListView, dDown);
     VK_SUBTRACT: UserMoveTrack(AudioListView, dUp);
     VK_RETURN  : ListViewDblCLick(Sender);
@@ -6569,7 +6569,7 @@ begin
     Ord('V')   : if Shift = [ssCtrl] then
                  begin
                    AddFromClipboard;
-                 end;                                  
+                 end;
     VK_ADD     : UserMoveTrack(VideoListView, dDown);
     VK_SUBTRACT: UserMoveTrack(VideoListView, dUp);
     VK_RETURN  : ListViewDblCLick(Sender);
@@ -6616,7 +6616,7 @@ begin
   {mit einem neuen Projekt sollen auch die alten Ausnahmen gelöscht werden}
   FData.IgnoreNameLengthErrors := False;
   FData.ErrorListIgnore.Clear;
-  FSettings.DataCD.MsInfo := '';  
+  FSettings.DataCD.MsInfo := '';
 end;
 
 { Data-CD: Check filesystem }
@@ -6790,7 +6790,7 @@ end;
 
   In Abhängigkeit der aufrufenden Komponente und der dort gewählten Einträge
   werden die Menü-Einträge aus- bzw. eingeblendet. Dieser Eventhandler ruft
-  die Eventhandler der mittlerweile entfernten Kontextmenüs auf.               }  
+  die Eventhandler der mittlerweile entfernten Kontextmenüs auf.               }
 
 procedure TCdrtfeMainForm.TreeListViewPopupMenuPopup(Sender: TObject);
 var ListView: TListView;
@@ -7033,16 +7033,16 @@ begin
     CDEListViewPopupRenameFile.Visible := True;
     CDEListViewPopupDeleteFile.Visible := True;
     CDEListViewPopupN5.Visible := True;
-    CDEListViewPopupNewFolder.Visible := True;    
+    CDEListViewPopupNewFolder.Visible := True;
   end else
   begin
     CDEListViewPopupAddFile.Visible := True;
-    CDEListViewPopupAddFolder.Visible := True;    
+    CDEListViewPopupAddFolder.Visible := True;
     CDEListViewPopupN1.Visible := True;
     CDEListViewPopupRenameFile.Visible := False;
     CDEListViewPopupDeleteFile.Visible := True;
     CDEListViewPopupN5.Visible := True;
-    CDEListViewPopupNewFolder.Visible := True;      
+    CDEListViewPopupNewFolder.Visible := True;
   end;
   if ListView = XCDEListView2 then
   begin
@@ -7127,7 +7127,7 @@ end;
 { Data-CD, XCD: Open file }
 
 procedure TCdrtfeMainForm.CDEListViewPopupOpenClick(Sender: TObject);
-begin 
+begin
   UserOpenFile(GetCurrentListView(GetPopupComp(Sender)));
 end;
 
@@ -7202,7 +7202,7 @@ begin
   case FSettings.General.Choice of
     cAudioCD: UserDeleteFile(nil, AudioListView);
     cVideoCD: UserDeleteFile(nil, VideoListView);
-  end;                                 
+  end;
 end;
 
 { Audio-CD: Move track up }
@@ -7283,7 +7283,7 @@ begin
   begin
     MiscPopupVerify.Visible := False;
     MiscPopupClearOutput.Visible := False;
-    MiscPopupSaveOutput.Visible := False;    
+    MiscPopupSaveOutput.Visible := False;
     MiscPopupEject.Visible := True;
     MiscPopupLoad.Visible := True;
   end;
@@ -7532,7 +7532,7 @@ end;
   Beim Klick auf ein Label, das den Zustand einer Option darstellt, soll die
   Option (de-)aktiviert werden. Das Umschalten erfolgt in einer eigenen
   Prozedur.                                                                    }
-                                                             
+
 {$IFDEF AllowToggle}
 procedure TCdrtfeMainForm.LabelClick(Sender: TObject);
 begin
@@ -7749,7 +7749,7 @@ procedure TCdrtfeMainForm.ActionUserToggleExplorerLogExecute(Sender: TObject);
 begin
   HandleKeyboardShortcut($4A);
 end;
-                              
+
 { Hilfsfunktionen ------------------------------------------------------------ }
 
 { ExpandNodeDelayed ------------------------------------------------------------
@@ -7851,7 +7851,8 @@ finalization
   DeviceChangeNotifier.Free;
   {$IFDEF ShowTime}
   TC.Free;
-  TC2.Free;  
+  TC2.Free;
   {$ENDIF}
 
 end.
+
