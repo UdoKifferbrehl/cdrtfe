@@ -5,7 +5,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.06.2013
+  letzte Änderung  20.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -31,7 +31,10 @@ uses Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
      HTMLHelpViewer,
      {$ENDIF}
      {externe Komponenten}
-     DragDrop, DragDropFile, {VistaAltFixUnit,}
+     DragDrop, DragDropFile,
+     {$IFNDEF Delphi2007Up}
+     VistaAltFixUnit,
+     {$ENDIF}
      c_filebrowser,
      {eigene Klassendefinitionen/Units}
      cl_lang, cl_imagelists, cl_settings, cl_projectdata, cl_filetypeinfo,
@@ -4698,8 +4701,10 @@ var DummyHandle: HWND;
     TempChoice : Byte;
 begin
   FInitDone := False;
-  {Fix für Win7-Vista-Alt-Bug}
-  //TVistaAltFix.Create(Self);
+  {Fix für Win7-Vista-Alt-Bug, nur bis Delphi 2006}
+  {$IFNDEF Delphi2007Up}
+  TVistaAltFix.Create(Self);
+  {$ENDIF}
   FImageTabFirstShow   := True;
   FImageTabFirstWrite  := True;
   FCheckingControls    := False;
