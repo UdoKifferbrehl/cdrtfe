@@ -26,7 +26,19 @@ Credits
   be obtained from http://jvcl.sourceforge.net
 
   Vampyre Imaging Library: © 2004-2012 Marek Mauder,
-  http://imaginglib.sourceforge.net/ 
+  http://imaginglib.sourceforge.net/
+
+  Mustangpeak Common Library,
+  http://code.google.com/p/mustangpeakcommonlib/
+
+  Mustangpeak EasyListview,
+  http://code.google.com/p/mustangpeakeasylistview/
+
+  Mustangpeak VirutalShellTools,
+  http://code.google.com/p/mustangpeakvirtualshelltools/
+
+  Virtual TreeView,
+  http://code.google.com/p/virtual-treeview/
 
   TQProgressBar (v 1.1) © 2004 by Olivier Touzot "QnnO". 
 

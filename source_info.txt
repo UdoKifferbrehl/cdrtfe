@@ -44,6 +44,12 @@ Root folder			cdrtfe main project file
 
     jvcl_mini			  Jedi Visual Component Library
 
+    mpcommonlib			  Mustangpeak Common Library
+
+    mpeasylistview		  Mustangpeak EasyListview
+
+    mpvirtualshelltools		  Mustangpeak VirutalShellTools
+
     oledragdrop			  components for dragging objects from explorer into the program
 
     scsi			  SCSI definitions
@@ -52,7 +58,9 @@ Root folder			cdrtfe main project file
 
     spacemeter			  visual componente to show used space of disc
 
-    tpshellshock_mini		  TurboPower ShellShock components (no longer needed)
+    virtualtreeview		  Virtual TreeView
+
+    vista_alt_fix		  Fix for disappearing controls (Vista and above) when Alt is pressed
 
   lib				own, but independent procedures/functions/components
 

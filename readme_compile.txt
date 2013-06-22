@@ -21,10 +21,10 @@ General notes on compiling cdrtfe
   (project options).
 
 - cdrtfe should be compiled with a detailed map file as this file is
-  needed for a better exception handlling (you will get detailed
-  information where in the source code the exception occurred). Using
-  MakeJclDbg.exe from the JCL the map file can be converted to a much 
-  smaller jdbg file.
+  needed for a better exception handling (you will get detailed
+  information where in the source code the exception occurred). The
+  map file can be converted to a much smaller jdbg file with 
+  MakeJclDbg.exe from the JCL.
 
 
 External third party components
@@ -38,6 +38,7 @@ External third party components
   * Mustangpeak Common Library, Mustangpeak EasyListview,
     Mustangpeak VirutalShellTools 
   * Virtual Treeview component
+  * Windows 7 Component Library
 
 - These libraries and components are completely independent of the 
   cdrtfe project. They are copyrighted by their respective authors.
@@ -54,6 +55,10 @@ External third party components
 
 - Extract these archives into the appropriate folder in the subfolder
   imports.
+
+- Beginning with cdrtfe 1.5.0.1 all these components will be bundled
+  into one archive thirdparty-comp-<ver>.rar where <ver> is the version
+  number of cdrtfe which needs this archive to compile.
 
 
 DelphiShellControls / VirtualShellTools
