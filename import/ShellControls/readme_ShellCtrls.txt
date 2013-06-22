@@ -1,26 +1,23 @@
-Hinweise zur Nutzung von TurboPower ShellShock
-==============================================
+Hinweise zur Nutzung von DelphiShellControls
+=============================================
 
-Einige Funktionen von cdrtfe bauen auf den TurboPower ShellShock-Komponenten auf,
-somit kann das Programm nur kompiliert werden, wenn diese Komponenten installiert
-sind. TurboPower ShellShock kann heruntergeladen werden von
-http://sourceforge.net/projects/tpshellshock/.
+Einige Funktionen von cdrtfe bauen auf den DelphiShellControls auf, somit
+kann das Programm nur kompiliert werden, wenn diese Komponenten installiert
+sind. Diese Komponenten sind Teil von Delphi und befinden sich meist im
+Demo-Verzeichnis.
 
-Falls eine Installation nicht erwünscht ist, kann von der cdrtfe-Download-Seite
-ein Archiv mit den benötigten Teilen von TurboPower ShellShock heruntergeladen
-werden, das dann in dieses Verzeichnis (import\tpshellshock_mini) entpackt werden
-muß.
+Falls eine Installation nicht erwünscht ist, können die Dateien ShellConsts.pas
+und ShellCtrls.pas in dieses Verzeichnis kopiert werden.
 
 
-Notes on the use of TurboPower ShellShock
-=========================================
+Notes on the use of DelphiShellControls
+=======================================
 
-Some functions of cdrtfe are based on the TurboPower ShellShock components.
-Thus, these components have to be installed in order to compile the program.
-You can download TurboPower ShellShock from
-http://sourceforge.net/projects/tpshellshock/.
+Some functions of cdrtfe are based on the DelphiShellControls. Thus, these
+components have to be installed in order to compile the program. These 
+components are part of Delphi and can be found in the demo folder.
 
-If you don't want to install these components, you can get a package which
-contains the needed parts of TurboPower ShellShock from the cdrtfe download page.
-Extract the files into this folder (import\tpshellshock_mini).
+If you don't want to install these components, you can copy the files
+ShellConsts.pas and ShellCtrls.pas into this folder.
+
 

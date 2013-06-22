@@ -1,5 +1,5 @@
-Hinweise zur Nutzung der JCL
-============================
+Hinweise zur Nutzung der Drag and Drop Component Suite
+======================================================
 
 Einige Funktionen von cdrtfe bauen auf der Drag and Drop Component Suite
 auf, somit kann das Programm nur kompiliert werden, wenn die Drag and 
@@ -12,8 +12,8 @@ heruntergeladen werden, das dann in dieses Verzeichnis (import\oledragdrop)
 entpackt werden muﬂ.
 
 
-Notes on the use of the JCL
-===========================
+Notes on the use of the Drag and Drop Component Suite
+=====================================================
 
 Some functions of cdrtfe are based on the Drag and Drop Component Suite.
 Thus, the Drag and Drop Component Suite has to be installed in order to compile
