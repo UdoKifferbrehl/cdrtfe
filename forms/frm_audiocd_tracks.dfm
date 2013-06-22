@@ -201,21 +201,16 @@ object FormAudioCDTracks: TFormAudioCDTracks
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 4
     TabStop = True
-    ExplicitWidth = 537
     inherited Bevel1: TBevel
       Width = 537
-      ExplicitWidth = 537
     end
     inherited PanelTop: TPanel
       Width = 537
-      ExplicitWidth = 537
       inherited Image2: TImage
         Width = 362
-        ExplicitWidth = 362
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

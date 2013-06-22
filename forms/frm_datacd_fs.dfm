@@ -583,28 +583,19 @@ object FormDataCDFS: TFormDataCDFS
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 578
-    ExplicitHeight = 50
     inherited Bevel1: TBevel
       Top = 47
       Width = 578
-      ExplicitTop = 47
-      ExplicitWidth = 578
     end
     inherited PanelTop: TPanel
       Width = 578
       Height = 47
-      ExplicitWidth = 578
-      ExplicitHeight = 47
       inherited Image2: TImage
         Width = 403
         Height = 47
-        ExplicitWidth = 403
-        ExplicitHeight = 47
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

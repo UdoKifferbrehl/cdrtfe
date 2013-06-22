@@ -50,7 +50,6 @@ object FormSettings: TFormSettings
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
       Caption = 'cdrtfe'
-      ExplicitHeight = 261
       object GroupBoxShellExt: TGroupBox
         Left = 8
         Top = 8
@@ -163,9 +162,6 @@ object FormSettings: TFormSettings
     object TabSheetCdrtfe2: TTabSheet
       Caption = 'cdrtfe (2)'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 29
-      ExplicitHeight = 261
       object GroupBoxConfirm: TGroupBox
         Left = 8
         Top = 8
@@ -213,9 +209,6 @@ object FormSettings: TFormSettings
     object TabSheetDrives: TTabSheet
       HelpContext = 1206
       Caption = 'Laufwerke'
-      ExplicitLeft = 8
-      ExplicitTop = 29
-      ExplicitHeight = 261
       object GroupBoxDetectSpeeds: TGroupBox
         Left = 8
         Top = 8
@@ -268,7 +261,6 @@ object FormSettings: TFormSettings
     object TabSheetCdrecord: TTabSheet
       HelpContext = 1202
       Caption = 'cdrecord'
-      ExplicitHeight = 261
       object GroupBoxAdditionalCmdLineOptions: TGroupBox
         Left = 8
         Top = 120
@@ -412,7 +404,6 @@ object FormSettings: TFormSettings
     object TabSheetCdrecord2: TTabSheet
       HelpContext = 1203
       Caption = 'cdrecord (2)'
-      ExplicitHeight = 261
       object GroupBoxCdrecordWritingSpeed: TGroupBox
         Left = 8
         Top = 8
@@ -489,7 +480,6 @@ object FormSettings: TFormSettings
     object TabSheetCdrdao: TTabSheet
       HelpContext = 1204
       Caption = 'cdrdao'
-      ExplicitHeight = 261
       object GroupBoxCdrdaoDriver: TGroupBox
         Left = 8
         Top = 64
@@ -536,7 +526,6 @@ object FormSettings: TFormSettings
     object TabSheetAudioCD: TTabSheet
       HelpContext = 1205
       Caption = 'Audio-CD'
-      ExplicitHeight = 261
       object GroupBoxAudioCDText: TGroupBox
         Left = 8
         Top = 8
@@ -626,7 +615,6 @@ object FormSettings: TFormSettings
     end
     object TabSheetCygwin: TTabSheet
       Caption = 'Cygwin'
-      ExplicitHeight = 261
       object GroupBoxCygwinDLL: TGroupBox
         Left = 8
         Top = 8
@@ -672,21 +660,16 @@ object FormSettings: TFormSettings
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 489
     inherited Bevel1: TBevel
       Width = 489
-      ExplicitWidth = 489
     end
     inherited PanelTop: TPanel
       Width = 489
-      ExplicitWidth = 489
       inherited Image2: TImage
         Width = 314
-        ExplicitWidth = 314
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

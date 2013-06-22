@@ -198,10 +198,6 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetCDDB: TTabSheet
       HelpContext = 1803
       Caption = 'freedb'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 8
         Top = 8
@@ -397,21 +393,16 @@ object FormDAEOptions: TFormDAEOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
-    ExplicitWidth = 481
     inherited Bevel1: TBevel
       Width = 481
-      ExplicitWidth = 481
     end
     inherited PanelTop: TPanel
       Width = 481
-      ExplicitWidth = 481
       inherited Image2: TImage
         Width = 306
-        ExplicitWidth = 306
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

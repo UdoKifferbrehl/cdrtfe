@@ -130,21 +130,16 @@ object FormDataCDFSError: TFormDataCDFSError
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
-    ExplicitWidth = 684
     inherited Bevel1: TBevel
       Width = 684
-      ExplicitWidth = 684
     end
     inherited PanelTop: TPanel
       Width = 684
-      ExplicitWidth = 684
       inherited Image2: TImage
         Width = 509
-        ExplicitWidth = 509
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

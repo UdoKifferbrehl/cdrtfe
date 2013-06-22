@@ -156,21 +156,16 @@ object FormVideoCDOptions: TFormVideoCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 6
-    ExplicitWidth = 474
     inherited Bevel1: TBevel
       Width = 474
-      ExplicitWidth = 474
     end
     inherited PanelTop: TPanel
       Width = 474
-      ExplicitWidth = 474
       inherited Image2: TImage
         Width = 299
-        ExplicitWidth = 299
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

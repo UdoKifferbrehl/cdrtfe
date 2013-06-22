@@ -68,28 +68,19 @@ object FormOutput: TFormOutput
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 608
-    ExplicitHeight = 50
     inherited Bevel1: TBevel
       Top = 47
       Width = 608
-      ExplicitTop = 47
-      ExplicitWidth = 608
     end
     inherited PanelTop: TPanel
       Width = 608
       Height = 47
-      ExplicitWidth = 608
-      ExplicitHeight = 47
       inherited Image2: TImage
         Width = 433
         Height = 47
-        ExplicitWidth = 433
-        ExplicitHeight = 47
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

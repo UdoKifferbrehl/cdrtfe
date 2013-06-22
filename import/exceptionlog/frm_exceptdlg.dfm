@@ -54,10 +54,6 @@ object ExceptionDialog: TExceptionDialog
     TabOrder = 1
     object TabSheet1: TTabSheet
       Caption = 'Report'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         506
         157)
