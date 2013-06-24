@@ -1,10 +1,10 @@
 { cl_tree.pas: Implementierung einer einfachen Baum-Struktur
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
 
   Version          1.0
   erstellt         11.02.2004
-  letzte Änderung  05.10.2008
+  letzte Änderung  24.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -266,7 +266,11 @@ begin
   if (Root <> nil) then
   begin
     s := GetNameLevelIndent(Root, Level) + EOL;
+    {$IFNDEF Unicode}
     Stream.Write(Pointer(s)^, Length(s));
+    {$ELSE}
+    Stream.Write(Pointer(s)^, Length(s) * SizeOf(Char));
+    {$ENDIF}
     {nächster Knoten}
     Node := Root.GetFirstChild;
     while Node <> nil do

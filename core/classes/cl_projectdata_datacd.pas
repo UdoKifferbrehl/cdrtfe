@@ -2,10 +2,10 @@
 
   cl_projectdata_datacd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.12.2011
+  letzte Änderung  24.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -941,7 +941,7 @@ begin
   Stream := TMemoryStream.Create;
   FRoot.SaveStructureToStream(Stream);
   Stream.Position := 0;
-  Tree.LoadFromStream(Stream);
+  Tree.LoadFromStream(Stream{$IFDEF Unicode}, TEncoding.Unicode{$ENDIF});
   Stream.Free;
 end;
 
