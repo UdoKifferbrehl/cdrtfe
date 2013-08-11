@@ -1,8 +1,8 @@
 { f_environment.pas: Umgebungsvariablen
 
-  Copyright (c) 2005, 2008 Oliver Valencia
+  Copyright (c) 2005-2013 Oliver Valencia
 
-  letzte Änderung  01.10.2008
+  letzte Änderung  27.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -48,13 +48,13 @@ implementation
 
 function GetEnvVarValue(const Name: string): string;
 var BufSize: Integer;
-    Buffer: PChar;
+    Buffer : PChar;
 begin
   {benötigten Platz für Wert der Umgebungsvariable feststellen (incl. #0)}
   BufSize := GetEnvironmentVariable(PChar(Name), nil, 0);
   if BufSize > 0 then
   begin
-    GetMem(Buffer, BufSize);
+    GetMem(Buffer, BufSize * SizeOf(Char));
     GetEnvironmentVariable(PChar(Name), Buffer, BufSize);
     Result := string(Buffer);
     FreeMem(Buffer);
@@ -100,7 +100,7 @@ end;
   Format des Blocks: String1#0String2#0String3#0#0                             }
 
 function GetEnvVars(VarList: TStringList): Integer;
-var PEnvBlock: Pointer;
+var PEnvBlock : Pointer;
     PEnvString: PChar;
 begin
   {Liste, wenn vorhanden, löschen.}
@@ -138,13 +138,13 @@ end;
 
 function ExpandEnvVars(const S: string): string;
 var BufSize: Integer;
-    Buffer: PChar;
+    Buffer : PChar;
 begin
   {benötigte Puffergröße bestimmen}
   BufSize := ExpandEnvironmentStrings(PChar(S), nil, 0);
   if BufSize > 0 then
   begin
-    GetMem(Buffer, BufSize);
+    GetMem(Buffer, BufSize * SizeOf(Char));
     ExpandEnvironmentStrings(PChar(S), Buffer, BufSize);
     Result := string(Buffer);
     FreeMem(Buffer);
@@ -162,7 +162,10 @@ end;
   Buffer        : Zeiger um Speicherbereich
   BufSize       : Größe des Speicherbereichs
 
-  Wenn Buffer nil ist, wird die Größe des neuen Blocks zurückgegeben.          }
+  Wenn Buffer nil ist, wird die Größe des neuen Blocks zurückgegeben.
+
+  Achtung: CreateEnvBlock wird aktuell in cdrtfe nicht mehr benötigt und wurde
+           nicht auf Kompatibilität für Delphi 2009 und neuer geprüft!         }
 
 function CreateEnvBlock(const NewVars: TStringList;
                         const IncludeCurrent: Boolean; const Buffer: Pointer;

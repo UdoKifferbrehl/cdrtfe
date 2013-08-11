@@ -1,8 +1,8 @@
 { f_system.pas: allgemeine Systemfunktionen
 
-  Copyright (c) 2010 Oliver Valencia
+  Copyright (c) 2010-2013 Oliver Valencia
 
-  letzte Änderung  10.09.2010
+  letzte Änderung  26.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -14,7 +14,7 @@
 
   exportierte Funktionen/Prozeduren:
 
-    SetDLLDirectory(lpPathName:PAnsiChar): Bool
+    SetDLLDirectory(Path: string): Boolean
 
 }
 
@@ -30,7 +30,7 @@ function SetDLLDirectory(const Path: string): Boolean;
 
 implementation
 
-type TSetDLLDirectory = function(lpPathName: PAnsiChar):Bool; stdcall;
+type TSetDLLDirectory = function(lpPathName: PChar):Bool; stdcall;
 
 var SetDLLDirectoryInt: TSetDLLDirectory;
 
@@ -38,7 +38,7 @@ function SetDLLDirectory(const Path: string): Boolean;
 begin
   if Assigned(SetDLLDirectoryInt) then
   begin
-    Result := SetDLLDirectoryInt(PAnsiChar(Path));
+    Result := SetDLLDirectoryInt(PChar(Path));
   end else
     Result := False;
 end;
@@ -48,7 +48,11 @@ var DLL: HModule;
 begin
   DLL := GetModuleHandle('kernel32.dll');
   if DLL = 0 then raise Exception.Create('kernel32 nicht geladen');
+  {$IFDEF Unicode}
+  SetDLLDirectoryInt := GetProcAddress(DLL, 'SetDllDirectoryW');  
+  {$ELSE}
   SetDLLDirectoryInt := GetProcAddress(DLL, 'SetDllDirectoryA');
+  {$ENDIF}
 end;
 
 initialization

@@ -1,8 +1,8 @@
 { f_strings.pas: String-Funktionen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2013Oliver Valencia
 
-  letzte Änderung  22.05.2010
+  letzte Änderung  29.06.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -173,16 +173,8 @@ end;
 
 function ReplaceString(s: string;
                        const SearchString, ReplaceString: string): string;
-var p: Integer;
 begin
-  p := Pos(SearchString, s);
-  while p > 0 do
-  begin
-    Delete(s, p, Length(SearchString));
-    Insert(ReplaceString, s, p);
-    p := Pos(SearchString, s)
-  end;
-  Result := s;
+  Result := StringReplace(s, SearchString, ReplaceString, [rfReplaceAll]);
 end;
 
 { QuotePath --------------------------------------------------------------------
