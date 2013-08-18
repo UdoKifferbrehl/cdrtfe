@@ -57,17 +57,18 @@ object FormDataCDFS: TFormDataCDFS
         Caption = 'Joliet-Dateisystem'
         TabOrder = 0
         object Label2: TLabel
-          Left = 8
-          Top = 48
-          Width = 208
-          Height = 13
-          Caption = 'Diese Option verletzt die Joliet-Spezifikation:'
+          Left = 25
+          Top = 70
+          Width = 238
+          Height = 25
+          AutoSize = False
+          Caption = 'Diese Option verletzt die Joliet-Spezifikation.'
           WordWrap = True
         end
         object CheckBoxJolietLong: TCheckBox
-          Left = 24
-          Top = 72
-          Width = 233
+          Left = 8
+          Top = 47
+          Width = 254
           Height = 17
           Caption = 'Dateinamen mit 103 Zeichen erlauben'
           TabOrder = 1
@@ -75,7 +76,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxJoliet: TCheckBox
           Left = 8
           Top = 24
-          Width = 233
+          Width = 254
           Height = 17
           Caption = 'Joliet-Dateisystem verwenden'
           TabOrder = 0
@@ -92,7 +93,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxFindDups: TCheckBox
           Left = 8
           Top = 24
-          Width = 225
+          Width = 254
           Height = 17
           Caption = 'identische Dateien suchen und verlinken'
           TabOrder = 0
@@ -136,7 +137,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxRationalRock: TCheckBox
           Left = 32
           Top = 48
-          Width = 209
+          Width = 230
           Height = 17
           Caption = 'Dateiattribute zur'#252'cksetzen'
           TabOrder = 1
@@ -151,7 +152,7 @@ object FormDataCDFS: TFormDataCDFS
         TabOrder = 5
         object LabelBootLoadSegAdr: TLabel
           Left = 56
-          Top = 120
+          Top = 119
           Width = 86
           Height = 13
           Caption = 'Segment-Adresse:'
@@ -176,7 +177,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxBoot: TCheckBox
           Left = 8
           Top = 24
-          Width = 113
+          Width = 254
           Height = 17
           Caption = 'Boot-Disk erstellen'
           TabOrder = 0
@@ -185,7 +186,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxBootCatHide: TCheckBox
           Left = 32
           Top = 72
-          Width = 217
+          Width = 230
           Height = 17
           Caption = 'boot.catalog verstecken'
           Enabled = False
@@ -211,7 +212,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxBootBinHide: TCheckBox
           Left = 32
           Top = 48
-          Width = 217
+          Width = 230
           Height = 17
           Caption = 'Boot-Image verstecken'
           Enabled = False
@@ -220,7 +221,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxBootNoEmul: TCheckBox
           Left = 32
           Top = 96
-          Width = 137
+          Width = 230
           Height = 17
           Caption = 'keine Disk-Emulation'
           TabOrder = 3
@@ -340,15 +341,16 @@ object FormDataCDFS: TFormDataCDFS
         object Label1: TLabel
           Left = 8
           Top = 96
-          Width = 310
+          Width = 513
           Height = 13
+          AutoSize = False
           Caption = 'Die folgenden Optionen versto'#223'en gegen den Standard ISO9660.'
           WordWrap = True
         end
         object CheckBoxISO31Chars: TCheckBox
           Left = 8
           Top = 24
-          Width = 233
+          Width = 310
           Height = 17
           Caption = 'Dateinamen mit 31 Zeichen erlauben'
           TabOrder = 0
@@ -356,7 +358,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISONoDot: TCheckBox
           Left = 24
           Top = 152
-          Width = 217
+          Width = 257
           Height = 17
           Caption = 'Dateinamen ohne '#39'.'#39' zulassen'
           TabOrder = 4
@@ -364,7 +366,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISODeepDir: TCheckBox
           Left = 296
           Top = 176
-          Width = 217
+          Width = 233
           Height = 17
           Caption = 'tiefe Verzeichnisse nicht verschieben'
           TabOrder = 10
@@ -372,7 +374,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISO37Chars: TCheckBox
           Left = 24
           Top = 128
-          Width = 217
+          Width = 257
           Height = 17
           Caption = 'Dateinamen mit 37 Zeichen erlauben'
           TabOrder = 3
@@ -380,7 +382,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISOStartDot: TCheckBox
           Left = 24
           Top = 176
-          Width = 217
+          Width = 257
           Height = 17
           Caption = 'Dateinamen d'#252'rfen mit '#39'.'#39' beginnen'
           TabOrder = 5
@@ -388,7 +390,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISOASCII: TCheckBox
           Left = 24
           Top = 224
-          Width = 217
+          Width = 257
           Height = 17
           Caption = '7bit-ASCII-Zeichen erlauben (gro'#223')'
           TabOrder = 7
@@ -396,7 +398,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISOLower: TCheckBox
           Left = 296
           Top = 128
-          Width = 217
+          Width = 225
           Height = 17
           Caption = 'Kleinbuchstaben erlauben'
           TabOrder = 8
@@ -404,7 +406,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISONoTrans: TCheckBox
           Left = 296
           Top = 152
-          Width = 217
+          Width = 225
           Height = 17
           Caption = #39'#'#39' und '#39'~'#39' in Dateinamen zulassen'
           TabOrder = 9
@@ -412,7 +414,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISOMultiDot: TCheckBox
           Left = 24
           Top = 200
-          Width = 217
+          Width = 257
           Height = 17
           Caption = 'Dateinamen d'#252'rfen mehrere '#39'.'#39' enthalten'
           TabOrder = 6
@@ -446,7 +448,7 @@ object FormDataCDFS: TFormDataCDFS
         object CheckBoxISONoVer: TCheckBox
           Left = 296
           Top = 200
-          Width = 217
+          Width = 233
           Height = 17
           Caption = 'Dateinamen ohne Versionsnummern'
           TabOrder = 11
@@ -583,19 +585,28 @@ object FormDataCDFS: TFormDataCDFS
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
+    ExplicitWidth = 578
+    ExplicitHeight = 50
     inherited Bevel1: TBevel
       Top = 47
       Width = 578
+      ExplicitTop = 47
+      ExplicitWidth = 578
     end
     inherited PanelTop: TPanel
       Width = 578
       Height = 47
+      ExplicitWidth = 578
+      ExplicitHeight = 47
       inherited Image2: TImage
         Width = 403
         Height = 47
+        ExplicitWidth = 403
+        ExplicitHeight = 47
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end

@@ -3,7 +3,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.05.2013
+  letzte Änderung  15.08.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -83,17 +83,26 @@ end;
 
 procedure SetFont(Control: TWinControl);
 var FontName: string;
+    Ok      : Boolean;
 begin
-  FontName := 'Microsoft Sans Serif';
-  if PlatformWin2kXP and (Win32MinorVersion > 0) then
+  FontName := 'Segoe UI';
+  Ok := Screen.Fonts.IndexOf(FontName) >= 0;
+  if not Ok then
   begin
-    if Screen.Fonts.IndexOf(FontName) >= 0 then
-    begin
-      if Control is TForm then
-        (Control as TForm).Font.Name := FontName;
-      if Control is TFrame then
-        (Control as TFrame).Font.Name := FontName;
-    end;
+    FontName := 'Tahoma';
+    Ok := Screen.Fonts.IndexOf(FontName) >= 0;
+  end;
+  if not Ok then
+  begin
+    FontName := 'Microsoft Sans Serif';
+    Ok := Screen.Fonts.IndexOf(FontName) >= 0;
+  end;
+  if Ok and PlatformWin2kXP and (Win32MinorVersion > 0) then
+  begin
+    if Control is TForm then
+      (Control as TForm).Font.Name := FontName;
+    if Control is TFrame then
+      (Control as TFrame).Font.Name := FontName;
   end;
 end;
 

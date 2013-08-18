@@ -120,7 +120,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   object PageControl1: TPageControl
     Left = 8
     Top = 36
-    Width = 776
+    Width = 777
     Height = 345
     ActivePage = TabSheet1
     Anchors = [akLeft, akTop, akRight, akBottom]
@@ -131,21 +131,21 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1300
       Caption = 'Daten-Disk'
       DesignSize = (
-        768
+        769
         317)
       object PanelTabSheet1: TPanel
         Left = 0
         Top = 0
-        Width = 768
+        Width = 769
         Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
         DesignSize = (
-          768
+          769
           317)
         object CDESpeedButton1: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 32
           Width = 25
           Height = 25
@@ -155,9 +155,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton1Click
+          ExplicitLeft = 742
         end
         object CDESpeedButton2: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 57
           Width = 25
           Height = 25
@@ -167,9 +168,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton2Click
+          ExplicitLeft = 742
         end
         object CDESpeedButton3: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 96
           Width = 25
           Height = 25
@@ -179,9 +181,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton3Click
+          ExplicitLeft = 742
         end
         object CDESpeedButton4: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 121
           Width = 25
           Height = 25
@@ -191,9 +194,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton4Click
+          ExplicitLeft = 742
         end
         object CDESpeedButton5: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 153
           Width = 25
           Height = 25
@@ -203,17 +207,18 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton5Click
+          ExplicitLeft = 742
         end
         object PanelDataCD: TPanel
           Left = 8
           Top = 272
-          Width = 727
+          Width = 728
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 0
           DesignSize = (
-            727
+            728
             41)
           object Sheet1SpeedButtonCheckFS: TSpeedButton
             Left = 166
@@ -239,7 +244,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Top = 16
             Width = 75
             Height = 25
-            Caption = 'Disk-Optionen'
+            Caption = 'Optionen'
             TabOrder = 1
             OnClick = ButtonDataCDOptionsClick
           end
@@ -253,7 +258,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             TabOrder = 2
           end
           object PanelDataCDOptions: TPanel
-            Left = 333
+            Left = 334
             Top = 5
             Width = 394
             Height = 36
@@ -357,7 +362,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         object PanelDataCDView: TPanel
           Left = 8
           Top = 8
-          Width = 727
+          Width = 728
           Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
@@ -390,7 +395,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CDEListView: TListView
             Left = 203
             Top = 0
-            Width = 524
+            Width = 525
             Height = 263
             Align = alClient
             Columns = <
@@ -430,21 +435,21 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1400
       Caption = 'Audio-CD'
       DesignSize = (
-        768
+        769
         317)
       object PanelTabSheet2: TPanel
         Left = 0
         Top = 0
-        Width = 768
+        Width = 769
         Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
         DesignSize = (
-          768
+          769
           317)
         object AudioSpeedButton1: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 32
           Width = 25
           Height = 25
@@ -454,9 +459,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton1Click
+          ExplicitLeft = 742
         end
         object AudioSpeedButton2: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 64
           Width = 25
           Height = 25
@@ -466,9 +472,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton2Click
+          ExplicitLeft = 742
         end
         object AudioSpeedButton3: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 89
           Width = 25
           Height = 25
@@ -478,9 +485,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton3Click
+          ExplicitLeft = 742
         end
         object AudioSpeedButton4: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 128
           Width = 25
           Height = 25
@@ -490,11 +498,12 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton4Click
+          ExplicitLeft = 742
         end
         object AudioListView: TListView
           Left = 8
           Top = 8
-          Width = 727
+          Width = 728
           Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           Columns = <
@@ -530,13 +539,13 @@ object CdrtfeMainForm: TCdrtfeMainForm
         object PanelAudioCD: TPanel
           Left = 8
           Top = 272
-          Width = 727
+          Width = 728
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 1
           DesignSize = (
-            727
+            728
             41)
           object ButtonAudioCDOptions: TButton
             Left = 0
@@ -548,7 +557,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             OnClick = ButtonAudioCDOptionsClick
           end
           object PanelAudioCDOptions: TPanel
-            Left = 333
+            Left = 334
             Top = 5
             Width = 394
             Height = 36
@@ -635,21 +644,21 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1500
       Caption = 'XCD'
       DesignSize = (
-        768
+        769
         317)
       object PanelTabSheet3: TPanel
         Left = 0
         Top = 0
-        Width = 768
+        Width = 769
         Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
         DesignSize = (
-          768
+          769
           317)
         object XCDESpeedButton1: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 32
           Width = 25
           Height = 25
@@ -659,9 +668,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton1Click
+          ExplicitLeft = 742
         end
         object XCDESpeedButton2: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 57
           Width = 25
           Height = 25
@@ -671,9 +681,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton2Click
+          ExplicitLeft = 742
         end
         object XCDESpeedButton3: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 88
           Width = 25
           Height = 25
@@ -683,9 +694,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton3Click
+          ExplicitLeft = 742
         end
         object XCDESpeedButton4: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 192
           Width = 25
           Height = 25
@@ -695,9 +707,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton4Click
+          ExplicitLeft = 742
         end
         object XCDESpeedButton5: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 224
           Width = 25
           Height = 25
@@ -707,9 +720,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton5Click
+          ExplicitLeft = 742
         end
         object XCDESpeedButton6: TSpeedButton
-          Left = 710
+          Left = 711
           Top = 288
           Width = 25
           Height = 25
@@ -719,9 +733,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton6Click
+          ExplicitLeft = 710
         end
         object XCDESpeedButton7: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 288
           Width = 25
           Height = 25
@@ -731,11 +746,12 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton7Click
+          ExplicitLeft = 742
         end
         object PanelXCDView: TPanel
           Left = 8
           Top = 8
-          Width = 727
+          Width = 728
           Height = 275
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
@@ -777,7 +793,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object PanelXCDViewRight: TPanel
             Left = 203
             Top = 0
-            Width = 524
+            Width = 525
             Height = 275
             Align = alClient
             BevelOuter = bvNone
@@ -785,15 +801,16 @@ object CdrtfeMainForm: TCdrtfeMainForm
             object SplitterXCDHorizontal: TSplitter
               Left = 0
               Top = 115
-              Width = 524
+              Width = 525
               Height = 3
               Cursor = crVSplit
               Align = alTop
+              ExplicitWidth = 524
             end
             object XCDEListView1: TListView
               Left = 0
               Top = 0
-              Width = 524
+              Width = 525
               Height = 115
               Align = alTop
               Columns = <
@@ -830,7 +847,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             object XCDEListView2: TListView
               Left = 0
               Top = 118
-              Width = 524
+              Width = 525
               Height = 157
               Align = alClient
               Columns = <
@@ -954,7 +971,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1600
       Caption = 'L'#246'schen'
       DesignSize = (
-        768
+        769
         317)
       object GroupBoxCDRWDelete: TGroupBox
         Left = 250
@@ -1010,7 +1027,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1700
       Caption = 'Infos'
       DesignSize = (
-        768
+        769
         317)
       object GroupBoxCDInfo: TGroupBox
         Left = 226
@@ -1073,7 +1090,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         object RadioButtonMInfo: TRadioButton
           Left = 168
           Top = 128
-          Width = 113
+          Width = 137
           Height = 17
           Caption = 'Disk Informationen'
           TabOrder = 6
@@ -1081,7 +1098,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         object RadioButtonMetaData: TRadioButton
           Left = 168
           Top = 160
-          Width = 129
+          Width = 137
           Height = 17
           Caption = 'Dateisystem-Infos'
           TabOrder = 7
@@ -1092,12 +1109,12 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1800
       Caption = 'DAE'
       DesignSize = (
-        768
+        769
         317)
       object DAEListView: TListView
         Left = 8
         Top = 8
-        Width = 727
+        Width = 728
         Height = 263
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
@@ -1125,13 +1142,13 @@ object CdrtfeMainForm: TCdrtfeMainForm
       object PanelDAE: TPanel
         Left = 8
         Top = 272
-        Width = 727
+        Width = 728
         Height = 41
         Anchors = [akLeft, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 1
         DesignSize = (
-          727
+          728
           41)
         object Label1: TLabel
           Left = 172
@@ -1176,7 +1193,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           OnClick = ButtonDAESelectPathClick
         end
         object PanelDAEOptions: TPanel
-          Left = 384
+          Left = 385
           Top = 5
           Width = 343
           Height = 36
@@ -1253,12 +1270,12 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 1900
       Caption = 'Disk-Image'
       DesignSize = (
-        768
+        769
         317)
       object PanelImage: TPanel
-        Left = 122
+        Left = 102
         Top = 36
-        Width = 521
+        Width = 561
         Height = 249
         Anchors = []
         BevelOuter = bvNone
@@ -1266,7 +1283,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         object GroupBoxReadCD: TGroupBox
           Left = 0
           Top = 24
-          Width = 257
+          Width = 277
           Height = 217
           Caption = 'Image von Disk erstellen'
           TabOrder = 0
@@ -1280,7 +1297,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CheckBoxReadCDNoerror: TCheckBox
             Left = 16
             Top = 72
-            Width = 233
+            Width = 258
             Height = 17
             Caption = 'kein Abbruch bei unkorrigierbaren Fehlern'
             TabOrder = 2
@@ -1288,7 +1305,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CheckBoxReadCDNocorr: TCheckBox
             Left = 16
             Top = 96
-            Width = 233
+            Width = 258
             Height = 17
             Caption = 'Fehlerkorrektur des Laufwerks abschalten'
             TabOrder = 3
@@ -1374,9 +1391,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
           end
         end
         object GroupBoxImage: TGroupBox
-          Left = 264
+          Left = 284
           Top = 24
-          Width = 257
+          Width = 277
           Height = 217
           Caption = 'ISO-/CUE-Image auf Disk schreiben'
           TabOrder = 1
@@ -1408,7 +1425,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             OnClick = CheckBoxClick
           end
           object PanelImageWriteRawOptions: TPanel
-            Left = 112
+            Left = 132
             Top = 88
             Width = 81
             Height = 73
@@ -1450,7 +1467,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             OnClick = CheckBoxClick
           end
           object RadioButtonImageDAO: TRadioButton
-            Left = 128
+            Left = 148
             Top = 72
             Width = 89
             Height = 17
@@ -1462,7 +1479,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CheckBoxImageOverburn: TCheckBox
             Left = 16
             Top = 168
-            Width = 105
+            Width = 113
             Height = 17
             Caption = #220'berbrennen'
             TabOrder = 6
@@ -1470,13 +1487,13 @@ object CdrtfeMainForm: TCdrtfeMainForm
           object CheckBoxImageClone: TCheckBox
             Left = 16
             Top = 192
-            Width = 97
+            Width = 113
             Height = 17
             Caption = 'Klon-Modus'
             TabOrder = 7
           end
           object CheckBoxImageCDText: TCheckBox
-            Left = 128
+            Left = 148
             Top = 192
             Width = 97
             Height = 17
@@ -1484,7 +1501,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             TabOrder = 8
           end
           object CheckBoxISOVerify: TCheckBox
-            Left = 128
+            Left = 148
             Top = 168
             Width = 113
             Height = 17
@@ -1503,7 +1520,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           OnClick = CheckBoxClick
         end
         object RadioButtonImageWrite: TRadioButton
-          Left = 264
+          Left = 284
           Top = 0
           Width = 129
           Height = 17
@@ -1525,21 +1542,21 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 2000
       Caption = '(S)VideoCD'
       DesignSize = (
-        768
+        769
         317)
       object PanelTabSheet8: TPanel
         Left = 0
         Top = 0
-        Width = 768
+        Width = 769
         Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
         DesignSize = (
-          768
+          769
           317)
         object VideoSpeedButton1: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 32
           Width = 25
           Height = 25
@@ -1549,9 +1566,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton1Click
+          ExplicitLeft = 742
         end
         object VideoSpeedButton2: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 64
           Width = 25
           Height = 25
@@ -1561,9 +1579,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton2Click
+          ExplicitLeft = 742
         end
         object VideoSpeedButton3: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 89
           Width = 25
           Height = 25
@@ -1573,9 +1592,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton3Click
+          ExplicitLeft = 742
         end
         object VideoSpeedButton4: TSpeedButton
-          Left = 742
+          Left = 743
           Top = 128
           Width = 25
           Height = 25
@@ -1585,11 +1605,12 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton4Click
+          ExplicitLeft = 742
         end
         object VideoListView: TListView
           Left = 8
           Top = 8
-          Width = 727
+          Width = 728
           Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           Columns = <
@@ -1623,13 +1644,13 @@ object CdrtfeMainForm: TCdrtfeMainForm
         object PanelVideoCD: TPanel
           Left = 8
           Top = 272
-          Width = 727
+          Width = 728
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 1
           DesignSize = (
-            727
+            728
             41)
           object ButtonVideoCDOptions: TButton
             Left = 0
@@ -1641,7 +1662,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             OnClick = ButtonVideoCDOptionsClick
           end
           object PanelVideoCDOptions: TPanel
-            Left = 574
+            Left = 575
             Top = 5
             Width = 153
             Height = 36
@@ -1684,7 +1705,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
       HelpContext = 2100
       Caption = 'DVD-Video'
       DesignSize = (
-        768
+        769
         317)
       object GroupBoxDVDVideo: TGroupBox
         Left = 266
@@ -1771,7 +1792,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   object CheckBoxDummy: TCheckBox
     Left = 353
     Top = 3
-    Width = 97
+    Width = 90
     Height = 25
     Anchors = [akTop, akRight]
     Caption = 'Simulation'
@@ -1900,19 +1921,20 @@ object CdrtfeMainForm: TCdrtfeMainForm
     end
   end
   object StaticTextSpeed: TStaticText
-    Left = 623
-    Top = 8
-    Width = 111
+    Left = 444
+    Top = 9
+    Width = 125
     Height = 17
-    Alignment = taCenter
+    Alignment = taRightJustify
     Anchors = [akTop, akRight]
-    Caption = 'Brenngeschwindigkeit:'
+    AutoSize = False
+    Caption = 'Brenngeschwindigkeit'
     TabOrder = 8
   end
   object ComboBoxSpeed: TComboBox
-    Left = 735
+    Left = 572
     Top = 5
-    Width = 49
+    Width = 46
     Height = 21
     Style = csDropDownList
     Anchors = [akTop, akRight]
@@ -1942,9 +1964,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
       '52')
   end
   object ComboBoxDrives: TComboBox
-    Left = 456
+    Left = 625
     Top = 5
-    Width = 161
+    Width = 158
     Height = 21
     Style = csDropDownList
     Anchors = [akTop, akRight]

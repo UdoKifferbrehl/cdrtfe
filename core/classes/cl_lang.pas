@@ -716,6 +716,23 @@ procedure TLang.SetFormLang(Form: TForm);
         Value := FComponentStrings.Values[Name];
         if Value <> '' then
         begin
+
+//          if (C is TButton) then
+//          begin
+//             if Form.Canvas.TextWidth(Value) > (C as TButton).Width then
+//             (C as TButton).Font.Size := (C as TButton).Font.Size - 1;
+//          end;
+//          if (C is TLabel) then
+//          begin
+//             if Form.Canvas.TextWidth(Value) > (C as TLabel).Width then
+//             (C as TLabel).Font.Size := (C as TLabel).Font.Size - 1;
+//          end;
+//          if (C is TStaticText) then
+//          begin
+//             if Form.Canvas.TextWidth(Value) > (C as TStaticText).Width then
+//             (C as TStaticText).Font.Size := (C as TStaticText).Font.Size - 1;
+//          end;
+
           SetCompProp(C, 'Caption', Value);
         end;
       end;
