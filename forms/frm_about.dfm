@@ -28,10 +28,8 @@ object FormAbout: TFormAbout
     ActivePage = TabSheetInfo
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
-    ExplicitWidth = 347
     object TabSheetInfo: TTabSheet
       Caption = 'Infos'
-      ExplicitWidth = 339
       DesignSize = (
         359
         206)
@@ -120,7 +118,10 @@ object FormAbout: TFormAbout
     object TabSheetLicense: TTabSheet
       Caption = 'Lizenz'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 339
+      ExplicitHeight = 0
       object RichEdit1: TRichEdit
         Left = 3
         Top = 3
@@ -135,7 +136,10 @@ object FormAbout: TFormAbout
     object TabSheetCredits: TTabSheet
       Caption = 'Credits'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 339
+      ExplicitHeight = 0
       object RichEdit2: TRichEdit
         Left = 3
         Top = 3
@@ -158,7 +162,6 @@ object FormAbout: TFormAbout
     Caption = 'Ok'
     ModalResult = 1
     TabOrder = 0
-    ExplicitLeft = 264
   end
   inline FrameTopBanner1: TFrameTopBanner
     Left = 0
@@ -168,13 +171,17 @@ object FormAbout: TFormAbout
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
     TabStop = True
+    ExplicitWidth = 365
     inherited Bevel1: TBevel
       Width = 365
+      ExplicitWidth = 365
     end
     inherited PanelTop: TPanel
       Width = 365
+      ExplicitWidth = 365
       inherited Image2: TImage
         Width = 190
+        ExplicitWidth = 190
       end
       inherited LabelDescription: TLabel
         Width = 79
