@@ -54,7 +54,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Height = 89
     Anchors = [akTop, akRight]
     Caption = 'Brenner'
-    TabOrder = 1
+    TabOrder = 4
     Visible = False
   end
   object Panel1: TPanel
@@ -64,7 +64,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Height = 105
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
-    TabOrder = 5
+    TabOrder = 7
     DesignSize = (
       185
       105)
@@ -125,7 +125,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     ActivePage = TabSheet1
     Anchors = [akLeft, akTop, akRight, akBottom]
     MultiLine = True
-    TabOrder = 0
+    TabOrder = 5
     OnChange = PageControl1Change
     object TabSheet1: TTabSheet
       HelpContext = 1300
@@ -216,7 +216,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
-          TabOrder = 0
+          TabOrder = 1
           DesignSize = (
             728
             41)
@@ -236,7 +236,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Width = 75
             Height = 25
             Caption = 'Dateisystem'
-            TabOrder = 0
+            TabOrder = 1
             OnClick = ButtonDataCDOptionsFSClick
           end
           object ButtonDataCDOptions: TButton
@@ -245,7 +245,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Width = 75
             Height = 25
             Caption = 'Optionen'
-            TabOrder = 1
+            TabOrder = 0
             OnClick = ButtonDataCDOptionsClick
           end
           object CheckBoxDataCDVerify: TCheckBox
@@ -366,7 +366,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
-          TabOrder = 1
+          TabOrder = 0
           object SplitterDataCD: TSplitter
             Left = 200
             Top = 0
@@ -755,7 +755,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Height = 275
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
-          TabOrder = 1
+          TabOrder = 0
           object SplitterXCDVertical: TSplitter
             Left = 200
             Top = 0
@@ -890,7 +890,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Height = 97
           Anchors = [akLeft, akBottom]
           BevelOuter = bvNone
-          TabOrder = 0
+          TabOrder = 1
           DesignSize = (
             200
             97)
@@ -1286,7 +1286,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Width = 277
           Height = 217
           Caption = 'Image von Disk erstellen'
-          TabOrder = 0
+          TabOrder = 3
           object LabelReadCDRetries: TLabel
             Left = 136
             Top = 121
@@ -1396,7 +1396,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Width = 277
           Height = 217
           Caption = 'ISO-/CUE-Image auf Disk schreiben'
-          TabOrder = 1
+          TabOrder = 4
           object EditImageIsoPath: TEdit
             Left = 16
             Top = 32
@@ -1516,7 +1516,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Width = 129
           Height = 17
           Caption = 'Image erstellen'
-          TabOrder = 2
+          TabOrder = 0
           OnClick = CheckBoxClick
         end
         object RadioButtonImageWrite: TRadioButton
@@ -1525,7 +1525,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Width = 129
           Height = 17
           Caption = 'Image schreiben'
-          TabOrder = 3
+          TabOrder = 2
           OnClick = CheckBoxClick
         end
         object CheckBoxReadCDWriteCopy: TCheckBox
@@ -1534,7 +1534,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Width = 121
           Height = 17
           Caption = 'Kopie schreiben'
-          TabOrder = 4
+          TabOrder = 1
         end
       end
     end
@@ -1779,14 +1779,14 @@ object CdrtfeMainForm: TCdrtfeMainForm
   end
   object Memo1: TMemo
     Left = 8
-    Top = 388
+    Top = 387
     Width = 695
     Height = 105
     Anchors = [akLeft, akRight, akBottom]
     PopupMenu = MiscPopupMenu
     ReadOnly = True
     ScrollBars = ssBoth
-    TabOrder = 3
+    TabOrder = 6
     OnKeyDown = Memo1KeyDown
   end
   object CheckBoxDummy: TCheckBox
@@ -1796,7 +1796,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Height = 25
     Anchors = [akTop, akRight]
     Caption = 'Simulation'
-    TabOrder = 2
+    TabOrder = 0
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -1817,7 +1817,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Width = 50
     Height = 24
     BevelOuter = bvNone
-    TabOrder = 6
+    TabOrder = 9
     Visible = False
   end
   object ToolBar1: TToolBar
@@ -1832,7 +1832,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Indent = 3
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 7
+    TabOrder = 10
     object ToolButton1: TToolButton
       Left = 3
       Top = 0
@@ -1929,7 +1929,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Anchors = [akTop, akRight]
     AutoSize = False
     Caption = 'Brenngeschwindigkeit'
-    TabOrder = 8
+    TabOrder = 1
   end
   object ComboBoxSpeed: TComboBox
     Left = 572
@@ -1939,7 +1939,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Style = csDropDownList
     Anchors = [akTop, akRight]
     ItemHeight = 13
-    TabOrder = 10
+    TabOrder = 2
     OnChange = ComboBoxChange
     OnKeyPress = EditKeyPress
     Items.Strings = (
@@ -1972,7 +1972,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Anchors = [akTop, akRight]
     ItemHeight = 13
     PopupMenu = MiscPopupMenu
-    TabOrder = 9
+    TabOrder = 3
     OnChange = ComboBoxChange
     OnKeyPress = EditKeyPress
   end
