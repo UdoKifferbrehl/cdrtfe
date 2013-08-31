@@ -2,10 +2,10 @@
 
   f_shellext.pas: ShellExtensions registrieren/löschen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.08.2010
+  letzte Änderung  31.08.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -55,38 +55,52 @@ var Is64Bit: Boolean;
 function ShellExtensionsRegistered: Boolean;
 var Reg    : TRegistry;
     ClassID: string;
+    RegKey : string;
+    aKey   : HKEY;
+    iRes   : Integer;
 begin
-  if Is64Bit then ClassID := CdrtfeClassID64 else ClassID := CdrtfeClassID;
-  Reg := TRegistry.Create;
-  try
-    Reg.RootKey := HKEY_CLASSES_ROOT;
-    {$IFDEF UseRegistryKeyExists}
-    {Dies ist die einfache Variante, die aber bei MemProof einen Fehler hervor-
-     ruft (key handle must be closed), obwohl kein Registry-Key-Handle zum
-     Schließen übrig bleibt. Der Fehler wird durch RegOpenKeyEx in der Funktion
-     TRegistry.GetKey ausgelöst, wenn der Registry-Zweig nicht vorhanden ist.
-     Wahrscheinlich ist es nur ein kosmetisches Problem.}
-    Result := Reg.KeyExists('\CLSID\' + ClassID);
-    {$ELSE}
-    {In der alternativen Variante wird versucht den Registry-Zweig zu öffnen.
-     Falls er nich vorhanden ist wird er erzeugt. Dann wird auf das Vorhanden-
-     sein eines Wertes geprüft. Falls dieser nicht gefunden wird, war der
-     Registry-Zweig ursprünglich nicht vorhanden, muß also wieder gelöscht
-     werden.}
-    if Reg.OpenKey('\CLSID\' + ClassID + '\InProcServer32', True) then
-    begin
-      Result := Reg.ValueExists('ThreadingModel');
-      if not Result then
+  if Is64Bit then
+  begin
+     ClassID := CdrtfeClassID64;
+     RegKey := 'CLSID\' + ClassID;
+     iRes := RegOpenKeyEx(HKEY_CLASSES_ROOT, PAnsiChar(RegKey), 0,
+                          KEY_READ or KEY_WOW64_64KEY, aKey);
+     Result := iRes = ERROR_SUCCESS;
+     RegCloseKey(aKey);
+  end else
+  begin
+    ClassID := CdrtfeClassID;
+    Reg := TRegistry.Create;
+    try
+      Reg.RootKey := HKEY_CLASSES_ROOT;
+      {$IFDEF UseRegistryKeyExists}
+      {Dies ist die einfache Variante, die aber bei MemProof einen Fehler hervor-
+       ruft (key handle must be closed), obwohl kein Registry-Key-Handle zum
+       Schließen übrig bleibt. Der Fehler wird durch RegOpenKeyEx in der Funktion
+       TRegistry.GetKey ausgelöst, wenn der Registry-Zweig nicht vorhanden ist.
+       Wahrscheinlich ist es nur ein kosmetisches Problem.}
+      Result := Reg.KeyExists('\CLSID\' + ClassID);
+      {$ELSE}
+      {In der alternativen Variante wird versucht den Registry-Zweig zu öffnen.
+       Falls er nich vorhanden ist wird er erzeugt. Dann wird auf das Vorhanden-
+       sein eines Wertes geprüft. Falls dieser nicht gefunden wird, war der
+       Registry-Zweig ursprünglich nicht vorhanden, muß also wieder gelöscht
+       werden.}
+      if Reg.OpenKey('\CLSID\' + ClassID + '\InProcServer32', True) then
       begin
-        Reg.DeleteKey('\CLSID\' + ClassID);
+        Result := Reg.ValueExists('ThreadingModel');
+        if not Result then
+        begin
+          Reg.DeleteKey('\CLSID\' + ClassID);
+        end;
+      end else
+      begin
+        Result := False;
       end;
-    end else
-    begin
-      Result := False;
+      {$ENDIF}
+    finally
+      Reg.Free;
     end;
-    {$ENDIF}
-  finally
-    Reg.Free;
   end;
 end;
 
@@ -151,39 +165,47 @@ var Reg    : TRegistry;
     Key    : string;
     DLLPath: string;
 begin
-  if Reg64 then ClassID := CdrtfeClassID64 else ClassID := CdrtfeClassID;
-  Reg := TRegistry.Create;
-  try
-    with Reg do
-    begin
-      {ShellExtensions löschen}
-      RootKey := HKEY_CLASSES_ROOT;
-      Access := Key_Read or Key_Write;
-      if Reg64 then Access := Access or KEY_WOW64_64KEY;
-      DeleteKey('\CLSID\' + ClassID + '\InProcServer32');
-      DeleteKey('\CLSID\' + ClassID);
-      {Kontextmenüeintrag für * löschen}
-      Key := '\*' + CMHPath + ClassID;
-      DeleteKey(Key);
-      {Kontextmenü für Ordner löschen}
-      Key := '\folder' + CMHPath + ClassID;
-      DeleteKey(Key);
-      {cdrtfe-Programmpfad löschen}
-      RootKey := HKEY_LOCAL_MACHINE;
-      DeleteKey('\Software\cdrtfe');     // Delphi-Bug: Key bleibt erhalten, x64
-    end;
-  finally
-    Reg.Free;
-  end;
-  {Workaround für Delphi-Bug: Unter 64-Bit-Windows wird der Schlüssel 'cdrtfe'
-   nicht gelöscht (Fehler in TRegistry). Daher rufen wir regsvr32 auf, das
-   die DLL abmeldet.}
   if Reg64 then
   begin
-    DLLPath := ExtractFilePath(Application.ExeName);
-    if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
-    DLLPath := '"' + DLLPath + cCdrtfeShlExDLL64 + '"';
-    ShlExecute('regsvr32', '-u -s ' + DLLPath);
+    ClassID := CdrtfeClassID64;
+    {Workaround für Delphi-Bug: Unter 64-Bit-Windows wird der Schlüssel 'cdrtfe'
+     nicht gelöscht (Fehler in TRegistry). Daher rufen wir regsvr32 auf, das
+     die DLL abmeldet.}
+    if Reg64 then
+    begin
+      DLLPath := ExtractFilePath(Application.ExeName);
+      if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
+      DLLPath := '"' + DLLPath + cCdrtfeShlExDLL64 + '"';
+      ShlExecute('regsvr32', '-u -s ' + DLLPath);
+      {dem externen Programmaufruf etwas Zeit geben.}
+      Sleep(500);
+    end;                       
+  end else
+  begin
+    ClassID := CdrtfeClassID;
+    Reg := TRegistry.Create;
+    try
+      with Reg do
+      begin
+        {ShellExtensions löschen}
+        RootKey := HKEY_CLASSES_ROOT;
+        Access := Key_Read or Key_Write;
+        if Reg64 then Access := Access or KEY_WOW64_64KEY;
+        DeleteKey('\CLSID\' + ClassID + '\InProcServer32');
+        DeleteKey('\CLSID\' + ClassID);
+        {Kontextmenüeintrag für * löschen}
+        Key := '\*' + CMHPath + ClassID;
+        DeleteKey(Key);
+        {Kontextmenü für Ordner löschen}
+        Key := '\folder' + CMHPath + ClassID;
+        DeleteKey(Key);
+        {cdrtfe-Programmpfad löschen}
+        RootKey := HKEY_LOCAL_MACHINE;
+        DeleteKey('\Software\cdrtfe');     // Delphi-Bug: Key bleibt erhalten, x64
+      end;
+    finally
+      Reg.Free;
+    end;
   end;
 end;
 
