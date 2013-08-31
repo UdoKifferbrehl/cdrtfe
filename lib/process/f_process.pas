@@ -1,9 +1,9 @@
 { f_process.pas: Prozesse, Fenster, ...
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.12.2011
+  letzte Änderung  31.08.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -225,27 +225,36 @@ end;
 procedure ShlExecute(const Cmd, Opt: string);
 var ErrorCode: Integer;
     Msg, Msg2: string;
+    MFHstring: string;
+    MFH      : THandle;
 begin
+  { Es kann passieren, dass ShlExecute aufgerufen wird, ohne dass ein MainForm
+    existiert. Dann das Handle auf 0 setzten.}
+  if Application.MainForm = nil then
+    MFH := 0
+  else
+    MFH := Application.MainForm.Handle;
   {$IFDEF WriteLogfile}
   AddLogCode(1109);
+  MFHstring := IntToStr(MFH);
   if Cmd = '' then
   begin
-    AddLog('ShellExecute(' + IntToStr(Application.MainForm.Handle) +
+    AddLog('ShellExecute(' + MFHstring +
            ', ''open'', ' + Opt + ', nil, nil, SW_SHOWNORMAL);', 2);
   end else
   begin
-    AddLog('ShellExecute(' + IntToStr(Application.MainForm.Handle) +
+    AddLog('ShellExecute(' + MFHstring +
            ', nil, ' + Cmd + ', ' + Opt + ', nil, SW_SHOWNORMAL);', 2);
   end;
   AddLog('', 2);
   {$ENDIF}
   if Cmd = '' then
   begin
-    ErrorCode := ShellExecute(Application.MainForm.Handle, 'open',
+    ErrorCode := ShellExecute(MFH, 'open',
                                 PChar(Opt), nil, nil, SW_SHOWNORMAL);
   end else
   begin
-    ErrorCode := ShellExecute(Application.MainForm.Handle, nil,
+    ErrorCode := ShellExecute(MFH, nil,
                                 PChar(Cmd), PChar(Opt), nil, SW_SHOWNORMAL);
   end;
   if ErrorCode <= 32 then
