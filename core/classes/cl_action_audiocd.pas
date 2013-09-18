@@ -2,10 +2,10 @@
 
   cl_action_audiocd.pas: Audio-CD
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.06.2012
+  letzte Änderung  18.09.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -100,24 +100,46 @@ var i         : Integer;
         begin
           CmdTemp := StartUpDir + cMPG123Bin +
                      ' -v --stereo -r 44100 -w ' +
-                     QuotePath(Target) + ' ' + QuotePath(Source) + CR
-                     // ' -v -S -b 16 -R 44100 -o wave:' +
-                     // QuotePath(Target) + ' ' + QuotePath(Source) + CR
+                     QuotePath(Target) + ' ' + QuotePath(Source) + CR;
+          if FSettings.AudioCD.CustomConvCmdMP3 <> '' then
+          begin
+            CmdTemp := FSettings.AudioCD.CustomConvCmdMP3 + CR;
+            CmdTemp := ReplaceString(CmdTemp, '%S', QuotePath(Source));
+            CmdTemp := ReplaceString(CmdTemp, '%T', QuotePath(Target));
+          end;
         end else
         if (Ext = cExtOgg) then
         begin
           CmdTemp := StartUpDir + cOggdecBin + ' -b 16 -o ' +
-                     QuotePath(Target) + ' ' + QuotePath(Source) + CR
+                     QuotePath(Target) + ' ' + QuotePath(Source) + CR;
+          if FSettings.AudioCD.CustomConvCmdOgg <> '' then
+          begin
+            CmdTemp := FSettings.AudioCD.CustomConvCmdOgg + CR;
+            CmdTemp := ReplaceString(CmdTemp, '%S', QuotePath(Source));
+            CmdTemp := ReplaceString(CmdTemp, '%T', QuotePath(Target));
+          end;
         end else
         if (Ext = cExtFlac) then
         begin
           CmdTemp := StartUpDir + cFLACBin + ' -d ' + QuotePath(Source) +
-                     ' -o ' + QuotePath(Target) + CR
+                     ' -o ' + QuotePath(Target) + CR;
+          if FSettings.AudioCD.CustomConvCmdFLAC <> '' then
+          begin
+            CmdTemp := FSettings.AudioCD.CustomConvCmdFLAC + CR;
+            CmdTemp := ReplaceString(CmdTemp, '%S', QuotePath(Source));
+            CmdTemp := ReplaceString(CmdTemp, '%T', QuotePath(Target));
+          end;
         end else
         if (Ext = cExtApe) then
         begin
           CmdTemp := StartUpDir + cMonkeyBin + ' ' + QuotePath(Source) + ' ' +
-                     QuotePath(Target) + ' -d' + CR
+                     QuotePath(Target) + ' -d' + CR;
+          if FSettings.AudioCD.CustomConvCmdApe <> '' then
+          begin
+            CmdTemp := FSettings.AudioCD.CustomConvCmdApe + CR;
+            CmdTemp := ReplaceString(CmdTemp, '%S', QuotePath(Source));
+            CmdTemp := ReplaceString(CmdTemp, '%T', QuotePath(Target));
+          end;
         end;
         FVList.Add(Target);
       end;
