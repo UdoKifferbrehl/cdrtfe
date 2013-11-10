@@ -3,7 +3,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.08.2013
+  letzte Änderung  10.11.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -211,8 +211,14 @@ var Dlg           : TForm;
     BannerBG      : string;
     DlgLabel      : TLabel;
     DlgImage      : TImage;
-    
+    DlgButtons    : array[0..5] of TButton;
+    DlgButtonCount: Integer;
+    DlgButtonDiff : Integer;
+    CurrentButton : TButton;
+
 begin
+  DlgButtonCount := 0;
+  for i := 0 to 5 - 1 do DlgButtons[i] := nil;
   DlgLabel := nil;
   DlgImage := nil;
   ImageHeight := 0;
@@ -250,9 +256,12 @@ begin
       if Component is TGraphicControl then
        (Component as TGraphicControl).Top :=
          (Component as TGraphicControl).Top + BannerHeight;
-      if Task and (Component is TButton) then 
-        (Component as TButton).Top :=
-          (Component as TButton).Top + 5;
+      if Task and (Component is TButton) then
+      begin
+        (Component as TButton).Top := (Component as TButton).Top + 5;
+        DlgButtons[DlgButtonCount] := (Component as TButton);
+        Inc(DlgButtonCount);
+      end;
       if Component is TGraphicControl then
         if (Component as TGraphicControl) is TImage then
           DlgImage := (Component as TGraphicControl) as TImage;
@@ -307,6 +316,22 @@ begin
         Panel.Height := ImageHeight
       else
         Panel.Height := MessageHeight;
+      i := 0;
+      CurrentButton := DlgButtons[i];
+      while DlgButtons[i] <> nil do
+      begin
+        if DlgButtons[i].Left > CurrentButton.Left then
+          CurrentButton := DlgButtons[i];
+        Inc(i);
+      end;
+      DlgButtonDiff := (Dlg.ClientWidth - CurrentButton.Width) -
+                       CurrentButton.Left - 8;
+      i := 0;
+      while DlgButtons[i] <> nil do
+      begin
+        DlgButtons[i].Left := DlgButtons[i].Left + DlgButtonDiff;
+        Inc(i);
+      end;
     end;
   finally
     Result := Dlg;
