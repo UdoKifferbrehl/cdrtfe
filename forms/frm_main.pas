@@ -5,7 +5,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.12.2013
+  letzte Änderung  23.12.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4604,7 +4604,14 @@ begin
   end;
 
   {automatische Erkennung des Disk-Typs}
-  if Self.FSettings.General.DetectDiskType then DetectDiskType(Drive);
+  if (FSettings.General.Choice = cDataCD) or
+     (FSettings.General.Choice = cAudioCD) or
+     (FSettings.General.Choice = cXCD) then
+    if Self.FSettings.General.DetectDiskType then DetectDiskType(Drive);
+
+  {automatisch TOC einlesen, wenn DAE aktives Projekt ist}
+  if FSettings.General.Choice = cDAE then
+    if FSettings.General.DAEAutoReadToc then ButtonDAEReadTocClick(nil);
 end;
 
 procedure TCdrtfeMainForm.DeviceRemoval(Drive: string);

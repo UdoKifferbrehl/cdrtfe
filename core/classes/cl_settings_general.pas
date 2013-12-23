@@ -5,7 +5,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.12.2011
+  letzte Änderung  23.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -46,6 +46,7 @@
                  PortableMode  : Boolean
                  DetectSpeeds  : Boolean
                  DetectDiskType: Boolean
+                 DAEAutoReadToc: Boolean
                  AutoSaveOnExit: Boolean
                  AllowFileOpen : Boolean
                  AllowDblClick : Boolean
@@ -102,6 +103,7 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
        FPortableMode  : Boolean;
        FDetectSpeeds  : Boolean;
        FDetectDiskType: Boolean;
+       FDAEAutoReadToc: Boolean;
        FAutoSaveOnExit: Boolean;
        FAllowFileOpen : Boolean;
        FAllowDblClick : Boolean;
@@ -151,6 +153,7 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
        property PortableMode  : Boolean read FPortableMode write FPortableMode;
        property DetectSpeeds  : Boolean read FDetectSpeeds write FDetectSpeeds;
        property DetectDiskType: Boolean read FDetectDiskType write FDetectDiskType;
+       property DAEAutoReadToc: Boolean read FDAEAutoReadToc write FDAEAutoReadToc;
        property AutoSaveOnExit: Boolean read FAutoSaveOnExit write FAutoSaveOnExit;
        property AllowFileOpen : Boolean read FAllowFileOpen write FAllowFileOpen;
        property AllowDblClick : Boolean read FAllowDblCLick write FAllowDblClick;
@@ -273,6 +276,7 @@ begin
   FPortableMode := False;
   FDetectSpeeds := False;
   FDetectDiskType := False;
+  FDAEAutoReadToc := False;
   FAutoSaveOnExit := False;
   FAllowFileOpen := True;
   FAllowDblClick := True;
@@ -319,6 +323,7 @@ begin
     FCDTextTP := ReadBool(Section, 'CDTextTP', False);
     FDetectSpeeds := ReadBool(Section, 'DetectSpeeds', FDetectSpeeds);
     FDetectDiskType := ReadBool(Section, 'DetectDiskType', FDetectDiskType);
+    FDAEAutoReadToc := ReadBool(Section, 'DAEAutoReadToc', FDAEAutoReadToc);
     FAutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
     FAllowFileOpen := ReadBool(Section, 'AllowFileOpen', True);
     FUseMplayer := ReadBool(Section, 'UseMPlayer', False);
@@ -379,6 +384,7 @@ begin
     WriteBool(Section, 'CDTextTP', FCDTextTP);
     WriteBool(Section, 'DetectSpeeds', FDetectSpeeds);
     WriteBool(Section, 'DetectDiskType', FDetectDiskType);
+    WriteBool(Section, 'DAEAutoReadToc', FDAEAutoReadToc);
     WriteBool(Section, 'AutoSaveOnExit', FAutoSaveOnExit);
     WriteBool(Section, 'AllowFileOpen', FAllowFileOpen);
     WriteBool(Section, 'AllowDblClick', FAllowDblClick);
