@@ -2,10 +2,10 @@
 
   cl_settings_general.pas: Objekt für allgemeine Einstellungen
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.11.2011
+  letzte Änderung  07.12.2011
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -45,6 +45,7 @@
                  CDTextTP      : Boolean
                  PortableMode  : Boolean
                  DetectSpeeds  : Boolean
+                 DetectDiskType: Boolean
                  AutoSaveOnExit: Boolean
                  AllowFileOpen : Boolean
                  AllowDblClick : Boolean
@@ -100,6 +101,7 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
        FCDTextTP      : Boolean;    // <title> - <performer>.mp3
        FPortableMode  : Boolean;
        FDetectSpeeds  : Boolean;
+       FDetectDiskType: Boolean;
        FAutoSaveOnExit: Boolean;
        FAllowFileOpen : Boolean;
        FAllowDblClick : Boolean;
@@ -148,6 +150,7 @@ type TabSheetIntegerArray = array[1..TabSheetCount] of Integer;
        property CDTextTP      : Boolean read FCDTextTP write FCDTextTP;
        property PortableMode  : Boolean read FPortableMode write FPortableMode;
        property DetectSpeeds  : Boolean read FDetectSpeeds write FDetectSpeeds;
+       property DetectDiskType: Boolean read FDetectDiskType write FDetectDiskType;
        property AutoSaveOnExit: Boolean read FAutoSaveOnExit write FAutoSaveOnExit;
        property AllowFileOpen : Boolean read FAllowFileOpen write FAllowFileOpen;
        property AllowDblClick : Boolean read FAllowDblCLick write FAllowDblClick;
@@ -269,6 +272,7 @@ begin
   FCDTextTP := False;
   FPortableMode := False;
   FDetectSpeeds := False;
+  FDetectDiskType := False;
   FAutoSaveOnExit := False;
   FAllowFileOpen := True;
   FAllowDblClick := True;
@@ -314,6 +318,7 @@ begin
     FCDTextUseTags := ReadBool(Section, 'CDTextUseTags', True);
     FCDTextTP := ReadBool(Section, 'CDTextTP', False);
     FDetectSpeeds := ReadBool(Section, 'DetectSpeeds', FDetectSpeeds);
+    FDetectDiskType := ReadBool(Section, 'DetectDiskType', FDetectDiskType);
     FAutoSaveOnExit := ReadBool(Section, 'AutoSaveOnExit', False);
     FAllowFileOpen := ReadBool(Section, 'AllowFileOpen', True);
     FUseMplayer := ReadBool(Section, 'UseMPlayer', False);
@@ -373,6 +378,7 @@ begin
     WriteBool(Section, 'CDTextUseTags', FCDTextUseTags);
     WriteBool(Section, 'CDTextTP', FCDTextTP);
     WriteBool(Section, 'DetectSpeeds', FDetectSpeeds);
+    WriteBool(Section, 'DetectDiskType', FDetectDiskType);
     WriteBool(Section, 'AutoSaveOnExit', FAutoSaveOnExit);
     WriteBool(Section, 'AllowFileOpen', FAllowFileOpen);
     WriteBool(Section, 'AllowDblClick', FAllowDblClick);

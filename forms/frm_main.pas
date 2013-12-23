@@ -5,7 +5,7 @@
   Copyright (c) 2004-2013 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.06.2013
+  letzte Änderung  07.12.2013
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -529,9 +529,10 @@ type
     {$IFDEF ShowCmdError}
     procedure CheckExitCode;
     {$ENDIF}
-    procedure ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
+    procedure DetectDiskType(const Drive: string);
     procedure DoMenuEraseDisk(const FastErase: Boolean);
     procedure DoMenuShowInfo(const ID: Integer);
+    procedure ExpandNodeDelayed(Node: TTreeNode; const TimerEvent: Boolean);
     procedure GetSettings;
     procedure InitMainform;
     procedure InitSpaceMeter;
@@ -659,7 +660,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      frm_audiocd_options, frm_audiocd_tracks,
      frm_xcd_options, frm_settings, frm_about, frm_output,
      frm_videocd_options, frm_dae_options, frm_maoutput,
-     cl_cdrtfedata, cl_devicechange, cl_sessionimport,
+     cl_cdrtfedata, cl_devicechange, cl_sessionimport, cl_diskinfo,
      {$IFDEF ShowTime} cl_timecount, {$ENDIF}
      {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
@@ -4239,6 +4240,78 @@ begin
   WindowStayOnTop(Self.Handle, StayOnTopState);
 end;
 
+{ DetectDiskType ---------------------------------------------------------------
+
+  ermittelt beim Einlegen eines Rohling den entsprechenden Rohlingstyp und
+  setzt das Spacemeter.                                                        }
+
+procedure TCdrtfeMainForm.DetectDiskType(const Drive: string);
+var DiskInfo : TDiskInfo;
+    Index    : Integer;
+    CurrDrive: string;
+    DeviceID : string;
+    DiskType : TDiskType;
+    Size     : Integer;
+    //Temp     : string;
+begin
+  {automatische Erkennung des Disk-Typs}
+  DiskInfo := nil;
+  Index := FSettings.General.TabSheetDrive[FSettings.General.Choice];
+  DeviceID := GetValueFromString(FDevices.CDWriter[Index]);
+  CurrDrive := FDevices.GetDriveLetter(DeviceID);
+  CurrDrive := Copy(CurrDrive, 1, 1);
+  {Erkennung nur durchführen, wenn Disk ins gewählte Laufwerk eingelegt wird.}
+  if LowerCase(CurrDrive) = LowerCase(Drive) then
+  begin
+    //TLogWin.Inst.Add('Arrival  : ' + Drive);
+    //TLogWin.Inst.Add('CurrDrive: ' + CurrDrive);
+    {Objekt zum Ausführen der Aktion}
+    try
+      case FSettings.Cdrecord.HaveMediaInfo of
+        True : Diskinfo := TDiskinfoM.Create;
+        False: Diskinfo := TDiskinfoA.Create;
+      end;
+      DiskInfo.GetDiskInfo(DeviceID, (FSettings.General.Choice = cAudioCD));
+      DiskType := DiskInfo.DiskType;
+      //Temp := EnumToStr(TypeInfo(TDiskType), DiskType);
+      //TLogWin.Inst.Add('Disk.DiskType: ' + Temp);
+      {SpaceMeter anpassen}
+      if DiskType in [DT_CD_R, DT_CD_RW] then
+      begin
+        Size := Round(DiskInfo.Sectors / 512);
+        //TLogWin.Inst.Add('Sectors: ' + IntToStr(DiskInfo.Sectors));
+        //TLogWin.Inst.Add('Size   : ' + IntToStr(Size));
+        if Size < 670 then SpaceMeter.DiskType := SMDT_CD650 else
+        if Size < 720 then SpaceMeter.DiskType := SMDT_CD700 else
+        if Size < 820 then SpaceMeter.DiskType := SMDT_CD800 else
+        if Size < 850 then SpaceMeter.DiskType := SMDT_CD870;
+      end else
+      if FSettings.General.Choice = cDataCD then
+      begin
+        {DVD/BD nur für Datendisk}
+        if DiskType in [DT_DVD_R, DT_DVD_RW, DT_DVD_PlusR, DT_DVD_PlusRW] then
+        begin
+          SpaceMeter.DiskType := SMDT_DVD;
+        end else
+        if DiskType in [DT_DVD_RDL, DT_DVD_PlusRDL] then
+        begin
+          SpaceMeter.DiskType := SMDT_DVD_DL;
+        end else
+        if DiskType in [DT_BD_R, DT_BD_RE] then
+        begin
+          SpaceMeter.DiskType := SMDT_BD;
+        end else
+        if DiskType in [DT_BD_R_DL, DT_BD_RE_DL] then
+        begin
+          SpaceMeter.DiskType := SMDT_BD_DL;
+        end;
+      end;
+    finally
+      DiskInfo.Free;
+    end;
+  end;
+end;
+
 { Initialisierungen -----------------------------------------------------------}
 
 { InitMainform -----------------------------------------------------------------
@@ -4529,6 +4602,9 @@ begin
     Self.CheckControlsSpeeds;
     Self.UpdatePanels('<>', '');
   end;
+
+  {automatische Erkennung des Disk-Typs}
+  if Self.FSettings.General.DetectDiskType then DetectDiskType(Drive);
 end;
 
 procedure TCdrtfeMainForm.DeviceRemoval(Drive: string);
@@ -4679,7 +4755,7 @@ end;
 
 { SpaceMeterTypeChange ---------------------------------------------------------
 
-  Speichert den neues Disk-Type des SpaceMeters.                               }
+  Speichert den neuen Disk-Type des SpaceMeters.                               }
 
 procedure TCdrtfeMainForm.SpaceMeterTypeChange;
 begin
