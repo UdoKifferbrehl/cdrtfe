@@ -150,7 +150,7 @@
 			<VersionInfo Name="MajorVer">1</VersionInfo>
 			<VersionInfo Name="MinorVer">5</VersionInfo>
 			<VersionInfo Name="Release">1</VersionInfo>
-			<VersionInfo Name="Build">1</VersionInfo>
+			<VersionInfo Name="Build">2</VersionInfo>
 			<VersionInfo Name="Debug">False</VersionInfo>
 			<VersionInfo Name="PreRelease">False</VersionInfo>
 			<VersionInfo Name="Special">False</VersionInfo>
@@ -166,9 +166,9 @@ http://cdrtfe.sourceforge.net
 eMail:
 kerberos002@arcor.de</VersionInfoKeys>
 			<VersionInfoKeys Name="FileDescription">cdrtools/Mode2CDMaker/VCDImager Frontend</VersionInfoKeys>
-			<VersionInfoKeys Name="FileVersion">1.5.1.1</VersionInfoKeys>
+			<VersionInfoKeys Name="FileVersion">1.5.1.2</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">cdrtfe</VersionInfoKeys>
-			<VersionInfoKeys Name="LegalCopyright">Copyright © 2002-2013  O. Valencia, O. Kutsche</VersionInfoKeys>
+			<VersionInfoKeys Name="LegalCopyright">Copyright © 2002-2014  O. Valencia, O. Kutsche</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
 			<VersionInfoKeys Name="OriginalFilename">cdrtfe.exe</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">cdrtools Frontend</VersionInfoKeys>
