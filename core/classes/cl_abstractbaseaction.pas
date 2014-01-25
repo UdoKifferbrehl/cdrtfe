@@ -2,10 +2,10 @@
 
   cl_abstractbaseaction.pas: abstrakte Basisklasse für Projekt
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  25.01.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -95,7 +95,8 @@ type TCdrtfeAction = class(TObject)
 implementation
 
 uses f_strings, f_getdosoutput, f_cygwin, f_filesystem, f_window, f_locations,
-     const_locations, const_common;
+     const_locations, {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     const_common;
 
 { TCdrtfeAction -------------------------------------------------------------- }
 
@@ -211,7 +212,7 @@ var CmdGetSize: string;
     Sectors   : string;
     Temp      : string;
     Output    : TStringList;
-    i, p      : Integer;
+    i         : Integer;
 begin
   SetPanels('<>', FLang.GMS('mburn12'));
   Result := '';
@@ -220,10 +221,15 @@ begin
   CmdGetSize := QuotePath(CmdGetSize);
   CmdGetsize := CmdGetSize + ' -print-size -quiet' + MkisofsOptions;
   Output.Text := GetDosOutput(PChar(CmdGetsize), True, True);
-  Sectors := Trim(Output.Text);
-  p := LastDelimiter(LF, Sectors);
-  if p > 0 then Delete(Sectors, 1, p);
-  if StrToIntDef(Sectors, -1) >= 0 then Result := Sectors else
+  for i := 0 to Output.Count - 1 do
+  begin
+    Sectors := Trim(Output[i]);
+    if StrToIntDef(Sectors, -1) >= 0 then Result := Sectors;
+  end;
+  {$IFDEF WriteLogfile}
+  AddLog('Sectors: ' + Result, 0);
+  {$ENDIF}
+  if Result = '' then
   begin
     Temp := ExtractFileName(cMkisofsBin);
     MessageShow(Temp + ' -print-size failed.');
