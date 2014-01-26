@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.02.2012
+  letzte Änderung  26.01.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -357,7 +357,8 @@ begin
     {Ist die cygwin1.dll im cdrtfe-Verzeichnis oder Suchpfad?}
     CygwinOk := FileExists(StartUpDir + '\' + cCygwin1Dll) or
                 (FindInSearchPath(cCygwin1Dll) <> '');
-    {Weitermachen, wenn cdrtools + cygwin oder Mingw32-cdrtools vorhanden sind.}
+    {Weitermachen, wenn cdrtools + cygwin oder Mingw32-cdrtools vorhanden sind.
+     Für vcdimager spielt es keine Rolle.}
     Ok := CdrtoolsOk and (CygwinOk or Mingw);
     {Weitere Tests für mkisofs}
     MkisofsOk := CheckMkisofsImports;
@@ -378,7 +379,7 @@ begin
     end else
     begin
       {Cygwin Path Prefix initialisieren}
-      InitCygwinPathPrefix;
+      if not Mingw then InitCygwinPathPrefix;
       {Version und Lauffähigkeit von cdrecord/mkisofs prüfen.}
       Result := Result and CheckVersion(Settings, Lang);
       {Ist cdda2wav da? Wenn nicht, dann kein DAE.}
