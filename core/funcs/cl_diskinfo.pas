@@ -2,9 +2,9 @@
 
   cl_diskinfo.pas: Zugriff auf Rohlingsinformationen und Medien-Überprüfung
 
-  Copyright (c) 2006-2011 Oliver Valencia
+  Copyright (c) 2006-2014 Oliver Valencia
 
-  letzte Änderung  24.03.2011
+  letzte Änderung  05.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -164,6 +164,9 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        {$IFDEF DebugReadCDInfo}
        procedure DebugShowDiskInfo; override;
        {$ENDIF}
+       {$IFDEF WriteLogfile}
+       procedure WriteDiskInfoToLogfile;
+       {$ENDIF}
        procedure InitDiskInfo; override;
      public
        function CheckMedium(var Args: TCheckMediumArgs): Boolean; override;
@@ -173,6 +176,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, f_stringlist,{$ENDIF}
+     {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      cl_cdrtfedata, cl_sessionimport,
      f_filesystem, f_strings, f_getdosoutput, f_helper, f_window, f_locations,
      const_locations, const_common, const_tabsheets;
@@ -1195,6 +1199,21 @@ begin
 end;
 {$ENDIF}
 
+{$IFDEF WriteLogfile}
+procedure TDiskInfoM.WriteDiskInfoToLogfile;
+begin
+  AddLog('DiskInfo:', 0);
+  AddLog('=========', 2);
+  AddLog('Disk Type      : ' + EnumToStr(TypeInfo(TDiskType), FDiskType), 3);
+  AddLog('Sectors        : ' + IntToStr(FSectors), 3);
+  AddLog('Sectors Free   : ' + IntToStr(FSecFree), 3);
+  AddLog('Size (MiB)     : ' + FloatToStr(FSize), 3);
+  AddLog('SizeUsed (MiB) : ' + FloatToStr(FSizeUsed), 3);
+  AddLog('SizeFree (MiB) : ' + FloatToStr(FSizeFree), 3);
+  AddLog('', 2);
+end;
+{$ENDIF}
+
 { InitDiskInfo -----------------------------------------------------------------
 
   setzt die Variablen des TDiskInfo-Records zurück.                            }
@@ -1582,6 +1601,9 @@ begin
 
   {$IFDEF DebugReadCDInfo}
   DebugShowDiskInfo;
+  {$ENDIF}
+  {$IFDEF WriteLogfile}
+  WriteDiskInfoToLogfile;
   {$ENDIF}
 
   {Variablen löschen für den nächsten Aufruf.}
