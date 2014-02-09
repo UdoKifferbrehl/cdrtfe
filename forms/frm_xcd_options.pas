@@ -2,10 +2,10 @@
 
   frm_xcd_options.pas: XCD-CD: Optionen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  09.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -212,6 +212,7 @@ begin
   begin
     CheckBoxUseErrorProtection.Enabled := FSettings.FileFlags.RrencOk;
     EditSecCount.Enabled := FSettings.FileFlags.RrencOk;
+    GroupBoxErrorProtection.Visible := FSettings.FileFlags.RrencOk;
   end;
 end;
 

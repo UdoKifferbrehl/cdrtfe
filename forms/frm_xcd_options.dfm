@@ -219,16 +219,22 @@ object FormXCDOptions: TFormXCDOptions
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 8
+    TabStop = True
+    ExplicitWidth = 473
     inherited Bevel1: TBevel
       Width = 473
+      ExplicitWidth = 473
     end
     inherited PanelTop: TPanel
       Width = 473
+      ExplicitWidth = 473
       inherited Image2: TImage
         Width = 298
+        ExplicitWidth = 298
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end
