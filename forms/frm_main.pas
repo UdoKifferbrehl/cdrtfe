@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.12.2013
+  letzte Änderung  12.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4260,8 +4260,9 @@ begin
   DeviceID := GetValueFromString(FDevices.CDWriter[Index]);
   CurrDrive := FDevices.GetDriveLetter(DeviceID);
   CurrDrive := Copy(CurrDrive, 1, 1);
-  {Erkennung nur durchführen, wenn Disk ins gewählte Laufwerk eingelegt wird.}
-  if LowerCase(CurrDrive) = LowerCase(Drive) then
+  {Erkennung nur durchführen, wenn Disk ins gewählte Laufwerk eingelegt wird
+   oder wenn STRG-F5 gedrückt wurde (Drive = '')}
+  if (LowerCase(CurrDrive) = LowerCase(Drive)) or (Drive = '') then
   begin
     //TLogWin.Inst.Add('Arrival  : ' + Drive);
     //TLogWin.Inst.Add('CurrDrive: ' + CurrDrive);
@@ -4304,6 +4305,16 @@ begin
         if DiskType in [DT_BD_R_DL, DT_BD_RE_DL] then
         begin
           SpaceMeter.DiskType := SMDT_BD_DL;
+        end;
+      end;
+      {wenn Multisession aktiv und Sessions importiert werden sollen, Import
+       starten.}
+      if Fsettings.General.Choice = cDataCD then
+      begin
+        if FSettings.DataCD.ContinueCD and FData.ProjectIsEmpty(cDataCD)then
+        begin
+          TLogWin.Inst.Add('STRG-F5: Import');
+          UserImportCD;
         end;
       end;
     finally
@@ -5297,6 +5308,7 @@ begin
   case Key of
     VK_F12: ToggleStayOnTopState;
     VK_F10: if ssCtrl in Shift then begin SetGlobalWriter; Key := 0; end;
+    VK_F5 : if ssCtrl in Shift then DeviceArrival(''); //DetectDiskType('');
   end;
 end;
 
