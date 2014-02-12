@@ -2,10 +2,10 @@
 
   cl_action_cdinfo.pas: Infos über Disks und Laufwerke
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  12.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,7 +52,8 @@ type TCdrtfeActionCDInfo = class(TCdrtfeAction)
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}         
-     f_strings, f_init, usermessages, f_locations, const_locations, f_helper;
+     f_strings, f_init, usermessages, f_locations, const_locations, f_helper,
+     cl_diskinfo;
 
 { TCdrtfeActionCDInfo -------------------------------------------------------- }
 
@@ -63,9 +64,10 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
   Infos anzeigen: -scanbus, -prcap, -atip, -toc, -msinfo.                      }
 
 procedure TCdrtfeActionCDInfo.GetCDInfos;
-var Cmd : string;
-    Temp: string;
-    Ok  : Boolean;
+var Cmd  : string;
+    Temp : string;
+    Ok   : Boolean;
+    DType: TDiskType;
 begin
   SendMessage(FFormHandle, WM_ButtonsOff, 0, 0);
   if not FSettings.CDInfo.CapInfo then
@@ -124,6 +126,13 @@ begin
     {Gesamtkapazität}
     if Ok then
     begin
+      {Disk-Typ}
+      DType := FDisk.DiskType;
+      Temp := EnumToStr(TypeInfo(TDiskType), DType) + ':';
+      Delete(Temp, 1, 3);
+      Temp := ReplaceString(Temp, '_', '-');
+      MessageShow(Temp);
+      {Gesamtkapaziät}
       Temp := Format(FLang.GMS('mburn07'),
               [FormatFloat(' ##0.##', FDisk.Size),
                IntToStr(Round(Int(FDisk.Time)) div 60),
