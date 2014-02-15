@@ -1,9 +1,9 @@
 { f_window.pas: Funktionnen für Fenster und Dialoge
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.11.2013
+  letzte Änderung  15.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -29,9 +29,10 @@ unit f_window;
 interface
 
 uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages, Dialogs, Classes,
-     MMSystem, StdCtrls, Graphics, ExtCtrls;
+     MMSystem, StdCtrls, Graphics, ExtCtrls, CommCtrl, Themes, UxTheme;
 
 function FlagIsSet(const Mask, Flag: Longint): Boolean;
+function SetTreeViewStyle(Control: TWinControl): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
 function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound, Task: Boolean): Integer; overload;
 function ShowTimedMsgDlg(const Text, Caption: string; const Flags: Longint; const TimeOut, TimeOutResult: Integer): Integer;
@@ -103,6 +104,30 @@ begin
       (Control as TForm).Font.Name := FontName;
     if Control is TFrame then
       (Control as TFrame).Font.Name := FontName;
+//    if Control is TForm then
+//      (Control as TForm).Font.Size := 9;  
+//    if Control is TFrame then
+//      (Control as TFrame).Font.Size := 9;
+  end;
+end;
+
+{ SetTreeViewStyle -------------------------------------------------------------
+
+  aktiviert den Vista-Explorer-Style, sofern möglich. Vergrößert den Abstand
+  der Elemente. Rückgabewert ist False, falls der Style nicht angewendet werden
+  kann.                                                                        }
+
+function SetTreeViewStyle(Control: TWinControl): Boolean;
+begin
+  Result := False;
+  if PlatformWinVista and ThemeServices.ThemesEnabled then
+  begin
+    {Höhe der Elemente setzten}
+    if PlatformWin2kXP then Control.Perform(TVM_SETITEMHEIGHT, 19, 0);
+    {Vista-Explorer-Style aktivieren}
+    SetWindowTheme(Control.Handle, 'explorer', nil);
+    if Control is TTreeView then (Control as TTreeView).ShowLines := False;
+    Result := True;
   end;
 end;
 

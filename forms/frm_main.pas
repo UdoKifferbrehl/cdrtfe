@@ -5,7 +5,7 @@
   Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.02.2014
+  letzte Änderung  15.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3505,6 +3505,7 @@ begin
     PanelBrowser.Height := FSettings.FileExplorer.Height;
     PanelBrowser.Visible  := True;
     FileBrowser.Path := FSettings.FileExplorer.Path;
+    FileBrowser.SetTreeViewStyle;
   end else
   {FileExplorer ausblenden}
   if not Status and FFileExplorerShowing then
@@ -5059,6 +5060,8 @@ begin
   TC.StopTimeCount;
   TLogWin.Inst.Add('StartupTime: ' + TC.TimeAsString);
   {$ENDIF}
+  SetTreeViewStyle(CDETreeView);
+  SetTreeViewStyle(XCDETreeView);
 end;
 
 { FormActivate -----------------------------------------------------------------

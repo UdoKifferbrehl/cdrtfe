@@ -1,8 +1,8 @@
 { c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
 
-  Copyright (c) 2009-2013 Oliver Valencia
+  Copyright (c) 2009-2014 Oliver Valencia
 
-  letzte Änderung  15.06.2013
+  letzte Änderung  15.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -89,6 +89,7 @@ type
     procedure UpdateTranslation;
     procedure TreeViewSetFocus;
     procedure ListViewSetFocus;
+    procedure SetTreeViewStyle;
     property TreeViewHasFocus: Boolean read GetTreeViewFocused;
     property ListViewHasFocus: Boolean read GetListViewFocused;
     property LabelCaption: string write FLabelCaption;
@@ -104,6 +105,8 @@ type
 implementation
 
 {$R *.dfm}
+
+uses f_window;
 
 {$IFDEF UseVirtualShellTools}
 { cdrtfe läßt für das gesamte Fenster Ole-Drag-Drop-Operationen aus dem Explorer
@@ -300,6 +303,15 @@ begin
   if FTreeViewWidth > 0 then PanelFolder.Width := FTreeViewWidth;
 
   UpdateTranslation;
+end;
+
+procedure TFrameFileBrowser.SetTreeViewStyle;
+begin
+  {$IFDEF UseVirtualShellTools}
+  {$ELSE}
+  if f_window.SetTreeViewStyle(FBShellTreeView) then
+    FBShellTreeView.ShowLines := False;
+  {$ENDIF}
 end;
 
 end.

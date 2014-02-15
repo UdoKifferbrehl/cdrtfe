@@ -1,8 +1,8 @@
 { dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
-  Copyright (c) 2007-2013 Oliver Valencia
+  Copyright (c) 2007-2014 Oliver Valencia
 
-  letzte Änderung  15.06.2013
+  letzte Änderung  15.02.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -126,6 +126,8 @@ type TFolderBrowser = class(TComponent)
      end;
 
 implementation
+
+uses f_window;
 
 const cComCtl32Name      : string   = 'comctl32.dll';
       cComCtl32MinVersion: Cardinal = $00050051;           // >=5.81
@@ -429,6 +431,11 @@ begin
         {$ENDIF}
       end;                                                    
     end;
+    {$IFDEF UseVirtualShellTools}
+    {$ELSE}
+    if SetTreeViewStyle(FBShellTreeView) then
+      FBShellTreeView.ShowLines := False;
+    {$ENDIF}
 
     {TabOrder}
     FBShellTreeView.TabOrder := 0;
