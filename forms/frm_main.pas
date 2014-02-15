@@ -4253,6 +4253,7 @@ var DiskInfo : TDiskInfo;
     DeviceID : string;
     DiskType : TDiskType;
     Size     : Integer;
+    SpaceUsed: Int64;
     //Temp     : string;
 begin
   {automatische Erkennung des Disk-Typs}
@@ -4308,14 +4309,20 @@ begin
           SpaceMeter.DiskType := SMDT_BD_DL;
         end;
       end;
-      {wenn Multisession aktiv und Sessions importiert werden sollen, Import
-       starten.}
-      if Fsettings.General.Choice = cDataCD then
+      {bei Datendisk belegten Speicher anzeigen}
+      if FSettings.General.Choice = cDataCD then
       begin
+        {wenn Multisession aktiv und Sessions importiert werden sollen, Import
+         starten.}
         if FSettings.DataCD.ContinueCD and FData.ProjectIsEmpty(cDataCD)then
         begin
-          TLogWin.Inst.Add('STRG-F5: Import');
+          //TLogWin.Inst.Add('STRG-F5: Import');
           UserImportCD;
+        end else
+        begin
+          SpaceUsed := (DiskInfo.Sectors - DiskInfo.SecFree) * 2048;
+          FData.MultisessionCDImportSetSizeUsed(SpaceUsed);
+          UpdateGauges;
         end;
       end;
     finally
