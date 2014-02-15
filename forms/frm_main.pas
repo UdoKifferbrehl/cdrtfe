@@ -669,7 +669,7 @@ uses frm_datacd_fs, frm_datacd_options, frm_datacd_fs_error,
      f_filesystem, f_process, f_window, f_strings, f_largeint, f_init, f_helper,
      f_checkproject, f_foldernamecache, f_screensaversup, f_locations,
      f_treelistfuncs, f_dischelper, f_instance, f_compprop, f_cygwin, f_system,
-     const_tabsheets, const_common, const_locations;
+     f_wininfo, const_tabsheets, const_common, const_locations;
 
 var DeviceChangeNotifier: TDeviceChangeNotifier;
     {$IFDEF ShowTime}
@@ -4520,6 +4520,12 @@ begin
   DeviceChangeNotifier.OnDiskRemoved := Self.DeviceRemoval;
   {Mainmenu-Icons}
   InitMainMenu;
+  {ComboBox-Position anpassen}
+  if PlatformWinVista and (ComboBoxSpeed.Font.Size = 9) then
+  begin
+    ComboBoxSpeed.Top := ComboBoxSpeed.Top - 1;
+    ComboBoxDrives.Top := ComboBoxDrives.Top - 1;
+  end;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------
