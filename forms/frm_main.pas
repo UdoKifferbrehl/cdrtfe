@@ -3450,6 +3450,7 @@ begin
     end;
     FileBrowser.Path := TempPath;
     PanelBrowser.Visible := True;
+    FileBrowser.SetTreeViewStyle;
   end;
 end;
 
@@ -3505,7 +3506,6 @@ begin
     PanelBrowser.Height := FSettings.FileExplorer.Height;
     PanelBrowser.Visible  := True;
     FileBrowser.Path := FSettings.FileExplorer.Path;
-    FileBrowser.SetTreeViewStyle;
   end else
   {FileExplorer ausblenden}
   if not Status and FFileExplorerShowing then
