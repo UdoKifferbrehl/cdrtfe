@@ -104,10 +104,13 @@ begin
       (Control as TForm).Font.Name := FontName;
     if Control is TFrame then
       (Control as TFrame).Font.Name := FontName;
-//    if Control is TForm then
-//      (Control as TForm).Font.Size := 9;  
-//    if Control is TFrame then
-//      (Control as TFrame).Font.Size := 9;
+    if PlatformWinVista then
+    begin
+      if Control is TForm then
+        (Control as TForm).Font.Size := 9;
+      if Control is TFrame then
+        (Control as TFrame).Font.Size := 9;
+    end;
   end;
 end;
 

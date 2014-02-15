@@ -4,7 +4,7 @@ object FormAbout: TFormAbout
   BorderStyle = bsDialog
   Caption = 'Info '#252'ber cdrtfe'
   ClientHeight = 327
-  ClientWidth = 365
+  ClientWidth = 379
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,22 +16,24 @@ object FormAbout: TFormAbout
   OnCreate = FormCreate
   OnShow = FormShow
   DesignSize = (
-    365
+    379
     327)
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl: TPageControl
     Left = 0
     Top = 56
-    Width = 367
+    Width = 381
     Height = 234
     ActivePage = TabSheetInfo
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
+    ExplicitWidth = 367
     object TabSheetInfo: TTabSheet
       Caption = 'Infos'
+      ExplicitWidth = 359
       DesignSize = (
-        359
+        373
         206)
       object Image1: TImage
         Left = 3
@@ -58,13 +60,12 @@ object FormAbout: TFormAbout
       object LabelHintTest: TLabel
         Left = 3
         Top = 155
-        Width = 350
-        Height = 40
+        Width = 364
+        Height = 55
         Alignment = taCenter
         Anchors = [akLeft, akTop, akRight]
         AutoSize = False
         Caption = 'LabelHintTest'
-        ExplicitWidth = 330
       end
       object StaticTextVersion: TStaticText
         Left = 103
@@ -118,10 +119,6 @@ object FormAbout: TFormAbout
     object TabSheetLicense: TTabSheet
       Caption = 'Lizenz'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 339
-      ExplicitHeight = 0
       object RichEdit1: TRichEdit
         Left = 3
         Top = 3
@@ -136,10 +133,6 @@ object FormAbout: TFormAbout
     object TabSheetCredits: TTabSheet
       Caption = 'Credits'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 339
-      ExplicitHeight = 0
       object RichEdit2: TRichEdit
         Left = 3
         Top = 3
@@ -153,7 +146,7 @@ object FormAbout: TFormAbout
     end
   end
   object Button1: TButton
-    Left = 284
+    Left = 298
     Top = 296
     Width = 75
     Height = 25
@@ -162,25 +155,26 @@ object FormAbout: TFormAbout
     Caption = 'Ok'
     ModalResult = 1
     TabOrder = 0
+    ExplicitLeft = 284
   end
   inline FrameTopBanner1: TFrameTopBanner
     Left = 0
     Top = 0
-    Width = 365
+    Width = 379
     Height = 53
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
     TabStop = True
     ExplicitWidth = 365
     inherited Bevel1: TBevel
-      Width = 365
+      Width = 379
       ExplicitWidth = 365
     end
     inherited PanelTop: TPanel
-      Width = 365
+      Width = 379
       ExplicitWidth = 365
       inherited Image2: TImage
-        Width = 190
+        Width = 204
         ExplicitWidth = 190
       end
       inherited LabelDescription: TLabel

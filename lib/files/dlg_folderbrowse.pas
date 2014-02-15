@@ -431,6 +431,7 @@ begin
         {$ENDIF}
       end;                                                    
     end;
+    SetFont(FBDialog);
     {$IFDEF UseVirtualShellTools}
     {$ELSE}
     if SetTreeViewStyle(FBShellTreeView) then

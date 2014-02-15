@@ -45,7 +45,7 @@ object FormSettings: TFormSettings
     Top = 56
     Width = 473
     Height = 297
-    ActivePage = TabSheetCdrtfe
+    ActivePage = TabSheetCdrecord
     TabOrder = 2
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
@@ -181,7 +181,7 @@ object FormSettings: TFormSettings
           Left = 239
           Top = 24
           Width = 201
-          Height = 41
+          Height = 54
           AutoSize = False
           Caption = 
             'Ein Klick auf '#39'Start'#39' f'#252'hrt die gew'#228'hlte Aktion sofort ohne weit' +
@@ -310,7 +310,7 @@ object FormSettings: TFormSettings
           Left = 8
           Top = 88
           Width = 425
-          Height = 41
+          Height = 46
           AutoSize = False
           Caption = 
             'Diese Optionen werden beim Aufruf von cdrecord bzw. mkisofs der ' +
@@ -660,16 +660,21 @@ object FormSettings: TFormSettings
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
+    ExplicitWidth = 489
     inherited Bevel1: TBevel
       Width = 489
+      ExplicitWidth = 489
     end
     inherited PanelTop: TPanel
       Width = 489
+      ExplicitWidth = 489
       inherited Image2: TImage
         Width = 314
+        ExplicitWidth = 314
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end
