@@ -2,9 +2,9 @@
 ;
 ;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.4.3
 ;
-;  Copyright (c) 2006-2013 Oliver Valencia
+;  Copyright (c) 2006-2014 Oliver Valencia
 ;
-;  letzte Änderung  11.08.2013
+;  letzte Änderung  18.02.2014
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,12 +12,12 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVer "1.5.1"
+#define MyAppVer "1.5.2"
 #define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
-#define MyAppCopyright "Copyright © 2002-2013  O. Valencia, O. Kutsche"
+#define MyAppCopyright "Copyright © 2002-2014  O. Valencia, O. Kutsche"
 
 [Setup]
 ; Installer
@@ -107,6 +107,7 @@ Source: I:\cdrtfe\proto\tools\cygwin\sh.exe; DestDir: {app}\tools\cygwin; Flags:
 Source: I:\cdrtfe\proto\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cygwin\cygiconv-2.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cygwin\cygintl-3.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cygwin\cygpopt-0.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\vcd
 Source: I:\cdrtfe\proto\tools\cygwin\cygwin.ini; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; Check: CygIniCheck; AfterInstall: CygIniSet
 ; Tools helper
 Source: I:\cdrtfe\proto\tools\helper\cygpathprefix.exe; DestDir: {app}\tools\helper; Flags: ignoreversion; Components: tools\cdrt

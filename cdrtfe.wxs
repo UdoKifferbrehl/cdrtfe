@@ -3,7 +3,7 @@
 <!--
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4FD0D58143"?>-->
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4F"?>
-<?define ProductId="$(var.BaseId)01010000"?>
+<?define ProductId="$(var.BaseId)01030000"?>
 <?define UpgradeId="$(var.BaseId)11000000"?>
 <?define CompMain="$(var.BaseId)00000000"?>
 <?define CompShlEx="$(var.BaseId)00000001"?>
@@ -15,17 +15,17 @@
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
 
-  <Product Name='cdrtfe 1.5' Id='$(var.ProductId)' UpgradeCode='$(var.UpgradeId)'
-    Language='1033' Codepage='1252' Version='1.5' Manufacturer='Oliver Valencia - Open Source Developer'>
+  <Product Name='cdrtfe 1.5.2' Id='$(var.ProductId)' UpgradeCode='$(var.UpgradeId)'
+    Language='1033' Codepage='1252' Version='1.5.2' Manufacturer='Oliver Valencia - Open Source Developer'>
 
-    <Package Id='*' Keywords='Installer' Description="cdrtfe 1.5 Installer"
+    <Package Id='*' Keywords='Installer' Description="cdrtfe 1.5.2 Installer"
       Comments='cdrtfe is Open Source (GPL)' Manufacturer='Oliver Valencia - Open Source Developer'
       InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
 
     <Upgrade Id='$(var.UpgradeId)'>
       <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
         Minimum='1.0.0' IncludeMinimum='yes'
-        Maximum='1.5.0' IncludeMaximum='no' />
+        Maximum='1.5.2' IncludeMaximum='no' />
     </Upgrade>
 
     <InstallExecuteSequence>
@@ -418,6 +418,9 @@
                     <Component Id="cygwin1.dll" DiskId="1" Guid="81E2371C-EC2A-4864-AAC2-FC732556DCB4">
                         <File Id="cygwin1.dll" Name="cygwin1.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygwin1.dll" />
                     </Component>
+                    <Component Id="cygpopt_0.dll" DiskId="1" Guid="75C77DBF-3BB5-4AD4-9453-7AB13E46D9AD">
+                        <File Id="cygpopt_0.dll" Name="cygpopt-0.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygpopt-0.dll" />
+                    </Component>
                     <Component Id="sh.exe" DiskId="1" Guid="94B133B2-2FEF-4849-B3EB-0162BF0289A9">
                         <File Id="sh.exe" Name="sh.exe" Source="I:\cdrtfe\proto\tools\cygwin\sh.exe" />
                     </Component>
@@ -582,6 +585,7 @@
       <ComponentRef Id="cygintl_3.dll" />
       <ComponentRef Id="cygwin.ini" />
       <ComponentRef Id="cygwin1.dll" />
+      <ComponentRef Id="cygpopt_0.dll" />
       <ComponentRef Id="sh.exe" />
       <ComponentRef Id="flac.exe" />
       <ComponentRef Id="lame.exe" />
