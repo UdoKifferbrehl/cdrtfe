@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2014 Oliver Valencia
 ;
-;  letzte Änderung  18.02.2014
+;  letzte Änderung  22.02.2014
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -113,11 +113,11 @@ Source: I:\cdrtfe\proto\tools\cygwin\cygwin.ini; DestDir: {app}\tools\cygwin; Fl
 Source: I:\cdrtfe\proto\tools\helper\cygpathprefix.exe; DestDir: {app}\tools\helper; Flags: ignoreversion; Components: tools\cdrt
 ; Tools: mode2cdmaker
 Source: I:\cdrtfe\proto\tools\xcd\Mode2CDMaker.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\m2cdm
-;Source: I:\cdrtfe\proto\tools\xcd\m2cdm.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\m2cdm\ex
-;Source: I:\cdrtfe\misc\misc\cdrtfe_tools.ini; DestDir: {app}; Flags: ignoreversion; Components: tools\m2cdm\ex
+Source: I:\cdrtfe\proto\tools\xcd\m2cdm.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\m2cdm\ex
+Source: I:\cdrtfe\misc\misc\cdrtfe_tools.ini; DestDir: {app}; Flags: ignoreversion; Components: tools\m2cdm\ex
 ; Tools: rrenc/rrdec
-;Source: I:\cdrtfe\proto\tools\xcd\rrenc.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\rrenc
-;Source: I:\cdrtfe\proto\tools\xcd\rrdec.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\rrenc
+Source: I:\cdrtfe\proto\tools\xcd\rrenc.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\rrenc
+Source: I:\cdrtfe\proto\tools\xcd\rrdec.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\rrenc
 ; Tools: XCD extraction
 Source: I:\cdrtfe\proto\tools\xcd\m2f2extract.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\xcd
 Source: I:\cdrtfe\proto\tools\xcd\d2fgui.exe; DestDir: {app}\tools\xcd; Flags: ignoreversion; Components: tools\xcd
@@ -220,8 +220,8 @@ Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Lan
 Name: tools; Description: {cm:CompTools}; Flags: fixed; Types: custom;
 Name: tools\cdrt; Description: {cm:CompCdrt}; Flags: fixed; Types: custom;
 Name: tools\m2cdm; Description: {cm:CompM2CDM}; Flags: dontinheritcheck checkablealone; Types: custom;
-;Name: tools\m2cdm\ex; Description: {cm:CompM2CDMex}; Flags: dontinheritcheck;
-;Name: tools\rrenc; Description: {cm:CompRrenc}; Flags: dontinheritcheck; Types: custom;
+Name: tools\m2cdm\ex; Description: {cm:CompM2CDMex}; Flags: dontinheritcheck;
+Name: tools\rrenc; Description: {cm:CompRrenc}; Flags: dontinheritcheck; Types: custom;
 Name: tools\xcd; Description: {cm:CompXCD}; Flags: dontinheritcheck; Types: custom;
 Name: tools\audio; Description: {cm:CompAudio}; Flags: dontinheritcheck; Types: custom;
 Name: tools\vcd; Description: {cm:CompVCD}; Flags: dontinheritcheck; Types: custom;

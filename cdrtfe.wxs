@@ -468,6 +468,15 @@
                     <Component Id="Mode2CDMaker.exe" DiskId="1" Guid="B2FA0FCB-CCFD-446D-AB83-35A3CD78FC3B">
                         <File Id="Mode2CDMaker.exe" Name="Mode2CDMaker.exe" Source="I:\cdrtfe\proto\tools\xcd\Mode2CDMaker.exe" />
                     </Component>
+                    <Component Id="rrdec.exe" DiskId="1" Guid="331A850A-E6B0-495B-B177-715775C06A75">
+                        <File Id="rrdec.exe" Name="rrdec.exe" Source="I:\cdrtfe\proto\tools\xcd\rrdec.exe" />
+                    </Component>
+                    <Component Id="rrenc.exe" DiskId="1" Guid="E1E8A9C9-77E9-4545-8FD8-2761207E2935">
+                        <File Id="rrenc.exe" Name="rrenc.exe" Source="I:\cdrtfe\proto\tools\xcd\rrenc.exe" />
+                    </Component>
+                    <Component Id="m2cdm.exe" DiskId="1" Guid="3FB09094-EAB6-40A0-B55B-7D92425E04F6">
+                        <File Id="m2cdm.exe" Name="m2cdm.exe" Source="I:\cdrtfe\proto\tools\xcd\m2cdm.exe" />
+                    </Component>
                 </Directory>
             </Directory>
 
@@ -599,6 +608,9 @@
       <ComponentRef Id="dat2file.exe" />
       <ComponentRef Id="m2f2extract.exe" />
       <ComponentRef Id="Mode2CDMaker.exe" />
+      <ComponentRef Id="rrenc.exe" />
+      <ComponentRef Id="rrdec.exe" />
+      <ComponentRef Id="m2cdm.exe" />
       <ComponentRef Id="ProgramMenuDir" />
 
     </Feature>
