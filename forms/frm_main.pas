@@ -4528,6 +4528,7 @@ begin
   begin
     ComboBoxSpeed.Top := ComboBoxSpeed.Top - 1;
     ComboBoxDrives.Top := ComboBoxDrives.Top - 1;
+    StaticTextSpeed.Top := StaticTextSpeed.Top - 1;
   end;
 end;
 

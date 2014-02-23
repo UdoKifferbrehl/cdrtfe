@@ -28,10 +28,8 @@ object FormAbout: TFormAbout
     ActivePage = TabSheetInfo
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
-    ExplicitWidth = 367
     object TabSheetInfo: TTabSheet
       Caption = 'Infos'
-      ExplicitWidth = 359
       DesignSize = (
         373
         206)
@@ -42,7 +40,7 @@ object FormAbout: TFormAbout
         Height = 65
       end
       object Label1: TLabel
-        Left = 103
+        Left = 105
         Top = 99
         Width = 15
         Height = 13
@@ -50,7 +48,7 @@ object FormAbout: TFormAbout
         OnClick = Label1Click
       end
       object Label2: TLabel
-        Left = 103
+        Left = 105
         Top = 122
         Width = 16
         Height = 13
@@ -68,7 +66,7 @@ object FormAbout: TFormAbout
         Caption = 'LabelHintTest'
       end
       object StaticTextVersion: TStaticText
-        Left = 103
+        Left = 105
         Top = 11
         Width = 87
         Height = 17
@@ -76,7 +74,7 @@ object FormAbout: TFormAbout
         TabOrder = 0
       end
       object StaticText3: TStaticText
-        Left = 103
+        Left = 105
         Top = 41
         Width = 18
         Height = 17
@@ -84,7 +82,7 @@ object FormAbout: TFormAbout
         TabOrder = 1
       end
       object StaticText6: TStaticText
-        Left = 103
+        Left = 105
         Top = 64
         Width = 24
         Height = 17
@@ -155,7 +153,6 @@ object FormAbout: TFormAbout
     Caption = 'Ok'
     ModalResult = 1
     TabOrder = 0
-    ExplicitLeft = 284
   end
   inline FrameTopBanner1: TFrameTopBanner
     Left = 0
@@ -165,14 +162,14 @@ object FormAbout: TFormAbout
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
     TabStop = True
-    ExplicitWidth = 365
+    ExplicitWidth = 379
     inherited Bevel1: TBevel
       Width = 379
       ExplicitWidth = 365
     end
     inherited PanelTop: TPanel
       Width = 379
-      ExplicitWidth = 365
+      ExplicitWidth = 379
       inherited Image2: TImage
         Width = 204
         ExplicitWidth = 190
