@@ -4623,24 +4623,29 @@ end;
 
 procedure TCdrtfeMainForm.DeviceArrival(Drive: string);
 begin
-  // TLogWin.Inst.Add('Arrival: ' + Drive);
-  if Self.FSettings.General.DetectSpeeds then
+  {nur auf eine Device-Arrival-Message reagieren, wenn Initialisierung abg-
+   schlossen ist.}
+  if FInitDone then
   begin
-    Self.UpdatePanels('<>', Self.FLang.GMS('m124'));
-    Self.FDevices.UpdateSpeedLists(Drive);
-    Self.CheckControlsSpeeds;
-    Self.UpdatePanels('<>', '');
+    // TLogWin.Inst.Add('Arrival: ' + Drive);
+    if Self.FSettings.General.DetectSpeeds then
+    begin
+      Self.UpdatePanels('<>', Self.FLang.GMS('m124'));
+      Self.FDevices.UpdateSpeedLists(Drive);
+      Self.CheckControlsSpeeds;
+      Self.UpdatePanels('<>', '');
+    end;
+
+    {automatische Erkennung des Disk-Typs}
+    if (FSettings.General.Choice = cDataCD) or
+       (FSettings.General.Choice = cAudioCD) or
+       (FSettings.General.Choice = cXCD) then
+      if Self.FSettings.General.DetectDiskType then DetectDiskType(Drive);
+
+    {automatisch TOC einlesen, wenn DAE aktives Projekt ist}
+    if FSettings.General.Choice = cDAE then
+      if FSettings.General.DAEAutoReadToc then ButtonDAEReadTocClick(nil);
   end;
-
-  {automatische Erkennung des Disk-Typs}
-  if (FSettings.General.Choice = cDataCD) or
-     (FSettings.General.Choice = cAudioCD) or
-     (FSettings.General.Choice = cXCD) then
-    if Self.FSettings.General.DetectDiskType then DetectDiskType(Drive);
-
-  {automatisch TOC einlesen, wenn DAE aktives Projekt ist}
-  if FSettings.General.Choice = cDAE then
-    if FSettings.General.DAEAutoReadToc then ButtonDAEReadTocClick(nil);
 end;
 
 procedure TCdrtfeMainForm.DeviceRemoval(Drive: string);
