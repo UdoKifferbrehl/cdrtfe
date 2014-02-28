@@ -80,7 +80,7 @@ Kontakt/Contact
 ---------------
 cdrtfe Homepage:         http://cdrtfe.sourceforge.net/
 
-eMail          :         kerberos002@arcor.de
+eMail          :         kerberos002@users.sourceforge.net
 
                          Bitte im Betreff das Tag [cdrtfe] verwenden, damit die
                          eMail den Spam-Filter passieren kann.

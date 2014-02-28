@@ -117,6 +117,10 @@ object FormAbout: TFormAbout
     object TabSheetLicense: TTabSheet
       Caption = 'Lizenz'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object RichEdit1: TRichEdit
         Left = 3
         Top = 3
@@ -131,6 +135,10 @@ object FormAbout: TFormAbout
     object TabSheetCredits: TTabSheet
       Caption = 'Credits'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object RichEdit2: TRichEdit
         Left = 3
         Top = 3
