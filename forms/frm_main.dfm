@@ -155,7 +155,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton1Click
-          ExplicitLeft = 742
         end
         object CDESpeedButton2: TSpeedButton
           Left = 743
@@ -168,7 +167,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton2Click
-          ExplicitLeft = 742
         end
         object CDESpeedButton3: TSpeedButton
           Left = 743
@@ -181,7 +179,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton3Click
-          ExplicitLeft = 742
         end
         object CDESpeedButton4: TSpeedButton
           Left = 743
@@ -194,7 +191,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton4Click
-          ExplicitLeft = 742
         end
         object CDESpeedButton5: TSpeedButton
           Left = 743
@@ -207,7 +203,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = CDESpeedButton5Click
-          ExplicitLeft = 742
         end
         object PanelDataCD: TPanel
           Left = 8
@@ -434,10 +429,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -463,7 +454,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton1Click
-          ExplicitLeft = 742
         end
         object AudioSpeedButton2: TSpeedButton
           Left = 743
@@ -476,7 +466,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton2Click
-          ExplicitLeft = 742
         end
         object AudioSpeedButton3: TSpeedButton
           Left = 743
@@ -489,7 +478,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton3Click
-          ExplicitLeft = 742
         end
         object AudioSpeedButton4: TSpeedButton
           Left = 743
@@ -502,7 +490,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = AudioSpeedButton4Click
-          ExplicitLeft = 742
         end
         object AudioListView: TListView
           Left = 8
@@ -647,10 +634,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -676,7 +659,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton1Click
-          ExplicitLeft = 742
         end
         object XCDESpeedButton2: TSpeedButton
           Left = 743
@@ -689,7 +671,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton2Click
-          ExplicitLeft = 742
         end
         object XCDESpeedButton3: TSpeedButton
           Left = 743
@@ -702,7 +683,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton3Click
-          ExplicitLeft = 742
         end
         object XCDESpeedButton4: TSpeedButton
           Left = 743
@@ -715,7 +695,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton4Click
-          ExplicitLeft = 742
         end
         object XCDESpeedButton5: TSpeedButton
           Left = 743
@@ -728,7 +707,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton5Click
-          ExplicitLeft = 742
         end
         object XCDESpeedButton6: TSpeedButton
           Left = 711
@@ -741,7 +719,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton6Click
-          ExplicitLeft = 710
         end
         object XCDESpeedButton7: TSpeedButton
           Left = 743
@@ -754,7 +731,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton7Click
-          ExplicitLeft = 742
         end
         object PanelXCDView: TPanel
           Left = 8
@@ -813,7 +789,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
               Height = 3
               Cursor = crVSplit
               Align = alTop
-              ExplicitWidth = 524
             end
             object XCDEListView1: TListView
               Left = 0
@@ -978,10 +953,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'L'#246'schen'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -1038,10 +1009,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -1124,10 +1091,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -1289,10 +1252,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'Disk-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -1565,10 +1524,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
@@ -1594,7 +1549,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton1Click
-          ExplicitLeft = 742
         end
         object VideoSpeedButton2: TSpeedButton
           Left = 743
@@ -1607,7 +1561,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton2Click
-          ExplicitLeft = 742
         end
         object VideoSpeedButton3: TSpeedButton
           Left = 743
@@ -1620,7 +1573,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton3Click
-          ExplicitLeft = 742
         end
         object VideoSpeedButton4: TSpeedButton
           Left = 743
@@ -1633,7 +1585,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = VideoSpeedButton4Click
-          ExplicitLeft = 742
         end
         object VideoListView: TListView
           Left = 8
@@ -1732,10 +1683,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         769
         317)
