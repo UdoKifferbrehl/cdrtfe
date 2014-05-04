@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2014 Oliver Valencia
 ;
-;  letzte Änderung  22.02.2014
+;  letzte Änderung  04.05.2014
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -82,8 +82,8 @@ Name: copycyg; Description: {cm:CopyCygwin}; GroupDescription: {cm:SpecialTask};
 ; Main program file
 Source: I:\cdrtfe\proto\cdrtfe.exe; DestDir: {app}; DestName: cdrtfe.exe; Flags: ignoreversion; Components: prog
 Source: I:\cdrtfe\proto\cdrtfedbg.dll; DestDir: {app}; DestName: cdrtfedbg.dll; Flags: ignoreversion; Components: prog
-Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: ignoreversion; Components: prog
-Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: ignoreversion; Components: prog; Check: IsWin64;
+Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: replacesameversion restartreplace uninsrestartdelete; Components: prog
+Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: replacesameversion restartreplace uninsrestartdelete; Components: prog; Check: IsWin64;
 Source: I:\cdrtfe\proto\cdrtfe.jdbg; DestDir: {app}; Flags: ignoreversion; Components: prog
 ; Manifest - seit Version 1.4 nicht mehr benötigt
 ; Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
@@ -194,6 +194,10 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}; Filen
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\cdrtfe.exe"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt;
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.cmd"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 0, 1
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.bat"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 1, 0
+; ShellExtension
+;Root: HKLM; Subkey: "Software\cdrtfe"; Flags: dontcreatekey uninsdeletekey;
+;Root: HKCR; Subkey: "CLSID\{{23ADD0C0-5A56-11D7-B55C-00E07D907FE2}}"; Flags: dontcreatekey uninsdeletekey;
+;Root: HKCR; Subkey: "CLSID\{{23ADD0C0-5A56-11D7-B55C-00E07D907FE3}}"; Flags: dontcreatekey uninsdeletekey;
 
 [Run]
 Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
@@ -207,6 +211,10 @@ Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; F
 [UninstallDelete]
 Type: files; Name: "{app}\tools\cdrtools\*.dll"; Tasks: copycyg
 Type: files; Name: "{app}\tools\cdrtools\*.cmd"; Tasks: copycyg
+
+[UninstallRun]
+Filename: "{sys}\regsvr32.exe"; Parameters: "/u /s ""{app}""\cdrtfeShlEx.dll";
+Filename: "{sys}\regsvr32.exe"; Parameters: "/u /s ""{app}""\cdrtfeShlEx64.dll"; Check: IsWin64;
 
 [Types]
 Name: custom; Description: cdrtfe Setup; Flags: iscustom
