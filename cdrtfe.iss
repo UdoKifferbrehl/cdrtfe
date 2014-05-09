@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2014 Oliver Valencia
 ;
-;  letzte Änderung  04.05.2014
+;  letzte Änderung  07.05.2014
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVer "1.5.2"
+#define MyAppVer "1.5.2.1"
 #define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
@@ -82,8 +82,8 @@ Name: copycyg; Description: {cm:CopyCygwin}; GroupDescription: {cm:SpecialTask};
 ; Main program file
 Source: I:\cdrtfe\proto\cdrtfe.exe; DestDir: {app}; DestName: cdrtfe.exe; Flags: ignoreversion; Components: prog
 Source: I:\cdrtfe\proto\cdrtfedbg.dll; DestDir: {app}; DestName: cdrtfedbg.dll; Flags: ignoreversion; Components: prog
-Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: replacesameversion restartreplace uninsrestartdelete; Components: prog
-Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: replacesameversion restartreplace uninsrestartdelete; Components: prog; Check: IsWin64;
+Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: ignoreversion restartreplace uninsrestartdelete; Components: prog
+Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: ignoreversion restartreplace uninsrestartdelete; Components: prog; Check: IsWin64;
 Source: I:\cdrtfe\proto\cdrtfe.jdbg; DestDir: {app}; Flags: ignoreversion; Components: prog
 ; Manifest - seit Version 1.4 nicht mehr benötigt
 ; Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
