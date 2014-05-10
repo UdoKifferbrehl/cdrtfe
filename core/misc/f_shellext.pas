@@ -2,10 +2,10 @@
 
   f_shellext.pas: ShellExtensions registrieren/löschen
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  31.08.2013
+  letzte Änderung  10.05.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -39,7 +39,7 @@ procedure UnregisterShellExtensions;
 
 implementation
 
-uses f_wininfo, f_process, const_core, const_locations;
+uses f_wininfo, f_process, f_strings, const_core, const_locations;
 
 const CMHPath: string = '\shellex\ContextMenuHandlers\';
       KEY_WOW64_64KEY = $0100;
@@ -107,8 +107,7 @@ end;
 { DoRegisterShellExtensions ----------------------------------------------------
 
   RegisterShellExtensions träg alle nötigen Informationen in die Registry ein,
-  damit die ShellExtensions verwendet werden können. Im UNterschied zu früheren
-  Versionen ist eine Aktivierung per Kommandozeile nicht mehr möglich.         }
+  damit die ShellExtensions verwendet werden können.                           }
 
 procedure DoRegisterShellExtensions(const Reg64: Boolean);
 var Reg    : TRegistry;
@@ -121,7 +120,7 @@ begin
   if Reg64 then DLLName := cCdrtfeShlExDLL64 else DLLName := cCdrtfeShlExDLL;
   DLLPath := ExtractFilePath(Application.ExeName);
   if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
-  DLLPath := DLLPath + DLLName;
+  DLLPath := Quote(DLLPath + DLLName);
   Reg := TRegistry.Create;
   try
     with Reg do
@@ -146,7 +145,7 @@ begin
       {cdrtfe-Programmpfad eintragen}
       RootKey := HKEY_LOCAL_MACHINE; //HKEY_CURRENT_USER;
       OpenKey('\Software\cdrtfe\Program', True);
-      WriteString('Path', ParamStr(0));
+      WriteString('Path', Quote(ParamStr(0)));
     end;
   finally
     Reg.Free;
@@ -156,8 +155,7 @@ end;
 { DoUnregisterShellExtensions --------------------------------------------------
 
   UnregisterShellExtensions entfernt die zu den ShellExtensions gehörenden Ein-
-  träge aus der Registry und deaktiviert diese. Im Gegensatz zu zu früheren
-  Versionen ist eine Deaktivierung per Kommandozeile nicht mehr möglich.       }
+  träge aus der Registry und deaktiviert diese.                                }
 
 procedure DoUnregisterShellExtensions(const Reg64: Boolean);
 var Reg    : TRegistry;
