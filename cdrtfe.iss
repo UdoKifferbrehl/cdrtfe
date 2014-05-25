@@ -33,6 +33,7 @@ AllowNoIcons=yes
 UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
+MinVersion=4.1,5.0
 ;Unistaller
 SignedUninstaller=yes
 SignedUninstallerDir=I:\cdrtfe\setupscript\inno\signeduninstaller
