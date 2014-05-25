@@ -5,7 +5,7 @@
   Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.05.2014
+  letzte Änderung  25.05.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -120,7 +120,10 @@ begin
   if Reg64 then DLLName := cCdrtfeShlExDLL64 else DLLName := cCdrtfeShlExDLL;
   DLLPath := ExtractFilePath(Application.ExeName);
   if DLLPath[Length(DLLPath)] = '\' then Delete(DLLPath, Length(DLLPath), 1);
-  DLLPath := Quote(DLLPath + DLLName);
+  if PlatformWin2kXP then
+    DLLPath := Quote(DLLPath + DLLName)
+  else
+    DLLPath := DLLPath + DLLName;
   Reg := TRegistry.Create;
   try
     with Reg do
@@ -145,7 +148,10 @@ begin
       {cdrtfe-Programmpfad eintragen}
       RootKey := HKEY_LOCAL_MACHINE; //HKEY_CURRENT_USER;
       OpenKey('\Software\cdrtfe\Program', True);
-      WriteString('Path', Quote(ParamStr(0)));
+      if PlatformWin2kXP then
+        WriteString('Path', Quote(ParamStr(0)))
+      else
+        WriteString('Path', ParamStr(0));
     end;
   finally
     Reg.Free;
