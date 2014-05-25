@@ -2,7 +2,7 @@
 
   Copyright (c) 2009-2014 Oliver Valencia
 
-  letzte Änderung  15.02.2014
+  letzte Änderung  25.05.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -218,13 +218,13 @@ begin
   {$IFDEF UseVirtualShellTools}
     // für VirtualExplorerListView nicht notwendig
   {$ELSE}
-  if FColCaptionName <> '' then
+  if (FColCaptionName <> '') and (FBShellListView.Columns.Count > 0) then
     FBShellListView.Column[0].Caption := FColCaptionName;
-  if FColCaptionSize <> '' then
+  if (FColCaptionSize <> '') and (FBShellListView.Columns.Count > 2) then
     FBShellListView.Column[2].Caption := FColCaptionSize;
-  if FColCaptionType <> '' then
+  if (FColCaptionType <> '') and (FBShellListView.Columns.Count > 1) then
     FBShellListView.Column[1].Caption := FColCaptionType;
-  if FColCaptionModified <> '' then
+  if (FColCaptionModified <> '') and (FBShellListView.Columns.Count > 3)  then
     FBShellListView.Column[3].Caption := FColCaptionModified;
   {$ENDIF}
 end;
