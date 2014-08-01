@@ -117,6 +117,10 @@ object FormAbout: TFormAbout
     object TabSheetLicense: TTabSheet
       Caption = 'Lizenz'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object RichEdit1: TRichEdit
         Left = 3
         Top = 3
@@ -131,6 +135,10 @@ object FormAbout: TFormAbout
     object TabSheetCredits: TTabSheet
       Caption = 'Credits'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object RichEdit2: TRichEdit
         Left = 3
         Top = 3
@@ -162,16 +170,21 @@ object FormAbout: TFormAbout
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
     TabStop = True
+    ExplicitWidth = 379
     inherited Bevel1: TBevel
       Width = 379
+      ExplicitWidth = 379
     end
     inherited PanelTop: TPanel
       Width = 379
+      ExplicitWidth = 379
       inherited Image2: TImage
         Width = 204
+        ExplicitWidth = 204
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end
