@@ -31,16 +31,21 @@ object FormMAOutput: TFormMAOutput
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
     TabStop = True
+    ExplicitWidth = 608
     inherited Bevel1: TBevel
       Width = 608
+      ExplicitWidth = 608
     end
     inherited PanelTop: TPanel
       Width = 608
+      ExplicitWidth = 608
       inherited Image2: TImage
         Width = 433
+        ExplicitWidth = 433
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end

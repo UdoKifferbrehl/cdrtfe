@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005-2012 Oliver Valencia
+  Copyright (c) 2005-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  20.10.2012
+  letzte Änderung  28.11.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -126,12 +126,14 @@ type TDevices = class(TObject)
        procedure ButtonCancelClick(Sender: TObject);
        procedure FormDestroy(Sender: TObject);
      private
+       FDevices    : TDevices;
        FLang       : TLang;
        FImageLists : TImageLists;
        FCDWriter   : TStringList;
        FSelDevices : string;
      public
        procedure Init;
+       property Devices        : TDevices write FDevices;
        property Lang           : TLang write FLang;
        property ImageLists     : TImageLists write FImageLists;
        property CDWriter       : TStringList write FCDWriter;
@@ -796,8 +798,9 @@ end;
 { TFormSelectWriter - private }
 
 procedure TFormSelectWriter.Init;
-var i      : Integer;
-    NewItem: TListItem;
+var i          : Integer;
+    NewItem    : TListItem;
+    DriveLetter: string;
 begin
   FSelDevices := '';
   SetFont(Self);
@@ -806,7 +809,7 @@ begin
   Position := poScreenCenter;
   BorderIcons := [biSystemMenu];
   ClientHeight := 180;
-  ClientWidth := 280;
+  ClientWidth := 300;
   OnShow := FormShow;
   OnDestroy := FormDestroy;
   {Banner}
@@ -824,7 +827,7 @@ begin
     Left := 8;
     Top := 61;
     Height := 76;
-    Width := 264;
+    Width := 284;
     CheckBoxes := True;
     Visible := True;
     ViewStyle := vsReport;
@@ -838,7 +841,7 @@ begin
   with ButtonOk do
   begin
     Parent := Self;
-    Left := 117;
+    Left := 137;
     Top := 145;
     Height := 25;
     Width := 75;
@@ -850,7 +853,7 @@ begin
   with ButtonCancel do
   begin
     Parent := Self;
-    Left := 197;
+    Left := 217;
     Top := 145; // 40;
     Height := 25;
     Width := 75;
@@ -862,8 +865,12 @@ begin
   {ListView füllen}
   for i := 0 to FCDWriter.Count - 2 do
   begin
+    DriveLetter := FDevices.GetDriveLetter(FCDWriter.ValueFromIndex[i]);
+    Delete(DriveLetter, LastDelimiter('\', DriveLetter), 1);
+    DriveLetter := UpperCase(DriveLetter);
     NewItem := ListView.Items.Add;
-    NewItem.Caption := FCDWriter.Names[i] + ' (' + FCDWriter.ValueFromIndex[i] + ')';
+    NewItem.Caption := '(' + DriveLetter + ') ' +FCDWriter.Names[i] +
+                       ' ('+ FCDWriter.ValueFromIndex[i] + ')';
     NewItem.ImageIndex := FImageLists.IconCDDrive;
   end;
 end;

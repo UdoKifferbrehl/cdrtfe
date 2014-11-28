@@ -5,7 +5,7 @@
   Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.03.2014
+  letzte Änderung  28.11.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -466,6 +466,7 @@ type
     procedure MainMenuEraseFullClick(Sender: TObject);
     procedure MainMenuShowInfoClick(Sender: TObject);
     procedure AudioListViewPopupSortClick(Sender: TObject);
+    procedure ComboBoxDrivesDropDown(Sender: TObject);
   private
     { Private declarations }
     FImageLists: TImageLists;              // FormCreate - FormDestroy
@@ -509,6 +510,7 @@ type
     FSelectedDevice     : string;
     FLVArray: array[0..cLVCount] of TListView;
     FInitDone           : Boolean;
+    // ComboBoxDrivesWindowProcORIGINAL: TWndMethod;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
     function GetCurrentTreeView: TTreeView;
@@ -604,6 +606,7 @@ type
     procedure WMCheckDataFS(var Msg: TMessage); message WM_CheckDataFS;
     procedure WMMinimize(var Msg: TMessage); message WM_Minimize;
     procedure WMDriveSettings(var Msg: TMessage); message WM_DriveSettings;
+    // procedure ComboBoxDrivesWindowProc(var Message: TMessage);
     {eigene Event-Handler}
     procedure DeviceArrival(Drive: string);
     procedure DeviceRemoval(Drive: string);
@@ -3827,7 +3830,8 @@ end;
   Laufwerken zugeordnet wird.                                                  }
 
 procedure TCdrtfeMainForm.CheckControlsSpeeds;
-var RWFlag: string;
+var RWFlag   : string;
+    DriveName: string;
 begin
   if FSettings.General.DetectSpeeds then
   begin
@@ -3844,10 +3848,12 @@ begin
       cCDImage  : if RadioButtonImageRead.Checked then RWFlag := '[R]' else
                                                        RWFlag := '[W]';
     end;
+    DriveName := ComboBoxDrives.Items[ComboBoxDrives.ItemIndex];
+    if (Pos('(', DriveName) = 1) and (Pos(':', DriveName) = 3) then
+      Delete(DriveName, 1, 5);
     ComboBoxSpeed.Items.Clear;
     ComboBoxSpeed.Items.CommaText :=
-      FDevices.CDSpeedList.Values[ComboBoxDrives.Items[ComboBoxDrives.ItemIndex]
-      + RWFlag];
+      FDevices.CDSpeedList.Values[DriveName + RWFlag];
   end;
   {falls möglich, die für das Tabsheet gespeicherte Geschwindigkeit setzen}
   if FSettings.General.TabSheetSpeed[FSettings.General.Choice] <
@@ -3865,7 +3871,9 @@ procedure TCdrtfeMainForm.CheckControls;
 
   {lokale Prozeduren nur der Übersicht wegen.}
   procedure SetDrives(DeviceList: TStringList);
-  var i: Integer;
+  var i          : Integer;
+      s          : string;
+      DriveLetter: string;
   begin
     case FSettings.General.Choice of
       cDataCD,
@@ -3888,7 +3896,17 @@ procedure TCdrtfeMainForm.CheckControls;
     ComboBoxDrives.Items.Clear;
     for i := 0 to (DeviceList.Count - 1) do
     begin
-      ComboBoxDrives.Items.Add(DeviceList.Names[i]);
+      // ComboBoxDrives.Items.Add(DeviceList.Names[i]);
+      s := '';
+      DriveLetter := FDevices.GetDriveLetter(DeviceList.ValueFromIndex[i]);
+      if DriveLetter <> '' then
+      begin
+        s := '(' + DriveLetter + ') ';
+        Delete(s, LastDelimiter('\', s), 1);
+        s := UpperCase(s);
+      end;
+      s := s + DeviceList.Names[i];
+      ComboBoxDrives.Items.Add(s);
     end;
     i := FSettings.General.Choice;
     if ComboBoxDrives.Items.Count > FSettings.General.TabSheetDrive[i] then
@@ -4536,6 +4554,9 @@ begin
     ComboBoxDrives.Top := ComboBoxDrives.Top - 1;
     StaticTextSpeed.Top := StaticTextSpeed.Top - 1;
   end;
+  {angepaßte WindowProc für ComboBoxDrives}
+//  ComboBoxDrivesWindowProcORIGINAL := ComboBoxDrives.WindowProc;
+//  ComboBoxDrives.WindowProc := ComboBoxDrivesWindowProc;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------
@@ -4957,6 +4978,7 @@ begin
       FSettings.General.Choice := TempChoice;
       {Einstellungen in GUI übernehmen}
       GetSettings;
+      ComboBoxChange(ComboBoxDrives); // ComboBoxDrives.Hint setzen
       {Tree-Views erneut initialisieren}
       InitTreeViews;
       {Objekt zum Ausführen der Aktion}
@@ -7647,6 +7669,7 @@ begin
     FSettings.General.TabSheetDrive[FSettings.General.Choice] :=
       ComboBoxDrives.ItemIndex;
     CheckControlsSpeeds;
+    ComboBoxDrives.Hint := ComboBoxDrives.Items[ComboBoxDrives.ItemIndex];
   end else
   if (Sender as TComboBox) = ComboBoxSpeed then
   begin
@@ -7655,7 +7678,43 @@ begin
   end;
 end;
 
+{ OnDropDown -------------------------------------------------------------------
 
+  passt die Breite der DropDownList an.                                       }
+
+
+procedure TCdrtfeMainForm.ComboBoxDrivesDropDown(Sender: TObject);
+begin
+  AutoSizeComboBoxDropDownList(Sender as TComboBox);
+end;
+
+{ ComboBoxDrivesWindowProc -----------------------------------------------------
+
+  modifizierte WindowProc für ComboBoxDrives, damit eine längere DropDownList
+  rechtsbündig angezeigt wird.                                                 }
+(*
+procedure TCdrtfeMainForm.ComboBoxDrivesWindowProc(var Message: TMessage);
+var cr, lbr: TRect;
+begin
+  //drawing the list box with combobox items
+  if Message.Msg = WM_CTLCOLORLISTBOX then
+  begin
+    GetWindowRect(ComboBoxDrives.Handle, cr);
+    //list box rectangle
+    GetWindowRect(Message.LParam, lbr);
+    //move it to left to match right border
+    if cr.Right <> lbr.Right then
+      MoveWindow(Message.LParam,
+                 lbr.Left - (lbr.Right - cr.Right),
+                 lbr.Top,
+                 lbr.Right - lbr.Left,
+                 lbr.Bottom - lbr.Top,
+                 {True}False);
+  end
+  else
+    ComboBoxDrivesWindowProcORIGINAL(Message);
+end;
+*)
 { Label-Events --------------------------------------------------------------- }
 
 { OnClick ----------------------------------------------------------------------

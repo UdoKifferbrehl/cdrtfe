@@ -3,7 +3,7 @@
   Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  15.02.2014
+  letzte Änderung  27.11.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,6 +12,7 @@
   f_window.pas stellt Hilfs-Funktionen zur Verfügung:
     * Standard-Dialog
     * Eigenschaften von Formularen ändern (Stay-on-top)
+    * Eigenschaften von Componenten ändern
 
 
   exportierte Funktionen/Prozeduren:
@@ -36,6 +37,7 @@ function SetTreeViewStyle(Control: TWinControl): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
 function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound, Task: Boolean): Integer; overload;
 function ShowTimedMsgDlg(const Text, Caption: string; const Flags: Longint; const TimeOut, TimeOutResult: Integer): Integer;
+procedure AutoSizeComboBoxDropDownList(CB: TComboBox);
 procedure SetButtonCaptions(const Ok, Cancel, Yes, No: string);
 procedure SetFont(Control: TWinControl);
 procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
@@ -490,6 +492,34 @@ begin
   end else
   begin
     SetWindowLong(PB.Handle, GWL_STYLE, cs and not PBS_MARQUEE);
+  end;
+end;
+
+{ AutoSizeComboBoxDropDownList -------------------------------------------------
+
+  passt die Breite der DropDownList an.                                        }
+
+procedure AutoSizeComboBoxDropDownList(CB: TComboBox);
+const HORIZONTAL_PADDING = 4;
+var itemsFullWidth: integer;
+    idx           : integer;
+    itemWidth     : integer;
+begin
+  itemsFullWidth := 0;
+  // get the max needed with of the items in dropdown state
+  for idx := 0 to CB.Items.Count - 1 do
+  begin
+    itemWidth := CB.Canvas.TextWidth(CB.Items[idx]);
+    itemWidth := itemWidth +  2 * HORIZONTAL_PADDING;
+    if (itemWidth > itemsFullWidth) then itemsFullWidth := itemWidth;
+  end;
+  // set the width of drop down if needed
+  if (itemsFullWidth > CB.Width) then
+  begin
+    //check if there would be a scroll bar
+    if CB.DropDownCount < CB.Items.Count then
+      itemsFullWidth := itemsFullWidth + GetSystemMetrics(SM_CXVSCROLL);
+    SendMessage(CB.Handle, CB_SETDROPPEDWIDTH, itemsFullWidth + 20, 0);
   end;
 end;
 

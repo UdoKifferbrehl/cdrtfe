@@ -3,9 +3,9 @@
   frm_maoutput.pas: Darstellung der Ausgabe der Konsolenprogramme wenn mehrere
                     Brenner gleichzeitig verwendet werden
 
-  Copyright (c) 2012 Oliver Valencia
+  Copyright (c) 2012-2014 Oliver Valencia
 
-  letzte Änderung  31.08.2012
+  letzte Änderung  28.11.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -600,6 +600,7 @@ begin
   try
     FormSelectWriter.Lang := FLang;
     FormSelectWriter.ImageLists := FImageLists;
+    FormSelectWriter.Devices := FDevices;
     FormSelectWriter.CDWriter := FDevices.CDWriter;
     FormSelectWriter.Init;
     FormSelectWriter.ShowModal;
