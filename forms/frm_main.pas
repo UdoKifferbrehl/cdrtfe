@@ -7522,14 +7522,12 @@ end;
 
 procedure TCdrtfeMainForm.MiscPopupEjectClick(Sender: TObject);
 begin
-  EjectDisk(FDevices.CDDevices.Values[ComboBoxDrives.Items[
-                                       ComboBoxDrives.ItemIndex]]);
+  EjectDisk(FDevices.CDDevices.ValueFromIndex[ComboBoxDrives.ItemIndex]);
 end;
 
 procedure TCdrtfeMainForm.MiscPopupLoadClick(Sender: TObject);
 begin
-  LoadDisk(FDevices.CDDevices.Values[ComboBoxDrives.Items[
-                                      ComboBoxDrives.ItemIndex]]);
+  LoadDisk(FDevices.CDDevices.ValueFromIndex[ComboBoxDrives.ItemIndex]);
 end;
 
 
