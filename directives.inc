@@ -2,9 +2,9 @@
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
 
-  letzte Änderung  15.06.2013
+  letzte Änderung  04.12.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -164,7 +164,7 @@
          //    - betrifft: frm_main.pas
 
 
-(* ----------------------------------------------------------------- NoDevice *)
+(* ------------------------------------------------------------------ Devices *)
 
 {$DEFINE xNoDevice}
          // simuliert das Nicht-Vorhandensein von Laufwerken
@@ -172,6 +172,10 @@
 
 {$DEFINE xUseDummyDevices}
          // simuliert eine größere Laufwerksliste
+         //    - betrifft: cl_devices.pas
+
+{$DEFINE xSameDeviceName}
+         // simuliert identische Laufwerksnamen
          //    - betrifft: cl_devices.pas
 
 

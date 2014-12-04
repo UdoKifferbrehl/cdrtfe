@@ -463,7 +463,11 @@ var CommandLine        : string;
     Delete(s, 1, p);
     p := Pos(Delimiter, s);
     DeviceName := DeviceName + ' ' + Trim(Copy(s, 1, p - 1));
+    {$IFDEF SameDeviceName}
+    Result := 'Test Device Model 1 Ver 1.0';
+    {$ELSE}
     Result := DeviceName;
+    {$ENDIF}
   end;
 
 begin
