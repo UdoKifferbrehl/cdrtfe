@@ -2,9 +2,9 @@
 
   f_logstrings.pas: vordefinierte Strings
 
-  Copyright (c) 2007-2010 Oliver Valencia
+  Copyright (c) 2007-2014 Oliver Valencia
 
-  letzte Änderung  19.10.2009
+  letzte Änderung  04.12.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,6 +52,9 @@ begin
     Add('1057=Received Message: WM_DriveSettings');
     Add('1058=UserOpenFile: Open audio or video track with special program.');
     Add('1059=UserOpenFile: Open file with standard program.');
+    Add('1060=Project changed, current project:');
+    Add('1061=Drive selection changed, current drive:');
+    Add('1062=Drive list changed, current drive:');
     {f_process.pas/cl_actionthread.pas}
     Add('1100=GetDOSOutputEx:');
     Add('1101=Running commandline');

@@ -65,7 +65,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 7
-    ExplicitTop = 386
     DesignSize = (
       185
       105)
@@ -128,11 +127,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     MultiLine = True
     TabOrder = 5
     OnChange = PageControl1Change
-    ExplicitHeight = 345
     object TabSheet1: TTabSheet
       HelpContext = 1300
       Caption = 'Daten-Disk'
-      ExplicitHeight = 317
       DesignSize = (
         769
         337)
@@ -144,7 +141,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 317
         DesignSize = (
           769
           337)
@@ -216,7 +212,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitTop = 272
           DesignSize = (
             728
             41)
@@ -367,7 +362,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitHeight = 263
           object SplitterDataCD: TSplitter
             Left = 200
             Top = 0
@@ -393,7 +387,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
             OnExpanding = TreeViewExpanding
             OnKeyDown = TreeViewKeyDown
             OnMouseDown = TreeViewMouseDown
-            ExplicitHeight = 263
           end
           object CDEListView: TListView
             Left = 203
@@ -430,7 +423,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
             OnDragDrop = CDEListViewDragDrop
             OnDragOver = CDEListViewDragOver
             OnKeyDown = ListViewKeyDown
-            ExplicitHeight = 263
           end
         end
       end
@@ -438,6 +430,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -647,6 +642,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -978,6 +976,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'L'#246'schen'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -1036,6 +1037,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'Infos'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -1120,6 +1124,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -1284,6 +1291,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'Disk-Image'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -1558,6 +1568,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -1721,6 +1734,9 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 317
       DesignSize = (
         769
@@ -1807,7 +1823,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
     ScrollBars = ssBoth
     TabOrder = 6
     OnKeyDown = Memo1KeyDown
-    ExplicitTop = 387
   end
   object CheckBoxDummy: TCheckBox
     Left = 353
@@ -1830,7 +1845,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
       item
         Width = 50
       end>
-    ExplicitTop = 535
   end
   object PanelBrowser: TPanel
     Left = 607

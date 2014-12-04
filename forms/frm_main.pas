@@ -5,7 +5,7 @@
   Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.12.2014
+  letzte Änderung  03.12.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -3917,6 +3917,14 @@ procedure TCdrtfeMainForm.CheckControls;
       ComboBoxDrives.ItemIndex := 0;
       FSettings.General.TabSheetDrive[i] := 0;
     end;
+    {$IFDEF WriteLogFile}
+    if Self.Active then
+    begin
+      AddLogCode(1062);
+      AddLog('Index: ' + IntToStr(ComboBoxDrives.ItemIndex) + '; ' +
+             ComboBoxDrives.Items.CommaText + CRLF + ' ', 2);
+    end;
+    {$ENDIF}
   end;
 
   {TabSheet3: XCD }
@@ -5517,6 +5525,10 @@ begin
     {Aktion ausführen}
     if FSelectedDevice <> 'mult' then
     begin
+      {$IFDEF WriteLogFile}
+      AddLog('Selected Drive Index: ' + IntToStr(ComboBoxDrives.ItemIndex) +
+             '; ' + ComboBoxDrives.Items.CommaText + CRLF + ' ', 0);
+      {$ENDIF}
       TLogWin.Inst.Add(ButtonStart.Caption + ': ' +
                        PageControl1.ActivePage.Caption);
       FAction.StartAction;
@@ -6079,6 +6091,13 @@ end;
 
 procedure TCdrtfeMainForm.PageControl1Change(Sender: TObject);
 begin
+  {$IFDEF WriteLogfile}
+  if Self.Active then
+  begin
+    AddLogCode(1060);
+    AddLog(PageControl1.ActivePage.Caption + CRLF + ' ', 2);
+  end;
+  {$ENDIF}
   FSettings.General.Choice := GetActivePage;
   CheckControls;
   UpdateGauges;
@@ -7670,6 +7689,11 @@ begin
       ComboBoxDrives.ItemIndex;
     CheckControlsSpeeds;
     ComboBoxDrives.Hint := ComboBoxDrives.Items[ComboBoxDrives.ItemIndex];
+    {$IFDEF WriteLogFile}
+    AddLogCode(1061);
+    AddLog('Index: ' + IntToStr(ComboBoxDrives.ItemIndex) + '; ' +
+           ComboBoxDrives.Items.CommaText + CRLF + ' ', 2);
+    {$ENDIF}
   end else
   if (Sender as TComboBox) = ComboBoxSpeed then
   begin
