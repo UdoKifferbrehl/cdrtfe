@@ -2,10 +2,10 @@
 
   cl_verifyhread.pas: Quell- und Zieldateien vergleichen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  07.12.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -536,6 +536,7 @@ end;
   Image mit der Disk übereinstimmt.                                            }
 
 function TVerificationThread.CompareISOImageDisc(const ISOFile: string): Boolean;
+const MaxRetry = 10;
 var File1         : TFileStream;
     DriveRoot     : string;
     p1, p2        : Pointer;
@@ -544,7 +545,9 @@ var File1         : TFileStream;
     NBytes        : Integer;  //Number of bytes to read
     RBytes        : LongWord; //Number of Bytes read
     CDHandle      : THandle;
+    RetryCount    : Integer;
 begin
+  RetryCount := 0;
   File1 := nil;
   DriveRoot := Copy(FDrive, 1, 2);
   CDHandle := INVALID_HANDLE_VALUE;
@@ -557,15 +560,28 @@ begin
       File1 := TFileStream.Create(ISOFile, fmOpenRead or fmShareDenyNone);
       FSize1 := GetFileSize(ISOFile);
       FSize2 := FSize1;
-      CDHandle := CreateFile(PChar('\\.\' + DriveRoot), GENERIC_READ, 0, nil,
-                             OPEN_EXISTING,
-                             FILE_ATTRIBUTE_NORMAL or FILE_FLAG_SEQUENTIAL_SCAN,
-                             0);
+      {Handle zur Disc holen, ggf. mehrfach versuchen, bis MaxRetry erreicht}
+      repeat
+//        FLine := 'Getting disc handle: ' + DriveRoot;
+//        Synchronize(DAddLine);
+        CDHandle := CreateFile(PChar('\\.\' + DriveRoot), GENERIC_READ, 0, nil,
+                               OPEN_EXISTING,
+                               FILE_ATTRIBUTE_NORMAL or FILE_FLAG_SEQUENTIAL_SCAN,
+                               0);
+
+        if CDHandle = INVALID_HANDLE_VALUE then
+        begin
+          FLine := 'Invalid Handle, retrying...';
+          Synchronize(DAddLine);
+          Inc(RetryCount);
+          Sleep(3000);
+        end;
+      until (CDHandle <> INVALID_HANDLE_VALUE) or (RetryCount > MaxRetry);
       if CDHandle = INVALID_HANDLE_VALUE then
       begin
-        FLine := 'Invalid Handle';
-        Synchronize(DAddLine);
+          FLine := 'Invalid Handle';
       end;
+
       if (FSize1 > 0) then
       begin
         while (FSize1 <> 0) and Result and not Terminated do
