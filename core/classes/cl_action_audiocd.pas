@@ -2,10 +2,10 @@
 
   cl_action_audiocd.pas: Audio-CD
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.09.2013
+  letzte Änderung  10.12.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -80,12 +80,14 @@ var i         : Integer;
     Die Namen der temporären Dateien werden in FVList gespeichert.             }
 
   procedure PrepareCompressedToWavConversion;
-  var j             : Integer;
+  var i, j          : Integer;
       Source, Target: string;
+      Path, Name    : string;
       CmdTemp       : string;
       Ext           : string;
   begin
     CmdMP := '';
+    Path := FSettings.General.TempFolder + '\';
     for j := 0 to BurnList.Count - 1 do
     begin
       CmdTemp := '';
@@ -93,8 +95,16 @@ var i         : Integer;
       Ext := LowerCase(ExtractFileExt(BurnList[j]));
       if (Ext <> cExtWav) then
       begin
-        Target := FSettings.General.TempFolder + '\' +
-                  ChangeFileExt(ExtractFileName(Source), cExtWav);
+//        Target := FSettings.General.TempFolder + '\' +
+//                  ChangeFileExt(ExtractFileName(Source), cExtWav);
+        Name := ChangeFileExt(ExtractFileName(Source), '');
+        Target := Path + Name + cExtWav;
+        i := 2;
+        while BurnList.IndexOf(Target) > -1 do
+        begin
+          Target := Path + Name + ' (' + IntToStr(i) + ')' + cExtWav;
+          Inc(i);
+        end;
         BurnList[j] := Target;
         if (Ext = cExtMP3) then
         begin
@@ -312,7 +322,7 @@ begin
   CopyList := TStringList.Create;
   FData.CreateBurnList(BurnList, cAudioCD);
   {$IFDEF ShowBurnList}
-  FormDebug.Memo2.Lines.Assign(BurnList);
+  FormDebug.Memo1.Lines.Assign(BurnList);
   {$ENDIF}
   CMArgs.Choice := cAudioCD;
   {Spielzeit ermitteln}
@@ -324,6 +334,9 @@ begin
   Ok := FDisk.CheckMedium(CMArgs);
   {Kommandozeile zusammenstellen}
   Cmd := GetCommandLine(BurnList, CopyList);
+  {$IFDEF ShowBurnList}
+  FormDebug.Memo2.Lines.Assign(BurnList);
+  {$ENDIF}
   BurnList.Free;
   {Kommando ausführen}
   if not Ok then
