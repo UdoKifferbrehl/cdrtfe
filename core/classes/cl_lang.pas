@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  21.07.2012
+  letzte Änderung  23.07.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -338,6 +338,8 @@ begin
     Add('everify04=Fehler beim Einlesen der Disk');
     Add('everify05=Fehler beim erneuten Einlesen der Disk. Vergleich abgebrochen.');
     Add('everify06=Fehler! Datei nicht gefunden   : %s');
+    Add('everify07=cdrtfe: Ungültiges Handle beim Öffnen der Disk zum sequentiellen Lesen, erneuter Versuch...');
+    Add('everify08=cdrtfe: Ungültiges Handle. Legen Sie die Disk erneut ein und starten Sie den Vergleich manuell.');
     {Messages - CD Text}
     Add('ccdtext01=Titel');
     Add('ccdtext02=Interpret');

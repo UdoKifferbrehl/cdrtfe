@@ -5,7 +5,7 @@
   Copyright (c) 2004-2014 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.12.2014
+  letzte Änderung  23.12.2014
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -568,10 +568,9 @@ begin
                                OPEN_EXISTING,
                                FILE_ATTRIBUTE_NORMAL or FILE_FLAG_SEQUENTIAL_SCAN,
                                0);
-
         if CDHandle = INVALID_HANDLE_VALUE then
         begin
-          FLine := 'Invalid Handle, retrying...';
+          FLine := FLang.GMS('everify07'); //  'Invalid Handle, retrying...';
           Synchronize(DAddLine);
           Inc(RetryCount);
           Sleep(3000);
@@ -579,9 +578,9 @@ begin
       until (CDHandle <> INVALID_HANDLE_VALUE) or (RetryCount > MaxRetry);
       if CDHandle = INVALID_HANDLE_VALUE then
       begin
-          FLine := 'Invalid Handle';
+          FLine := FLang.GMS('everify08'); // 'Invalid Handle';
+          Synchronize(DAddLine);
       end;
-
       if (FSize1 > 0) then
       begin
         while (FSize1 <> 0) and Result and not Terminated do
