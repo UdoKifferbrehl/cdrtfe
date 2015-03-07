@@ -1,8 +1,8 @@
 { f_logfile.pas: Funktionen zum Debuggen, Anzeigen und Schreiben eines Log-Files
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
 
-  letzte Änderung  15.01.2011
+  letzte Änderung  07.03.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -70,7 +70,8 @@ begin
   DLLLoaded   := False;
   DLLName     := StartUpDir + '\' + cDebugDLL;
   DoAutoSave  := CheckCommandLineSwitch('/debugAS');
-  DoDebug     := CheckCommandLineSwitch('/debug') or DoAutosave;
+  DoDebug     := CheckCommandLineSwitch('/debug') or DoAutosave or
+                 ((GetKeyState(VK_SHIFT) and $80) = $80);
   LogFileName := ProgDataDir + '\' + cLogName;
   if CheckCommandLineSwitch('/portable') then
     LogFileName := StartUpDir + '\' + cLogName;  
