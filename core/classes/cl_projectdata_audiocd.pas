@@ -2,10 +2,10 @@
 
   cl_projectdata_audiocd.pas: Datentypen zur Speicherung der Pfadlisten
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.11.2011
+  letzte Änderung  06.05.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,6 +59,7 @@ type TAudioCD = class(TObject)
        FAcceptOgg: Boolean;
        FAcceptFLAC: Boolean;
        FAcceptApe: Boolean;
+       FRelaxedFormatChecking: Boolean;
        FCDTime: Extended;
        FCDTimeChanged: Boolean;
        FError: Byte;
@@ -106,6 +107,7 @@ type TAudioCD = class(TObject)
        property AcceptOgg: Boolean read FAcceptOgg write FAcceptOgg;
        property AcceptFLAC: Boolean read FAcceptFLAC write FAcceptFLAC;
        property AcceptApe: Boolean read FAcceptApe write FAcceptApe;
+       property RelaxedFormatChecking: Boolean read FRelaxedFormatChecking write FRelaxedFormatChecking;
        property CDTextLength: Integer  read GetCDTextLength;
        property CDTextPresent: Boolean read GetCDTextPresent;
        property CDTime: Extended read GetCDTime;
@@ -515,7 +517,8 @@ begin
         CDTextArgs.FileName := Name;
         CDTextArgs.IsWave := Wave;
         CDText := AutoCDText(CDTextArgs);
-        Ok := FLACFile.IsCDFormat and (TrackLength > 0);
+        Ok := (FLACFile.IsCDFormat or FRelaxedFormatChecking) and
+              (TrackLength > 0);
         FLACFile.Free;
         if not Ok then
         begin

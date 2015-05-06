@@ -2,10 +2,10 @@
 
   cl_settings_audiocd.pas: Objekt für Einstellungen des Audio-CD-Projektes
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.09.2013
+  letzte Änderung  06.05.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -20,31 +20,32 @@
 
   TSettingsAudioCD
 
-    Properties   Device     : string
-                 Speed      : string
-                 Multi      : Boolean
-                 Fix        : Boolean
-                 DAO        : Boolean
-                 TAO        : Boolean
-                 RAW        : Boolean
-                 RAWMode    : string
-                 Overburn   : Boolean
-                 Preemp     : Boolean
-                 Copy       : Boolean
-                 SCMS       : Boolean
-                 UseInfo    : Boolean
-                 CDText     : Boolean
-                 CDTextFile : string
-                 Pause      : Integer
-                 PauseLength: string
-                 PauseSector: Boolean
-                 UTFToAnsi  : Boolean
-                 ReplayGain : Boolean
-                 Gain       : Integer
-                 CustomConvCmdMP3 : string;
-                 CustomConvCmdOgg : string;
-                 CustomConvCmdFLAC: string;
-                 CustomConvCmdApe : string;
+    Properties   Device               : string
+                 Speed                : string
+                 Multi                : Boolean
+                 Fix                  : Boolean
+                 DAO                  : Boolean
+                 TAO                  : Boolean
+                 RAW                  : Boolean
+                 RAWMode              : string
+                 Overburn             : Boolean
+                 Preemp               : Boolean
+                 Copy                 : Boolean
+                 SCMS                 : Boolean
+                 UseInfo              : Boolean
+                 CDText               : Boolean
+                 CDTextFile           : string
+                 Pause                : Integer
+                 PauseLength          : string
+                 PauseSector          : Boolean
+                 UTFToAnsi            : Boolean
+                 ReplayGain           : Boolean
+                 Gain                 : Integer
+                 RelaxedFormatChecking: Boolean
+                 CustomConvCmdMP3     : string;
+                 CustomConvCmdOgg     : string;
+                 CustomConvCmdFLAC    : string;
+                 CustomConvCmdApe     : string;
 
     Methoden     Init
                  Load(MIF: TMemIniFile)
@@ -60,31 +61,32 @@ uses IniFiles, cl_abstractbase;
 
 type TSettingsAudioCD = class(TCdrtfeSettings)
      private
-       FDevice           : string;
-       FSpeed            : string;
-       FMulti            : Boolean;
-       FFix              : Boolean;
-       FDAO              : Boolean;
-       FTAO              : Boolean;
-       FRAW              : Boolean;
-       FRAWMode          : string;
-       FOverburn         : Boolean;
-       FPreemp           : Boolean;
-       FCopy             : Boolean;
-       FSCMS             : Boolean;
-       FUseInfo          : Boolean;
-       FCDText           : Boolean;
-       FCDTextFile       : string;
-       FPause            : Integer;    // 0 = keine; 1 = für alle gleich; 2 = separat
-       FPauseLength      : string;    // Länge in Sekunden bzw. Sektoren
-       FPauseSector      : Boolean;    // Länge der Pause in Sektoren
-       FUTFToAnsi        : Boolean;
-       FReplayGain       : Boolean;
-       FGain             : Integer;
-       FCustomConvCmdMP3 : string;
-       FCustomConvCmdOgg : string;
-       FCustomConvCmdFLAC: string;
-       FCustomConvCmdApe : string;
+       FDevice               : string;
+       FSpeed                : string;
+       FMulti                : Boolean;
+       FFix                  : Boolean;
+       FDAO                  : Boolean;
+       FTAO                  : Boolean;
+       FRAW                  : Boolean;
+       FRAWMode              : string;
+       FOverburn             : Boolean;
+       FPreemp               : Boolean;
+       FCopy                 : Boolean;
+       FSCMS                 : Boolean;
+       FUseInfo              : Boolean;
+       FCDText               : Boolean;
+       FCDTextFile           : string;
+       FPause                : Integer;    // 0 = keine; 1 = für alle gleich; 2 = separat
+       FPauseLength          : string;    // Länge in Sekunden bzw. Sektoren
+       FPauseSector          : Boolean;    // Länge der Pause in Sektoren
+       FUTFToAnsi            : Boolean;
+       FReplayGain           : Boolean;
+       FGain                 : Integer;
+       FRelaxedFormatChecking: Boolean;
+       FCustomConvCmdMP3     : string;
+       FCustomConvCmdOgg     : string;
+       FCustomConvCmdFLAC    : string;
+       FCustomConvCmdApe     : string;
      public
        constructor Create;
        destructor Destroy; override;
@@ -112,6 +114,7 @@ type TSettingsAudioCD = class(TCdrtfeSettings)
        property UTFToAnsi  : Boolean read FUTFToAnsi write FUTFToAnsi;
        property ReplayGain : Boolean read FReplayGain write FReplayGain;
        property Gain       : Integer read FGain write FGain;
+       property RelaxedFormatChecking: Boolean read FRelaxedFormatChecking write FRelaxedFormatChecking;
        property CustomConvCmdMP3 : string read FCustomConvCmdMP3 write FCustomConvCmdMP3;
        property CustomConvCmdOgg : string read FCustomConvCmdOgg write FCustomConvCmdOgg;
        property CustomConvCmdFLAC: string read FCustomConvCmdFLAC write FCustomConvCmdFLAC;
@@ -144,31 +147,32 @@ end;
 
 procedure TSettingsAudioCD.Init;
 begin
-  FDevice            := '';
-  FSpeed             := '';
-  FMulti             := False;
-  FFix               := True;
-  FDAO               := True;
-  FTAO               := False;
-  FRAW               := False;
-  FRAWMode           := 'raw96r';
-  FOverburn          := False;
-  FPreemp            := False;
-  FCopy              := False;
-  FSCMS              := False;
-  FUseInfo           := False;
-  FCDText            := False;
-  FCDTextFile        := '';
-  FPause             := 1;       // für alle Tracks gleiche Pausenlänge
-  FPauseLength       := '2';     // Länge 2
-  FPauseSector       := False;   // Länge in Sekunden
-  FUTFToAnsi         := False;
-  FReplayGain        := False;
-  FGain              := 0;
-  FCustomConvCmdMP3  := '';
-  FCustomConvCmdOgg  := '';
-  FCustomConvCmdFLAC := '';
-  FCustomConvCmdApe  := '';
+  FDevice                := '';
+  FSpeed                 := '';
+  FMulti                 := False;
+  FFix                   := True;
+  FDAO                   := True;
+  FTAO                   := False;
+  FRAW                   := False;
+  FRAWMode               := 'raw96r';
+  FOverburn              := False;
+  FPreemp                := False;
+  FCopy                  := False;
+  FSCMS                  := False;
+  FUseInfo               := False;
+  FCDText                := False;
+  FCDTextFile            := '';
+  FPause                 := 1;       // für alle Tracks gleiche Pausenlänge
+  FPauseLength           := '2';     // Länge 2
+  FPauseSector           := False;   // Länge in Sekunden
+  FUTFToAnsi             := False;
+  FReplayGain            := False;
+  FGain                  := 0;
+  FRelaxedFormatChecking := False;
+  FCustomConvCmdMP3      := '';
+  FCustomConvCmdOgg      := '';
+  FCustomConvCmdFLAC     := '';
+  FCustomConvCmdApe      := '';
 end;
 
 { Load -------------------------------------------------------------------------
@@ -206,6 +210,7 @@ begin
     FCustomConvCmdOgg  := ReadString(Section, 'CustomConvCmdOgg', '');
     FCustomConvCmdFLAC := ReadString(Section, 'CustomConvCmdFLAC', '');
     FCustomConvCmdApe  := ReadString(Section, 'CustomConvCmdApe', '');
+    FRelaxedFormatChecking := ReadBool(Section, 'RelaxedFormatChecking', False);
   end;
 end;
 
@@ -239,6 +244,7 @@ begin
     WriteBool(Section, 'UTFToAnsi', FUTFToAnsi);
     WriteBool(Section, 'ReplayGain', FReplayGain);
     WriteInteger(Section, 'Gain', FGain);
+    WriteBool(Section, 'RelaxedFormatChecking', FRelaxedFormatChecking);
     WriteString(Section, 'CustomConvCmdMP3', FCustomConvCmdMP3);
     WriteString(Section, 'CustomConvCmdOgg', FCustomConvCmdOgg);
     WriteString(Section, 'CustomConvCmdFLAC', FCustomConvCmdFLAC);

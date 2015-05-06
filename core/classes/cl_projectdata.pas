@@ -2,10 +2,10 @@
 
   cl_projectdata.pas:
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  18.05.2010
+  letzte Änderung  06.05.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,7 +33,8 @@
                  OnProgressBarUpdate
                  OnProjectError                 
                  OnUpdatePanels
-                 
+                 RelaxedFormatChecking
+
     Variablen    DataCDFilesToSort: Boolean           Diese Flags geben an, ob
                  DataCDFilesToSortFolder: string      und welche Ordner nach
                  DataCDFoldersToSort: Boolean         Umbennennungen sortiert
@@ -140,6 +141,7 @@ type TProjectData = class(TObject)
        FAcceptOgg: Boolean;
        FAcceptFLAC: Boolean;
        FAcceptApe: Boolean;
+       FRelaxedFormatChecking: Boolean;
        FLang: TLang;
        FDataCD: TCD;
        FAudioCD: TAudioCD;
@@ -163,6 +165,7 @@ type TProjectData = class(TObject)
        procedure SetAcceptOgg(Mode: Boolean);
        procedure SetAcceptFLAC(Mode: Boolean);
        procedure SetAcceptApe(Mode: Boolean);
+       procedure SetRelaxedFormatChecking(Mode: Boolean);
        procedure SetXCDAddMode(Mode: Boolean);
        procedure SetCDImportSession(Mode: Boolean);
        procedure SetOnProjectError(EventHandler: TProjectErrorEvent);
@@ -245,6 +248,7 @@ type TProjectData = class(TObject)
        property AcceptOgg: Boolean read FAcceptOgg write SetAcceptOgg;
        property AcceptFLAC: Boolean read FAcceptFLAC write SetAcceptFLAC;
        property AcceptApe: Boolean read FAcceptApe write SetAcceptApe;
+       property RelaxedFormatChecking: Boolean read FRelaxedFormatChecking write SetRelaxedFormatChecking;
        property CompressedAudioFilesPresent: Boolean read GetCompressedAudioFilesPresent;
        property DataCDFilesToDelete: Boolean read GetDataCDFilesToDelete;
        property Lang: TLang write FLang;
@@ -413,6 +417,16 @@ procedure TProjectData.SetAcceptApe(Mode: Boolean);
 begin
   FAcceptApe := Mode;
   FAudioCD.AcceptApe := Mode;
+end;
+
+{ SetRelaxedFormatChecking -----------------------------------------------------
+
+  auch nicht CD-konforme Sounddateien zulassen (bei FLAC).                     }
+
+procedure TProjectData.SetRelaxedFormatChecking(Mode: Boolean);
+begin
+  FRelaxedFormatChecking := Mode;
+  FAudioCD.RelaxedFormatChecking := Mode;
 end;
 
 { SetOnProjectError ------------------------------------------------------------

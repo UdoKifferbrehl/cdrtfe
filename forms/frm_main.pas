@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  03.12.2014
+  letzte Änderung  06.05.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1218,6 +1218,11 @@ begin
   begin
     CheckBoxDataCDVerify.Checked := Verify;
     FData.SetCDLabel(VolID, cDataCD);
+  end;
+  {Audio-CD}
+  with FSettings.AudioCD do
+  begin
+    FData.RelaxedFormatChecking := RelaxedFormatChecking;
   end;
   {XCD}
   with FSettings.XCD do
