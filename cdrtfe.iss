@@ -2,9 +2,9 @@
 ;
 ;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.4.3
 ;
-;  Copyright (c) 2006-2014 Oliver Valencia
+;  Copyright (c) 2006-2015 Oliver Valencia
 ;
-;  letzte Änderung  01.08.2014
+;  letzte Änderung  31.05.2015
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,12 +12,12 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVer "1.5.3"
+#define MyAppVer "1.5.4"
 #define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
 #define MyAppExeName "cdrtfe.exe"
-#define MyAppCopyright "Copyright © 2002-2014  O. Valencia, O. Kutsche"
+#define MyAppCopyright "Copyright © 2002-2015  O. Valencia, O. Kutsche"
 
 [Setup]
 ; Installer
