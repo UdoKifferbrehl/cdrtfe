@@ -6,7 +6,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   VertScrollBar.Visible = False
   ActiveControl = ButtonCancel
   Caption = 'cdrtools Frontend'
-  ClientHeight = 574
+  ClientHeight = 554
   ClientWidth = 792
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -28,7 +28,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   OnShow = FormShow
   DesignSize = (
     792
-    574)
+    554)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel4: TBevel
@@ -59,7 +59,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   end
   object Panel1: TPanel
     Left = 607
-    Top = 406
+    Top = 386
     Width = 185
     Height = 105
     Anchors = [akRight, akBottom]
@@ -121,7 +121,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
     Left = 8
     Top = 36
     Width = 777
-    Height = 365
+    Height = 345
     ActivePage = TabSheet1
     Anchors = [akLeft, akTop, akRight, akBottom]
     MultiLine = True
@@ -132,18 +132,18 @@ object CdrtfeMainForm: TCdrtfeMainForm
       Caption = 'Daten-Disk'
       DesignSize = (
         769
-        337)
+        317)
       object PanelTabSheet1: TPanel
         Left = 0
         Top = 0
         Width = 769
-        Height = 337
+        Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
         DesignSize = (
           769
-          337)
+          317)
         object CDESpeedButton1: TSpeedButton
           Left = 743
           Top = 32
@@ -206,7 +206,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         end
         object PanelDataCD: TPanel
           Left = 8
-          Top = 292
+          Top = 272
           Width = 728
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
@@ -358,22 +358,21 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Left = 8
           Top = 8
           Width = 728
-          Height = 283
+          Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 0
           object SplitterDataCD: TSplitter
             Left = 200
             Top = 0
-            Height = 283
+            Height = 263
             MinSize = 150
-            ExplicitHeight = 263
           end
           object CDETreeView: TTreeView
             Left = 0
             Top = 0
             Width = 200
-            Height = 283
+            Height = 263
             Align = alLeft
             DragMode = dmAutomatic
             HideSelection = False
@@ -392,7 +391,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Left = 203
             Top = 0
             Width = 525
-            Height = 283
+            Height = 263
             Align = alClient
             Columns = <
               item
@@ -430,25 +429,20 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet2: TTabSheet
       HelpContext = 1400
       Caption = 'Audio-CD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object PanelTabSheet2: TPanel
         Left = 0
         Top = 0
         Width = 769
-        Height = 337
+        Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 317
         DesignSize = (
           769
-          337)
+          317)
         object AudioSpeedButton1: TSpeedButton
           Left = 743
           Top = 32
@@ -501,7 +495,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Left = 8
           Top = 8
           Width = 728
-          Height = 283
+          Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           Columns = <
             item
@@ -532,17 +526,15 @@ object CdrtfeMainForm: TCdrtfeMainForm
           OnDragDrop = CDEListViewDragDrop
           OnDragOver = CDEListViewDragOver
           OnKeyDown = AudioListViewKeyDown
-          ExplicitHeight = 263
         end
         object PanelAudioCD: TPanel
           Left = 8
-          Top = 292
+          Top = 272
           Width = 728
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitTop = 272
           DesignSize = (
             728
             41)
@@ -642,25 +634,20 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet3: TTabSheet
       HelpContext = 1500
       Caption = 'XCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object PanelTabSheet3: TPanel
         Left = 0
         Top = 0
         Width = 769
-        Height = 337
+        Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 317
         DesignSize = (
           769
-          337)
+          317)
         object XCDESpeedButton1: TSpeedButton
           Left = 743
           Top = 32
@@ -699,7 +686,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
         end
         object XCDESpeedButton4: TSpeedButton
           Left = 743
-          Top = 212
+          Top = 192
           Width = 25
           Height = 25
           Hint = 'Movie (als Form2) hinzuf'#252'gen'
@@ -708,11 +695,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton4Click
-          ExplicitTop = 192
         end
         object XCDESpeedButton5: TSpeedButton
           Left = 743
-          Top = 244
+          Top = 224
           Width = 25
           Height = 25
           Hint = 'Movie entfernen'
@@ -721,11 +707,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton5Click
-          ExplicitTop = 224
         end
         object XCDESpeedButton6: TSpeedButton
           Left = 711
-          Top = 308
+          Top = 288
           Width = 25
           Height = 25
           Hint = 'Ordner entfernen'
@@ -734,11 +719,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton6Click
-          ExplicitTop = 288
         end
         object XCDESpeedButton7: TSpeedButton
           Left = 743
-          Top = 308
+          Top = 288
           Width = 25
           Height = 25
           Hint = 'Alles entfernen'
@@ -747,23 +731,20 @@ object CdrtfeMainForm: TCdrtfeMainForm
           ParentShowHint = False
           ShowHint = True
           OnClick = XCDESpeedButton7Click
-          ExplicitTop = 288
         end
         object PanelXCDView: TPanel
           Left = 8
           Top = 8
           Width = 728
-          Height = 295
+          Height = 275
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitHeight = 275
           object SplitterXCDVertical: TSplitter
             Left = 200
             Top = 0
             Height = 295
             MinSize = 200
-            ExplicitHeight = 275
           end
           object PanelXCDViewLeft: TPanel
             Left = 0
@@ -773,7 +754,6 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Align = alLeft
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitHeight = 275
             object XCDETreeView: TTreeView
               Left = 0
               Top = 0
@@ -798,11 +778,10 @@ object CdrtfeMainForm: TCdrtfeMainForm
             Left = 203
             Top = 0
             Width = 525
-            Height = 295
+            Height = 275
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitHeight = 275
             object SplitterXCDHorizontal: TSplitter
               Left = 0
               Top = 115
@@ -884,19 +863,17 @@ object CdrtfeMainForm: TCdrtfeMainForm
               OnDragDrop = XCDEListView1DragDrop
               OnDragOver = XCDEListView1DragOver
               OnKeyDown = ListViewKeyDown
-              ExplicitHeight = 157
             end
           end
         end
         object PanelXCD: TPanel
           Left = 8
-          Top = 236
+          Top = 216
           Width = 200
           Height = 97
           Anchors = [akLeft, akBottom]
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitTop = 216
           DesignSize = (
             200
             97)
@@ -976,22 +953,17 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet4: TTabSheet
       HelpContext = 1600
       Caption = 'L'#246'schen'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object GroupBoxCDRWDelete: TGroupBox
         Left = 250
-        Top = 58
+        Top = 49
         Width = 265
         Height = 177
         Anchors = []
         Caption = 'Disk l'#246'schen'
         TabOrder = 0
-        ExplicitTop = 49
         object RadioButtonCDRWBlankAll: TRadioButton
           Left = 24
           Top = 32
@@ -1037,22 +1009,17 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet5: TTabSheet
       HelpContext = 1700
       Caption = 'Infos'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object GroupBoxCDInfo: TGroupBox
         Left = 226
-        Top = 61
+        Top = 52
         Width = 313
         Height = 193
         Anchors = []
         Caption = 'Aktion ausw'#228'hlen'
         TabOrder = 0
-        ExplicitTop = 52
         object RadioButtonToc: TRadioButton
           Left = 168
           Top = 32
@@ -1124,18 +1091,14 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet6: TTabSheet
       HelpContext = 1800
       Caption = 'DAE'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object DAEListView: TListView
         Left = 8
         Top = 8
         Width = 728
-        Height = 283
+        Height = 263
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
           item
@@ -1158,17 +1121,15 @@ object CdrtfeMainForm: TCdrtfeMainForm
         ViewStyle = vsReport
         OnEditing = DAEListViewEditing
         OnKeyDown = DAEListViewKeyDown
-        ExplicitHeight = 263
       end
       object PanelDAE: TPanel
         Left = 8
-        Top = 292
+        Top = 272
         Width = 728
         Height = 41
         Anchors = [akLeft, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitTop = 272
         DesignSize = (
           728
           41)
@@ -1291,22 +1252,17 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet7: TTabSheet
       HelpContext = 1900
       Caption = 'Disk-Image'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object PanelImage: TPanel
         Left = 102
-        Top = 46
+        Top = 36
         Width = 561
         Height = 249
         Anchors = []
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitTop = 36
         object GroupBoxReadCD: TGroupBox
           Left = 0
           Top = 24
@@ -1568,25 +1524,20 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet8: TTabSheet
       HelpContext = 2000
       Caption = '(S)VideoCD'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object PanelTabSheet8: TPanel
         Left = 0
         Top = 0
         Width = 769
-        Height = 337
+        Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 317
         DesignSize = (
           769
-          337)
+          317)
         object VideoSpeedButton1: TSpeedButton
           Left = 743
           Top = 32
@@ -1639,7 +1590,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
           Left = 8
           Top = 8
           Width = 728
-          Height = 283
+          Height = 263
           Anchors = [akLeft, akTop, akRight, akBottom]
           Columns = <
             item
@@ -1668,17 +1619,15 @@ object CdrtfeMainForm: TCdrtfeMainForm
           OnDragDrop = CDEListViewDragDrop
           OnDragOver = CDEListViewDragOver
           OnKeyDown = VideoListViewKeyDown
-          ExplicitHeight = 263
         end
         object PanelVideoCD: TPanel
           Left = 8
-          Top = 292
+          Top = 272
           Width = 728
           Height = 41
           Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitTop = 272
           DesignSize = (
             728
             41)
@@ -1734,22 +1683,17 @@ object CdrtfeMainForm: TCdrtfeMainForm
     object TabSheet9: TTabSheet
       HelpContext = 2100
       Caption = 'DVD-Video'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 317
       DesignSize = (
         769
-        337)
+        317)
       object GroupBoxDVDVideo: TGroupBox
         Left = 266
-        Top = 91
+        Top = 81
         Width = 233
         Height = 153
         Anchors = []
         Caption = 'Video-DVD schreiben'
         TabOrder = 0
-        ExplicitTop = 81
         object LabelDVDVideoPath: TLabel
           Left = 16
           Top = 24
@@ -1814,7 +1758,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   end
   object Memo1: TMemo
     Left = 8
-    Top = 407
+    Top = 387
     Width = 695
     Height = 105
     Anchors = [akLeft, akRight, akBottom]
@@ -1835,7 +1779,7 @@ object CdrtfeMainForm: TCdrtfeMainForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 555
+    Top = 535
     Width = 792
     Height = 19
     Panels = <
