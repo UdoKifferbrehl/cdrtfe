@@ -4991,7 +4991,6 @@ begin
       FSettings.General.Choice := TempChoice;
       {Einstellungen in GUI übernehmen}
       GetSettings;
-      ComboBoxChange(ComboBoxDrives); // ComboBoxDrives.Hint setzen
       {Tree-Views erneut initialisieren}
       InitTreeViews;
       {Objekt zum Ausführen der Aktion}
@@ -5160,6 +5159,8 @@ begin
   {temporäres Verzeichnis erfragen, damit cdrtfe auch von einem read-only-Medium
    gestartet werden kann.}
   if FSettings.General.AskForTempDir then OverrideProgDataDir(False);
+  {ComboBoxDrives.Hint setzen, das aktuell ausgewählte Laufwerk}
+  ComboBoxDrives.Hint := ComboBoxDrives.Items[ComboBoxDrives.ItemIndex];
 end;
 
 { FormResize -------------------------------------------------------------------
