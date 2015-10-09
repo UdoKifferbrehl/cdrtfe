@@ -4895,6 +4895,7 @@ begin
   FDevices := TDevices.Create;
   {Objekt für Einstellungen}
   FSettings := TSettings.Create;
+  FSettings.General.Choice := cDataCD;
   FSettings.Lang := FLang;
   FSettings.OnUpdatePanels := UpdatePanels;
   FSettings.OnProgressBarHide := ProgressBarHide;
