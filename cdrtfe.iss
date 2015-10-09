@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2015 Oliver Valencia
 ;
-;  letzte Änderung  31.05.2015
+;  letzte Änderung  08.10.2015
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVer "1.5.4"
+#define MyAppVer "1.5.4.1"
 #define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
