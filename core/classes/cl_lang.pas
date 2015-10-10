@@ -90,7 +90,7 @@ implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      f_logfile, f_filesystem, f_strings, f_stringlist, f_wininfo, f_locations,
-     const_locations, f_window, f_compprop, c_frametopbanner;
+     const_locations, f_window, f_commandline, f_compprop, c_frametopbanner;
 
 type TFormSelectLang = class(TForm)
        ComboBox: TComboBox;
@@ -402,8 +402,10 @@ end;
   wird als TLang.                                                              }
 
 function TLang.GetIniPath: string;
-var Temp: string;
-    Name: string;
+var Temp, Temp2: string;
+    Name       : string;
+    IniFile    : TIniFile;
+    Portable   : Boolean;
 begin
   Name := cDataDir + cIniFile;
   if PlatformWinNT then
@@ -427,10 +429,18 @@ begin
     end;
     {Sonderbehanldung: Wenn cdrtfe im Portable-Mode ist, gibt es im Programm-
      verzeichis eine cdrtfe.ini.}
-    Temp := StartUpDir + cIniFile;
-    if not FileExists(Temp) then
+    Temp2 := StartUpDir + cIniFile;
+    Portable := False;
+    if FileExists(Temp2) then
     begin
-      Temp := '';
+      IniFile := TIniFile.Create(Temp2);
+      Portable := IniFile.ReadBool('General', 'PortableMode', False);
+      IniFile.Free;
+      if Portable then Temp := Temp2;
+    end;
+    if CheckCommandLineSwitch('/portable') then
+    begin
+      if Portable then Temp := Temp2 else Temp := '';
     end;
     Result := Temp;
   end else
@@ -531,11 +541,22 @@ begin
     {$ENDIF}
   end else
   begin
+  (* Wir dürfen nicht die aktuelle Sprache in der cdrtfe_lang.ini speichern,
+     da in der Regel ein User keinen Schreibzugriff auf diese Datei hat.
+     Stattdessen erzeugen wir einfach eine neue cdrtfe.ini.
+
     IniFile := TIniFile.Create(StartUpDir + cLangDir + cLangFileName);
     IniFile.WriteString('Languages', 'Default', FCurrentLang);
     IniFile.Free;
     {$IFDEF DebugLang}
     Deb('cdrtfe_lang.ini: Default=' + FCurrentLang + ' saved.', 1);
+    {$ENDIF}
+    *)
+    IniFile := TIniFile.Create(ProgDataDir + ciniFile);
+    IniFile.WriteString('General', 'DefaultLang', FCurrentLang);
+    IniFile.Free;
+    {$IFDEF DebugLang}
+    Deb('cdrtfe.ini (new): DefaultLang=' + FCurrentLang + ' saved.', 1);
     {$ENDIF}
   end;
   FDefaultLang := FCurrentLang;
