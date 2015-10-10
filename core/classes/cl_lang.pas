@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.07.2014
+  letzte Änderung  10.10.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -424,6 +424,13 @@ begin
           end;
         end;
       end;
+    end;
+    {Sonderbehanldung: Wenn cdrtfe im Portable-Mode ist, gibt es im Programm-
+     verzeichis eine cdrtfe.ini.}
+    Temp := StartUpDir + cIniFile;
+    if not FileExists(Temp) then
+    begin
+      Temp := '';
     end;
     Result := Temp;
   end else
