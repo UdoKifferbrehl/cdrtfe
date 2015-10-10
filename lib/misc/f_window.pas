@@ -1,9 +1,9 @@
 { f_window.pas: Funktionnen für Fenster und Dialoge
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.11.2014
+  letzte Änderung  10.10.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -100,7 +100,7 @@ begin
     FontName := 'Microsoft Sans Serif';
     Ok := Screen.Fonts.IndexOf(FontName) >= 0;
   end;
-  if Ok and PlatformWin2kXP and (Win32MinorVersion > 0) then
+  if Ok and PlatformWin2kXP {and (Win32MinorVersion > 0)} then
   begin
     if Control is TForm then
       (Control as TForm).Font.Name := FontName;
