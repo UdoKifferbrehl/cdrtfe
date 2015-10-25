@@ -4,8 +4,8 @@ object FormDAEOptions: TFormDAEOptions
   HelpContext = 1801
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'DAE - Optionen'
-  ClientHeight = 336
-  ClientWidth = 481
+  ClientHeight = 343
+  ClientWidth = 487
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,13 +16,13 @@ object FormDAEOptions: TFormDAEOptions
   Position = poScreenCenter
   OnShow = FormShow
   DesignSize = (
-    481
-    336)
+    487
+    343)
   PixelsPerInch = 96
   TextHeight = 13
   object ButtonOk: TButton
-    Left = 318
-    Top = 304
+    Left = 323
+    Top = 310
     Width = 75
     Height = 25
     Caption = 'Ok'
@@ -30,8 +30,8 @@ object FormDAEOptions: TFormDAEOptions
     OnClick = ButtonOkClick
   end
   object ButtonCancel: TButton
-    Left = 398
-    Top = 304
+    Left = 404
+    Top = 310
     Width = 75
     Height = 25
     Cancel = True
@@ -42,13 +42,15 @@ object FormDAEOptions: TFormDAEOptions
   object PageControlDAE: TPageControl
     Left = 8
     Top = 56
-    Width = 465
-    Height = 241
+    Width = 471
+    Height = 248
     ActivePage = TabSheetDAE
     TabOrder = 1
     object TabSheetDAE: TTabSheet
       HelpContext = 1802
       Caption = 'DAE'
+      ExplicitWidth = 457
+      ExplicitHeight = 213
       object LabelSpeedW: TLabel
         Left = 16
         Top = 188
@@ -59,7 +61,7 @@ object FormDAEOptions: TFormDAEOptions
       object GroupBoxFileNames: TGroupBox
         Left = 8
         Top = 8
-        Width = 217
+        Width = 229
         Height = 145
         Caption = 'Dateinamen'
         TabOrder = 0
@@ -99,7 +101,7 @@ object FormDAEOptions: TFormDAEOptions
         end
       end
       object GroupBoxOptions: TGroupBox
-        Left = 232
+        Left = 243
         Top = 8
         Width = 217
         Height = 97
@@ -131,7 +133,7 @@ object FormDAEOptions: TFormDAEOptions
         end
       end
       object GroupBoxDAEFormat: TGroupBox
-        Left = 232
+        Left = 243
         Top = 112
         Width = 217
         Height = 97
@@ -181,7 +183,7 @@ object FormDAEOptions: TFormDAEOptions
       object CheckBoxDAEWriteCopy: TCheckBox
         Left = 16
         Top = 160
-        Width = 209
+        Width = 221
         Height = 17
         Caption = 'Tracks automatisch auf CD schreiben'
         TabOrder = 3
@@ -198,10 +200,12 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetCDDB: TTabSheet
       HelpContext = 1803
       Caption = 'freedb'
+      ExplicitWidth = 457
+      ExplicitHeight = 213
       object GroupBox1: TGroupBox
         Left = 8
         Top = 8
-        Width = 433
+        Width = 452
         Height = 105
         TabOrder = 0
         object LabelCDDBServer: TLabel
@@ -248,10 +252,12 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetCompression: TTabSheet
       HelpContext = 1804
       Caption = 'Encoding'
+      ExplicitWidth = 457
+      ExplicitHeight = 213
       object GroupBoxDAETags: TGroupBox
         Left = 8
         Top = 8
-        Width = 433
+        Width = 452
         Height = 41
         Caption = 'Tags'
         TabOrder = 0
@@ -267,7 +273,7 @@ object FormDAEOptions: TFormDAEOptions
       object GroupBoxDAEFlac: TGroupBox
         Left = 8
         Top = 56
-        Width = 208
+        Width = 223
         Height = 73
         Caption = 'FLAC'
         TabOrder = 1
@@ -298,9 +304,9 @@ object FormDAEOptions: TFormDAEOptions
         end
       end
       object GroupBoxDAEOgg: TGroupBox
-        Left = 232
+        Left = 237
         Top = 56
-        Width = 208
+        Width = 223
         Height = 73
         Caption = 'Ogg Vorbis'
         TabOrder = 3
@@ -332,7 +338,7 @@ object FormDAEOptions: TFormDAEOptions
       object GroupBoxDAEMp3: TGroupBox
         Left = 8
         Top = 136
-        Width = 209
+        Width = 223
         Height = 73
         Caption = 'mp3 (Lame-Preset)'
         TabOrder = 2
@@ -346,9 +352,9 @@ object FormDAEOptions: TFormDAEOptions
         end
       end
       object GroupBoxDAECustom: TGroupBox
-        Left = 232
+        Left = 237
         Top = 136
-        Width = 209
+        Width = 223
         Height = 73
         Caption = 'benutzerdefiniert'
         TabOrder = 4
@@ -385,24 +391,169 @@ object FormDAEOptions: TFormDAEOptions
         end
       end
     end
+    object TabSheetParanoia: TTabSheet
+      Caption = 'Paranoia'
+      ImageIndex = 3
+      ExplicitWidth = 457
+      ExplicitHeight = 213
+      object GroupBox2: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 452
+        Height = 209
+        TabOrder = 0
+        object LabelDAEParaRetries: TLabel
+          Left = 40
+          Top = 160
+          Width = 70
+          Height = 13
+          AutoSize = False
+          Caption = 'retries'
+        end
+        object LabelDAEParaReadahead: TLabel
+          Left = 116
+          Top = 160
+          Width = 70
+          Height = 13
+          AutoSize = False
+          Caption = 'readahead'
+        end
+        object LabelDAEParaOverlap: TLabel
+          Left = 192
+          Top = 160
+          Width = 70
+          Height = 13
+          AutoSize = False
+          Caption = 'overlap'
+        end
+        object LabelDAEParaMinOverlap: TLabel
+          Left = 268
+          Top = 160
+          Width = 70
+          Height = 13
+          AutoSize = False
+          Caption = 'minoverlap'
+        end
+        object LabelDAEParaMaxOverlap: TLabel
+          Left = 344
+          Top = 160
+          Width = 70
+          Height = 13
+          AutoSize = False
+          Caption = 'maxoverlap'
+        end
+        object CheckBoxDAEUseParaOpts: TCheckBox
+          Left = 8
+          Top = 16
+          Width = 345
+          Height = 17
+          Caption = 'Einstellungen f'#252'r LibParanoia '#228'ndern'
+          TabOrder = 0
+          OnClick = CheckBoxClick
+        end
+        object RadioButtonDAEUseParanoiaPresetProof: TRadioButton
+          Left = 24
+          Top = 39
+          Width = 377
+          Height = 17
+          Caption = 'Voreinstellung '#39'proof'#39' verwenden'
+          TabOrder = 1
+          OnClick = CheckBoxClick
+        end
+        object RadioButtonDAEUseParanoiaUserdefined: TRadioButton
+          Left = 24
+          Top = 63
+          Width = 377
+          Height = 17
+          Caption = 'Benutzerdefinierte Einstellungen verwenden'
+          TabOrder = 2
+          OnClick = CheckBoxClick
+        end
+        object CheckBoxDAEDisableParanoia: TCheckBox
+          Left = 40
+          Top = 87
+          Width = 361
+          Height = 17
+          Caption = 'Paranoia-Modus abschalten, aber LibParanoia verwenden'
+          TabOrder = 3
+        end
+        object CheckBoxDAEParanoiaC2check: TCheckBox
+          Left = 40
+          Top = 111
+          Width = 361
+          Height = 17
+          Caption = 'C2-Fehler-Pr'#252'fung'
+          TabOrder = 4
+        end
+        object CheckBoxDAEParanoiaNoVerify: TCheckBox
+          Left = 40
+          Top = 135
+          Width = 361
+          Height = 17
+          Caption = 'static overlap, no verification, no dynamic overlap'
+          TabOrder = 5
+        end
+        object EditDAEParaRetries: TEdit
+          Left = 40
+          Top = 177
+          Width = 70
+          Height = 21
+          TabOrder = 6
+        end
+        object EditDAEParaReadahead: TEdit
+          Left = 116
+          Top = 177
+          Width = 70
+          Height = 21
+          TabOrder = 7
+        end
+        object EditDAEParaOverlap: TEdit
+          Left = 192
+          Top = 177
+          Width = 70
+          Height = 21
+          TabOrder = 8
+        end
+        object EditDAEParaMinOverlap: TEdit
+          Left = 268
+          Top = 177
+          Width = 70
+          Height = 21
+          TabOrder = 9
+        end
+        object EditDAEParaMaxOverlap: TEdit
+          Left = 344
+          Top = 177
+          Width = 70
+          Height = 21
+          TabOrder = 10
+        end
+      end
+    end
   end
   inline FrameTopBanner1: TFrameTopBanner
     Left = 0
     Top = 0
-    Width = 481
+    Width = 487
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
+    TabStop = True
+    ExplicitWidth = 481
     inherited Bevel1: TBevel
-      Width = 481
+      Width = 487
+      ExplicitWidth = 481
     end
     inherited PanelTop: TPanel
-      Width = 481
+      Width = 487
+      ExplicitWidth = 481
       inherited Image2: TImage
-        Width = 306
+        Width = 312
+        ExplicitWidth = 306
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end

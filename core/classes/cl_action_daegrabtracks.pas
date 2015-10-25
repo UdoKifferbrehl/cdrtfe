@@ -2,10 +2,10 @@
 
   cl_action_daegrabtracks.pas: Audio-CD auslesen
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  25.10.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -110,6 +110,17 @@ end;
 function TCdrtfeActionDAEGrabTracks.Cdda2wavStdCmdLine: string;
 var CommandLine : string;
     VerboseLEvel: string;
+    Temp        : string;
+
+  function AddParaOpt(const OptionList, Option: string): string;
+  var TempList: string;
+  begin
+    TempList := OptionList;
+    if TempList <> '' then TempList := TempList + ',';
+    TempList := TempList + Option;
+    Result := TempList;
+  end;
+
 begin
   case FSettings.DAE.DoCopy of
     True : VerboseLevel := 'all';
@@ -123,6 +134,31 @@ begin
     CommandLine := CommandLine + ' verbose-level=' + VerboseLevel; //'summary'
     CommandLine := CommandLine + ' -gui';
     if Paranoia       then CommandLine := CommandLine + ' -paranoia';
+    if Paranoia and UseParaOpts then
+    begin
+      Commandline := Commandline + ' -paraopts=';
+      Temp := '';
+      if ParaProof then
+      begin
+        Temp := 'proof';
+      end else
+      begin
+        if ParaDisable  then Temp := AddParaOpt(Temp, 'disable');
+        if ParaC2check  then Temp := AddParaOpt(Temp, 'c2check');
+        if ParaNoVerify then Temp := AddParaOpt(Temp, 'no-verify');
+        if ParaRetries <> '' then
+          Temp := AddParaOpt(Temp, 'retries=' + ParaRetries);
+        if ParaReadahead <> '' then
+          Temp := AddParaOpt(Temp, 'readahead=' + ParaReadahead);
+        if ParaOverlap <> '' then
+          Temp := AddParaOpt(Temp, 'overlap=' + ParaOverlap);
+        if ParaMinoverlap <> '' then
+          Temp := AddParaOpt(Temp, 'minoverlap=' + ParaMinoverlap);
+        if ParaMaxoverlap <> '' then
+          Temp := AddParaOpt(Temp, 'maxoverlap=' + ParaMaxoverlap);
+      end;
+      Commandline := Commandline + Temp;
+    end;
     if Bulk or DoCopy then CommandLine := CommandLine + ' -bulk';
     if NoInfoFile
        and not DoCopy then CommandLine := CommandLine + ' -no-infofile';

@@ -2,9 +2,9 @@
 
   frm_dae_options.pas: DAE: Optionen
 
-  Copyright (c) 2006-2010 Oliver Valencia
+  Copyright (c) 2006-2015 Oliver Valencia
 
-  letzte Änderung  10.01.2010
+  letzte Änderung  25.10.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -72,6 +72,24 @@ type
     ComboBoxSpeedW: TComboBox;
     LabelSpeedW: TLabel;
     FrameTopBanner1: TFrameTopBanner;
+    TabSheetParanoia: TTabSheet;
+    GroupBox2: TGroupBox;
+    CheckBoxDAEUseParaOpts: TCheckBox;
+    RadioButtonDAEUseParanoiaPresetProof: TRadioButton;
+    RadioButtonDAEUseParanoiaUserdefined: TRadioButton;
+    CheckBoxDAEDisableParanoia: TCheckBox;
+    CheckBoxDAEParanoiaC2check: TCheckBox;
+    CheckBoxDAEParanoiaNoVerify: TCheckBox;
+    EditDAEParaRetries: TEdit;
+    EditDAEParaReadahead: TEdit;
+    EditDAEParaOverlap: TEdit;
+    EditDAEParaMinOverlap: TEdit;
+    EditDAEParaMaxOverlap: TEdit;
+    LabelDAEParaRetries: TLabel;
+    LabelDAEParaReadahead: TLabel;
+    LabelDAEParaOverlap: TLabel;
+    LabelDAEParaMinOverlap: TLabel;
+    LabelDAEParaMaxOverlap: TLabel;
     procedure ButtonOkClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
@@ -183,6 +201,17 @@ begin
     ComboBoxDAEMp3Quality.ItemIndex :=
                                 ComboBoxDAEMp3Quality.Items.IndexOf(LamePreset);
     ComboBoxSpeedW.ItemIndex := ComboBoxSpeedW.Items.IndexOf(SpeedW);
+    CheckBoxDAEUseParaOpts.Checked       := UseParaOpts;
+    RadioButtonDAEUseParanoiaPresetProof.Checked := ParaProof;
+    RadioButtonDAEUseParanoiaUserdefined.Checked := not ParaProof;
+    CheckBoxDAEDisableParanoia.Checked   := ParaDisable;
+    CheckBoxDAEParanoiaC2check.Checked   := ParaC2check;
+    CheckBoxDAEParanoiaNoVerify.Checked  := ParaNoVerify;
+    EditDAEParaRetries.Text              := ParaRetries;
+    EditDAEParaReadahead.Text            := ParaReadahead;
+    EditDAEParaOverlap.Text              := ParaOverlap;
+    EditDAEParaMinOverlap.Text           := ParaMinoverlap;
+    EditDAEParaMaxOverlap.Text           := ParaMaxoverlap;
   end;
   ActivateTab;
 end;
@@ -216,6 +245,16 @@ begin
     CustomOpt   := EditCustomOpt.Text;
     LamePreset  := ComboBoxDAEMp3Quality.Items[ComboBoxDAEMp3Quality.ItemIndex];
     SpeedW      := ComboBoxSpeedW.Items[ComboBoxSpeedW.ItemIndex];
+    UseParaOpts    := CheckBoxDAEUseParaOpts.Checked;
+    ParaProof      := RadioButtonDAEUseParanoiaPresetProof.Checked;
+    ParaDisable    := CheckBoxDAEDisableParanoia.Checked;
+    ParaC2check    := CheckBoxDAEParanoiaC2check.Checked;
+    ParaNoVerify   := CheckBoxDAEParanoiaNoVerify.Checked;
+    ParaRetries    := EditDAEParaRetries.Text;
+    ParaReadahead  := EditDAEParaReadahead.Text;
+    ParaOverlap    := EditDAEParaOverlap.Text;
+    ParaMinoverlap := EditDAEParaMinOverlap.Text;
+    ParaMaxoverlap := EditDAEParaMaxOverlap.Text;
   end;
   FSettings.General.TabFrmDAE := GetActivePage;
 end;
@@ -226,11 +265,24 @@ end;
   Einstellungen vorkommen.                                                     }
 
 procedure TFormDAEOptions.CheckControls(Sender: TObject);
+var Temp: Boolean;
 begin
   EditDAEPrefix.Enabled := RadioButtonDAEUsePrefix.Checked;
   EditDAENamePattern.Enabled := RAdioButtonDAEUseNamePattern.Checked;
   EditDAECDDBServer.Enabled := CheckBoxDAEUseCDDB.Checked;
-  EditDAECDDBPort.Enabled := CheckBoxDAEUseCDDB.Checked;  
+  EditDAECDDBPort.Enabled := CheckBoxDAEUseCDDB.Checked;
+  Temp := CheckBoxDAEUseParaOpts.Checked;
+  RadioButtonDAEUseParanoiaPresetProof.Enabled := Temp;
+  RadioButtonDAEUseParanoiaUserdefined.Enabled := Temp;
+  Temp := Temp and RadioButtonDAEUseParanoiaUserdefined.Checked;
+  CheckBoxDAEDisableParanoia.Enabled := Temp;
+  CheckBoxDAEParanoiaC2check.Enabled := Temp;
+  CheckBoxDAEParanoiaNoVerify.Enabled := Temp;
+  EditDAEParaRetries.Enabled := Temp;
+  EditDAEParaReadahead.Enabled := Temp;
+  EditDAEParaOverlap.Enabled := Temp;
+  EditDAEParaMinOverlap.Enabled := Temp;
+  EditDAEParaMaxOverlap.Enabled := Temp;
 end;
 
 
