@@ -2,9 +2,9 @@
 
   cdrtfedbg.dpr: Debug-DLL
 
-  Copyright (c) 2007-2009 Oliver Valencia
+  Copyright (c) 2007-2015 Oliver Valencia
 
-  letzte Änderung  23.09.2009
+  letzte Änderung  27.11.2015
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -31,6 +31,8 @@
 }
 
 library cdrtfedbg;
+
+{$SetPEOptFlags $0140} // enable DEP and ASLR
 
 uses
   Forms,

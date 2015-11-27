@@ -2,10 +2,10 @@
 
   cdrtfe.dpr: Hauptprogramm
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.06.2013
+  letzte Änderung  27.11.2015
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -34,6 +34,8 @@
 program cdrtfe;
 
 {$I directives.inc}
+
+{$SetPEOptFlags $0140} // enable DEP and ASLR
 
 uses
   Forms,
