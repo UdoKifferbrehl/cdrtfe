@@ -5,7 +5,7 @@ object FormDataCDFS: TFormDataCDFS
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'mkisofs - Optionen'
-  ClientHeight = 463
+  ClientHeight = 471
   ClientWidth = 578
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,12 +18,12 @@ object FormDataCDFS: TFormDataCDFS
   OnShow = FormShow
   DesignSize = (
     578
-    463)
+    471)
   PixelsPerInch = 96
   TextHeight = 13
   object ButtonCancel: TButton
     Left = 496
-    Top = 432
+    Top = 440
     Width = 75
     Height = 25
     Cancel = True
@@ -33,7 +33,7 @@ object FormDataCDFS: TFormDataCDFS
   end
   object ButtonOk: TButton
     Left = 416
-    Top = 432
+    Top = 440
     Width = 75
     Height = 25
     Caption = 'Ok'
@@ -44,23 +44,24 @@ object FormDataCDFS: TFormDataCDFS
     Left = 8
     Top = 56
     Width = 561
-    Height = 369
+    Height = 377
     ActivePage = TabSheetGeneral
     TabOrder = 1
     object TabSheetGeneral: TTabSheet
       Caption = 'Allgemein'
+      ExplicitHeight = 341
       object GroupBoxJoliet: TGroupBox
         Left = 8
         Top = 8
         Width = 265
-        Height = 97
+        Height = 105
         Caption = 'Joliet-Dateisystem'
         TabOrder = 0
         object Label2: TLabel
           Left = 25
           Top = 70
           Width = 238
-          Height = 25
+          Height = 33
           AutoSize = False
           Caption = 'Diese Option verletzt die Joliet-Spezifikation.'
           WordWrap = True
@@ -101,7 +102,7 @@ object FormDataCDFS: TFormDataCDFS
       end
       object GroupBoxUDF: TGroupBox
         Left = 8
-        Top = 112
+        Top = 120
         Width = 265
         Height = 49
         Caption = 'UDF-Dateisystem'
@@ -117,7 +118,7 @@ object FormDataCDFS: TFormDataCDFS
       end
       object GroupBoxRockRidge: TGroupBox
         Left = 8
-        Top = 168
+        Top = 176
         Width = 265
         Height = 73
         Caption = 'Rock-Ridge-Dateisystem'
@@ -147,7 +148,7 @@ object FormDataCDFS: TFormDataCDFS
         Left = 280
         Top = 64
         Width = 265
-        Height = 273
+        Height = 281
         Caption = 'Boot-Disk'
         TabOrder = 5
         object LabelBootLoadSegAdr: TLabel
@@ -252,7 +253,7 @@ object FormDataCDFS: TFormDataCDFS
       end
       object GroupBoxCharSet: TGroupBox
         Left = 8
-        Top = 248
+        Top = 256
         Width = 265
         Height = 89
         Caption = 'Zeichensatz'
@@ -331,6 +332,7 @@ object FormDataCDFS: TFormDataCDFS
     end
     object TabSheetISO: TTabSheet
       Caption = 'ISO9660'
+      ExplicitHeight = 341
       object GroupBoxISO: TGroupBox
         Left = 8
         Top = 8
@@ -341,11 +343,9 @@ object FormDataCDFS: TFormDataCDFS
         object Label1: TLabel
           Left = 8
           Top = 96
-          Width = 513
+          Width = 310
           Height = 13
-          AutoSize = False
           Caption = 'Die folgenden Optionen versto'#223'en gegen den Standard ISO9660.'
-          WordWrap = True
         end
         object CheckBoxISO31Chars: TCheckBox
           Left = 8
@@ -457,6 +457,7 @@ object FormDataCDFS: TFormDataCDFS
     end
     object TabSheetSpecial: TTabSheet
       Caption = 'Spezial'
+      ExplicitHeight = 341
       object GroupBoxMeta: TGroupBox
         Left = 8
         Top = 8
@@ -585,24 +586,33 @@ object FormDataCDFS: TFormDataCDFS
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
+    ExplicitWidth = 578
+    ExplicitHeight = 50
     inherited Bevel1: TBevel
       Top = 47
       Width = 578
+      ExplicitTop = 47
+      ExplicitWidth = 578
     end
     inherited PanelTop: TPanel
       Width = 578
       Height = 47
+      ExplicitWidth = 578
+      ExplicitHeight = 47
       inherited Image2: TImage
         Width = 403
         Height = 47
+        ExplicitWidth = 403
+        ExplicitHeight = 47
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end
   object OpenDialog1: TOpenDialog
     Left = 368
-    Top = 432
+    Top = 440
   end
 end

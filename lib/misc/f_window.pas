@@ -3,7 +3,7 @@
   Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.10.2015
+  letzte Änderung  29.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,6 +16,8 @@
 
 
   exportierte Funktionen/Prozeduren:
+    ScaleByDPI(const i: Integer): Integer;
+    SetCurrentDPI(dpi: Integer)
     SetFont(Control: TWinControl)
     SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean)
     ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer
@@ -33,6 +35,8 @@ uses Forms, SysUtils, Windows, Controls, ComCtrls, Messages, Dialogs, Classes,
      MMSystem, StdCtrls, Graphics, ExtCtrls, CommCtrl, Themes, UxTheme;
 
 function FlagIsSet(const Mask, Flag: Longint): Boolean;
+function IsHighDPI: Boolean;
+function ScaleByDPI(const i: Integer): Integer;
 function SetTreeViewStyle(Control: TWinControl): Boolean;
 function ShowMsgDlg(const Text, Caption: string; const Flags: Longint): Integer; overload;
 function ShowMsgDlg(const Text, Caption: string; const DlgType: TMsgDlgType; const Buttons: TMsgDlgButtons; Sound, Task: Boolean): Integer; overload;
@@ -42,6 +46,7 @@ procedure SetButtonCaptions(const Ok, Cancel, Yes, No: string);
 procedure SetFont(Control: TWinControl);
 procedure SetProgressBarMarquee(PB: TProgressBar; const Active: Boolean);
 procedure WindowStayOnTop(Handle: THandle; Value: Boolean);
+procedure SetCurrentDPI(dpi: Integer);
 
 const MB_cdrtfeDlgEx	   = $01000000;
       MB_cdrtfeDlgSnd	   = $02000000;
@@ -69,6 +74,7 @@ type TMsgTimer = class(TTimer)
      end;
 
 var StrNewOk, StrNewCancel, StrNewYes, StrNewNo: string;
+    CurrentDPI: Integer;
 
 { FlagIsSet --------------------------------------------------------------------
 
@@ -77,6 +83,34 @@ var StrNewOk, StrNewCancel, StrNewYes, StrNewNo: string;
 function FlagIsSet(const Mask, Flag: Longint): Boolean;
 begin
   Result := (Mask and Flag) = Flag;
+end;
+
+{ IsHighDPI --------------------------------------------------------------------
+
+  True, wenn DPI > 96.                                                         }
+
+function IsHighDPI: Boolean;
+begin
+  Result := CurrentDPI > 96;
+end;
+
+{ ScaleByDPI -------------------------------------------------------------------
+
+  skaliert einen Wert in Abhängigkeit des Verhältnisses von CurrentDPI zum
+  Standard von 96dpi.                                                          }
+
+function ScaleByDPI(const i: Integer): Integer;
+begin
+  Result := Round((CurrentDPI / 96) * i); 
+end;
+
+{ SetCurrentDPI ----------------------------------------------------------------
+
+  setzt die Variable CurrentDPI für spätere Verwendung.                        }
+
+procedure SetCurrentDPI(dpi: Integer);
+begin
+  CurrentDPI := dpi;
 end;
 
 { SetFont ----------------------------------------------------------------------
@@ -235,6 +269,8 @@ var Dlg           : TForm;
     MessageLabel  : TStaticText;
     i             : Integer;
     ImageHeight   : Integer;
+    ImgHeightDiff : Integer;
+    ImgWidthDiff  : Integer;
     MessageHeight : Integer;
     SoundString   : string;
     BannerCap     : string;
@@ -252,6 +288,8 @@ begin
   DlgLabel := nil;
   DlgImage := nil;
   ImageHeight := 0;
+  ImgHeightDiff := 0;
+  ImgWidthDiff := 0;
   BannerBG := 'grad1';
   case DlgType of
     mtWarning     : begin
@@ -276,19 +314,19 @@ begin
     Dlg.Caption := Application.MainForm.Caption;
     if Dlg.Caption = '' then Dlg.Caption := Application.Title;
     {Komponenten nach unten verschieben}
-    Dlg.Height := Dlg.Height + BannerHeight;
+    Dlg.Height := Dlg.Height + ScaleByDPI(BannerHeight);
     for i := 0 to Dlg.ComponentCount - 1 do
     begin
       Component := Dlg.Components[i];
       if Component is TWinControl then
        (Component as TWinControl).Top :=
-         (Component as TWinControl).Top + BannerHeight;
+         (Component as TWinControl).Top + ScaleByDPI(BannerHeight);
       if Component is TGraphicControl then
        (Component as TGraphicControl).Top :=
-         (Component as TGraphicControl).Top + BannerHeight;
+         (Component as TGraphicControl).Top + ScaleByDPI(BannerHeight);
       if Task and (Component is TButton) then
       begin
-        (Component as TButton).Top := (Component as TButton).Top + 5;
+        (Component as TButton).Top := (Component as TButton).Top + ScaleByDPI(5);
         DlgButtons[DlgButtonCount] := (Component as TButton);
         Inc(DlgButtonCount);
       end;
@@ -304,9 +342,10 @@ begin
     FrameTopBanner.Top := 0;
     FrameTopBanner.Left := 0;
     FrameTopBanner.Width := Dlg.ClientWidth;
-    FrameTopBanner.Height := BannerHeight;
+    FrameTopBanner.Height := ScaleByDPI(BannerHeight);
     FrameTopBanner.Image2.Left := 0;
     FrameTopBanner.Image2.Width := FrameTopBanner.ClientWidth;
+    FrameTopBanner.Image2.Height := FrameTopBanner.ClientHeight;
     FrameTopBanner.Init(BannerCap, '', BannerBG);
     {Sound abspielen, Buttons übersetzen}
     if Sound then PlaySound(PChar(SoundString), 0, SND_ALIAS or SND_ASYNC);
@@ -317,7 +356,7 @@ begin
     MessageLabel.Parent := Dlg;
     MessageLabel.Caption := Text;
     MessageLabel.Top := DlgLabel.Top;
-    MessageLabel.Left :=DlgLabel.Left;
+    MessageLabel.Left := DlgLabel.Left;
     MessageLabel.Width := DlgLabel.Width;
     MessageLabel.Height :=DlgLabel.Height;
 
@@ -328,7 +367,7 @@ begin
       Panel.Parent := Dlg;
       Panel.ParentBackground := false;
       Panel.Color := clWhite;
-      Panel.Top := FrameTopBanner.Height - 1;
+      Panel.Top := FrameTopBanner.Height - ScaleByDPI(1);
       Panel.Width := Dlg.ClientWidth;
       Panel.BorderStyle := bsNone;
       Panel.BevelInner := bvNone;
@@ -336,26 +375,49 @@ begin
       if DlgImage <> nil then
       begin
         DlgImage.Parent := Panel;
-        DlgImage.Top := DlgImage.Top - BannerHeight;
-        ImageHeight := DlgImage.Top * 2 + DlgImage.Height;
+        DlgImage.Top := DlgImage.Top - ScaleByDPI(BannerHeight);
+        if CurrentDPI > 96 then
+        begin
+          ImgWidthDiff := DlgImage.Picture.Width - DlgImage.Width;
+          DlgImage.Width := DlgImage.Picture.Width;
+          ImgHeightDiff := DlgImage.Picture.Height - DlgImage.Height;
+          DlgImage.Height := DlgImage.Picture.Height;
+        end;
+        ImageHeight := DlgImage.Top * 2 + DlgImage.Height; 
       end;
       MessageLabel.Parent := Panel;
-      MessageLabel.Top := MessageLabel.Top - BannerHeight;
+      MessageLabel.Top := MessageLabel.Top - ScaleByDPI(BannerHeight);
       MessageHeight := MessageLabel.Top * 2 + MessageLabel.Height;
       if ImageHeight > MessageHeight then
         Panel.Height := ImageHeight
       else
+      begin
         Panel.Height := MessageHeight;
+        ImgHeightDiff := 0;
+      end;
+      if ImgHeightDiff > 0 then
+      begin
+        Dlg.ClientHeight := Dlg.ClientHeight + ImgHeightDiff;
+      end;
+      if ImgWidthDiff > 0 then
+      begin
+        Dlg.ClientWidth := Dlg.ClientWidth + ImgWidthDiff;
+        DlgLabel.Left := DlgLabel.Left + ImgWidthDiff;
+        MessageLabel.Left := MessageLabel.Left + ImgWidthDiff;
+        Panel.Width := Dlg.ClientWidth;
+      end;
       i := 0;
       CurrentButton := DlgButtons[i];
       while DlgButtons[i] <> nil do
       begin
+        if ImgHeightDiff > 0 then
+          DlgButtons[i].Top := DlgButtons[i].Top + ImgHeightDiff;
         if DlgButtons[i].Left > CurrentButton.Left then
           CurrentButton := DlgButtons[i];
         Inc(i);
       end;
       DlgButtonDiff := (Dlg.ClientWidth - CurrentButton.Width) -
-                       CurrentButton.Left - 8;
+                       CurrentButton.Left - ScaleByDPI(8);
       i := 0;
       while DlgButtons[i] <> nil do
       begin
@@ -522,5 +584,8 @@ begin
     SendMessage(CB.Handle, CB_SETDROPPEDWIDTH, itemsFullWidth + 20, 0);
   end;
 end;
+
+initialization
+  CurrentDPI := 96;
 
 end.

@@ -1,8 +1,8 @@
 { c_filebrowser.pas: Komponente zur Darstellung einer Explorer-Ansicht
 
-  Copyright (c) 2009-2014 Oliver Valencia
+  Copyright (c) 2009-2015 Oliver Valencia
 
-  letzte Änderung  25.05.2014
+  letzte Änderung  29.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -35,7 +35,7 @@ unit c_filebrowser;
 interface
 
 uses Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-     Dialogs, StdCtrls, ExtCtrls, ComCtrls, ShlObj, ShellApi,
+     Dialogs, StdCtrls, ExtCtrls, CommCtrl, ComCtrls, ShlObj, ShellApi,
      {$IFDEF UseVirtualShellTools}
      VirtualExplorerTree, VirtualTrees
      {$ELSE}
@@ -90,6 +90,7 @@ type
     procedure TreeViewSetFocus;
     procedure ListViewSetFocus;
     procedure SetTreeViewStyle;
+    procedure SetTreeViewItemHeight(const Height: Integer);
     property TreeViewHasFocus: Boolean read GetTreeViewFocused;
     property ListViewHasFocus: Boolean read GetListViewFocused;
     property LabelCaption: string write FLabelCaption;
@@ -230,12 +231,17 @@ begin
 end;
 
 procedure TFrameFileBrowser.Init;
+var NewTop: Integer;
 begin
   Self.TabStop := False;
   Self.Color := clBtnFace;
   Self.Align := alClient;
   Label1.Caption := FLabelCaption;
   Label1.Font.Style := [fsBold];
+
+  NewTop := ScaleByDPI(Panel1.Top);
+  Panel1.Height := Panel1.Height - (NewTop - Panel1.Top);
+  Panel1.Top := NewTop;
 
   {FolderTreeView}
   FBShellTreeView := {$IFDEF UseVirtualShellTools}
@@ -311,6 +317,14 @@ begin
   {$ELSE}
   if f_window.SetTreeViewStyle(FBShellTreeView) then
     FBShellTreeView.ShowLines := False;
+  {$ENDIF}
+end;
+
+procedure TFrameFileBrowser.SetTreeViewItemHeight(const Height: Integer);
+begin
+  {$IFDEF UseVirtualShellTools}
+  {$ELSE}
+  FBShellTreeView.Perform(TVM_SETITEMHEIGHT, Height, 0);
   {$ENDIF}
 end;
 

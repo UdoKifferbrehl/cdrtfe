@@ -1,9 +1,9 @@
 { f_treelistfuncs.pas: List- und Treeview-Funktionen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.01.2010
+  letzte Änderung  29.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -16,9 +16,11 @@
   exportierte Funktionen/Prozeduren:
     GetPathFromNode(Root: TTreeNode): string
     GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode
+    GetTreeViewItemHeight(Tree: TTreeView)
     ItemIsFolder(Item: TListItem): Boolean
     ListViewSelectAll(ListView: TListView)
     SelectRootIfNoneSelected(Tree: TTreeView)
+    SetTreeViewItemHight(Tree: TTreeView; const Height: Integer)
 
 }
 
@@ -28,13 +30,15 @@ unit f_treelistfuncs;
 
 interface
 
-uses Classes, ComCtrls;
+uses Classes, CommCtrl, ComCtrls, Types;
 
 function GetPathFromNode(Root: TTreeNode): string;
 function GetNodeFromPath(Root: TTreeNode; Path: string): TTreeNode;
+function GetTreeViewItemHeight(Tree: TTreeView): Integer;
 function ItemIsFolder(Item: TListItem): Boolean;
 procedure ListViewSelectAll(ListView: TListView);
 procedure SelectRootIfNoneSelected(Tree: TTreeView);
+procedure SetTreeViewItemHight(Tree: TTreeView; const Height: Integer);
 
 implementation
 
@@ -104,6 +108,27 @@ begin
     List.Free;
   end;
   Result := Root;
+end;
+
+{ GetTreeViewItemHeight --------------------------------------------------------
+
+  gibt die Höhe eines TreeView-Elements zurück. Achtung: Es muß mindestens ein
+  Item vorhanden sein.                                                         }
+
+function GetTreeViewItemHeight(Tree: TTreeView): Integer;
+var r: TRect;
+begin
+  r := Tree.Items[0].DisplayRect(False);
+  Result := r.Bottom - r.Top;
+end;
+
+{ SetTreeViewItemHeight --------------------------------------------------------
+
+  setzt die Höhe eine Items des TreeViews.                                     }
+
+procedure SetTreeViewItemHight(Tree: TTreeView; const Height: Integer);
+begin
+  Tree.Perform(TVM_SETITEMHEIGHT, Height, 0);
 end;
 
 { ListViewSelectAll ------------------------------------------------------------

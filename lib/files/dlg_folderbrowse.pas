@@ -1,8 +1,8 @@
 { dlg_folderbrowse.pas: Auswahldialog für einen oder mehrere Ordner
 
-  Copyright (c) 2007-2014 Oliver Valencia
+  Copyright (c) 2007-2015 Oliver Valencia
 
-  letzte Änderung  15.02.2014
+  letzte Änderung  29.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,7 +50,7 @@ unit dlg_folderbrowse;
 interface
 
 uses Classes, Windows, Forms, StdCtrls, Controls, FileCtrl, SysUtils, ComCtrls,
-     ShlObj, ActiveX,
+     CommCtrl, ShlObj, ActiveX,
      {$IFDEF UseVirtualShellTools}
      VirtualExplorerTree
      {$ELSE}
@@ -69,6 +69,7 @@ type TFolderBrowser = class(TComponent)
        FBLabelTitle    : TLabel;
        FBButtonOk      : TButton;
        FBButtonCancel  : TButton;
+       procedure FormShow(Sender: TObject);
      private
        FPath           : string;
        FPathList       : TStringList;
@@ -127,12 +128,30 @@ type TFolderBrowser = class(TComponent)
 
 implementation
 
-uses f_window;
+uses f_window, f_treelistfuncs;
 
 const cComCtl32Name      : string   = 'comctl32.dll';
       cComCtl32MinVersion: Cardinal = $00050051;           // >=5.81
 
 { TFolderBrowser ------------------------------------------------------------- }
+
+{ TFolderBrowser - Events }
+
+procedure TFolderBrowser.FormShow(Sender: TObject);
+var ItemHeight: Integer;
+    r         : TRect;
+begin
+  if IsHighDPI then
+  begin
+    {$IFDEF UseVirtualShellTools}
+    // not possible to adjust item height?
+    {$ELSE}
+    r := FBShellTreeView.Items[0].DisplayRect(False);
+    ItemHeight := r.Bottom - r.Top;
+    FBShellTreeView.Perform(TVM_SETITEMHEIGHT, ScaleByDPI(ItemHeight), 0);
+    {$ENDIF}
+  end;
+end;
 
 { TFolderBrowser - private }
 
@@ -320,36 +339,40 @@ begin
   begin
     {Dialog erstellen}
     FBDialog              := TForm.Create(Self);
-    FBDialog.ClientHeight := FHeight;
+    FBDialog.ClientHeight := ScaleByDPI(FHeight);
     FBDialog.Left         := FLeft;
     FBDialog.Top          := FTop;
-    FBDialog.ClientWidth  := FWidth;
+    FBDialog.ClientWidth  := ScaleByDPI(FWidth);
     FBDialog.Position     := FPosition;
     FBDialog.BorderStyle  := bsDialog;
     FBDialog.ModalResult  := mrNone;
     FBDialog.KeyPreview   := True;
     FBDialog.Caption      := FCaption;
+    FBDialog.OnShow       := FormShow;
     {Ereignisse}
     //FBDialog.OnKeyDown    := OpenDirDlgKeyDown;
 
     {Label}
-    NewTop := 8;
+    NewTop := ScaleByDPI(8);
     FBLabelTitle := TLabel.Create(Self);
     with FBLabelTitle do
     begin
-      SetBounds(8, NewTop, FWidth - 16, 13);
+      SetBounds(ScaleByDPI(8), NewTop,
+                ScaleByDPI(FWidth) - ScaleByDPI(16), ScaleByDPI(13));
       // Font.Size  := Font.Size + 1;
       Parent     := FBDialog;
       Autosize   := True;
       Caption    := FTitle;
     end;
-    NewTop := NewTop + 8 + FBLabelTitle.Height;
+    NewTop := NewTop + ScaleByDPI(8) + FBLabelTitle.Height;
 
     {Cancel-Button}
     FBButtonCancel := TButton.Create(Self);
     with FBButtonCancel do
     begin
-      SetBounds(FWidth - 8 - 75, FHeight - 30, 75, 25);
+      SetBounds(ScaleByDPI(FWidth) - ScaleByDPI(8) - ScaleByDPI(75),
+                ScaleByDPI(FHeight) - ScaleByDPI(30), ScaleByDPI(75),
+                ScaleByDPI(25));
       Parent      := FBDialog;
       Caption     := FButtonCapCancel;
       ModalResult := mrAbort;
@@ -360,21 +383,25 @@ begin
     FBButtonOk := TButton.Create(Self);
     with FBButtonOk do
     begin
-      SetBounds(FWidth - 8 - 2*75 - 5, FHeight - 30, 75, 25);
+      SetBounds(ScaleByDPI(FWidth) - ScaleByDPI(8) - ScaleByDPI(2*75) -
+                ScaleByDPI(5),
+                ScaleByDPI(FHeight) - ScaleByDPI(30),
+                ScaleByDPI(75), ScaleByDPI(25));
       Parent      := FBDialog;
       Caption     := FButtonCapOk;
       ModalResult := mrOk;
     end;
-    NewBottom := FBButtonOk.Top - 8;
+    NewBottom := FBButtonOk.Top - ScaleByDPI(8);
 
     {ListView}
     if FMultiselect then
     begin
-      LVHeight := 120;
+      LVHeight := ScaleByDPI(120);
       FBListView := TListView.Create(Self);
       with FBListView do
       begin
-        SetBounds(8, NewBottom - LVHeight, FWidth - 16, LVHeight);
+        SetBounds(ScaleByDPI(8), NewBottom - LVHeight,
+                  ScaleByDPI(FWidth) - ScaleByDPI(16), LVHeight);
         Parent             := FBDialog;
         ViewStyle          := vsReport;
         CheckBoxes         := False;
@@ -384,7 +411,7 @@ begin
         Columns[0].Caption := FColCaption;
         Columns[0].Width   := FBListView.Width - 20;
       end;
-      NewBottom := FBListView.Top - 8;
+      NewBottom := FBListView.Top - ScaleByDPI(8);
     end;
 
     {ShellTreeView}
@@ -395,7 +422,8 @@ begin
                        {$ENDIF}
     with FBShellTreeView do
     begin
-      SetBounds(8, NewTop, FWidth - 16, FHeight - NewTop - (FHeight - NewBottom));
+      SetBounds(ScaleByDPI(8), NewTop, ScaleByDPI(FWidth) - ScaleByDPI(16),
+                ScaleByDPI(FHeight) - NewTop - (ScaleByDPI(FHeight) - NewBottom));
       Parent := FBDialog;
       {$IFDEF UseVirtualShellTools}
       RootFolder := rfDesktop;

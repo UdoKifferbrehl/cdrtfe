@@ -2,10 +2,10 @@
 
   cl_devices.pas: Laufwerkslisten, -erkennung
 
-  Copyright (c) 2005-2014 Oliver Valencia
+  Copyright (c) 2005-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  28.11.2014
+  letzte Änderung  29.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -812,8 +812,8 @@ begin
   Caption := FLang.GMS('mselw01');
   Position := poScreenCenter;
   BorderIcons := [biSystemMenu];
-  ClientHeight := 180;
-  ClientWidth := 300;
+  ClientHeight := ScaleByDPI(180);
+  ClientWidth := ScaleByDPI(300);
   OnShow := FormShow;
   OnDestroy := FormDestroy;
   {Banner}
@@ -822,16 +822,17 @@ begin
   FrameTopBanner1.Top := 0;
   FrameTopBanner1.Left := 0;
   FrameTopBanner1.Width := ClientWidth;
+  FrameTopBanner1.Height := ScaleByDPI(FrameTopBanner1.Height);
   FrameTopBanner1.Init(Self.Caption, FLang.GMS('mselw02'), 'grad1');
   {ListView}
   ListView := TListView.Create(Self);
   with ListView do
   begin
     Parent := Self;
-    Left := 8;
-    Top := 61;
-    Height := 76;
-    Width := 284;
+    Left := ScaleByDPI(8);
+    Top := ScaleByDPI(61);
+    Height := ScaleByDPI(76);
+    Width := ScaleByDPI(284);
     CheckBoxes := True;
     Visible := True;
     ViewStyle := vsReport;
@@ -845,10 +846,10 @@ begin
   with ButtonOk do
   begin
     Parent := Self;
-    Left := 137;
-    Top := 145;
-    Height := 25;
-    Width := 75;
+    Left := ScaleByDPI(137);
+    Top := ScaleByDPI(145);
+    Height := ScaleByDPI(25);
+    Width := ScaleByDPI(75);
     Caption := FLang.GMS('mlang02');
     OnClick := ButtonClick;
   end;
@@ -857,10 +858,10 @@ begin
   with ButtonCancel do
   begin
     Parent := Self;
-    Left := 217;
-    Top := 145; // 40;
-    Height := 25;
-    Width := 75;
+    Left := ScaleByDPI(217);
+    Top := ScaleByDPI(145); // 40;
+    Height := ScaleByDPI(25);
+    Width := ScaleByDPI(75);
     Caption := FLang.GMS('mlang03');
     ModalResult := mrCancel;
     Cancel := True;

@@ -5,11 +5,14 @@
   Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.10.2015
+  letzte Änderung  30.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
   Informationen (Lizenz, Gewährleistungsausschluß) in license.txt, COPYING.txt.
+
+  Info: TCdrtfeMainForm.Width : 808
+                        Height: 613
 
 }
 
@@ -510,6 +513,7 @@ type
     FSelectedDevice     : string;
     FLVArray: array[0..cLVCount] of TListView;
     FInitDone           : Boolean;
+    FTreeViewItemHeight : Integer;
     // ComboBoxDrivesWindowProcORIGINAL: TWndMethod;
     function GetActivePage: Byte;
     function GetCurrentListView(Sender: TObject): TListView;
@@ -3060,16 +3064,16 @@ begin
       {Falls keine Werte vorhanden, dann Fenster zentrieren. Die muß hier
        manuell geschehen, da poScreenCenter zu Fehlern beim Setzen der
        Eigenschaften führt. Deshalb muß poDefault verwendet werden.}
-      if (Screen.PixelsPerInch = 96) then
-      begin
-        Self.Width := dWidth;
-        Self.Height := dHeight;
-      end else
-      if (Screen.PixelsPerInch > 96) then
-      begin
-        Self.Width := dWidthBigFont;
-        Self.Height := dHeightBigFont;
-      end;
+//      if (Screen.PixelsPerInch = 96) then
+//      begin
+//        Self.Width := dWidth;
+//        Self.Height := dHeight;
+//      end else
+//      if (Screen.PixelsPerInch > 96) then
+//      begin
+//        Self.Width := dWidthBigFont;
+//        Self.Height := dHeightBigFont;
+//      end;
       Self.Top := (Screen.Height - Self.Height) div 2;
       Self.Left := (Screen.Width - Self.Width) div 2;
     end;
@@ -3465,6 +3469,8 @@ begin
     FileBrowser.Path := TempPath;
     PanelBrowser.Visible := True;
     FileBrowser.SetTreeViewStyle;
+    if IsHighDPI then
+      FileBrowser.SetTreeViewItemHeight(ScaleByDPI(FTreeViewItemHeight));
   end;
 end;
 
@@ -3516,10 +3522,12 @@ begin
     MainMenuToggleFileExplorer.Checked := True;
     SetPanelSize(Status, FileExplorerHeight);
     SetFileBrowserParent;
-    PanelBrowser.Width := TabSheet.Width - 5 - 36; //41;
+    PanelBrowser.Width := CDEListView.Left + CDEListView.Width;
     PanelBrowser.Height := FSettings.FileExplorer.Height;
     PanelBrowser.Visible  := True;
     FileBrowser.Path := FSettings.FileExplorer.Path;
+    if IsHighDPI then
+      FileBrowser.SetTreeViewItemHeight(ScaleByDPI(FTreeViewItemHeight));
   end else
   {FileExplorer ausblenden}
   if not Status and FFileExplorerShowing then
@@ -4381,6 +4389,7 @@ end;
 
 procedure TCdrtfeMainForm.InitMainform;
 var GlyphArray    : TGlyphArray;
+    Temp          : Integer;
 
   {lokale Prozedur zum Registrieren der Label-OnClick-Eventhandler}
   {$IFDEF AllowToggle}
@@ -4461,9 +4470,9 @@ var GlyphArray    : TGlyphArray;
 
   procedure InitFileBrowser;
   begin
-    PanelBrowser.Top := 8; //PageControl1.Top + 27;
-    PanelBrowser.Left := 8; // PageControl1.Left + 12;
-    PanelBrowser.Width := PageControl1.Width - 12 - 36; //41;
+    PanelBrowser.Top := ScaleByDPI(8); //PageControl1.Top + 27;
+    PanelBrowser.Left := ScaleByDPI(8); // PageControl1.Left + 12;
+    PanelBrowser.Width := CDEListView.Left + CDEListView.Width;
     PanelBrowser.Height := FSettings.FileExplorer.Height;
     PanelBrowser.Color := clBackground;
     PanelBrowser.Anchors := [akLeft, akTop, akRight];
@@ -4505,7 +4514,20 @@ var GlyphArray    : TGlyphArray;
     ToolButtonClose.Hint := ReplaceString(MainMenuClose.Caption, '&', '');
   end;
 
+  procedure InitToolBar;
+  begin
+    if IsHighDPI then
+    begin
+      Toolbar1.Width := ScaleByDPI(Toolbar1.Width) ;
+      Toolbar1.Height := ScaleByDPI(Toolbar1.Height) - ScaleByDPI(1);
+      ToolBar1.ButtonHeight := ScaleByDPI(ToolBar1.ButtonHeight);
+      ToolBar1.ButtonWidth := ScaleByDPI(ToolBar1.ButtonWidth);
+    end;
+  end;
+
 begin
+  {Set CurrentDPI}
+  SetCurrentDPi(Self.PixelsPerInch);
   //SetDoubleBuffered(True);
   Application.Title := LowerCase(Application.Title);
   {Ole-Drag-Drop für gesamtes Fenster zulassen (Explorer -> cdrtfe)}
@@ -4544,6 +4566,7 @@ begin
   Toolbar1.Images := FImageLists.ToolButtonImages;
   Toolbar1.DisabledImages := FImageLists.ToolButtonImagesD;
   InitToolButtonHints;
+  InitToolBar;
   {OnClick-Event für Option-Labels zuweisen}
   {$IFDEF AllowToggle}
   RegisterLabelEvents;
@@ -4561,15 +4584,23 @@ begin
   {Mainmenu-Icons}
   // InitMainMenu;
   {ComboBox-Position anpassen}
-  if PlatformWinVista and (ComboBoxSpeed.Font.Size = 9) then
+  if PlatformWinVista and (ComboBoxSpeed.Font.Size >= 9) then
   begin
-    ComboBoxSpeed.Top := ComboBoxSpeed.Top - 1;
-    ComboBoxDrives.Top := ComboBoxDrives.Top - 1;
-    StaticTextSpeed.Top := StaticTextSpeed.Top - 1;
+    ComboBoxSpeed.Top := ComboBoxSpeed.Top - ScaleByDPI(1);
+    ComboBoxDrives.Top := ComboBoxDrives.Top - ScaleByDPI(1);
+    StaticTextSpeed.Top := StaticTextSpeed.Top - ScaleByDPI(1);
   end;
   {angepaßte WindowProc für ComboBoxDrives}
 //  ComboBoxDrivesWindowProcORIGINAL := ComboBoxDrives.WindowProc;
 //  ComboBoxDrives.WindowProc := ComboBoxDrivesWindowProc;
+  {StatusBar in Abhängigkeit der DPI anpassen}
+  if IsHighDPI then
+  begin
+    Temp := ScaleByDPI(StatusBar.Height);
+    Statusbar.Top := Self.ClientHeight - Temp;
+    StatusBar.Height := Temp;
+    StatusBar.Panels[0].Width := ScaleByDPI(StatusBar.Panels[0].Width);
+  end;
 end;
 
 { InitSpaceMeter ---------------------------------------------------------------
@@ -4581,8 +4612,8 @@ begin
   SpaceMeter := TSpaceMeter.Create(Self);
   SpaceMeter.Font := Self.Font;
   SpaceMeter.Captions := FLang.GMS('g014');
-  SpaceMeter.Init(Self, StatusBar.Top - 34, 8,
-                 {545}{Memo1.Width}PageControl1.Width, 30,
+  SpaceMeter.Init(Self, StatusBar.Top - ScaleByDPI(34), ScaleByDPI(8),
+                 {545}{Memo1.Width}PageControl1.Width, ScaleByDPI(30),
                   [akLeft, akRight, akBottom]);
   SpaceMeter.OnSpaceMeterTypeChange := SpaceMeterTypeChange;
 end;
@@ -5075,8 +5106,8 @@ end;
   sind, aber in FormCreate noch nicht ausgeführt werden können.                }
 
 procedure TCdrtfeMainForm.FormShow(Sender: TObject);
-var i: Byte;
-    OldChoice: Byte;
+var i         : Byte;
+    OldChoice : Byte;
 begin
   {$IFDEF WriteLogfile} AddLogCode(1053); {$ENDIF}
   {einmal jedes Tab aktivieren, sonst funktioniert FormResize nicht richtig.
@@ -5123,8 +5154,16 @@ begin
   TC.StopTimeCount;
   TLogWin.Inst.Add('StartupTime: ' + TC.TimeAsString);
   {$ENDIF}
+  {Style und ItemHeight setzen}
   SetTreeViewStyle(CDETreeView);
   SetTreeViewStyle(XCDETreeView);
+  if IsHighDPI then
+  begin
+    FTreeViewItemHeight := GetTreeViewItemHeight(CDETreeView);
+    SetTreeViewItemHight(CDETreeView, ScaleByDPI(FTreeViewItemHeight));
+    SetTreeViewItemHight(XCDETreeView, ScaleByDPI(FTreeViewItemHeight));
+    FileBrowser.SetTreeViewItemHeight(ScaleByDPI(FTreeViewItemHeight));
+  end;
 end;
 
 { FormActivate -----------------------------------------------------------------
@@ -5178,36 +5217,15 @@ var TSHeight                 : Integer;
 begin
   if not (csDestroying in ComponentState) then
   begin
-    {Resize bei kleiner Schriftart}
-    if (Screen.PixelsPerInch <= 96) and not Application.Terminated then
-    begin
-      {TabSheet3}
-      {Höhe des aktuellen TabSheets}
-      TSHeight := PanelTabSheet3.Height; // PageControl1.ActivePage.Height;
-      PanelXCD.Top := TSHeight - 101;
-      PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
-      PanelXCDView.Width := XCDESpeedButton1.Left - 15;
-      XCDETreeView.Height := PanelXCD.Top - 15;
-      XCDEListView1.Height := (PanelXCDViewRight.Height -
-                               SplitterXCDHorizontal.Height) div 2;
-      XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
-      XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
-    end else
-    {Resize mit großer Schriftart}
-    if (Screen.PixelsPerInch > 96) and not Application.Terminated then
-    begin
-      {TabSheet3}
-      {Höhe des aktuellen TabSheets}
-      TSHeight := PanelTabSheet3.Height; //PageControl1.ActivePage.Height;
-      PanelXCD.Top := TSHeight - 127;
-      PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - 8;
-      PanelXCDView.Width := XCDESpeedButton1.Left - 15;
-      XCDETreeView.Height := PanelXCD.Top - 15;
-      XCDEListView1.Height := (PanelXCDViewRight.Height -
-                               SplitterXCDHorizontal.Height) div 2;
-      XCDESpeedButton4.Top := XCDEListView2.Top + 24 + 8;
-      XCDESpeedButton5.Top := XCDEListView2.Top + 56 + 8;
-    end;
+    {TabSheet3}
+    TSHeight := PanelTabSheet3.Height; // PageControl1.ActivePage.Height;
+    PanelXCD.Top := TSHeight - ScaleByDPI(101);
+    PanelXCDView.Height := PanelXCD.Top + PanelXCDOptions.Height - ScaleByDPI(8);
+    XCDETreeView.Height := PanelXCD.Top - ScaleByDPI(15);
+    XCDEListView1.Height := (PanelXCDViewRight.Height -
+                             SplitterXCDHorizontal.Height) div 2;
+    XCDESpeedButton4.Top := XCDEListView2.Top + ScaleByDPI(24) + ScaleByDPI(8);
+    XCDESpeedButton5.Top := XCDEListView2.Top + ScaleByDPI(56) + ScaleByDPI(8);
     {FileExplorer anpassen}
     FSettings.FileExplorer.Height := Round(TabSheet1.Height * 0.45);
     FileExplorerHeight := FSettings.FileExplorer.Height + 4;

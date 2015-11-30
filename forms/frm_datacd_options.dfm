@@ -6,7 +6,7 @@ object FormDataCDOptions: TFormDataCDOptions
   BorderStyle = bsSingle
   Caption = 'Daten-Disk - Optionen'
   ClientHeight = 338
-  ClientWidth = 465
+  ClientWidth = 481
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,14 +18,14 @@ object FormDataCDOptions: TFormDataCDOptions
   OnCreate = FormCreate
   OnShow = FormShow
   DesignSize = (
-    465
+    481
     338)
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBoxCD: TGroupBox
     Left = 8
     Top = 224
-    Width = 449
+    Width = 465
     Height = 73
     Caption = 'Disk'
     TabOrder = 3
@@ -41,22 +41,22 @@ object FormDataCDOptions: TFormDataCDOptions
     object CheckBoxContinue: TCheckBox
       Left = 8
       Top = 48
-      Width = 193
+      Width = 202
       Height = 17
       Caption = 'vorhandene Sessions importieren'
       TabOrder = 1
       OnClick = CheckBoxClick
     end
     object CheckBoxLastSession: TCheckBox
-      Left = 208
+      Left = 216
       Top = 24
-      Width = 238
+      Width = 246
       Height = 17
       Caption = 'Disk abschlie'#223'en (keine weiteren Sessions)'
       TabOrder = 2
     end
     object CheckBoxSelectSess: TCheckBox
-      Left = 208
+      Left = 216
       Top = 48
       Width = 225
       Height = 17
@@ -65,7 +65,7 @@ object FormDataCDOptions: TFormDataCDOptions
     end
   end
   object GroupBoxWritingMode: TGroupBox
-    Left = 256
+    Left = 272
     Top = 56
     Width = 201
     Height = 161
@@ -140,7 +140,7 @@ object FormDataCDOptions: TFormDataCDOptions
     end
   end
   object ButtonOk: TButton
-    Left = 301
+    Left = 317
     Top = 305
     Width = 75
     Height = 25
@@ -149,7 +149,7 @@ object FormDataCDOptions: TFormDataCDOptions
     OnClick = ButtonOkClick
   end
   object ButtonCancel: TButton
-    Left = 382
+    Left = 398
     Top = 305
     Width = 75
     Height = 25
@@ -161,7 +161,7 @@ object FormDataCDOptions: TFormDataCDOptions
   object GroupBoxImage: TGroupBox
     Left = 8
     Top = 56
-    Width = 241
+    Width = 257
     Height = 161
     Caption = 'ISO-Image'
     TabOrder = 1
@@ -177,7 +177,7 @@ object FormDataCDOptions: TFormDataCDOptions
     object RadioButtonOnTheFly: TRadioButton
       Left = 8
       Top = 136
-      Width = 230
+      Width = 246
       Height = 17
       Caption = 'on-the-fly, kein Image'
       TabOrder = 5
@@ -203,7 +203,7 @@ object FormDataCDOptions: TFormDataCDOptions
     object CheckBoxImageOnly: TCheckBox
       Left = 24
       Top = 80
-      Width = 214
+      Width = 230
       Height = 17
       Caption = 'Image nur erstellen, nicht brennen'
       TabOrder = 3
@@ -212,7 +212,7 @@ object FormDataCDOptions: TFormDataCDOptions
     object CheckBoxImageKeep: TCheckBox
       Left = 24
       Top = 104
-      Width = 214
+      Width = 230
       Height = 17
       Caption = 'Image nicht l'#246'schen'
       TabOrder = 4
@@ -222,26 +222,31 @@ object FormDataCDOptions: TFormDataCDOptions
   inline FrameTopBanner1: TFrameTopBanner
     Left = 0
     Top = 0
-    Width = 465
+    Width = 481
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 5
     TabStop = True
+    ExplicitWidth = 465
     inherited Bevel1: TBevel
-      Width = 465
+      Width = 481
+      ExplicitWidth = 465
     end
     inherited PanelTop: TPanel
-      Width = 465
+      Width = 481
+      ExplicitWidth = 465
       inherited Image2: TImage
-        Width = 290
+        Width = 306
+        ExplicitWidth = 290
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end
   object SaveDialog1: TSaveDialog
-    Left = 264
+    Left = 280
     Top = 304
   end
 end

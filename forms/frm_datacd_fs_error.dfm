@@ -4,7 +4,7 @@ object FormDataCDFSError: TFormDataCDFSError
   HelpContext = 1303
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  ClientHeight = 409
+  ClientHeight = 425
   ClientWidth = 684
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object FormDataCDFSError: TFormDataCDFSError
   OnShow = FormShow
   DesignSize = (
     684
-    409)
+    425)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -39,13 +39,13 @@ object FormDataCDFSError: TFormDataCDFSError
     Left = 288
     Top = 280
     Width = 385
-    Height = 121
+    Height = 137
     TabOrder = 1
     object StaticText1: TStaticText
       Left = 16
       Top = 16
       Width = 273
-      Height = 41
+      Height = 48
       AutoSize = False
       Caption = 
         'Die angezeigten Dateinamen unver'#228'ndert lassen und die '#220'berpr'#252'fun' +
@@ -63,7 +63,7 @@ object FormDataCDFSError: TFormDataCDFSError
     end
     object ButtonOk: TButton
       Left = 296
-      Top = 72
+      Top = 74
       Width = 75
       Height = 25
       Caption = 'Ok'
@@ -72,9 +72,9 @@ object FormDataCDFSError: TFormDataCDFSError
     end
     object StaticText2: TStaticText
       Left = 16
-      Top = 72
+      Top = 74
       Width = 273
-      Height = 41
+      Height = 48
       AutoSize = False
       Caption = 
         'Die angezeigten Dateinamen unver'#228'ndert lassen. Neu hinzugef'#252'gte ' +
@@ -111,14 +111,14 @@ object FormDataCDFSError: TFormDataCDFSError
     Left = 8
     Top = 280
     Width = 273
-    Height = 121
+    Height = 137
     Caption = 'Hinweis'
     TabOrder = 2
     object Label3: TLabel
       Left = 8
       Top = 16
       Width = 257
-      Height = 97
+      Height = 116
       AutoSize = False
       WordWrap = True
     end
@@ -130,16 +130,22 @@ object FormDataCDFSError: TFormDataCDFSError
     Height = 53
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
+    TabStop = True
+    ExplicitWidth = 684
     inherited Bevel1: TBevel
       Width = 684
+      ExplicitWidth = 684
     end
     inherited PanelTop: TPanel
       Width = 684
+      ExplicitWidth = 684
       inherited Image2: TImage
         Width = 509
+        ExplicitWidth = 509
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end

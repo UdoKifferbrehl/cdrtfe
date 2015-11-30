@@ -2,9 +2,9 @@
 
   cl_sessionimport.pas: Auswählen und Importieren von vorigen Sessions
 
-  Copyright (c) 2008-2010 Oliver Valencia
+  Copyright (c) 2008-2015 Oliver Valencia
 
-  letzte Änderung  18.05.2010
+  letzte Änderung  29.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -118,8 +118,8 @@ begin
   Caption := FLang.GMS('msess01');
   Position := poScreenCenter;
   BorderIcons := [biSystemMenu];
-  ClientHeight := 180;
-  ClientWidth := 220;
+  ClientHeight := ScaleByDPI(180);
+  ClientWidth := ScaleByDPI(220);
   OnShow := FormShow;
   OnDestroy := FormDestroy;
   {Banner}
@@ -128,17 +128,18 @@ begin
   FrameTopBanner1.Top := 0;
   FrameTopBanner1.Left := 0;
   FrameTopBanner1.Width := ClientWidth;
+  FrameTopBanner1.Height := ScaleByDPI(FrameTopBanner1.Height);
   FrameTopBanner1.Init(Self.Caption, '', 'grad1');
   {StaticText}
   StaticText := TStaticText.Create(Self);
   with StaticText do
   begin
     Parent := Self;
-    Left := 8;
-    Top := 56; // 8;
+    Left := ScaleByDPI(8);
+    Top := ScaleByDPI(56); // 8;
     AutoSize := False;
-    Height := 93;
-    Width := 203;
+    Height := ScaleByDPI(93);
+    Width := ScaleByDPI(203);
     Caption := FLang.GMS('msess02');
   end;
   {ComboBox}
@@ -146,10 +147,10 @@ begin
   with ComboBox do
   begin
     Parent := Self;
-    Left := 8;
-    Top := 109;
-    Height := 98;
-    Width := 203;
+    Left := ScaleByDPI(8);
+    Top := ScaleByDPI(109);
+    Height := ScaleByDPI(98);
+    Width := ScaleByDPI(203);
     Visible := True;
     Style := csDropDownList;
   end;
@@ -158,10 +159,10 @@ begin
   with ButtonOk do
   begin
     Parent := Self;
-    Left := 56;
-    Top := 145;
-    Height := 25;
-    Width := 75;
+    Left := ScaleByDPI(56);
+    Top := ScaleByDPI(145);
+    Height := ScaleByDPI(25);
+    Width := ScaleByDPI(75);
     Caption := FLang.GMS('mlang02');
     OnClick := ButtonClick;
   end;
@@ -170,10 +171,10 @@ begin
   with ButtonCancel do
   begin
     Parent := Self;
-    Left := 136;
-    Top := 145; // 40;
-    Height := 25;
-    Width := 75;
+    Left := ScaleByDPI(136);
+    Top := ScaleByDPI(145); // 40;
+    Height := ScaleByDPI(25);
+    Width := ScaleByDPI(75);
     Caption := FLang.GMS('mlang03');
     ModalResult := mrCancel;
     Cancel := True;

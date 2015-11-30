@@ -2,10 +2,10 @@
 
   frm_datacd_fs_error.pas: Dialog zum Korrigieren von zu langen Dateinamen
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  04.07.2010
+  letzte Änderung  30.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere

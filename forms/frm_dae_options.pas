@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2015 Oliver Valencia
 
-  letzte Änderung  25.10.2015
+  letzte Änderung  30.11.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere

@@ -49,8 +49,6 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetDAE: TTabSheet
       HelpContext = 1802
       Caption = 'DAE'
-      ExplicitWidth = 457
-      ExplicitHeight = 213
       object LabelSpeedW: TLabel
         Left = 16
         Top = 188
@@ -200,8 +198,6 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetCDDB: TTabSheet
       HelpContext = 1803
       Caption = 'freedb'
-      ExplicitWidth = 457
-      ExplicitHeight = 213
       object GroupBox1: TGroupBox
         Left = 8
         Top = 8
@@ -252,8 +248,6 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetCompression: TTabSheet
       HelpContext = 1804
       Caption = 'Encoding'
-      ExplicitWidth = 457
-      ExplicitHeight = 213
       object GroupBoxDAETags: TGroupBox
         Left = 8
         Top = 8
@@ -394,8 +388,6 @@ object FormDAEOptions: TFormDAEOptions
     object TabSheetParanoia: TTabSheet
       Caption = 'Paranoia'
       ImageIndex = 3
-      ExplicitWidth = 457
-      ExplicitHeight = 213
       object GroupBox2: TGroupBox
         Left = 8
         Top = 8
@@ -405,41 +397,36 @@ object FormDAEOptions: TFormDAEOptions
         object LabelDAEParaRetries: TLabel
           Left = 40
           Top = 160
-          Width = 70
+          Width = 28
           Height = 13
-          AutoSize = False
           Caption = 'retries'
         end
         object LabelDAEParaReadahead: TLabel
           Left = 116
           Top = 160
-          Width = 70
+          Width = 51
           Height = 13
-          AutoSize = False
           Caption = 'readahead'
         end
         object LabelDAEParaOverlap: TLabel
           Left = 192
           Top = 160
-          Width = 70
+          Width = 35
           Height = 13
-          AutoSize = False
           Caption = 'overlap'
         end
         object LabelDAEParaMinOverlap: TLabel
           Left = 268
           Top = 160
-          Width = 70
+          Width = 51
           Height = 13
-          AutoSize = False
           Caption = 'minoverlap'
         end
         object LabelDAEParaMaxOverlap: TLabel
           Left = 344
           Top = 160
-          Width = 70
+          Width = 54
           Height = 13
-          AutoSize = False
           Caption = 'maxoverlap'
         end
         object CheckBoxDAEUseParaOpts: TCheckBox
@@ -495,35 +482,35 @@ object FormDAEOptions: TFormDAEOptions
         end
         object EditDAEParaRetries: TEdit
           Left = 40
-          Top = 177
+          Top = 180
           Width = 70
           Height = 21
           TabOrder = 6
         end
         object EditDAEParaReadahead: TEdit
           Left = 116
-          Top = 177
+          Top = 180
           Width = 70
           Height = 21
           TabOrder = 7
         end
         object EditDAEParaOverlap: TEdit
           Left = 192
-          Top = 177
+          Top = 180
           Width = 70
           Height = 21
           TabOrder = 8
         end
         object EditDAEParaMinOverlap: TEdit
           Left = 268
-          Top = 177
+          Top = 180
           Width = 70
           Height = 21
           TabOrder = 9
         end
         object EditDAEParaMaxOverlap: TEdit
           Left = 344
-          Top = 177
+          Top = 180
           Width = 70
           Height = 21
           TabOrder = 10
@@ -539,14 +526,14 @@ object FormDAEOptions: TFormDAEOptions
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 481
+    ExplicitWidth = 487
     inherited Bevel1: TBevel
       Width = 487
       ExplicitWidth = 481
     end
     inherited PanelTop: TPanel
       Width = 487
-      ExplicitWidth = 481
+      ExplicitWidth = 487
       inherited Image2: TImage
         Width = 312
         ExplicitWidth = 306
