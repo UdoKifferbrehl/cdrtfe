@@ -79,10 +79,8 @@ procedure TImageLists.InitIcons(AOwner: TComponent);
 var Icon    : TIcon;
     Bitmap  : TBitmap;
     Mask    : TBitmap;
-    Dummy   : HICON;
     i       : Integer;
     IconFile: string;
-    Ok      : Boolean;
     Info    : TSHFileInfo;
     Drives  : TStringList;
 begin
@@ -92,32 +90,15 @@ begin
   Icon := TIcon.Create;
   Bitmap := TBitmap.Create;
   Mask := TBitmap.Create;
-  IconFile := StartUpDir + cCdrtfeResDll;
-  if not FileExists(IconFile) or
-     (ExtractIconEx(PChar(IconFile), -1, Dummy, Dummy, 0) < 5) then
-    IconFile := Application.ExeName;
+  IconFile := Application.ExeName;
   {Application-Icon laden}
   Icon.Handle := ExtractIcon(Application.Handle, PChar(IconFile), 0);
   IconImages.AddIcon(Icon);
   {Treeview-/Listview-Icons laden}
   for i := 1 to 4 do
   begin
-    Ok := True;
-    try
-      Bitmap.LoadFromFile(StartUpDir + cIconDir + '\' + IconNames[i] + cExtBmp);
-    except
-      Ok := False;
-    end;
-    if Ok then
-    begin
-      Mask.Assign(Bitmap);
-      Mask.Mask(clFuchsia);
-      IconImages.Add(Bitmap, Mask);
-    end else
-    begin
       Icon.Handle := ExtractIcon(Application.Handle, PChar(IconFile), i);
       IconImages.AddIcon(Icon);
-    end;
   end;
   {zusätzliche System-Icons laden}
   Icon.Handle := LoadIcon(0, IDI_INFORMATION);
@@ -248,56 +229,21 @@ end;
   LoadGlyphs lädt die Icons für die Speedbuttons.                              }
 
 procedure TImageLists.LoadGlyphs(Glyphs: TGlyphArray);
-var Path          : string;
-    SrcName       : string;
-    ResDllName    : string;
-    DPIName       : string;
-    Ok            : Boolean;
-    UseResDll     : Boolean;
-    i, Index      : Integer;
+var DPIName       : string;
+    i             : Integer;
     InstanceHandle: THandle;
 begin
-  Path := StartUpDir + cIconDir + '\';
-  ResDllName := StartUpDir + cCdrtfeResDll;
-  if FileExists(ResDllName) then
-  begin
-    InstanceHandle := LoadLibrary(PChar(ResDllName));
-    UseResDll := True;
-  end else
-  begin
-    InstanceHandle := hInstance;
-    UseResDll := False;
-  end;
+  InstanceHandle := hInstance;
   for i := 1 to High(Glyphs) do
   begin
-    Ok := True;
-    SrcName := Path + GlyphNames[i, 1] + cExtBmp;
-    if not FileExists(SrcName) then
+    if IsHighDPI then
     begin
-      Index := StrToIntDef(GlyphNames[i, 3], 0);
-      if Index > 0 then SrcName := Path + GlyphNames[Index, 1] + cExtBmp;
-      Ok := FileExists(SrcName);
+      DPIName := '';
+      if ScaleByDPI(16) >= 24 then DPIName := '_24';
+      if ScaleByDPI(16) >= 32 then DPIName := '_32';
     end;
-    if Ok then
-    begin
-      try
-        Glyphs[i].LoadFromFile(SrcName);
-      except
-        Ok := False;
-      end;
-    end;
-    if not Ok then
-    begin
-      if IsHighDPI then
-      begin
-        DPIName := '';
-        if ScaleByDPI(16) >= 24 then DPIName := '_24';
-        if ScaleByDPI(16) >= 32 then DPIName := '_32';  
-      end;
-      Glyphs[i].LoadFromResourceName(InstanceHandle, GlyphNames[i, 2] + DPIName);
-    end;
+    Glyphs[i].LoadFromResourceName(InstanceHandle, GlyphNames[i, 2] + DPIName);
   end;
-  if UseResDll then FreeLibrary(InstanceHandle);
 end;
 
 end.
