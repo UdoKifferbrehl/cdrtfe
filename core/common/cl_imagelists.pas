@@ -1,9 +1,9 @@
 { cl_imagelists.pas: Zugriff auf SytemImageList und Icons
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  12.05.2012
+  letzte Änderung  05.12.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -65,7 +65,7 @@ type TGlyphArray = array[1..cGlyphCount] of TBitmap;
 
 implementation
 
-uses f_locations, f_filesystem, const_locations, const_common;
+uses f_locations, f_filesystem, f_window, const_locations, const_common;
 
 { TImageLists ---------------------------------------------------------------- }
 
@@ -251,6 +251,7 @@ procedure TImageLists.LoadGlyphs(Glyphs: TGlyphArray);
 var Path          : string;
     SrcName       : string;
     ResDllName    : string;
+    DPIName       : string;
     Ok            : Boolean;
     UseResDll     : Boolean;
     i, Index      : Integer;
@@ -287,7 +288,13 @@ begin
     end;
     if not Ok then
     begin
-      Glyphs[i].LoadFromResourceName(InstanceHandle, GlyphNames[i, 2]);
+      if IsHighDPI then
+      begin
+        DPIName := '';
+        if ScaleByDPI(16) >= 24 then DPIName := '_24';
+        if ScaleByDPI(16) >= 32 then DPIName := '_32';  
+      end;
+      Glyphs[i].LoadFromResourceName(InstanceHandle, GlyphNames[i, 2] + DPIName);
     end;
   end;
   if UseResDll then FreeLibrary(InstanceHandle);
