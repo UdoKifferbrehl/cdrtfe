@@ -5,7 +5,7 @@
   Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  30.11.2015
+  letzte Änderung  05.12.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -657,7 +657,7 @@ var CdrtfeMainForm: TCdrtfeMainForm;
 implementation
 
 {$R *.DFM}
-{$R ../resource/icons.res}
+{ $R ../resource/icons.res}
 {$R ../resource/buttons.res}
 {$R ../resource/toolbuttons.res}
 {$R ../resource/logo.res}
@@ -4526,8 +4526,6 @@ var GlyphArray    : TGlyphArray;
   end;
 
 begin
-  {Set CurrentDPI}
-  SetCurrentDPi(Self.PixelsPerInch);
   //SetDoubleBuffered(True);
   Application.Title := LowerCase(Application.Title);
   {Ole-Drag-Drop für gesamtes Fenster zulassen (Explorer -> cdrtfe)}
@@ -4889,6 +4887,8 @@ var DummyHandle: HWND;
     TempChoice : Byte;
 begin
   FInitDone := False;
+  {Set CurrentDPI}
+  SetCurrentDPi(Self.PixelsPerInch);  
   {Fix für Win7-Vista-Alt-Bug, nur bis Delphi 2006}
   {$IFNDEF Delphi2007Up}
   TVistaAltFix.Create(Self);
@@ -5308,6 +5308,7 @@ var i: Integer;
     TextTrackData: TCDTextTrackData;
 {$ENDIF}
 begin
+  Memo1.Lines.Add(inttostr(FImageLists.IconImages.Height));
   {$IFDEF CreateAllForms}
   FormDataCDOptions  := TFormDataCDOptions.Create(Application);
   FormDataCDFS       := TFormDataCDFS.Create(Application);

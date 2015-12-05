@@ -77,29 +77,28 @@ uses f_locations, f_filesystem, f_window, const_locations, const_common;
 
 procedure TImageLists.InitIcons(AOwner: TComponent);
 var Icon    : TIcon;
-    Bitmap  : TBitmap;
-    Mask    : TBitmap;
-    i       : Integer;
     IconFile: string;
     Info    : TSHFileInfo;
     Drives  : TStringList;
+    IconSize: Integer;
 begin
+  IconSize := 16;
+  if IsHighDPI then
+  begin
+    if ScaleByDPI(16) >= 24 then IconSize := 24;
+    if ScaleByDPI(16) >= 32 then IconSize := 32;
+  end;
   {eigene Icons aus der Exe laden}
   IconImages := TImageList.Create(AOwner);
-  IconImages.Handle := ImageList_Create(16, 16, ILC_COLOR32 or ILC_MASK, 0, 0);
+  IconImages.Width := IconSize;
+  IconImages.Height := IconSize;
+  IconImages.Handle := ImageList_Create(IconSize, IconSize,
+                                        ILC_COLOR32 or ILC_MASK, 0, 0);
   Icon := TIcon.Create;
-  Bitmap := TBitmap.Create;
-  Mask := TBitmap.Create;
   IconFile := Application.ExeName;
   {Application-Icon laden}
   Icon.Handle := ExtractIcon(Application.Handle, PChar(IconFile), 0);
   IconImages.AddIcon(Icon);
-  {Treeview-/Listview-Icons laden}
-  for i := 1 to 4 do
-  begin
-      Icon.Handle := ExtractIcon(Application.Handle, PChar(IconFile), i);
-      IconImages.AddIcon(Icon);
-  end;
   {zusätzliche System-Icons laden}
   Icon.Handle := LoadIcon(0, IDI_INFORMATION);
   IconImages.AddIcon(Icon);
@@ -130,23 +129,27 @@ begin
   Drives.Free;
   SHGetFileInfo(PChar(IconFile), 0, Info,
                 SizeOf(TSHFileInfo),
-                SHGFI_ICON or SHGFI_SMALLICON);
+                SHGFI_ICON or SHGFI_TYPENAME );
   Icon.Handle := Info.hIcon;
   IconImages.AddIcon(Icon);
-
+  {cda-Icon}
+  SHGetFileInfo(PChar('.cda'), 0, Info,
+                SizeOf(TSHFileInfo),
+                SHGFI_ICON or SHGFI_SMALLICON or SHGFI_SYSICONINDEX or
+                SHGFI_USEFILEATTRIBUTES);
+  Icon.Handle := Info.hIcon;
+  IconImages.AddIcon(Icon);
   Icon.Free;
-  Bitmap.Free;
-  Mask.Free;
   {Icon-Indizes festlegen}
-  IconFolder         :=  9; //1;
-  IconFolderSelected := 10; //2;
-  IconCD             :=  3;
-  IconCDA            :=  4;
-  IconInformation    :=  5;
-  IconWarning        :=  6;
-  IconError          :=  7;
-  IconWinlogo        :=  8;
-  IconCDDrive        := 11;
+  IconCD             :=  0;
+  IconInformation    :=  1;
+  IconWarning        :=  2;
+  IconError          :=  3;
+  IconWinlogo        :=  4;
+  IconFolder         :=  5;
+  IconFolderSelected :=  6;
+  IconCDDrive        :=  7;
+  IconCDA            :=  8;
 end;
 
 { InitToolButtonImages ---------------------------------------------------------
