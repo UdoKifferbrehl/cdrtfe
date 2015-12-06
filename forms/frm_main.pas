@@ -5,7 +5,7 @@
   Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.12.2015
+  letzte Änderung  06.12.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -657,7 +657,6 @@ var CdrtfeMainForm: TCdrtfeMainForm;
 implementation
 
 {$R *.DFM}
-{ $R ../resource/icons.res}
 {$R ../resource/buttons.res}
 {$R ../resource/toolbuttons.res}
 {$R ../resource/logo.res}
@@ -4515,13 +4514,17 @@ var GlyphArray    : TGlyphArray;
   end;
 
   procedure InitToolBar;
+  var IconSize: Integer;
   begin
+    IconSize := 16;
     if IsHighDPI then
     begin
+      if ScaleByDPI(16) >= 24 then IconSize := 24;
+      if ScaleByDPI(16) >= 32 then IconSize := 32;
       Toolbar1.Width := ScaleByDPI(Toolbar1.Width) ;
       Toolbar1.Height := ScaleByDPI(Toolbar1.Height) - ScaleByDPI(1);
-      ToolBar1.ButtonHeight := ScaleByDPI(ToolBar1.ButtonHeight);
-      ToolBar1.ButtonWidth := ScaleByDPI(ToolBar1.ButtonWidth);
+      ToolBar1.ButtonHeight := IconSize + ScaleByDPI(7);
+      ToolBar1.ButtonWidth := IconSize + ScaleByDPI(6);
     end;
   end;
 
@@ -5308,7 +5311,6 @@ var i: Integer;
     TextTrackData: TCDTextTrackData;
 {$ENDIF}
 begin
-  Memo1.Lines.Add(inttostr(FImageLists.IconImages.Height));
   {$IFDEF CreateAllForms}
   FormDataCDOptions  := TFormDataCDOptions.Create(Application);
   FormDataCDFS       := TFormDataCDFS.Create(Application);

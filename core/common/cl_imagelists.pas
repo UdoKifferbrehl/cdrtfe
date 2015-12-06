@@ -3,7 +3,7 @@
   Copyright (c) 2004-2015 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.12.2015
+  letzte Änderung  06.12.2015
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -161,18 +161,32 @@ var InstanceHandle: THandle;
     Bitmap        : TBitmap;
     Mask          : TBitmap;
     i             : Integer;
+    IconSize      : Integer;
+    IconSizeStr   : string;
     ResNameA      : string;
     ResNameD      : string;
 begin
+  IconSize := 16;
+  IconSizeStr := '';
+  if IsHighDPI then
+  begin
+    if ScaleByDPI(16) >= 24 then IconSize := 24;
+    if ScaleByDPI(16) >= 32 then IconSize := 32;
+    if IconSize >= 24 then IconSizeStr := IntToStr(IconSize);
+  end;
   ToolButtonImages := TImageList.Create(AOwner);
   ToolButtonImagesD := TImageList.Create(AOwner);
+  ToolButtonImages.Width := IconSize;
+  ToolButtonImages.Height := Iconsize;
+  ToolButtonImagesD.Width := IconSize;
+  ToolButtonImagesD.Height := Iconsize;
   Bitmap := TBitmap.Create;
   Mask := TBitmap.Create;
   InstanceHandle := hInstance;
   for i := 1 to cToolButtonCount do
   begin
-    ResNameA := 'tb' + IntToStr(i) + 'a';
-    ResNameD := 'tb' + IntToStr(i) + 'd';
+    ResNameA := 'tb' + IntToStr(i) + 'a' + IconSizeStr;
+    ResNameD := 'tb' + IntToStr(i) + 'd' + IconSizeStr;
     Bitmap.LoadFromResourceName(InstanceHandle, ResNameA);
     Mask.Assign(Bitmap);
     Mask.Mask(clFuchsia);
