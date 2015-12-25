@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2015 Oliver Valencia
 ;
-;  letzte Änderung  08.10.2015
+;  letzte Änderung  25.12.2015
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVer "1.5.4.1"
+#define MyAppVer "1.5.4.2"
 #define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
@@ -88,8 +88,8 @@ Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: ignoreversion 
 Source: I:\cdrtfe\proto\cdrtfe.jdbg; DestDir: {app}; Flags: ignoreversion; Components: prog
 ; Manifest - seit Version 1.4 nicht mehr benötigt
 ; Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
-; Icons/Glyphs
-Source: I:\cdrtfe\proto\icons\*; DestDir: {app}\icons; Flags: ignoreversion; Components: prog
+; Icons/Glyphs - seit Version 1.5.4.2 nicht mehr benötigt
+; Source: I:\cdrtfe\proto\icons\*; DestDir: {app}\icons; Flags: ignoreversion; Components: prog
 ; Language files
 Source: I:\cdrtfe\proto\translations\*; Excludes: _cdrtfe_lang.ini; DestDir: {app}\translations; Flags: ignoreversion recursesubdirs; Components: prog\langsupport
 Source: I:\cdrtfe\proto\translations\_cdrtfe_lang.ini; DestDir: {app}\translations; DestName: cdrtfe_lang.ini; Flags: ignoreversion; Components: prog\langsupport; AfterInstall: LangIniSet

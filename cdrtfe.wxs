@@ -3,7 +3,7 @@
 <!--
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4FD0D58143"?>-->
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4F"?>
-<?define ProductId="$(var.BaseId)01030000"?>
+<?define ProductId="$(var.BaseId)01070000"?>
 <?define UpgradeId="$(var.BaseId)11000000"?>
 <?define CompMain="$(var.BaseId)00000000"?>
 <?define CompShlEx="$(var.BaseId)00000001"?>
@@ -15,17 +15,17 @@
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
 
-  <Product Name='cdrtfe 1.5.2' Id='$(var.ProductId)' UpgradeCode='$(var.UpgradeId)'
-    Language='1033' Codepage='1252' Version='1.5.2' Manufacturer='Oliver Valencia - Open Source Developer'>
+  <Product Name='cdrtfe 1.5.4.2' Id='$(var.ProductId)' UpgradeCode='$(var.UpgradeId)'
+    Language='1033' Codepage='1252' Version='1.5.4.2' Manufacturer='Oliver Valencia - Open Source Developer'>
 
-    <Package Id='*' Keywords='Installer' Description="cdrtfe 1.5.2 Installer"
+    <Package Id='*' Keywords='Installer' Description="cdrtfe 1.5.4.2 Installer"
       Comments='cdrtfe is Open Source (GPL)' Manufacturer='Oliver Valencia - Open Source Developer'
       InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
 
     <Upgrade Id='$(var.UpgradeId)'>
       <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
         Minimum='1.0.0' IncludeMinimum='yes'
-        Maximum='1.5.2' IncludeMaximum='no' />
+        Maximum='1.5.4.1' IncludeMaximum='no' />
     </Upgrade>
 
     <InstallExecuteSequence>
@@ -69,24 +69,6 @@
                 <File Id='cdrtfe_greek' Name='cdrtfe_greek.chm' Source='I:\cdrtfe\proto\help\cdrtfe_greek.chm' />
                 <File Id='cdrtfe_italian' Name='cdrtfe_italian.chm' Source='I:\cdrtfe\proto\help\cdrtfe_italian.chm' />
               </Component>
-            </Directory>
-
-            <Directory Id="icons" Name="icons">
-                <Component Id="cdrtfeIcons" Guid='$(var.CompIcons)'>
-                    <File Id="btn_a_down.bmp" Name="btn_a_down.bmp" Source="I:\cdrtfe\proto\icons\btn_a_down.bmp" />
-                    <File Id="btn_a_up.bmp" Name="btn_a_up.bmp" Source="I:\cdrtfe\proto\icons\btn_a_up.bmp" />
-                    <File Id="btn_check_fs.bmp" Name="btn_check_fs.bmp" Source="I:\cdrtfe\proto\icons\btn_check_fs.bmp" />
-                    <File Id="btn_del_all.bmp" Name="btn_del_all.bmp" Source="I:\cdrtfe\proto\icons\btn_del_all.bmp" />
-                    <File Id="btn_del_file.bmp" Name="btn_del_file.bmp" Source="I:\cdrtfe\proto\icons\btn_del_file.bmp" />
-                    <File Id="btn_del_folder.bmp" Name="btn_del_folder.bmp" Source="I:\cdrtfe\proto\icons\btn_del_folder.bmp" />
-                    <File Id="btn_load_file.bmp" Name="btn_load_file.bmp" Source="I:\cdrtfe\proto\icons\btn_load_file.bmp" />
-                    <File Id="btn_load_folder.bmp" Name="btn_load_folder.bmp" Source="I:\cdrtfe\proto\icons\btn_load_folder.bmp" />
-                    <File Id="icon_audiotrack.bmp" Name="icon_audiotrack.bmp" Source="I:\cdrtfe\proto\icons\icon_audiotrack.bmp" />
-                    <File Id="icon_cd.bmp" Name="icon_cd.bmp" Source="I:\cdrtfe\proto\icons\icon_cd.bmp" />
-                    <File Id="icon_folder_closed.bmp" Name="icon_folder_closed.bmp" Source="I:\cdrtfe\proto\icons\icon_folder_closed.bmp" />
-                    <File Id="icon_folder_opened.bmp" Name="icon_folder_opened.bmp" Source="I:\cdrtfe\proto\icons\icon_folder_opened.bmp" />
-                    <File Id="readme.txt" Name="readme.txt" Source="I:\cdrtfe\proto\icons\readme.txt" />
-                </Component>
             </Directory>
 
             <Directory Id="translations" Name="translations">
@@ -499,7 +481,6 @@
       <ComponentRef Id='MainExecutable' />
       <ComponentRef Id='ShellExt' />
       <ComponentRef Id='cdrtfeHelp' />
-      <ComponentRef Id='cdrtfeIcons' />
       <ComponentRef Id="_cdrtfe_lang.ini" />
       <ComponentRef Id="cdrtfeShlEx_lang.ini" />
       <ComponentRef Id="cdrtfe_lang.ini" />
