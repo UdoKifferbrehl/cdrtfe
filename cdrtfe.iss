@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2015 Oliver Valencia
 ;
-;  letzte Änderung  25.12.2015
+;  letzte Änderung  27.12.2015
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -50,8 +50,10 @@ SolidCompression=yes
 ; Cosmetic
 ;WizardSmallImageFile=compiler:wizmodernsmallimage-IS.bmp
 ;WizardImageFile=compiler:wizmodernimage-IS.bmp
-WizardSmallImageFile=compiler:images\SetupModernSmall19.bmp
-WizardImageFile=compiler:images\SetupModern19.bmp
+;WizardSmallImageFile=compiler:images\SetupModernSmall19.bmp
+;WizardImageFile=compiler:images\SetupModern19.bmp
+WizardSmallImageFile=I:\cdrtfe\setupscript\images\cdrtfe_inno_small.bmp
+WizardImageFile=I:\cdrtfe\setupscript\images\cdrtfe_inno.bmp
 WindowVisible=no
 AppCopyright={#MyAppCopyright}
 ShowUndisplayableLanguages=yes

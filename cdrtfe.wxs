@@ -601,8 +601,8 @@
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
     <Property Id="ALLUSERS">1</Property>
     <UIRef Id="WixUI_InstallDir"/>
-    <WixVariable Id="WixUIBannerBmp" Value="I:\cdrtfe\setupscript\wix\images\banner.bmp" />
-    <WixVariable Id="WixUIDialogBmp" Value="I:\cdrtfe\setupscript\wix\images\dialog.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="I:\cdrtfe\setupscript\images\cdrtfe_wix_small.jpg" />
+    <WixVariable Id="WixUIDialogBmp" Value="I:\cdrtfe\setupscript\images\cdrtfe_wix.jpg" />
     <WixVariable Id="WixUILicenseRtf" Value="I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf"/>
 
   </Product>
