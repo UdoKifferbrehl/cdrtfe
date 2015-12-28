@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2015 Oliver Valencia
 ;
-;  letzte Änderung  27.12.2015
+;  letzte Änderung  28.12.2015
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,16 +59,16 @@ AppCopyright={#MyAppCopyright}
 ShowUndisplayableLanguages=yes
 
 [Languages]
-Name: en; MessagesFile: compiler:Default.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
-Name: de; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_de.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_de.rtf
-Name: fr; MessagesFile: compiler:Languages\French.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_fr.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_fr.rtf
-Name: it; MessagesFile: compiler:Languages\Italian.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_it.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_it.rtf
-Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pl.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pl.rtf
-Name: nl; MessagesFile: compiler:Languages\Dutch.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
-Name: ptbr; MessagesFile: compiler:Languages\BrazilianPortuguese.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pt-br.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_pt-br.rtf
-Name: el; MessagesFile: compiler:Languages\Greek.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_el.rtf
-Name: sv; MessagesFile: compiler:Languages\Swedish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_sv.rtf
-Name: kr; MessagesFile: compiler:Languages\Korean.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_kr.rtf; InfoBeforeFile: I:\cdrtfe\cdrtfe\doc\setup\info\info_en.rtf
+Name: en; MessagesFile: compiler:Default.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf; 
+Name: de; MessagesFile: compiler:Languages\German.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_de.rtf;
+Name: fr; MessagesFile: compiler:Languages\French.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_fr.rtf;
+Name: it; MessagesFile: compiler:Languages\Italian.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_it.rtf;
+Name: pl; MessagesFile: compiler:Languages\Polish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pl.rtf;
+Name: nl; MessagesFile: compiler:Languages\Dutch.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf;
+Name: ptbr; MessagesFile: compiler:Languages\BrazilianPortuguese.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_pt-br.rtf;
+Name: el; MessagesFile: compiler:Languages\Greek.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf;
+Name: sv; MessagesFile: compiler:Languages\Swedish.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf;
+Name: kr; MessagesFile: compiler:Languages\Korean.isl; LicenseFile: I:\cdrtfe\cdrtfe\doc\setup\info\license_kr.rtf;
 
 [Tasks]
 ; Desktop icon
@@ -347,12 +347,13 @@ begin
   { Create the page - Cygwin options}
   MkisofsDLLsFound := IsInSearchPath('cygiconv-2.dll') and IsInSearchPath('cygintl-3.dll');
   CygFoundInSysDir := IsInSysDir('cygwin1.dll');
+  CygTextMsg := CustomMessage('CygwinTextInfo');
   if MkisofsDLLsFound then
   begin
-    CygTextMsg := CustomMessage('CygwinText');
+    CygTextMsg := CygTextMsg + #13#10 + #13#10 + CustomMessage('CygwinText');
   end else
   begin
-    CygTextMsg := CustomMessage('CygwinText') + #13#10 + #13#10 + CustomMessage('CygwinText2');
+    CygTextMsg := CygTextMsg + #13#10 + #13#10 + CustomMessage('CygwinText') + #13#10 + #13#10 + CustomMessage('CygwinText2');
   end;
   if IsInSysDir('cygwin1.dll') then
   begin
@@ -468,6 +469,7 @@ de.TaskAllUsers=für alle Benutzer
 de.TaskCurrentUser=für den aktuellen Benutzer
 de.CygwinHeader=Cygwin
 de.CygwinHeader2=Eine cygwin1.dll wurde auf Ihrem System gefunden.
+de.CygwinTextInfo=Einige der von cdrtfe verwendeten Kommandozeilentools benötigen die Datei cygwin1.dll. Diese Datei ist im cdrtfe-Setup-Programm enthalten. Diese Datei könnte allerdings bereits auf dem System vorhanden sein. Um mögliche Versionskonflikte zu vermeiden, fragt das Installationsprogramm nach, welche Version der cygwin1.dll dann verwendet werden soll. Diese Einstellung kann auch später noch in cdrtfe (Dialog 'Einstellungen') geändert werden.
 de.CygwinText=Welche cygwin-DLL soll verwendet werden?
 de.CygwinText2=Hinweis: Die Dateien cygiconv-2.dll und cygintl-3.dll wurden nicht im Suchpfad gefunden.
 de.CygwinText3=Warnung: Die Datei cygwin1.dll wurde in einem Windows-System-Ordner gefunden. Daher kann die Nutzung der mitgelieferten DLL nicht erzwungen werden.
@@ -493,6 +495,7 @@ en.TaskAllUsers=For all users
 en.TaskCurrentUser=For the current user only
 en.CygwinHeader=Cygwin
 en.CygwinHeader2=A cygwin1.dll has been found on your system.
+en.CygwinTextInfo=Some of the commandline tools used by cdrtfe need the file cygwin1.dll. This file is included in the cdrtfe setup program. The file could be previously installed on the system already. To avoid possible version conflicts the setup program asks which version of the cygwin1.dll should be used. This setting can be changed at any time within cdrtfe (dialog 'Settings').
 en.CygwinText=Which cygwin dll do you want to use?
 en.CygwinText2=Note: The files cygiconv-2.dll and cygintl-3.dll could not be found in the search path.
 en.CygwinText3=Warning: The file cygwin1.dll has been found in a Windows system folder. The use of the included DLL cannot be forced.
@@ -518,6 +521,7 @@ fr.TaskAllUsers=Pour tous les utilisateurs
 fr.TaskCurrentUser=Pour l'utilisateur actuel seulement
 fr.CygwinHeader=Cygwin
 fr.CygwinHeader2=Un fichier cygwin1.dll a été trouvé sur votre système.
+fr.CygwinTextInfo=Certains outils en ligne de commande utilisés par cdrtfe ont besoin du fichier cygwin1.dll. Ce fichier est inclus au programme d'installation de cdrtfe. Ce fichier a pu être précédemment installé sur le système. Pour éviter un possible conflit de version, le programme d'installation demande quelle version de cygwin1.dll doit être utilisée. Ce paramètre peut être modifié à tout moment dans cdrtfe (boîte de dialogue 'Réglages').
 fr.CygwinText=Quelle dll cygwin voulez-vous utiliser ?
 fr.CygwinText2=Remarque : les fichiers cygiconv-2.dll et cygintl-3.dll sont introuvables dans votre chemin d'accès.
 fr.CygwinText3=Attention : le fichier cygwin1.dll a été trouvé dans un dossier système de Windows. L'utilisation de la dll fournie ne peut pas être forcée.
@@ -543,6 +547,7 @@ it.TaskAllUsers=Per tutti gli utenti
 it.TaskCurrentUser=Solo per l'utente corrente
 it.CygwinHeader=Cygwin
 it.CygwinHeader2=Un file cygwin1.dll è stato trovato nel sistema.
+it.CygwinTextInfo=Alcuni dei programmi a riga di comando usati da cdrtfe hanno bisogno del file cygwin1.dll. Il file è incluso nel programma di installazione di cdrtfe setup program. Il file potrebbe essere già installato nel sistema. Per evitare possibili conflitti di versione, il programma di installazione chiede quale versione di cygwin1.dll deve essere usata. Tale impostazione può essere modificata in ogni momento dal menu 'Impostazioni' di cdrtfe.
 it.CygwinText=Quale dll cygwin deve essere usata?
 it.CygwinText2=Nota: I file cygiconv-2.dll e cygintl-3.dll non sono stati trovati nel percorso di ricerca.
 it.CygwinText3=Attenzione: Il file cygwin1.dll è stato trovato in una cartella di sistema. L'utilizzo della DDL inclusa non può essere forzato.
@@ -568,6 +573,7 @@ pl.TaskAllUsers=Dla wszystkich u¿ytkowników
 pl.TaskCurrentUser=Dla aktualnego u¿ytkownika
 pl.CygwinHeader=Cygwin
 pl.CygwinHeader2=Znaleziono plik cygwin1.dll w twoim systemie.
+pl.CygwinTextInfo=Niektóre narzedzia wiersza polecen uzywane przez cdrtfe potrzebuja plik cygwin1.dll. Instalator programu cdrtfe zawiera ten plik. Plik ten moze juz byc zainstalowany w twoim systemie. Aby zapobiec mozliwe konflikty, instalator pyta która wersje pliku cygwin1.dll ma uzywac. To ustawienie mozna tez pózniej zmienic w programie cdrtfe (dialog 'Ustawienia').
 pl.CygwinText=Który plik cygwin ma byæ u¿ywany?
 pl.CygwinText2=Wskazówka: Nie znaleziono pilików cygiconv-2.dll i cygintl-3.dll  w œcie¿ce wyszukiwania.
 pl.CygwinText3=Uwaga: Plik cygwin1.dll zosta³ znaleziony w katalogu Windows. Nie jest mo¿liwe wymuszenie u¿ycia wewnêtrznej biblioteki DLL.
@@ -593,6 +599,7 @@ nl.TaskAllUsers=Voor alle gebruikers
 nl.TaskCurrentUser=Alleen voor deze gebruiker
 nl.CygwinHeader=Cygwin
 nl.CygwinHeader2=Cygwin1.dll werd op uw systeem gevonden.
+nl.CygwinTextInfo=Some of the commandline tools used by cdrtfe need the file cygwin1.dll. This file is included in the cdrtfe setup program. The file could be previously installed on the system already. To avoid possible version conflicts the setup program asks which version of the cygwin1.dll should be used. This setting can be changed at any time within cdrtfe (dialog 'Settings').
 nl.CygwinText=Welke cygwin dll wilt u gebruiken?
 nl.CygwinText2=Opmerking: de bestanden cygiconv-2.dll en cygintl-3.dll konden niet teruggevonden worden in het zoekpad.
 nl.CygwinText3=Waarschuwing: het bestand cygwin1.dll werd teruggevonden in een Windows-systeemmap. Het gebruik van de bijgeleverde dll kan niet geforceerd worden.
@@ -618,6 +625,7 @@ ptbr.TaskAllUsers=Para todos os usuários
 ptbr.TaskCurrentUser=Apenas para este usuário
 ptbr.CygwinHeader=Cygwin
 ptbr.CygwinHeader2=O arquivo cygwin1.dll foi encontrado.
+ptbr.CygwinTextInfo=Algumas ferramentas em linha de comando usados pelo cdrtfe necessitam do arquivo cygwin1.dll. Este arquivo está incluído no programa de instalação do cdrtfe. O arquivo já pode estar instalado no sistema. Para evitar possíveis conflitos entre versões, o programa de instalação pergunta qual versão do cygwin1.dll deve ser usada. Isso pode ser modificado quando quiser no cdrtfe. (Menu 'Configurações')
 ptbr.CygwinText=Qual dll do cygwin você deseja usar?
 ptbr.CygwinText2=Nota: Os arquivos cygiconv-2.dll e cygintl-3.dll não puderam ser encontrados no diretório pesquisado.
 ptbr.CygwinText3=Aviso: O arquivo cygwin1.dll foi encontrado numa pasta de sistema do Windows. Impossível forçar o uso da DLL incluída.
@@ -643,6 +651,7 @@ el.TaskAllUsers=Ãéá üëïõò ôïõò ÷ñŞóôåò
 el.TaskCurrentUser=Ãéá ôùí ôñİ÷ùí ÷ñŞóôç ìüíï
 el.CygwinHeader=Cygwin
 el.CygwinHeader2=Ôï cygwin1.dll âñİèçêå óôï óıóôçìá óáò.
+el.CygwinTextInfo=Some of the commandline tools used by cdrtfe need the file cygwin1.dll. This file is included in the cdrtfe setup program. The file could be previously installed on the system already. To avoid possible version conflicts the setup program asks which version of the cygwin1.dll should be used. This setting can be changed at any time within cdrtfe (dialog 'Settings').
 el.CygwinText=Ğïéü cygwin dll èİëåôå íá ÷ñçóéìïğïéŞóåôå ;
 el.CygwinText2=Óçìåßùóç: Ôá áñ÷åßá cygiconv-2.dll êáé cygintl-3.dll äåí êáôİóôåé äõíáôü íá âñåèïıí óôï ìïíïğÜôé áíáæŞôçóçò.
 el.CygwinText3=Warning: Ôï áñ÷åßï cygwin1.dll åíôïğßóôçêå óå İíá öÜêåëï ôïõ óõóôŞìáôïò ôùí Windows. Ç ÷ñŞóç ôïõ óõìğåñéëÜìâáíïìİíïõ DLL äåí ìğïñåß íá åğéâëçèåß.
@@ -668,6 +677,7 @@ sv.TaskAllUsers=För alla användare
 sv.TaskCurrentUser=Endast för mig
 sv.CygwinHeader=Cygwin
 sv.CygwinHeader2=En befintlig cygwin1.dll har upptäckts i systemet.
+sv.CygwinTextInfo=Några av de kommandoradsverktyg som används av cdrtfe, kräver att filen, cygwin1.dll finns tillgänglig på datorn. Denna fil inkluderas i installationsprogrammet. Filen kan dock redan finnas installerad i ditt system och för att då undvika versionskonflikter kommer installationsprogrammet att fråga vilken version av cygwin1.dll som skall användas. Denna versionsinställning kan när som helst ändras i cdrtfe (under 'Inställningar').
 sv.CygwinText=Vilken cygwin dll vill du använda?
 sv.CygwinText2=Notis: cygiconv-2.dll och cygintl-3.dll kan inte hittas i systemet.
 sv.CygwinText3=Varning! cygwin1.dll har hittats i Windows systemkatalog. Användning av den, i installationsprogrammet, inkluderade DLL-filen kan inte genomföras.
@@ -693,6 +703,7 @@ kr.TaskAllUsers=¸ğµç »ç¿ëÀÚ¿¡ ´ëÇØ
 kr.TaskCurrentUser=ÇöÀç »ç¿ëÀÚ¿¡ ´ëÇØ¼­¸¸
 kr.CygwinHeader=Cygwin
 kr.CygwinHeader2=cygwin1.dllÀº ½Ã½ºÅÛ¿¡¼­ ¹ß°ßµÇ¾ú½À´Ï´Ù.
+kr.CygwinTextInfo=Some of the commandline tools used by cdrtfe need the file cygwin1.dll. This file is included in the cdrtfe setup program. The file could be previously installed on the system already. To avoid possible version conflicts the setup program asks which version of the cygwin1.dll should be used. This setting can be changed at any time within cdrtfe (dialog 'Settings').
 kr.CygwinText=cygwin dllÀ» »ç¿ëÇÏ½Ã°Ú½À´Ï±î?
 kr.CygwinText2=ÁÖÀÇ: cygiconv-2.dll,cygintl-3.dllÆÄÀÏÀº °Ë»ö °æ·Î¿¡¼­ Ã£À» ¼ö ¾ø½À´Ï´Ù.
 kr.CygwinText3=°æ°í: Windows ½Ã½ºÅÛ Æú´õ¿¡ ÆÄÀÏ cygwin1.dll ¹ß°ß µÇ¾ú½À´Ï´Ù. Æ÷ÇÔ µÈ DLLÀÇ »ç¿ëÀ» °­Á¦ ¼ö ¾ø½À´Ï´Ù.
