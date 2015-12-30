@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2015 Oliver Valencia
 ;
-;  letzte Änderung  28.12.2015
+;  letzte Änderung  30.12.2015
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -227,17 +227,18 @@ Name: custom; Description: cdrtfe Setup; Flags: iscustom
 Name: prog; Description: {cm:CompProg}; Flags: fixed; Types: custom
 Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Types: custom; Languages: en fr it pl nl ptbr el sv kr
 Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Languages: de
+; source files
+Name: src; Description: {cm:CompSrc};
 ; Tools
 Name: tools; Description: {cm:CompTools}; Flags: fixed; Types: custom;
 Name: tools\cdrt; Description: {cm:CompCdrt}; Flags: fixed; Types: custom;
-Name: tools\m2cdm; Description: {cm:CompM2CDM}; Flags: dontinheritcheck checkablealone; Types: custom;
+Name: tools\m2cdm; Description: {cm:CompM2CDM}; Flags: fixed dontinheritcheck checkablealone; Types: custom;
 Name: tools\m2cdm\ex; Description: {cm:CompM2CDMex}; Flags: dontinheritcheck;
-Name: tools\rrenc; Description: {cm:CompRrenc}; Flags: dontinheritcheck; Types: custom;
-Name: tools\xcd; Description: {cm:CompXCD}; Flags: dontinheritcheck; Types: custom;
-Name: tools\audio; Description: {cm:CompAudio}; Flags: dontinheritcheck; Types: custom;
-Name: tools\vcd; Description: {cm:CompVCD}; Flags: dontinheritcheck; Types: custom;
-; source files
-Name: src; Description: {cm:CompSrc};
+Name: tools\rrenc; Description: {cm:CompRrenc}; Flags: fixed dontinheritcheck; Types: custom;
+Name: tools\xcd; Description: {cm:CompXCD}; Flags: fixed dontinheritcheck; Types: custom;
+Name: tools\audio; Description: {cm:CompAudio}; Flags: fixed dontinheritcheck; Types: custom;
+Name: tools\vcd; Description: {cm:CompVCD}; Flags: fixed dontinheritcheck; Types: custom;
+
 
 [Code]
 var CygDLLPage: TInputOptionWizardPage;
