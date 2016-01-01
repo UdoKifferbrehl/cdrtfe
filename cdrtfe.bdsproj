@@ -168,7 +168,7 @@ kerberos002@users.sourceforge.net</VersionInfoKeys>
 			<VersionInfoKeys Name="FileDescription">cdrtools/Mode2CDMaker/VCDImager Frontend</VersionInfoKeys>
 			<VersionInfoKeys Name="FileVersion">1.5.4.2</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">cdrtfe</VersionInfoKeys>
-			<VersionInfoKeys Name="LegalCopyright">Copyright © 2002-2015  O. Valencia, O. Kutsche</VersionInfoKeys>
+			<VersionInfoKeys Name="LegalCopyright">Copyright © 2002-2016  O. Valencia, O. Kutsche</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
 			<VersionInfoKeys Name="OriginalFilename">cdrtfe.exe</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">cdrtools Frontend</VersionInfoKeys>
