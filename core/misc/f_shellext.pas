@@ -67,6 +67,13 @@ begin
                           KEY_READ or KEY_WOW64_64KEY, aKey);
      Result := iRes = ERROR_SUCCESS;
      RegCloseKey(aKey);
+     {Es müssen beide Versionen registriert sein.}
+     ClassID := CdrtfeClassID;
+     RegKey := 'CLSID\' + ClassID;
+     iRes := RegOpenKeyEx(HKEY_CLASSES_ROOT, PAnsiChar(RegKey), 0,
+                          KEY_READ, aKey);
+     Result := Result and (iRes = ERROR_SUCCESS);
+     RegCloseKey(aKey);
   end else
   begin
     ClassID := CdrtfeClassID;
