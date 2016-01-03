@@ -2,10 +2,10 @@
 
   f_shellext.pas: ShellExtensions registrieren/löschen
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.05.2014
+  letzte Änderung  03.01.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
