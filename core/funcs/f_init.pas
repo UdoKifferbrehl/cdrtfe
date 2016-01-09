@@ -2,10 +2,10 @@
 
   f_init.pas: Dateien prüfen und Laufwerke erkennen
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  26.01.2014
+  letzte Änderung  09.01.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -112,9 +112,9 @@ end;
 procedure GetToolNames;
 const cTool: string = 'Tools';
       cPath: string = 'PATH';
-var Ini  : TIniFile;
-    Path : string;
-    Temp : string;
+var Ini           : TIniFile;
+    Path, OldPath : string;
+    Temp          : string;
 begin
   {standardmäßig sollen sich die Tools im Ordner \tools\ befinden}
   if DirectoryExists(StartUpDir + cToolDir) then
@@ -229,6 +229,13 @@ begin
     AddLog(' ', 3);
     {$ENDIF}
   end;
+  {damit mkisofs die Zeichsatztabellen findet, muss das Programmverzeichnis im
+   Suchpfad sein.}
+   Path := GetEnvVarValue(cPath);
+   OldPath := Path;
+   Path := StartUpDir + cToolDir + cCdrtoolsDir + ';' + Path;
+   SetEnvVarValue(cPath, Path);
+   {$IFDEF WriteLogFile} AddLog(GetEnvVarValue(cPath) + CRLF + ' ', 3); {$ENDIF}
 end;
 
 { GetCygwinPath ----------------------------------------------------------------
