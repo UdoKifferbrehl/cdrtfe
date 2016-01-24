@@ -1492,6 +1492,14 @@ object CdrtfeMainForm: TCdrtfeMainForm
             PopupMenu = MiscPopupMenu
             TabOrder = 9
           end
+          object CheckBoxImageMulti: TCheckBox
+            Left = 16
+            Top = 145
+            Width = 126
+            Height = 17
+            Caption = 'Multisession'
+            TabOrder = 10
+          end
         end
         object RadioButtonImageRead: TRadioButton
           Left = 0

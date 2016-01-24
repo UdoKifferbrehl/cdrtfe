@@ -2,10 +2,10 @@
 
   frm_main.pas: Hauptfenster
 
-  Copyright (c) 2004-2015 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.12.2015
+  letzte Änderung  24.01.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -332,6 +332,7 @@ type
     MainMenuInfoMeta: TMenuItem;
     AudioListViewPopupN3: TMenuItem;
     AudioListViewPopupSort: TMenuItem;
+    CheckBoxImageMulti: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -1296,6 +1297,7 @@ begin
     CheckBoxImageOverburn.Checked := Overburn;
     CheckBoxImageClone.Checked := Clone;
     CheckBoxImageCDText.Checked := CDText;
+    CheckBoxImageMulti.Checked := Multi;
   end;
   {DVD-Video}
   with FSettings.DVDVideo do
@@ -1464,6 +1466,7 @@ begin
       RawMode := 'raw16';
     end;
     OverBurn := CheckBoxImageOverburn.Checked;
+    Multi    := CheckBoxImageMulti.Checked;
     Clone    := CheckBoxImageClone.Checked;
     CDText   := CheckBoxImageCDText.Checked;
     Device   := GetDevice(cCDImage);

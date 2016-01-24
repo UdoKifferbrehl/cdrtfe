@@ -2,10 +2,10 @@
 
   cl_action_image.pas: Disk-Images
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.05.2012
+  letzte Änderung  24.01.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -151,6 +151,7 @@ begin
                      then Cmd := Cmd + ' -tao';
       if DAO         then Cmd := Cmd + ' -dao';
       if RAW         then Cmd := Cmd + ' -' + RAWMode;
+      if Multi       then Cmd := Cmd + ' -multi';
       if Overburn and (DAO or RAW) then
                           Cmd := Cmd + ' -overburn';
       if Clone and RAW then
@@ -222,6 +223,7 @@ begin
         if DMASpeedCheck and ForceSpeed then
                             Cmd := Cmd + ' -force';
         if Overburn    then Cmd := Cmd + ' -overburn';
+        if Multi       then Cmd := Cmd + ' -multi';
         if CueFile.IsAudio then
         begin
           Cmd := Cmd + ' -pad';

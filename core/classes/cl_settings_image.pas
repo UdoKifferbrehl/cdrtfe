@@ -2,10 +2,10 @@
 
   cl_settings_image.pas: Objekt für Einstellungen des CD-Image-Projektes
 
-  Copyright (c) 2004-2010 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  16.05.2010
+  letzte Änderung  24.01.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -28,6 +28,7 @@
                  RAWMode : string
                  CDText  : Boolean
                  Verify  : Boolean
+                 Multi   : Boolean
 
     Methoden     Init
                  Load(MIF: TMemIniFile)
@@ -54,6 +55,7 @@ type TSettingsImage = class(TCdrtfeSettings)
        FRAWMode : string;
        FCDText  : Boolean;
        FVerify  : Boolean;
+       FMulti   : Boolean;
      public
        constructor Create;
        destructor Destroy; override;
@@ -71,6 +73,7 @@ type TSettingsImage = class(TCdrtfeSettings)
        property RAWMode : string read FRAWMode write FRAWMode;
        property CDText  : Boolean read FCDText write FCDText;
        property Verify  : Boolean read FVerify write FVerify;
+       property Multi   : Boolean read FMulti write FMulti;
      end;
 
 implementation
@@ -110,6 +113,7 @@ begin
   FRAWMode  := 'raw96r';
   FCDText   := False;
   FVerify   := False;
+  FMulti    := False;
 end;
 
 { Load -------------------------------------------------------------------------
@@ -133,6 +137,7 @@ begin
     FRAWMode := ReadString(Section, 'RAWMode', 'raw96r');
     FCDText := ReadBool(Section, 'CDText', False);
     FVerify := ReadBool(Section, 'Verify', False);
+    FMulti := ReadBool(Section, 'Multi', False);
   end;
 end;
 
@@ -157,6 +162,7 @@ begin
     WriteString(Section, 'RAWMode', FRAWMode);
     WriteBool(Section, 'CDText', FCDText);
     WriteBool(Section, 'Verify', FVerify);
+    WriteBool(Section, 'Multi', FMulti);
   end;
 end;
 
