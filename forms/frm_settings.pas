@@ -2,10 +2,10 @@
 
   frm_settings.pas: cdrtfe - Einstellungen
              
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 07.01.2012
+  letzte Änderung 07.02.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -105,6 +105,7 @@ type
     StaticText2: TStaticText;
     GroupBoxWarning: TGroupBox;
     CheckBoxWarnChanges: TCheckBox;
+    CheckBoxRelaxedFormatCheck: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -284,6 +285,7 @@ begin
   RadioButtonCDTextUseName.Checked := not FSettings.General.CDTextUseTags;
   RadioButtonCDTextPT.Checked := not FSettings.General.CDTextTP;
   RadioButtonCDTextTP.Checked := FSettings.General.CDTextTP;
+  CheckBoxRelaxedFormatCheck.Checked := FSettings.AudioCD.RelaxedFormatChecking;
   RadioButtonAutoErase.Checked := FSettings.Cdrecord.AutoErase;
   RadioButtonAutoEraseDisabled.Checked := not FSettings.Cdrecord.AutoErase;
   RadioButtonSCSIAuto.Checked := FSettings.Drives.SCSIInterface = '';
@@ -332,6 +334,7 @@ begin
   FSettings.General.TabFrmSettings := GetActivePage;
   FSettings.General.CDTextUseTags := RadioButtonCDTextUseTags.Checked;
   FSettings.General.CDTextTP := RadioButtonCDTextTP.Checked;
+  FSettings.AudioCD.RelaxedFormatChecking := CheckBoxRelaxedFormatCheck.Checked;
   FSettings.Cdrecord.AutoErase := RadioButtonAutoErase.Checked;
   FSettings.General.DetectSpeeds := CheckBoxDetectSpeeds.Checked;
   if RadioButtonSCSIAuto.Checked then FSettings.Drives.SCSIInterface := '';

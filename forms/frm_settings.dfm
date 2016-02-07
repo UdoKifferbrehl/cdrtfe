@@ -45,7 +45,7 @@ object FormSettings: TFormSettings
     Top = 56
     Width = 473
     Height = 297
-    ActivePage = TabSheetCdrecord
+    ActivePage = TabSheetAudioCD
     TabOrder = 2
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
@@ -612,6 +612,14 @@ object FormSettings: TFormSettings
           TabOrder = 1
         end
       end
+      object CheckBoxRelaxedFormatCheck: TCheckBox
+        Left = 16
+        Top = 232
+        Width = 433
+        Height = 17
+        Caption = 'CheckBoxRelaxedFormatCheck'
+        TabOrder = 2
+      end
     end
     object TabSheetCygwin: TTabSheet
       Caption = 'Cygwin'
@@ -660,16 +668,21 @@ object FormSettings: TFormSettings
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
+    ExplicitWidth = 489
     inherited Bevel1: TBevel
       Width = 489
+      ExplicitWidth = 489
     end
     inherited PanelTop: TPanel
       Width = 489
+      ExplicitWidth = 489
       inherited Image2: TImage
         Width = 314
+        ExplicitWidth = 314
       end
       inherited LabelDescription: TLabel
         Width = 79
+        ExplicitWidth = 79
       end
     end
   end
