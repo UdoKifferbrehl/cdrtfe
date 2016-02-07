@@ -45,7 +45,7 @@ object FormSettings: TFormSettings
     Top = 56
     Width = 473
     Height = 297
-    ActivePage = TabSheetAudioCD
+    ActivePage = TabSheetCdrtfe
     TabOrder = 2
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
@@ -529,14 +529,14 @@ object FormSettings: TFormSettings
       object GroupBoxAudioCDText: TGroupBox
         Left = 8
         Top = 8
-        Width = 449
-        Height = 129
+        Width = 217
+        Height = 130
         Caption = 'CD-Text'
         TabOrder = 0
         object RadioButtonCDTextUseTags: TRadioButton
           Left = 8
           Top = 24
-          Width = 417
+          Width = 201
           Height = 17
           Caption = 'Tags verwenden'
           TabOrder = 0
@@ -545,23 +545,23 @@ object FormSettings: TFormSettings
         object RadioButtonCDTextUseName: TRadioButton
           Left = 8
           Top = 48
-          Width = 417
+          Width = 201
           Height = 17
           Caption = 'Dateinamen verwenden'
           TabOrder = 1
           OnClick = CheckBoxClick
         end
         object PanelCDText: TPanel
-          Left = 24
+          Left = 14
           Top = 64
-          Width = 409
+          Width = 190
           Height = 57
           BevelOuter = bvNone
           TabOrder = 2
           object RadioButtonCDTextPT: TRadioButton
             Left = 16
             Top = 8
-            Width = 393
+            Width = 169
             Height = 17
             Caption = '<Interpret> - <Titel>'
             TabOrder = 0
@@ -569,7 +569,7 @@ object FormSettings: TFormSettings
           object RadioButtonCDTextTP: TRadioButton
             Left = 16
             Top = 32
-            Width = 393
+            Width = 169
             Height = 17
             Caption = '<Titel> - <Interpret>'
             TabOrder = 1
@@ -617,8 +617,74 @@ object FormSettings: TFormSettings
         Top = 232
         Width = 433
         Height = 17
-        Caption = 'CheckBoxRelaxedFormatCheck'
+        Caption = 
+          'Erlaube nicht standardkonforme Quelldateien (nur flac). Ben'#246'tigt' +
+          ' z.B. ffmpeg.'
         TabOrder = 2
+      end
+      object GroupBox1: TGroupBox
+        Left = 231
+        Top = 8
+        Width = 226
+        Height = 130
+        Caption = 'externes Programm zum Dekodieren'
+        TabOrder = 3
+        object Label1: TLabel
+          Left = 12
+          Top = 26
+          Width = 20
+          Height = 13
+          Caption = 'mp3'
+        end
+        object Label2: TLabel
+          Left = 12
+          Top = 53
+          Width = 18
+          Height = 13
+          Caption = 'ogg'
+        end
+        object Label3: TLabel
+          Left = 12
+          Top = 80
+          Width = 26
+          Height = 13
+          Caption = 'FLAC'
+        end
+        object Label4: TLabel
+          Left = 12
+          Top = 107
+          Width = 18
+          Height = 13
+          Caption = 'ape'
+        end
+        object EditCustomConvCmdMP3: TEdit
+          Left = 56
+          Top = 24
+          Width = 161
+          Height = 21
+          TabOrder = 0
+        end
+        object EditCustomConvCmdOgg: TEdit
+          Left = 56
+          Top = 51
+          Width = 161
+          Height = 21
+          TabOrder = 1
+        end
+        object EditCustomConvCmdFLAC: TEdit
+          Left = 56
+          Top = 78
+          Width = 161
+          Height = 21
+          TabOrder = 2
+        end
+        object EditCustomConvCmdApe: TEdit
+          Left = 56
+          Top = 105
+          Width = 161
+          Height = 21
+          TabOrder = 3
+        end
       end
     end
     object TabSheetCygwin: TTabSheet

@@ -106,6 +106,15 @@ type
     GroupBoxWarning: TGroupBox;
     CheckBoxWarnChanges: TCheckBox;
     CheckBoxRelaxedFormatCheck: TCheckBox;
+    GroupBox1: TGroupBox;
+    EditCustomConvCmdMP3: TEdit;
+    EditCustomConvCmdOgg: TEdit;
+    EditCustomConvCmdFLAC: TEdit;
+    EditCustomConvCmdApe: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -286,6 +295,10 @@ begin
   RadioButtonCDTextPT.Checked := not FSettings.General.CDTextTP;
   RadioButtonCDTextTP.Checked := FSettings.General.CDTextTP;
   CheckBoxRelaxedFormatCheck.Checked := FSettings.AudioCD.RelaxedFormatChecking;
+  EditCustomConvCmdMP3.Text := FSettings.AudioCD.CustomConvCmdMP3;
+  EditCustomConvCmdOgg.Text := FSettings.AudioCD.CustomConvCmdOgg;
+  EditCustomConvCmdFLAC.Text := FSettings.AudioCD.CustomConvCmdFLAC;
+  EditCustomConvCmdApe.Text := FSettings.AudioCD.CustomConvCmdApe;
   RadioButtonAutoErase.Checked := FSettings.Cdrecord.AutoErase;
   RadioButtonAutoEraseDisabled.Checked := not FSettings.Cdrecord.AutoErase;
   RadioButtonSCSIAuto.Checked := FSettings.Drives.SCSIInterface = '';
@@ -335,6 +348,10 @@ begin
   FSettings.General.CDTextUseTags := RadioButtonCDTextUseTags.Checked;
   FSettings.General.CDTextTP := RadioButtonCDTextTP.Checked;
   FSettings.AudioCD.RelaxedFormatChecking := CheckBoxRelaxedFormatCheck.Checked;
+  FSettings.AudioCD.CustomConvCmdMP3 := EditCustomConvCmdMP3.Text;
+  FSettings.AudioCD.CustomConvCmdOgg := EditCustomConvCmdOgg.Text;
+  FSettings.AudioCD.CustomConvCmdFLAC := EditCustomConvCmdFLAC.Text;
+  FSettings.AudioCD.CustomConvCmdApe := EditCustomConvCmdApe.Text;
   FSettings.Cdrecord.AutoErase := RadioButtonAutoErase.Checked;
   FSettings.General.DetectSpeeds := CheckBoxDetectSpeeds.Checked;
   if RadioButtonSCSIAuto.Checked then FSettings.Drives.SCSIInterface := '';
