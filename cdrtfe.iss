@@ -1,10 +1,10 @@
 ; cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 ;
-;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.4.3
+;  cdrtfe.iss: Inno-Setup-Skript für Inno Setup 5.8.8
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  16.01.2016
+;  letzte Änderung  13.02.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -30,10 +30,11 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\cdrtfe
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
+DisableWelcomePage=no
 UninstallFilesDir={app}\uninst
 ShowLanguageDialog=yes
 PrivilegesRequired=admin
-MinVersion=4.1,5.0
+MinVersion=5.1
 ;Unistaller
 SignedUninstaller=yes
 SignedUninstallerDir=I:\cdrtfe\setupscript\inno\signeduninstaller
@@ -72,10 +73,9 @@ Name: kr; MessagesFile: compiler:Languages\Korean.isl; LicenseFile: I:\cdrtfe\cd
 
 [Tasks]
 ; Desktop icon
-Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked; MinVersion: 1, 0
-Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; MinVersion: 0, 1
-Name: desktopicon\common; Description: {cm:TaskAllUsers}; GroupDescription: {cm:AdditionalIcons}; Flags: exclusive; MinVersion: 0, 1
-Name: desktopicon\user; Description: {cm:TaskCurrentUser}; GroupDescription: {cm:AdditionalIcons}; Flags: exclusive unchecked; MinVersion: 0, 1
+Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons};
+Name: desktopicon\common; Description: {cm:TaskAllUsers}; GroupDescription: {cm:AdditionalIcons}; Flags: exclusive;
+Name: desktopicon\user; Description: {cm:TaskCurrentUser}; GroupDescription: {cm:AdditionalIcons}; Flags: exclusive unchecked;
 ; Quicklaunch icon
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 ; Copy cygwin files
@@ -88,10 +88,6 @@ Source: I:\cdrtfe\proto\cdrtfedbg.dll; DestDir: {app}; DestName: cdrtfedbg.dll; 
 Source: I:\cdrtfe\proto\cdrtfeShlEx.dll; DestDir: {app}; Flags: ignoreversion restartreplace uninsrestartdelete; Components: prog
 Source: I:\cdrtfe\proto\cdrtfeShlEx64.dll; DestDir: {app}; Flags: ignoreversion restartreplace uninsrestartdelete; Components: prog; Check: IsWin64;
 Source: I:\cdrtfe\proto\cdrtfe.jdbg; DestDir: {app}; Flags: ignoreversion; Components: prog
-; Manifest - seit Version 1.4 nicht mehr benötigt
-; Source: I:\cdrtfe\proto\cdrtfe.exe.manifest; DestDir: {app}; DestName: cdrtfe.exe.manifest; Flags: ignoreversion; Components: prog
-; Icons/Glyphs - seit Version 1.5.4.2 nicht mehr benötigt
-; Source: I:\cdrtfe\proto\icons\*; DestDir: {app}\icons; Flags: ignoreversion; Components: prog
 ; Language files
 Source: I:\cdrtfe\proto\translations\*; Excludes: _cdrtfe_lang.ini; DestDir: {app}\translations; Flags: ignoreversion recursesubdirs; Components: prog\langsupport
 Source: I:\cdrtfe\proto\translations\_cdrtfe_lang.ini; DestDir: {app}\translations; DestName: cdrtfe_lang.ini; Flags: ignoreversion; Components: prog\langsupport; AfterInstall: LangIniSet
@@ -107,11 +103,7 @@ Source: I:\cdrtfe\proto\tools\cdrtools\.mkisofsrc; DestDir: {app}\tools\cdrtools
 Source: I:\cdrtfe\proto\tools\cdrtools\lib\siconv\*.*; DestDir: {app}\tools\cdrtools\lib\siconv; Flags: ignoreversion; Components: tools\cdrt
 ; Tools cygwin
 Source: I:\cdrtfe\proto\tools\cygwin\sh.exe; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; MinVersion: 0, 5.1 
-Source: I:\cdrtfe\proto\tools\cygwin\bak\1.5.25sc\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; OnlyBelowVersion: 0, 5.1
-;Source: I:\cdrtfe\proto\tools\cygwin\cygiconv-2.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
-;Source: I:\cdrtfe\proto\tools\cygwin\cygintl-3.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
-;Source: I:\cdrtfe\proto\tools\cygwin\cygpopt-0.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\vcd
+Source: I:\cdrtfe\proto\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt;
 Source: I:\cdrtfe\proto\tools\cygwin\cygwin.ini; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; Check: CygIniCheck; AfterInstall: CygIniSet
 ; Tools helper
 Source: I:\cdrtfe\proto\tools\helper\cygpathprefix.exe; DestDir: {app}\tools\helper; Flags: ignoreversion; Components: tools\cdrt
@@ -136,10 +128,8 @@ Source: I:\cdrtfe\proto\tools\sound\wavegain.exe; DestDir: {app}\tools\sound; Fl
 ; Tools: VCDImager
 Source: I:\cdrtfe\proto\tools\vcdimager\vcdimager.exe; DestDir: {app}\tools\vcdimager; Flags: ignoreversion; Components: tools\vcd
 ; Commandline Scripts
-Source: I:\cdrtfe\misc\scripts\cmdshell.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet; MinVersion: 0, 1
-Source: I:\cdrtfe\misc\scripts\cmdshellinit.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet; MinVersion: 0, 1
-Source: I:\cdrtfe\misc\scripts\cmdshell.bat; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet; MinVersion: 1, 0
-Source: I:\cdrtfe\misc\scripts\cmdshellinit.bat; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet; MinVersion: 1, 0
+Source: I:\cdrtfe\misc\scripts\cmdshell.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet;
+Source: I:\cdrtfe\misc\scripts\cmdshellinit.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet;
 Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
 Source: I:\cdrtfe\misc\scripts\copycyg.bat; DestDir: {tmp}; Tasks: copycyg
 ; Readme cdrtfe
@@ -166,8 +156,7 @@ Source: I:\cdrtfe\cdrtfe\shellex\cdrtfeShlEx\*; DestDir: {app}\source\cdrtfeShlE
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}
 Name: {group}\cdrtfe (debug mode); Filename: {app}\{#MyAppExeName}; Parameters: "/debug"
 ; CommandShell
-Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd; MinVersion: 0, 1
-Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.bat; MinVersion: 1, 0
+Name: {group}\CommandShell; Filename: {app}\tools\scripts\cmdshell.cmd;
 ; Help file
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_german.chm; Languages: de
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_english.chm; Languages: en pl nl ptbr sv kr
@@ -176,12 +165,6 @@ Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_italian.chm; Langua
 Name: {group}\{cm:IconHelpFile}; Filename: {app}\help\cdrtfe_greek.chm; Languages: el
 ; Readme files
 Name: {group}\Changes; Filename: {app}\doc\changes.txt;
-;Name: {group}\Readme; Filename: {app}\doc\readme_de.txt; Languages: de
-;Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_de.txt; Languages: de
-;Name: {group}\Readme; Filename: {app}\doc\readme_en.txt; Languages: en fr it pl ptbr
-;Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_en.txt; Languages: en fr it pl nl ptbr sv kr
-;Name: {group}\Readme DVD; Filename: {app}\doc\readme_dvd_el.txt; Languages: el
-;Name: {group}\Readme Icons; Filename: {app}\icons\readme.txt;
 Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_de.txt; Languages: de; Components: tools\xcd
 Name: {group}\Readme M2F2Extract; Filename: {app}\doc\m2f2extract_en.txt; Languages: en fr it pl nl ptbr el sv kr; Components: tools\xcd
 ; Source files
@@ -189,26 +172,16 @@ Name: {group}\{cm:IconSourceFiles}; Filename: {app}\source; Components: src
 ; Uninstall
 Name: {group}\{cm:UninstallProgram,{#MyAppName}}; Filename: {uninstallexe}
 ; Desktop & Quicklaunch Icon
-Name: {userdesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon; MinVersion: 1, 0
-Name: {userdesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon\user; MinVersion: 0, 1
-Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon\common; MinVersion: 0, 1
+Name: {userdesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon\user;
+Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon\common;
 Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: quicklaunchicon
 
 [Registry]
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\cdrtfe.exe"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt;
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.cmd"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 0, 1
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.bat"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt; MinVersion: 1, 0
-; ShellExtension
-;Root: HKLM; Subkey: "Software\cdrtfe"; Flags: dontcreatekey uninsdeletekey;
-;Root: HKCR; Subkey: "CLSID\{{23ADD0C0-5A56-11D7-B55C-00E07D907FE2}}"; Flags: dontcreatekey uninsdeletekey;
-;Root: HKCR; Subkey: "CLSID\{{23ADD0C0-5A56-11D7-B55C-00E07D907FE3}}"; Flags: dontcreatekey uninsdeletekey;
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.cmd"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt;
 
 [Run]
 Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
-;Filename: "{app}\doc\readme_en.txt"; Languages: en fr it pl nl ptbr; Flags: shellexec postinstall skipifsilent unchecked
-;Filename: "{app}\doc\readme_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
-;Filename: "{app}\doc\readme_dvd_en.txt"; Languages: en fr it pl nl ptbr; Flags: shellexec postinstall skipifsilent unchecked
-;Filename: "{app}\doc\readme_dvd_de.txt"; Languages: de; Flags: shellexec postinstall skipifsilent unchecked
 Filename: "{app}\doc\changes.txt"; Flags: shellexec postinstall skipifsilent unchecked
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
 
