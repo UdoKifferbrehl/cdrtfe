@@ -45,7 +45,7 @@ object FormSettings: TFormSettings
     Top = 56
     Width = 473
     Height = 297
-    ActivePage = TabSheetAudioCD
+    ActivePage = TabSheetCdrtfe
     TabOrder = 2
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
@@ -270,7 +270,7 @@ object FormSettings: TFormSettings
           Top = 47
           Width = 361
           Height = 17
-          Caption = 'Tracks autotmatisch erkennen beim Einlegen (Projekt DAE)'
+          Caption = 'Tracks automatisch erkennen beim Einlegen (Projekt DAE)'
           TabOrder = 1
         end
         object CheckBoxDetectSpeeds: TCheckBox
