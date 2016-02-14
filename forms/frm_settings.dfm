@@ -211,23 +211,16 @@ object FormSettings: TFormSettings
       Caption = 'Laufwerke'
       object GroupBoxDetectSpeeds: TGroupBox
         Left = 8
-        Top = 8
+        Top = 182
         Width = 449
         Height = 57
         Caption = 'Geschwindigkeiten'
         TabOrder = 0
-        object CheckBoxDetectSpeeds: TCheckBox
-          Left = 8
-          Top = 24
-          Width = 361
-          Height = 17
-          Caption = 'Verf'#252'gbare Geschwindigkeiten automatisch ermitteln'
-          TabOrder = 0
-        end
+        Visible = False
       end
       object GroupBoxSCSI: TGroupBox
         Left = 8
-        Top = 71
+        Top = 8
         Width = 449
         Height = 57
         Caption = 'SCSI-Interface'
@@ -254,6 +247,38 @@ object FormSettings: TFormSettings
           Width = 113
           Height = 17
           Caption = 'SPTI'
+          TabOrder = 2
+        end
+      end
+      object GroupBoxAutoDetect: TGroupBox
+        Left = 8
+        Top = 71
+        Width = 449
+        Height = 105
+        Caption = 'Automatische Disk-Erkennung'
+        TabOrder = 2
+        object CheckBoxDetectDiskType: TCheckBox
+          Left = 8
+          Top = 24
+          Width = 361
+          Height = 17
+          Caption = 'Disk-Typ automatisch erkennen beim Einlegen'
+          TabOrder = 0
+        end
+        object CheckBoxDetectAudioTOC: TCheckBox
+          Left = 3
+          Top = 47
+          Width = 361
+          Height = 17
+          Caption = 'Tracks autotmatisch erkennen beim Einlegen (Projekt DAE)'
+          TabOrder = 1
+        end
+        object CheckBoxDetectSpeeds: TCheckBox
+          Left = 8
+          Top = 70
+          Width = 361
+          Height = 17
+          Caption = 'Verf'#252'gbare Geschwindigkeiten automatisch ermitteln'
           TabOrder = 2
         end
       end
@@ -530,7 +555,7 @@ object FormSettings: TFormSettings
         Left = 8
         Top = 8
         Width = 217
-        Height = 130
+        Height = 132
         Caption = 'CD-Text'
         TabOrder = 0
         object RadioButtonCDTextUseTags: TRadioButton
@@ -626,7 +651,7 @@ object FormSettings: TFormSettings
         Left = 231
         Top = 8
         Width = 226
-        Height = 130
+        Height = 132
         Caption = 'externes Programm zum Dekodieren'
         TabOrder = 3
         object Label1: TLabel

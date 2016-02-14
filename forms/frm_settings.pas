@@ -1,11 +1,11 @@
 { cdrtfe: cdrtools/Mode2CDMaker/VCDImager Frontend
 
   frm_settings.pas: cdrtfe - Einstellungen
-             
+
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung 07.02.2016
+  letzte Änderung 14.02.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -82,7 +82,6 @@ type
     CheckBoxCdrecordFormat: TCheckBox;
     GroupBoxDetectSpeeds: TGroupBox;
     TabSheetDrives: TTabSheet;
-    CheckBoxDetectSpeeds: TCheckBox;
     GroupBoxSCSI: TGroupBox;
     RadioButtonSCSIAuto: TRadioButton;
     RadioButtonSCSIASPI: TRadioButton;
@@ -115,6 +114,10 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    GroupBoxAutoDetect: TGroupBox;
+    CheckBoxDetectDiskType: TCheckBox;
+    CheckBoxDetectAudioTOC: TCheckBox;
+    CheckBoxDetectSpeeds: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure ButtonOkClick(Sender: TObject);
     procedure ButtonSettingsSaveClick(Sender: TObject);
@@ -286,6 +289,8 @@ begin
     CheckBoxCdrecordFormat.Checked           := AllowFormat;
   end;
   CheckBoxDetectSpeeds.Checked := FSettings.General.DetectSpeeds;
+  CheckBoxDetectDiskType.Checked := FSettings.General.DetectDiskType;
+  CheckBoxDetectAudioTOC.Checked := FSettings.General.DAEAutoReadToc;
   CheckBoxCdrdaoCueImage.Enabled := FSettings.FileFlags.CdrdaoOk and
                                     FSettings.Cdrecord.CanWriteCueImage;
   CheckBoxForceGenericMMC.Enabled := FSettings.FileFlags.CdrdaoOk;
@@ -354,6 +359,8 @@ begin
   FSettings.AudioCD.CustomConvCmdApe := EditCustomConvCmdApe.Text;
   FSettings.Cdrecord.AutoErase := RadioButtonAutoErase.Checked;
   FSettings.General.DetectSpeeds := CheckBoxDetectSpeeds.Checked;
+  FSettings.General.DetectDiskType := CheckBoxDetectDiskType.Checked;
+  FSettings.General.DAEAutoReadToc := CheckBoxDetectAudioTOC.Checked;
   if RadioButtonSCSIAuto.Checked then FSettings.Drives.SCSIInterface := '';
   if RadioButtonSCSIASPI.Checked then FSettings.Drives.SCSIInterface := 'ASPI';
   if RadioButtonSCSISPTI.Checked then FSettings.Drives.SCSIInterface := 'SPTI';
