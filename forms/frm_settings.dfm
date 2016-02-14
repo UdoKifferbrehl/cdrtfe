@@ -266,7 +266,7 @@ object FormSettings: TFormSettings
           TabOrder = 0
         end
         object CheckBoxDetectAudioTOC: TCheckBox
-          Left = 3
+          Left = 8
           Top = 47
           Width = 361
           Height = 17
