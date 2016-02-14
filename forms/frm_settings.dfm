@@ -45,7 +45,7 @@ object FormSettings: TFormSettings
     Top = 56
     Width = 473
     Height = 297
-    ActivePage = TabSheetCdrtfe
+    ActivePage = TabSheetAudioCD
     TabOrder = 2
     object TabSheetCdrtfe: TTabSheet
       HelpContext = 1201
@@ -647,7 +647,7 @@ object FormSettings: TFormSettings
           ' z.B. ffmpeg.'
         TabOrder = 2
       end
-      object GroupBox1: TGroupBox
+      object GroupBoxAudioCDCustomConvCmd: TGroupBox
         Left = 231
         Top = 8
         Width = 226

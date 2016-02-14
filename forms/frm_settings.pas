@@ -105,7 +105,7 @@ type
     GroupBoxWarning: TGroupBox;
     CheckBoxWarnChanges: TCheckBox;
     CheckBoxRelaxedFormatCheck: TCheckBox;
-    GroupBox1: TGroupBox;
+    GroupBoxAudioCDCustomConvCmd: TGroupBox;
     EditCustomConvCmdMP3: TEdit;
     EditCustomConvCmdOgg: TEdit;
     EditCustomConvCmdFLAC: TEdit;
