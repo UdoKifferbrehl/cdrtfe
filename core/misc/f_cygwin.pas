@@ -1,8 +1,8 @@
 { f_cygwin.pas: cygwin-Funktionen
 
-  Copyright (c) 2004-2012 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
 
-  letzte Änderung  26.02.2012
+  letzte Änderung  20.02.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -53,8 +53,10 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
 
 { 'statische' Variablen }
 var CygPathPrefix    : string;           // Cygwin-Mountpoint
-    CygnusPresentHKLM: Boolean;
+    CygnusPresentHKLM: Boolean;          // Registryeinträge bis cygwin 1.5.x
     CygnusPresentHKCU: Boolean;
+    CygwinPresentHKLM: Boolean;          // Registryeinträge ab cygwin 1.7.x
+    CygwinPresentHKCU: Boolean;
 
 { CygnusPresent ----------------------------------------------------------------
 
@@ -90,6 +92,40 @@ begin
   end;
 end;
 
+{ CygwinPresent ----------------------------------------------------------------
+
+  True, wenn Registry-Zweig "HK\Software\Cygwin" existiert.                    }
+
+function CygwinPresent(HK: HKEY): Boolean;
+var Reg: TRegistry;
+begin
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HK;
+    Reg.Access := Key_Read;
+    Result := Reg.KeyExists('\Software\Cygwin');
+  finally
+    Reg.Free;
+  end;
+end;
+
+{ DeleteCygnus -----------------------------------------------------------------
+
+ löscht Registry-Zweig "HK\Software\Cygwin".                                   }
+
+function DeleteCygwin(HK: HKEY): Boolean;
+var Reg: TRegistry;
+begin
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HK;
+    Reg.Access := Key_Read or Key_Write;
+    Result := Reg.DeleteKey('\Software\Cygwin');
+  finally
+    Reg.Free;
+  end;
+end;
+
 { CleanRegistryPortable --------------------------------------------------------
 
   löscht die von cygwin erzeugten Einträge, sofern sie beim Start nicht vor-
@@ -101,6 +137,8 @@ procedure CleanRegistryPortable;
 begin
   if not CygnusPresentHKLM then DeleteCygnus(HKEY_LOCAL_MACHINE);
   if not CygnusPresentHKCU then DeleteCygnus(HKEY_CURRENT_USER);
+  if not CygwinPresentHKLM then DeleteCygwin(HKEY_LOCAL_MACHINE);
+  if not CygwinPresentHKCU then DeleteCygwin(HKEY_CURRENT_USER);
 (* debug:
   if CygnusPresentHKLM then Temp := 'CygnusHKLMPresent = True' + #13#10 else
                             Temp := 'CygnusHKLMPresent = False' + #13#10;
@@ -171,96 +209,8 @@ end;
   liefert den Cygwin-Mountpoint für Windowslaufwerke (normalerweise /cygdrive).
 
   Zur Zeit wird hierfür ein externes Programm (cygpathprefix.exe) aufgerufen,
-  das das Prefix nach StdOut ausgibt. Es wäre natürlich schöner, dies durch
-  direkten Aufruf der entsprechenden Funktion der cygwin1.dll zu erledigen,
-  aber hierfür muß der Stack manipuliert werden (unterste 4K sichern und an-
-  schließend wiederherstellen, sonst überschreibt cygwin_dll_init diesen
-  Bereich).                                                                    }
-(*
-type TCygwinGetinfoTypes = (
-       CW_LOCK_PINFO,
-       CW_UNLOCK_PINFO,
-       CW_GETTHREADNAME,
-       CW_GETPINFO,
-       CW_SETPINFO,
-       CW_SETTHREADNAME,
-       CW_GETVERSIONINFO,
-       CW_READ_V1_MOUNT_TABLES,
-       CW_USER_DATA,
-       CW_PERFILE,
-       CW_GET_CYGDRIVE_PREFIXES,
-       CW_GETPINFO_FULL,
-       CW_INIT_EXCEPTIONS,
-       CW_GET_CYGDRIVE_INFO,
-       CW_SET_CYGWIN_REGISTRY_NAME,
-       CW_GET_CYGWIN_REGISTRY_NAME,
-       CW_STRACE_TOGGLE,
-       CW_STRACE_ACTIVE,
-       CW_CYGWIN_PID_TO_WINPID,
-       CW_EXTRACT_DOMAIN_AND_USER,
-       CW_CMDLINE,
-       CW_CHECK_NTSEC,
-       CW_GET_ERRNO_FROM_WINERROR,
-       CW_GET_POSIX_SECURITY_ATTRIBUTE,
-       CW_GET_SHMLBA,
-       CW_GET_UID_FROM_SID,
-       CW_GET_GID_FROM_SID,
-       CW_GET_BINMODE,
-       CW_HOOK,
-       CW_ARGV,
-       CW_ENVP,
-       CW_DEBUG_SELF,
-       CW_SYNC_WINENV,
-       CW_CYGTLS_PADSIZE);
+  das das Prefix nach StdOut ausgibt.                                          }
 
-     TInitCygDLL = procedure; stdcall;
-     TCygInternal = procedure(InfoType: TCygwinGetinfoTypes;
-                              user, system, u_flags, s_flags: Pointer); stdcall;
-
-function GetCygwinPathPrefixEx: string;
-var CygDLLHandle: THandle;
-    InitCygDLL  : TInitCygDLL;
-    CygInternal : TCygInternal;
-    DLLName     : string;
-    user, system,
-    u_flags,
-    s_flags     : array[0..MAX_PATH] of Char;
-    Prefix,
-    pu, ps      : string;
-begin
-  Prefix := '';
-  CygDLLHandle := 0;
-  ZeroMemory(@system, SizeOf(system));
-  try
-    DLLName := cCygwin1Dll;
-    CygDLLHandle := LoadLibrary(PChar(DLLName));
-    if CygDLLHandle > 0 then
-    begin
-      @InitCygDLL  := GetProcAddress(CygDLLHandle, 'cygwin_dll_init');
-      @CygInternal := GetProcAddress(CygDLLHandle, 'cygwin_internal');
-      {cygwin1.dll initialisieren}
-      InitCygDLL;
-      {Infos abrufen}
-      CygInternal(CW_GET_CYGDRIVE_INFO, @user, @system, @u_flags, @s_flags);
-      ps := StrPas(@system);
-      pu := StrPas(@user);
-      {$IFDEF WriteLogfile}
-      AddLog('cygwin path prefix (system): ' + ps, 0);
-      AddLog('cygwin path prefix (user)  : ' + pu, 0);
-      {$ENDIF}
-      if ps <> '' then Prefix := ps else Prefix := pu;
-    end;
-  finally
-    if CygDLLHandle > 0 then FreeLibrary(CygDLLHandle);
-    if Prefix = '/' then Prefix := '' else
-    if Prefix = '' then Prefix := '/cygdrive';
-  end;
-  Result := Prefix;
-  {$IFDEF WriteLogfile}
-  AddLog('cygwin path prefix         : ' + Prefix + #13#10 + ' ', 0);
-  {$ENDIF}
-end;
-*)
 function GetCygwinPathPrefixEx: string;
 var Cmd    : string;
     Output : string;
@@ -450,6 +400,8 @@ end;
 initialization
   CygPathPrefix := 'unknown';
   CygnusPresentHKLM := CygnusPresent(HKEY_LOCAL_MACHINE);
-  CygnusPresentHKCU := CygnusPresent(HKEY_CURRENT_USER);  
+  CygnusPresentHKCU := CygnusPresent(HKEY_CURRENT_USER);
+  CygwinPresentHKLM := CygwinPresent(HKEY_LOCAL_MACHINE);
+  CygwinPresentHKCU := CygwinPresent(HKEY_CURRENT_USER);
 
 end.
