@@ -759,21 +759,16 @@ object FormSettings: TFormSettings
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 489
     inherited Bevel1: TBevel
       Width = 489
-      ExplicitWidth = 489
     end
     inherited PanelTop: TPanel
       Width = 489
-      ExplicitWidth = 489
       inherited Image2: TImage
         Width = 314
-        ExplicitWidth = 314
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

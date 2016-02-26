@@ -227,21 +227,16 @@ object FormDataCDOptions: TFormDataCDOptions
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 5
     TabStop = True
-    ExplicitWidth = 465
     inherited Bevel1: TBevel
       Width = 481
-      ExplicitWidth = 465
     end
     inherited PanelTop: TPanel
       Width = 481
-      ExplicitWidth = 465
       inherited Image2: TImage
         Width = 306
-        ExplicitWidth = 290
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

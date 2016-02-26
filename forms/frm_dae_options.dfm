@@ -526,21 +526,16 @@ object FormDAEOptions: TFormDAEOptions
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 487
     inherited Bevel1: TBevel
       Width = 487
-      ExplicitWidth = 481
     end
     inherited PanelTop: TPanel
       Width = 487
-      ExplicitWidth = 487
       inherited Image2: TImage
         Width = 312
-        ExplicitWidth = 306
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end

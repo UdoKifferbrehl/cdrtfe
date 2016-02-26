@@ -49,7 +49,6 @@ object FormDataCDFS: TFormDataCDFS
     TabOrder = 1
     object TabSheetGeneral: TTabSheet
       Caption = 'Allgemein'
-      ExplicitHeight = 341
       object GroupBoxJoliet: TGroupBox
         Left = 8
         Top = 8
@@ -332,7 +331,6 @@ object FormDataCDFS: TFormDataCDFS
     end
     object TabSheetISO: TTabSheet
       Caption = 'ISO9660'
-      ExplicitHeight = 341
       object GroupBoxISO: TGroupBox
         Left = 8
         Top = 8
@@ -457,7 +455,6 @@ object FormDataCDFS: TFormDataCDFS
     end
     object TabSheetSpecial: TTabSheet
       Caption = 'Spezial'
-      ExplicitHeight = 341
       object GroupBoxMeta: TGroupBox
         Left = 8
         Top = 8
@@ -586,28 +583,19 @@ object FormDataCDFS: TFormDataCDFS
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 3
     TabStop = True
-    ExplicitWidth = 578
-    ExplicitHeight = 50
     inherited Bevel1: TBevel
       Top = 47
       Width = 578
-      ExplicitTop = 47
-      ExplicitWidth = 578
     end
     inherited PanelTop: TPanel
       Width = 578
       Height = 47
-      ExplicitWidth = 578
-      ExplicitHeight = 47
       inherited Image2: TImage
         Width = 403
         Height = 47
-        ExplicitWidth = 403
-        ExplicitHeight = 47
       end
       inherited LabelDescription: TLabel
         Width = 79
-        ExplicitWidth = 79
       end
     end
   end
