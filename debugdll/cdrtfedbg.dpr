@@ -2,7 +2,7 @@
 
   cdrtfedbg.dpr: Debug-DLL
 
-  Copyright (c) 2007-2015 Oliver Valencia
+  Copyright (c) 2007-2016 Oliver Valencia
 
   letzte Änderung  27.11.2015
 
