@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='windows-1252'?>
-
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4FD0D58143"?>-->
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4F"?>
@@ -11,599 +10,741 @@
 <?define CompIcons="$(var.BaseId)00000003"?>
 <?define CompShortcut="$(var.BaseId)00000004"?>
 <?define CompProgMenuDir="$(var.BaseId)00000005"?>
-
-<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
-
-
-  <Product Name='cdrtfe 1.5.4.2' Id='$(var.ProductId)' UpgradeCode='$(var.UpgradeId)'
-    Language='1033' Codepage='1252' Version='1.5.4.2' Manufacturer='Oliver Valencia - Open Source Developer'>
-
-    <Package Id='*' Keywords='Installer' Description="cdrtfe 1.5.4.2 Installer"
-      Comments='cdrtfe is Open Source (GPL)' Manufacturer='Oliver Valencia - Open Source Developer'
-      InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
-
-    <Upgrade Id='$(var.UpgradeId)'>
-      <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
-        Minimum='1.0.0' IncludeMinimum='yes'
-        Maximum='1.5.4.1' IncludeMaximum='no' />
-    </Upgrade>
-
-    <InstallExecuteSequence>
-      <RemoveExistingProducts Before="InstallInitialize" />
-    </InstallExecuteSequence>
-
-    <Condition Message="You need to be an administrator to install this product.">
-      AdminUser
-    </Condition>
-
-    <Media Id="1" Cabinet="cdrtfe.cab" EmbedCab="yes" CompressionLevel="high" />
-
-    <Directory Id='TARGETDIR' Name='SourceDir'>
-
-      <Directory Id="DesktopFolder" Name="Desktop" />
-
-      <Directory Id='ProgramFilesFolder' Name='PFiles'>
-
-
-        <Directory Id='INSTALLDIR' Name='cdrtfe'>
-            <Component Id='MainExecutable' Guid='$(var.CompMain)'>
-              <File Id='cdrtfeEXE' Name='cdrtfe.exe' Source='I:\cdrtfe\proto\cdrtfe.exe' KeyPath='yes'/>
-              <File Id='cdrtfejdb' Name='cdrtfe.jdbg' Source='I:\cdrtfe\proto\cdrtfe.jdbg'/>
-              <File Id='cdrtfedbg' Name='cdrtfedbg.dll' Source='I:\cdrtfe\proto\cdrtfedbg.dll' />
-              <Shortcut Id="desktopcdrtfe" Directory="DesktopFolder" Name="cdrtfe" WorkingDirectory="INSTALLDIR"
-                Icon="cdrtfe.ico" Advertise="yes" />
-              <Shortcut Id="startmenucdrtfe" Directory="ProgramMenuDir" Name="cdrtfe"
-                  WorkingDirectory='INSTALLDIR' Icon="cdrtfe.ico" Advertise="yes" />
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Name="cdrtfe 1.5.5" Id="$(var.ProductId)" UpgradeCode="$(var.UpgradeId)" Language="1033" Codepage="1252" Version="1.5.5" Manufacturer="Oliver Valencia - Open Source Developer">
+        <Package Id="*" Keywords="Installer" Description="cdrtfe 1.5.5 Installer" Comments="cdrtfe is Open Source (GPL)" Manufacturer="Oliver Valencia - Open Source Developer" InstallerVersion="100" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
+        <Upgrade Id="$(var.UpgradeId)">
+            <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="1.6.0" IncludeMaximum="no" />
+        </Upgrade>
+        <InstallExecuteSequence>
+            <RemoveExistingProducts After="InstallValidate" />
+            <!--            <Custom Action="UnregisterShlEx" Before="InstallFinalize">Installed</Custom> -->
+            <!--            <Custom Action="UnregisterShlEx64" Before="InstallFinalize">Installed and <![CDATA[VersionNT64]]></Custom> -->
+            <!--After="InstallFinalize"-->
+        </InstallExecuteSequence>
+        <Condition Message="You need to be an administrator to install this product.">Privileged</Condition>
+        <Media Id="1" Cabinet="cdrtfe.cab" EmbedCab="yes" CompressionLevel="high" />
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Component Id="RegistryEntriesCmdCdrtfe" Guid="F3E1F558-9786-4AA0-9D29-1592D4A640F2">
+                <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.exe" Action="createAndRemoveOnUninstall">
+                    <RegistryValue Type="string" Value="[INSTALLDIR]cdrtfe.exe" KeyPath="yes" />
+                </RegistryKey>
             </Component>
-
-            <Component Id='ShellExt' Guid='$(var.CompShlEx)'>
-              <File Id='cdrtfeshlEx' Name='cdrtfeShlEx.dll' Source='I:\cdrtfe\proto\cdrtfeShlEx.dll' KeyPath='yes'/>
-              <File Id='cdrtfeshlEx64' Name='cdrtfeShlEx64.dll' Source='I:\cdrtfe\proto\cdrtfeShlEx64.dll' />
+            <Component Id="RegistryEntriesCmdShell" Guid="D819A058-645E-42CE-836C-F68C4BC3BEC7">
+                <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd" Action="createAndRemoveOnUninstall">
+                    <RegistryValue Type="string" Value="[INSTALLDIR]tools\scripts\cmdshell.cmd" KeyPath="yes" />
+                </RegistryKey>
             </Component>
-
-            <Directory Id='Help' Name='help'>
-              <Component Id='cdrtfeHelp' Guid='$(var.CompHelp)'>
-                <File Id='cdrtfe_english' Name='cdrtfe_english.chm' Source='I:\cdrtfe\proto\help\cdrtfe_english.chm' KeyPath='yes'/>
-                <File Id='cdrtfe_german' Name='cdrtfe_german.chm' Source='I:\cdrtfe\proto\help\cdrtfe_german.chm' />
-                <File Id='cdrtfe_french' Name='cdrtfe_french.chm' Source='I:\cdrtfe\proto\help\cdrtfe_french.chm' />
-                <File Id='cdrtfe_greek' Name='cdrtfe_greek.chm' Source='I:\cdrtfe\proto\help\cdrtfe_greek.chm' />
-                <File Id='cdrtfe_italian' Name='cdrtfe_italian.chm' Source='I:\cdrtfe\proto\help\cdrtfe_italian.chm' />
-              </Component>
-            </Directory>
-
-            <Directory Id="translations" Name="translations">
-                <Component Id="_cdrtfe_lang.ini" DiskId="1" Guid="F2BC6AA2-04EE-44E7-B859-F147D318A7BD">
-                    <File Id="_cdrtfe_lang.ini" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\_cdrtfe_lang.ini" />
+            <Component Id="RegKeyRemove1" Guid="89F2806C-7C94-411C-B130-33E5C1E2B76D" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove1" Root="HKLM" Key="Software\cdrtfe" Action="removeOnUninstall" />
+            </Component>
+            <Component Id="RegKeyRemove2" Guid="EF60B2F0-85AE-47BC-85DD-520D3CCE07E7" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove2" Root="HKCR" Key="*\shellex\ContextMenuHandlers\{23ADD0C0-5A56-11D7-B55C-00E07D907FE2}" Action="removeOnUninstall" />
+            </Component>
+            <Component Id="RegKeyRemove3" Guid="D7B33898-B4B1-431C-BA1D-8B63AE066333" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove3" Root="HKCR" Key="CLSID\{23ADD0C0-5A56-11D7-B55C-00E07D907FE2}" Action="removeOnUninstall" />
+            </Component>
+            <Component Id="RegKeyRemove4" Guid="BA8571A2-1AE4-4953-B99E-2623E82B0E50" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove4" Root="HKCR" Key="folder\shellex\ContextMenuHandlers\{23ADD0C0-5A56-11D7-B55C-00E07D907FE2}" Action="removeOnUninstall" />
+            </Component>
+            <Component Id="RegKeyRemove5" Guid="356AB452-413E-464D-8E30-1FD9A08A6F68" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove5" Root="HKCR" Key="*\shellex\ContextMenuHandlers\{23ADD0C0-5A56-11D7-B55C-00E07D907FE3}" Action="removeOnUninstall" />
+            </Component>
+            <Component Id="RegKeyRemove6" Guid="F09A021B-636B-420A-AA8E-1475B1FBBD15" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove6" Root="HKCR" Key="CLSID\{23ADD0C0-5A56-11D7-B55C-00E07D907FE3}" Action="removeOnUninstall" />
+            </Component>
+            <Component Id="RegKeyRemove7" Guid="DB0D12A0-6EA5-462D-B878-8ABDAB5FB251" KeyPath="yes">
+                <RemoveRegistryKey Id="RegKeyRemove7" Root="HKCR" Key="folder\shellex\ContextMenuHandlers\{23ADD0C0-5A56-11D7-B55C-00E07D907FE3}" Action="removeOnUninstall" />
+            </Component>
+            <Directory Id="DesktopFolder" Name="Desktop">
+                <Component Id="desktopshortcut" Guid="E0AA5AE5-A974-4BBF-AC1A-A2AA9918AA64">
+                    <RegistryValue Id="RegShortcutDesktop" Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="DesktopSC" Value="1" Type="integer" KeyPath="yes" />
+                    <Shortcut Id="desktopcdrtfe" Directory="DesktopFolder" Name="cdrtfe" Target="[INSTALLDIR]\cdrtfe.exe" WorkingDirectory="INSTALLDIR" Icon="cdrtfe.ico" Advertise="no" />
                 </Component>
-                <Directory Id="arabic" Name="arabic">
-                    <Component Id="cdrtfeShlEx_lang.ini" DiskId="1" Guid="964FEDFB-B38F-43B1-BDF9-334F34E49849">
-                        <File Id="cdrtfeShlEx_lang.ini" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\arabic\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini" DiskId="1" Guid="E9DA30A7-8000-4354-9C80-8B1083231A7C">
-                        <File Id="cdrtfe_lang.ini" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\arabic\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="chinese__simplified_" Name="chinese (simplified)">
-                    <Component Id="cdrtfeShlEx_lang.ini_1" DiskId="1" Guid="FE56B520-032B-462E-8328-042EA88DE3C4">
-                        <File Id="cdrtfeShlEx_lang.ini_1" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\chinese (simplified)\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_1" DiskId="1" Guid="010E9D38-74D9-49C7-A435-DF2C396DF961">
-                        <File Id="cdrtfe_lang.ini_1" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\chinese (simplified)\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="czech" Name="czech">
-                    <Component Id="cdrtfeShlEx_lang.ini_2" DiskId="1" Guid="9BF0C70D-1637-4CBF-9951-D2FDD0A1709C">
-                        <File Id="cdrtfeShlEx_lang.ini_2" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\czech\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_2" DiskId="1" Guid="C4CD407F-8A98-4BC9-AB46-819E26847F57">
-                        <File Id="cdrtfe_lang.ini_2" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\czech\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="dutch" Name="dutch">
-                    <Component Id="cdrtfeShlEx_lang.ini_3" DiskId="1" Guid="1B05A582-D10D-45C3-8677-F92F6586CA2D">
-                        <File Id="cdrtfeShlEx_lang.ini_3" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\dutch\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_3" DiskId="1" Guid="E05E3E44-E0CB-4E41-ABE9-A3924669757F">
-                        <File Id="cdrtfe_lang.ini_3" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\dutch\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="english" Name="english">
-                    <Component Id="cdrtfeShlEx_lang.ini_4" DiskId="1" Guid="8ABDA168-94D2-4923-8FA3-0344024CDC9D">
-                        <File Id="cdrtfeShlEx_lang.ini_4" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\english\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_4" DiskId="1" Guid="AE5CBF2B-6600-4717-B836-5FC8D4B7E966">
-                        <File Id="cdrtfe_lang.ini_4" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\english\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="french" Name="french">
-                    <Component Id="cdrtfeShlEx_lang.ini_5" DiskId="1" Guid="AB1440A3-49E5-4613-96AE-AC1A1ADE88C8">
-                        <File Id="cdrtfeShlEx_lang.ini_5" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\french\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_5" DiskId="1" Guid="B3BC1E72-9D70-46B7-91D7-90CD59ACDAEA">
-                        <File Id="cdrtfe_lang.ini_5" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\french\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="german" Name="german">
-                    <Component Id="cdrtfeShlEx_lang.ini_6" DiskId="1" Guid="730C603C-9657-4C6F-8FDF-7F035A150904">
-                        <File Id="cdrtfeShlEx_lang.ini_6" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\german\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_6" DiskId="1" Guid="75BDD57F-20E2-482F-9DB1-9255ACB0D9F4">
-                        <File Id="cdrtfe_lang.ini_6" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\german\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="greek" Name="greek">
-                    <Component Id="cdrtfeShlEx_lang.ini_7" DiskId="1" Guid="B64DDF78-D502-4B9C-9C63-D8321EF2C9DD">
-                        <File Id="cdrtfeShlEx_lang.ini_7" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\greek\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_7" DiskId="1" Guid="2B72CFCD-D39E-463F-B280-115F945EB8D2">
-                        <File Id="cdrtfe_lang.ini_7" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\greek\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="hungarian" Name="hungarian">
-                    <Component Id="cdrtfeShlEx_lang.ini_8" DiskId="1" Guid="60F14149-EDA6-4066-A72D-A9AC457BBE05">
-                        <File Id="cdrtfeShlEx_lang.ini_8" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\hungarian\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_8" DiskId="1" Guid="4659CC08-61D8-4CE1-BC94-8200CE34CA47">
-                        <File Id="cdrtfe_lang.ini_8" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\hungarian\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="italian" Name="italian">
-                    <Component Id="cdrtfeShlEx_lang.ini_9" DiskId="1" Guid="8A654919-EE1F-4BC6-9F07-51BBE2035040">
-                        <File Id="cdrtfeShlEx_lang.ini_9" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\italian\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_9" DiskId="1" Guid="85C9B802-D729-4AFC-974E-3F4BF87DB496">
-                        <File Id="cdrtfe_lang.ini_9" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\italian\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="japanese" Name="japanese">
-                    <Component Id="cdrtfeShlEx_lang.ini_10" DiskId="1" Guid="768C9251-4ABD-4405-8240-3EC1B7187A1F">
-                        <File Id="cdrtfeShlEx_lang.ini_10" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\japanese\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_10" DiskId="1" Guid="C3AACB0B-4B17-4EC5-A0D2-D6BA48C87A0E">
-                        <File Id="cdrtfe_lang.ini_10" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\japanese\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="polish" Name="polish">
-                    <Component Id="cdrtfeShlEx_lang.ini_11" DiskId="1" Guid="06990AC4-4930-444D-A252-61FD048B755C">
-                        <File Id="cdrtfeShlEx_lang.ini_11" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\polish\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_11" DiskId="1" Guid="EE7CCA24-DBD6-44D1-9713-F0408B2ADE85">
-                        <File Id="cdrtfe_lang.ini_11" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\polish\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="portuguese" Name="portuguese">
-                    <Component Id="cdrtfeShlEx_lang.ini_12" DiskId="1" Guid="0E2679DC-AAC0-41A3-A9E4-BFED52A2D061">
-                        <File Id="cdrtfeShlEx_lang.ini_12" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\portuguese\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_12" DiskId="1" Guid="C1357D2D-91C2-493B-A279-31A11ACE6ED5">
-                        <File Id="cdrtfe_lang.ini_12" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\portuguese\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="portuguese__brazilian_" Name="portuguese (brazilian)">
-                    <Component Id="cdrtfeShlEx_lang.ini_13" DiskId="1" Guid="C41AE6F2-987D-477E-9470-430CCB796527">
-                        <File Id="cdrtfeShlEx_lang.ini_13" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\portuguese (brazilian)\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_13" DiskId="1" Guid="3789783C-C495-4F27-A2AE-A337F3A3AAA4">
-                        <File Id="cdrtfe_lang.ini_13" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\portuguese (brazilian)\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="russian" Name="russian">
-                    <Component Id="cdrtfeShlEx_lang.ini_14" DiskId="1" Guid="422D46B7-9A38-4229-B06A-64AAB1F61516">
-                        <File Id="cdrtfeShlEx_lang.ini_14" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\russian\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_14" DiskId="1" Guid="F68E1794-7B46-4A6A-80C2-0564BE0E7B05">
-                        <File Id="cdrtfe_lang.ini_14" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\russian\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="slovak" Name="slovak">
-                    <Component Id="cdrtfeShlEx_lang.ini_15" DiskId="1" Guid="4F5736B7-515A-4B62-B7AF-B24560342341">
-                        <File Id="cdrtfeShlEx_lang.ini_15" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\slovak\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_15" DiskId="1" Guid="54F1A88E-DD33-4038-8F82-C1623D6A5C4E">
-                        <File Id="cdrtfe_lang.ini_15" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\slovak\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="spanish" Name="spanish">
-                    <Component Id="cdrtfeShlEx_lang.ini_16" DiskId="1" Guid="0F284049-DA23-49EC-B607-55EC6491759E">
-                        <File Id="cdrtfeShlEx_lang.ini_16" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\spanish\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_16" DiskId="1" Guid="F2755344-8835-4AD1-A149-86524977853C">
-                        <File Id="cdrtfe_lang.ini_16" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\spanish\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
-                <Directory Id="swedish" Name="swedish">
-                    <Component Id="cdrtfeShlEx_lang.ini_17" DiskId="1" Guid="284C53D7-B714-43FD-BDD3-8236E7B287E5">
-                        <File Id="cdrtfeShlEx_lang.ini_17" Name="cdrtfeShlEx_lang.ini" Source="I:\cdrtfe\proto\translations\swedish\cdrtfeShlEx_lang.ini" />
-                    </Component>
-                    <Component Id="cdrtfe_lang.ini_17" DiskId="1" Guid="CB41FD09-435A-46D4-A6FC-8EFE79F71CCD">
-                        <File Id="cdrtfe_lang.ini_17" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\swedish\cdrtfe_lang.ini" />
-                    </Component>
-                </Directory>
             </Directory>
-
-            <Directory Id="tools" Name="tools">
-                <Directory Id="cdrdao" Name="cdrdao">
-                </Directory>
-                <Directory Id="cdrtools" Name="cdrtools">
-                    <Component Id="cdda2wav.exe" DiskId="1" Guid="43C3CE9A-F88A-40B7-B857-7A2E76D57D41">
-                        <File Id="cdda2wav.exe" Name="cdda2wav.exe" Source="I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe" />
+            <Directory Id="ProgramFilesFolder" Name="PFiles">
+                <Directory Id="INSTALLDIR" Name="cdrtfe">
+                    <Component Id="cdrtfe.exe" Guid="3EAAC03D-9397-4023-9A62-79A65B9BA039">
+                        <File Id="cdrtfe.exe" KeyPath="yes" Source="I:\cdrtfe\proto\cdrtfe.exe" />
                     </Component>
-                    <Component Id="cdrecord.exe" DiskId="1" Guid="CCB4B154-096C-4333-8F62-E4534BC515D9">
-                        <File Id="cdrecord.exe" Name="cdrecord.exe" Source="I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe" />
+                    <Component Id="cdrtfe.jdbg" Guid="7CE0366D-428E-43E1-A1FC-F1C2B3352985">
+                        <File Id="cdrtfe.jdbg" KeyPath="yes" Source="I:\cdrtfe\proto\cdrtfe.jdbg" />
                     </Component>
-                    <Component Id="isoinfo.exe" DiskId="1" Guid="DE2237B6-F44C-4188-B332-AD89158B4EF7">
-                        <File Id="isoinfo.exe" Name="isoinfo.exe" Source="I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe" />
+                    <Component Id="cdrtfedbg.dll" Guid="6DD45E67-FED0-4F79-9A90-FA67B82DFA84">
+                        <File Id="cdrtfedbg.dll" KeyPath="yes" Source="I:\cdrtfe\proto\cdrtfedbg.dll" />
                     </Component>
-                    <Component Id="mkisofs.exe" DiskId="1" Guid="3ED5A169-BEFF-49F2-9C34-53C77905C4B4">
-                        <File Id="mkisofs.exe" Name="mkisofs.exe" Source="I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe" />
+                    <Component Id="cdrtfeShlEx.dll" Guid="2351AD5A-0EED-49C1-9C5F-7E3B20A96CC4">
+                        <File Id="cdrtfeShlEx.dll" KeyPath="yes" Source="I:\cdrtfe\proto\cdrtfeShlEx.dll" />
                     </Component>
-                    <Component Id="readcd.exe" DiskId="1" Guid="34761550-F755-4F51-A27F-E8318940F40D">
-                        <File Id="readcd.exe" Name="readcd.exe" Source="I:\cdrtfe\proto\tools\cdrtools\readcd.exe" />
+                    <Component Id="cdrtfeShlEx64.dll" Guid="4A295705-A738-4371-8D0E-4C23DECEFDEE">
+                        <File Id="cdrtfeShlEx64.dll" KeyPath="yes" Source="I:\cdrtfe\proto\cdrtfeShlEx64.dll" />
+                        <Condition><![CDATA[VersionNT64]]></Condition>
                     </Component>
-                    <Directory Id="siconv" Name="siconv">
-                        <Component Id="CP10000" DiskId="1" Guid="CB6890E5-73C2-41CB-8A3B-69C970178731">
-                            <File Id="CP10000" Name="CP10000" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP10000" />
+                    <Component Id="cdrtfe_tools.ini" Guid="4A8C5B65-F0D3-4B05-A587-4AE3914A038E">
+                        <File Id="cdrtfe_tools.ini" KeyPath="yes" Source="I:\cdrtfe\misc\misc\cdrtfe_tools.ini" />
+                    </Component>
+                    <Directory Id="translations" Name="translations">
+                        <Component Id="_cdrtfe_lang.ini" DiskId="1" Guid="F2BC6AA2-04EE-44E7-B859-F147D318A7BD">
+                            <File Id="_cdrtfe_lang.ini" Name="cdrtfe_lang.ini" Source="I:\cdrtfe\proto\translations\_cdrtfe_lang.ini" />
                         </Component>
-                        <Component Id="CP10006" DiskId="1" Guid="9A55E0D7-E17C-4968-B95F-22D206DF1D3E">
-                            <File Id="CP10006" Name="CP10006" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP10006" />
+                        <Directory Id="arabic" Name="arabic">
+                            <Component Id="cdrtfeShlEx_lang.ini" Guid="97BFBB65-3A45-4415-9460-CB99FE5E9812">
+                                <File Id="cdrtfeShlEx_lang.ini" KeyPath="yes" Source="I:\cdrtfe\proto\translations\arabic\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini" Guid="0D039E42-8F20-4F3F-93A3-DD579482789B">
+                                <File Id="cdrtfe_lang.ini" KeyPath="yes" Source="I:\cdrtfe\proto\translations\arabic\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="catalan" Name="catalan">
+                            <Component Id="cdrtfeShlEx_lang.ini_1" Guid="4AB57B95-CDDE-47B8-BD81-6C5D6E894511">
+                                <File Id="cdrtfeShlEx_lang.ini_1" KeyPath="yes" Source="I:\cdrtfe\proto\translations\catalan\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_1" Guid="8BBA46B5-366C-4584-8FFA-F04F2B403D4C">
+                                <File Id="cdrtfe_lang.ini_1" KeyPath="yes" Source="I:\cdrtfe\proto\translations\catalan\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="chinese__simplified_" Name="chinese (simplified)">
+                            <Component Id="cdrtfeShlEx_lang.ini_2" Guid="369C78DB-373C-4783-8DA4-5811B2B5A277">
+                                <File Id="cdrtfeShlEx_lang.ini_2" KeyPath="yes" Source="I:\cdrtfe\proto\translations\chinese (simplified)\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_2" Guid="8E42B179-CFAD-42D9-855C-C8803E159380">
+                                <File Id="cdrtfe_lang.ini_2" KeyPath="yes" Source="I:\cdrtfe\proto\translations\chinese (simplified)\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="chinese__traditional_" Name="chinese (traditional)">
+                            <Component Id="cdrtfeShlEx_lang.ini_3" Guid="03820ADE-F28E-4917-B7D6-F012A8E51744">
+                                <File Id="cdrtfeShlEx_lang.ini_3" KeyPath="yes" Source="I:\cdrtfe\proto\translations\chinese (traditional)\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_3" Guid="03893A42-007B-44CA-B842-020F18B15C41">
+                                <File Id="cdrtfe_lang.ini_3" KeyPath="yes" Source="I:\cdrtfe\proto\translations\chinese (traditional)\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="czech" Name="czech">
+                            <Component Id="cdrtfeShlEx_lang.ini_4" Guid="F1E0CBAE-5CB4-4333-97BE-7FF6DF9412C8">
+                                <File Id="cdrtfeShlEx_lang.ini_4" KeyPath="yes" Source="I:\cdrtfe\proto\translations\czech\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_4" Guid="322D1F44-2FE9-44F0-9DDC-A104B531D8B7">
+                                <File Id="cdrtfe_lang.ini_4" KeyPath="yes" Source="I:\cdrtfe\proto\translations\czech\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="dutch" Name="dutch">
+                            <Component Id="cdrtfeShlEx_lang.ini_5" Guid="203E8114-4FB2-4F89-944F-5915D5E1EEB7">
+                                <File Id="cdrtfeShlEx_lang.ini_5" KeyPath="yes" Source="I:\cdrtfe\proto\translations\dutch\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_5" Guid="B5EC18D2-09AA-4698-A4A7-5F4A621C66C5">
+                                <File Id="cdrtfe_lang.ini_5" KeyPath="yes" Source="I:\cdrtfe\proto\translations\dutch\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="english" Name="english">
+                            <Component Id="cdrtfeShlEx_lang.ini_6" Guid="2DE6DDE8-FD73-42FC-B0D2-622EA1686549">
+                                <File Id="cdrtfeShlEx_lang.ini_6" KeyPath="yes" Source="I:\cdrtfe\proto\translations\english\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_6" Guid="D1C9F30E-7724-4F9E-A01B-868C004C9337">
+                                <File Id="cdrtfe_lang.ini_6" KeyPath="yes" Source="I:\cdrtfe\proto\translations\english\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="french" Name="french">
+                            <Component Id="cdrtfeShlEx_lang.ini_7" Guid="2AFD5790-2673-438F-8624-2EDFE804BC57">
+                                <File Id="cdrtfeShlEx_lang.ini_7" KeyPath="yes" Source="I:\cdrtfe\proto\translations\french\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_7" Guid="205D0660-2B22-47CE-811C-89E868554AB3">
+                                <File Id="cdrtfe_lang.ini_7" KeyPath="yes" Source="I:\cdrtfe\proto\translations\french\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="german" Name="german">
+                            <Component Id="cdrtfeShlEx_lang.ini_8" Guid="CFDA201A-65B3-4A40-B8E6-3B8E19186B5D">
+                                <File Id="cdrtfeShlEx_lang.ini_8" KeyPath="yes" Source="I:\cdrtfe\proto\translations\german\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_8" Guid="B9711497-ABCF-4BE0-8245-87085D26B210">
+                                <File Id="cdrtfe_lang.ini_8" KeyPath="yes" Source="I:\cdrtfe\proto\translations\german\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="greek" Name="greek">
+                            <Component Id="cdrtfeShlEx_lang.ini_9" Guid="2857A467-0B2F-4E87-8C72-6753221B94FC">
+                                <File Id="cdrtfeShlEx_lang.ini_9" KeyPath="yes" Source="I:\cdrtfe\proto\translations\greek\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_9" Guid="E355D922-7213-4939-8BD6-20FA9C1962C5">
+                                <File Id="cdrtfe_lang.ini_9" KeyPath="yes" Source="I:\cdrtfe\proto\translations\greek\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="hungarian" Name="hungarian">
+                            <Component Id="cdrtfeShlEx_lang.ini_10" Guid="122C2CB2-418A-42ED-86DD-18FF4255A0A2">
+                                <File Id="cdrtfeShlEx_lang.ini_10" KeyPath="yes" Source="I:\cdrtfe\proto\translations\hungarian\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_10" Guid="958914B0-66DB-498E-8A0D-40AFA6AC87B5">
+                                <File Id="cdrtfe_lang.ini_10" KeyPath="yes" Source="I:\cdrtfe\proto\translations\hungarian\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="italian" Name="italian">
+                            <Component Id="cdrtfeShlEx_lang.ini_11" Guid="E96A95D8-C396-4135-B262-38125E70B11A">
+                                <File Id="cdrtfeShlEx_lang.ini_11" KeyPath="yes" Source="I:\cdrtfe\proto\translations\italian\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_11" Guid="63ED7C34-AD67-4550-A9B9-D4D68EC8183F">
+                                <File Id="cdrtfe_lang.ini_11" KeyPath="yes" Source="I:\cdrtfe\proto\translations\italian\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="japanese" Name="japanese">
+                            <Component Id="cdrtfeShlEx_lang.ini_12" Guid="10918091-0756-4822-B4FA-7C6E937DD6BE">
+                                <File Id="cdrtfeShlEx_lang.ini_12" KeyPath="yes" Source="I:\cdrtfe\proto\translations\japanese\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_12" Guid="0A537A76-DFA3-4166-82B7-35ABF3D55081">
+                                <File Id="cdrtfe_lang.ini_12" KeyPath="yes" Source="I:\cdrtfe\proto\translations\japanese\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="korean" Name="korean">
+                            <Component Id="cdrtfeShlEx_lang.ini_13" Guid="463C14BE-3881-4F96-BCDA-EF8C8CDF7B9E">
+                                <File Id="cdrtfeShlEx_lang.ini_13" KeyPath="yes" Source="I:\cdrtfe\proto\translations\korean\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_13" Guid="D2D41316-0569-49F5-B6FC-AB0E43F09693">
+                                <File Id="cdrtfe_lang.ini_13" KeyPath="yes" Source="I:\cdrtfe\proto\translations\korean\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="polish" Name="polish">
+                            <Component Id="cdrtfeShlEx_lang.ini_14" Guid="F6E73161-398B-4039-B463-0F1DD7FA3852">
+                                <File Id="cdrtfeShlEx_lang.ini_14" KeyPath="yes" Source="I:\cdrtfe\proto\translations\polish\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_14" Guid="5B0B8A93-4038-42A9-BB8F-683EA5363CF9">
+                                <File Id="cdrtfe_lang.ini_14" KeyPath="yes" Source="I:\cdrtfe\proto\translations\polish\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="portuguese" Name="portuguese">
+                            <Component Id="cdrtfeShlEx_lang.ini_15" Guid="F04FF552-C289-44E3-8F84-9D6D21352900">
+                                <File Id="cdrtfeShlEx_lang.ini_15" KeyPath="yes" Source="I:\cdrtfe\proto\translations\portuguese\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_15" Guid="C5C8F0A3-F152-4628-93B0-B5E237DC51C4">
+                                <File Id="cdrtfe_lang.ini_15" KeyPath="yes" Source="I:\cdrtfe\proto\translations\portuguese\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="portuguese__brazilian_" Name="portuguese (brazilian)">
+                            <Component Id="cdrtfeShlEx_lang.ini_16" Guid="CFAD3B3B-6C5D-4E7B-AEB8-2DEE36A4C185">
+                                <File Id="cdrtfeShlEx_lang.ini_16" KeyPath="yes" Source="I:\cdrtfe\proto\translations\portuguese (brazilian)\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_16" Guid="C8C6355D-D037-44AD-9D2D-4411F0378191">
+                                <File Id="cdrtfe_lang.ini_16" KeyPath="yes" Source="I:\cdrtfe\proto\translations\portuguese (brazilian)\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="russian" Name="russian">
+                            <Component Id="cdrtfeShlEx_lang.ini_17" Guid="DB40D0C7-CF7A-44DD-AB29-0B543C2BFD8F">
+                                <File Id="cdrtfeShlEx_lang.ini_17" KeyPath="yes" Source="I:\cdrtfe\proto\translations\russian\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_17" Guid="0C6D8B2A-053F-4379-964E-F638F491B5CE">
+                                <File Id="cdrtfe_lang.ini_17" KeyPath="yes" Source="I:\cdrtfe\proto\translations\russian\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="slovak" Name="slovak">
+                            <Component Id="cdrtfeShlEx_lang.ini_18" Guid="37379084-A7BB-4D79-BE28-D50959A2109D">
+                                <File Id="cdrtfeShlEx_lang.ini_18" KeyPath="yes" Source="I:\cdrtfe\proto\translations\slovak\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_18" Guid="77077E80-478A-4585-A62D-6CCD6D89C4BE">
+                                <File Id="cdrtfe_lang.ini_18" KeyPath="yes" Source="I:\cdrtfe\proto\translations\slovak\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="spanish" Name="spanish">
+                            <Component Id="cdrtfeShlEx_lang.ini_19" Guid="8407B3AD-59D1-4A19-9A79-B87E16059268">
+                                <File Id="cdrtfeShlEx_lang.ini_19" KeyPath="yes" Source="I:\cdrtfe\proto\translations\spanish\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_19" Guid="1168CF76-4315-41F8-B40F-F17A973E8A91">
+                                <File Id="cdrtfe_lang.ini_19" KeyPath="yes" Source="I:\cdrtfe\proto\translations\spanish\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="swedish" Name="swedish">
+                            <Component Id="cdrtfeShlEx_lang.ini_20" Guid="7E3695BB-EFCC-448A-AD2A-7408550A0D22">
+                                <File Id="cdrtfeShlEx_lang.ini_20" KeyPath="yes" Source="I:\cdrtfe\proto\translations\swedish\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_20" Guid="A29EC200-00D5-4530-AA05-6276A571E792">
+                                <File Id="cdrtfe_lang.ini_20" KeyPath="yes" Source="I:\cdrtfe\proto\translations\swedish\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="ukrainian" Name="ukrainian">
+                            <Component Id="cdrtfeShlEx_lang.ini_21" Guid="609CE64A-0F61-4C2D-BCB7-C9067F7DA9EE">
+                                <File Id="cdrtfeShlEx_lang.ini_21" KeyPath="yes" Source="I:\cdrtfe\proto\translations\ukrainian\cdrtfeShlEx_lang.ini" />
+                            </Component>
+                            <Component Id="cdrtfe_lang.ini_21" Guid="DDD9D60C-51E4-425C-B21D-69E3E76B9FAD">
+                                <File Id="cdrtfe_lang.ini_21" KeyPath="yes" Source="I:\cdrtfe\proto\translations\ukrainian\cdrtfe_lang.ini" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                    <Directory Id="tools" Name="tools">
+                        <Directory Id="cdrtools" Name="cdrtools">
+                            <Component Id="cdda2wav.exe" DiskId="1" Guid="43C3CE9A-F88A-40B7-B857-7A2E76D57D41">
+                                <File Id="cdda2wav.exe" Name="cdda2wav.exe" Source="I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe" />
+                            </Component>
+                            <Component Id="cdrecord.exe" DiskId="1" Guid="CCB4B154-096C-4333-8F62-E4534BC515D9">
+                                <File Id="cdrecord.exe" Name="cdrecord.exe" Source="I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe" />
+                            </Component>
+                            <Component Id="isoinfo.exe" DiskId="1" Guid="DE2237B6-F44C-4188-B332-AD89158B4EF7">
+                                <File Id="isoinfo.exe" Name="isoinfo.exe" Source="I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe" />
+                            </Component>
+                            <Component Id="mkisofs.exe" DiskId="1" Guid="3ED5A169-BEFF-49F2-9C34-53C77905C4B4">
+                                <File Id="mkisofs.exe" Name="mkisofs.exe" Source="I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe" />
+                            </Component>
+                            <Component Id="readcd.exe" DiskId="1" Guid="34761550-F755-4F51-A27F-E8318940F40D">
+                                <File Id="readcd.exe" Name="readcd.exe" Source="I:\cdrtfe\proto\tools\cdrtools\readcd.exe" />
+                            </Component>
+                            <Directory Id="lib" Name="lib">
+                                <Directory Id="siconv" Name="siconv">
+                                    <Component Id="CP10000" DiskId="1" Guid="CB6890E5-73C2-41CB-8A3B-69C970178731">
+                                        <File Id="CP10000" Name="CP10000" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP10000" />
+                                    </Component>
+                                    <Component Id="CP10006" DiskId="1" Guid="9A55E0D7-E17C-4968-B95F-22D206DF1D3E">
+                                        <File Id="CP10006" Name="CP10006" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP10006" />
+                                    </Component>
+                                    <Component Id="CP10007" DiskId="1" Guid="CE827337-6B8E-4951-8593-49998F3D93FE">
+                                        <File Id="CP10007" Name="CP10007" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP10007" />
+                                    </Component>
+                                    <Component Id="CP10029" DiskId="1" Guid="FE753DF3-1EEB-4916-9CC5-874D93803C16">
+                                        <File Id="CP10029" Name="CP10029" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP10029" />
+                                    </Component>
+                                    <Component Id="CP10079" DiskId="1" Guid="95F1B589-7969-4FFB-A0E4-84DB8F05EBF3">
+                                        <File Id="CP10079" Name="CP10079" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP10079" />
+                                    </Component>
+                                    <Component Id="CP10081" DiskId="1" Guid="29BE006C-067C-4555-A214-03E029881293">
+                                        <File Id="CP10081" Name="CP10081" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP10081" />
+                                    </Component>
+                                    <Component Id="CP1250" DiskId="1" Guid="C8BEF992-D479-41E2-B5E9-907B908F0622">
+                                        <File Id="CP1250" Name="CP1250" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1250" />
+                                    </Component>
+                                    <Component Id="CP1251" DiskId="1" Guid="D444B9C4-1060-4436-924F-D7115241676C">
+                                        <File Id="CP1251" Name="CP1251" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1251" />
+                                    </Component>
+                                    <Component Id="CP1252" DiskId="1" Guid="6098D106-E1BC-4CA3-8C33-4E168A2790E8">
+                                        <File Id="CP1252" Name="CP1252" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1252" />
+                                    </Component>
+                                    <Component Id="CP1253" DiskId="1" Guid="851E1766-5322-484E-9749-75145D403760">
+                                        <File Id="CP1253" Name="CP1253" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1253" />
+                                    </Component>
+                                    <Component Id="CP1254" DiskId="1" Guid="A0E409D0-A8C3-4C35-BD8F-5C6BE42D0465">
+                                        <File Id="CP1254" Name="CP1254" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1254" />
+                                    </Component>
+                                    <Component Id="CP1255" DiskId="1" Guid="2B4EFAD7-127D-492E-BC4F-9C81B39BC6EC">
+                                        <File Id="CP1255" Name="CP1255" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1255" />
+                                    </Component>
+                                    <Component Id="CP1256" DiskId="1" Guid="91392749-4596-4CBD-8D87-8AF333C5E9F7">
+                                        <File Id="CP1256" Name="CP1256" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1256" />
+                                    </Component>
+                                    <Component Id="CP1257" DiskId="1" Guid="5724F913-8102-4BA5-A83E-36E1F75BD75B">
+                                        <File Id="CP1257" Name="CP1257" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1257" />
+                                    </Component>
+                                    <Component Id="CP1258" DiskId="1" Guid="87793FDD-DE3F-4A4E-BE8A-C320A3B6683B">
+                                        <File Id="CP1258" Name="CP1258" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP1258" />
+                                    </Component>
+                                    <Component Id="CP437" DiskId="1" Guid="F091EAB2-99C5-436B-8D6F-2395DD4D923A">
+                                        <File Id="CP437" Name="CP437" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP437" />
+                                    </Component>
+                                    <Component Id="CP737" DiskId="1" Guid="47201C42-A9DB-42B9-AE98-AF0D6BEFA90D">
+                                        <File Id="CP737" Name="CP737" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP737" />
+                                    </Component>
+                                    <Component Id="CP775" DiskId="1" Guid="965DBAAC-47D1-4482-B2DA-81EE4124EF8B">
+                                        <File Id="CP775" Name="CP775" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP775" />
+                                    </Component>
+                                    <Component Id="CP850" DiskId="1" Guid="367842B3-F70B-4C3F-B70B-A436A435698C">
+                                        <File Id="CP850" Name="CP850" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP850" />
+                                    </Component>
+                                    <Component Id="CP852" DiskId="1" Guid="148F283A-71DB-4BB5-8AF8-9B51DA12A011">
+                                        <File Id="CP852" Name="CP852" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP852" />
+                                    </Component>
+                                    <Component Id="CP855" DiskId="1" Guid="44276788-AE04-4019-B974-F9AB0F1CAA82">
+                                        <File Id="CP855" Name="CP855" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP855" />
+                                    </Component>
+                                    <Component Id="CP857" DiskId="1" Guid="A0DC10F4-1FE7-4AC7-9932-E4D0EAB21DAD">
+                                        <File Id="CP857" Name="CP857" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP857" />
+                                    </Component>
+                                    <Component Id="CP860" DiskId="1" Guid="18E60E90-BB6C-449F-8407-ED81F932D8D6">
+                                        <File Id="CP860" Name="CP860" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP860" />
+                                    </Component>
+                                    <Component Id="CP861" DiskId="1" Guid="EAFABE0C-4B30-45D5-94E1-2087D5D74DD2">
+                                        <File Id="CP861" Name="CP861" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP861" />
+                                    </Component>
+                                    <Component Id="CP862" DiskId="1" Guid="8D65A39E-988D-431D-9A00-235AD63F92EE">
+                                        <File Id="CP862" Name="CP862" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP862" />
+                                    </Component>
+                                    <Component Id="CP863" DiskId="1" Guid="C41CC106-6CB0-48A8-9C5B-F54E0DBD7006">
+                                        <File Id="CP863" Name="CP863" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP863" />
+                                    </Component>
+                                    <Component Id="CP864" DiskId="1" Guid="069B82A7-28DB-431B-93DD-3C640CD16FAF">
+                                        <File Id="CP864" Name="CP864" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP864" />
+                                    </Component>
+                                    <Component Id="CP865" DiskId="1" Guid="45214EBD-2B5D-4240-A29F-97A070FC208B">
+                                        <File Id="CP865" Name="CP865" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP865" />
+                                    </Component>
+                                    <Component Id="CP866" DiskId="1" Guid="FC2711D3-CD8E-42BD-8FAB-294793A10976">
+                                        <File Id="CP866" Name="CP866" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP866" />
+                                    </Component>
+                                    <Component Id="CP869" DiskId="1" Guid="625ED539-291F-4AF8-9048-DE39C2E280C5">
+                                        <File Id="CP869" Name="CP869" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP869" />
+                                    </Component>
+                                    <Component Id="CP874" DiskId="1" Guid="15EA75C6-7A32-416E-BF70-F973E47E40CC">
+                                        <File Id="CP874" Name="CP874" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\CP874" />
+                                    </Component>
+                                    <Component Id="iso8859_1" DiskId="1" Guid="A027EE3A-25AF-4CED-AE14-6F06369BC6F1">
+                                        <File Id="iso8859_1" Name="iso8859-1" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-1" />
+                                    </Component>
+                                    <Component Id="iso8859_10" DiskId="1" Guid="423DF3BC-EAC7-4868-BCD6-3FA7C974E12B">
+                                        <File Id="iso8859_10" Name="iso8859-10" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-10" />
+                                    </Component>
+                                    <Component Id="iso8859_11" DiskId="1" Guid="C4704375-FF3F-4601-9F98-69658D6645BC">
+                                        <File Id="iso8859_11" Name="iso8859-11" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-11" />
+                                    </Component>
+                                    <Component Id="iso8859_13" DiskId="1" Guid="858D41A7-67A1-4777-90B3-832353F12841">
+                                        <File Id="iso8859_13" Name="iso8859-13" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-13" />
+                                    </Component>
+                                    <Component Id="iso8859_14" DiskId="1" Guid="A0C4DED1-F2ED-4403-B0AF-276CCEA62DC7">
+                                        <File Id="iso8859_14" Name="iso8859-14" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-14" />
+                                    </Component>
+                                    <Component Id="iso8859_15" DiskId="1" Guid="516EC4CE-397A-4226-A772-10DCD9A5CF00">
+                                        <File Id="iso8859_15" Name="iso8859-15" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-15" />
+                                    </Component>
+                                    <Component Id="iso8859_16" DiskId="1" Guid="CDD3B574-9F66-442D-B1E6-2AF219EFFC35">
+                                        <File Id="iso8859_16" Name="iso8859-16" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-16" />
+                                    </Component>
+                                    <Component Id="iso8859_2" DiskId="1" Guid="CE7A762C-2AAF-458A-82AA-550CAEF0AC1B">
+                                        <File Id="iso8859_2" Name="iso8859-2" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-2" />
+                                    </Component>
+                                    <Component Id="iso8859_3" DiskId="1" Guid="1C9E6B0A-D24F-4E9A-AAEF-6FD1D2669CBA">
+                                        <File Id="iso8859_3" Name="iso8859-3" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-3" />
+                                    </Component>
+                                    <Component Id="iso8859_4" DiskId="1" Guid="963CCBA9-A109-48DB-95D3-E79F4539DE69">
+                                        <File Id="iso8859_4" Name="iso8859-4" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-4" />
+                                    </Component>
+                                    <Component Id="iso8859_5" DiskId="1" Guid="1D861FAE-13FD-46DC-8A3F-92DF1926A91E">
+                                        <File Id="iso8859_5" Name="iso8859-5" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-5" />
+                                    </Component>
+                                    <Component Id="iso8859_6" DiskId="1" Guid="C85A6A22-D2C4-4A57-BD56-CEC36B507762">
+                                        <File Id="iso8859_6" Name="iso8859-6" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-6" />
+                                    </Component>
+                                    <Component Id="iso8859_7" DiskId="1" Guid="F5F0FD6B-8D99-4327-9E21-2FE9BAA223D3">
+                                        <File Id="iso8859_7" Name="iso8859-7" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-7" />
+                                    </Component>
+                                    <Component Id="iso8859_8" DiskId="1" Guid="9509FCC1-309F-450F-89FA-31265938E2E5">
+                                        <File Id="iso8859_8" Name="iso8859-8" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-8" />
+                                    </Component>
+                                    <Component Id="iso8859_9" DiskId="1" Guid="F98392C2-10E7-466C-A4EB-0E7CC374CA42">
+                                        <File Id="iso8859_9" Name="iso8859-9" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\iso8859-9" />
+                                    </Component>
+                                    <Component Id="KOI8_R" DiskId="1" Guid="69F43898-FCF1-4C92-8FB8-EB92453BE673">
+                                        <File Id="KOI8_R" Name="KOI8-R" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\KOI8-R" />
+                                    </Component>
+                                    <Component Id="KOI8_U" DiskId="1" Guid="D6E78758-2EF8-465B-A763-BC921716432C">
+                                        <File Id="KOI8_U" Name="KOI8-U" Source="I:\cdrtfe\proto\tools\cdrtools\lib\siconv\KOI8-U" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="cygwin" Name="cygwin">
+                            <Component Id="cygwin.ini" DiskId="1" Guid="5CD13A56-83BC-4711-83D2-060E711A1CED">
+                                <File Id="cygwin.ini" Name="cygwin.ini" Source="I:\cdrtfe\proto\tools\cygwin\cygwin.ini" />
+                            </Component>
+                            <Component Id="cygwin1.dll" DiskId="1" Guid="81E2371C-EC2A-4864-AAC2-FC732556DCB4">
+                                <File Id="cygwin1.dll" Name="cygwin1.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygwin1.dll" />
+                            </Component>
+                            <Component Id="sh.exe" DiskId="1" Guid="94B133B2-2FEF-4849-B3EB-0162BF0289A9">
+                                <File Id="sh.exe" Name="sh.exe" Source="I:\cdrtfe\proto\tools\cygwin\sh.exe" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="sound" Name="sound">
+                            <Component Id="flac.exe" DiskId="1" Guid="E89C25E9-B743-4E33-BBEC-77E5D6B9BE2C">
+                                <File Id="flac.exe" Name="flac.exe" Source="I:\cdrtfe\proto\tools\sound\flac.exe" />
+                            </Component>
+                            <Component Id="lame.exe" DiskId="1" Guid="92DA7E50-3F0A-46D8-8B82-55908E823DF3">
+                                <File Id="lame.exe" Name="lame.exe" Source="I:\cdrtfe\proto\tools\sound\lame.exe" />
+                            </Component>
+                            <Component Id="mpg123.exe" DiskId="1" Guid="32C0F1DF-88B0-446D-B224-0948DCBAF018">
+                                <File Id="mpg123.exe" Name="mpg123.exe" Source="I:\cdrtfe\proto\tools\sound\mpg123.exe" />
+                            </Component>
+                            <Component Id="oggdec.exe" DiskId="1" Guid="AB288197-2FD4-4C61-8DB2-9F782B06FC2E">
+                                <File Id="oggdec.exe" Name="oggdec.exe" Source="I:\cdrtfe\proto\tools\sound\oggdec.exe" />
+                            </Component>
+                            <Component Id="oggenc.exe" DiskId="1" Guid="4BB4CAC8-A5BC-427E-A00A-A8B72A6336D2">
+                                <File Id="oggenc.exe" Name="oggenc.exe" Source="I:\cdrtfe\proto\tools\sound\oggenc.exe" />
+                            </Component>
+                            <Component Id="wavegain.exe" DiskId="1" Guid="C91685FA-89A5-48C3-89BA-E9752DEC0971">
+                                <File Id="wavegain.exe" Name="wavegain.exe" Source="I:\cdrtfe\proto\tools\sound\wavegain.exe" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="vcdimager" Name="vcdimager">
+                            <Component Id="vcdimager.exe" DiskId="1" Guid="FA3B0BC4-0925-4536-B23B-74575E99A69A">
+                                <File Id="vcdimager.exe" Name="vcdimager.exe" Source="I:\cdrtfe\proto\tools\vcdimager\vcdimager.exe" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="helper" Name="helper">
+                            <Component Id="cygpathprefix.exe" DiskId="1" Guid="C6F0E3D7-A9D6-434E-BBCB-B91CAC6E1748">
+                                <File Id="cygpathprefix.exe" Name="cygpathprefix.exe" Source="I:\cdrtfe\proto\tools\helper\cygpathprefix.exe" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="xcd" Name="xcd">
+                            <Component Id="d2fgui.exe" DiskId="1" Guid="356A135F-85A2-4630-92EB-A77B3E37BC3C">
+                                <File Id="d2fgui.exe" Name="d2fgui.exe" Source="I:\cdrtfe\proto\tools\xcd\d2fgui.exe" />
+                            </Component>
+                            <Component Id="dat2file.exe" DiskId="1" Guid="B2053AAA-EE2C-42EB-852F-17AC624EAC29">
+                                <File Id="dat2file.exe" Name="dat2file.exe" Source="I:\cdrtfe\proto\tools\xcd\dat2file.exe" />
+                            </Component>
+                            <Component Id="m2f2extract.exe" DiskId="1" Guid="08A84DC7-FAFB-4A8E-92DD-AF77F87FCD65">
+                                <File Id="m2f2extract.exe" Name="m2f2extract.exe" Source="I:\cdrtfe\proto\tools\xcd\m2f2extract.exe" />
+                            </Component>
+                            <Component Id="Mode2CDMaker.exe" DiskId="1" Guid="B2FA0FCB-CCFD-446D-AB83-35A3CD78FC3B">
+                                <File Id="Mode2CDMaker.exe" Name="Mode2CDMaker.exe" Source="I:\cdrtfe\proto\tools\xcd\Mode2CDMaker.exe" />
+                            </Component>
+                            <Component Id="rrdec.exe" DiskId="1" Guid="331A850A-E6B0-495B-B177-715775C06A75">
+                                <File Id="rrdec.exe" Name="rrdec.exe" Source="I:\cdrtfe\proto\tools\xcd\rrdec.exe" />
+                            </Component>
+                            <Component Id="rrenc.exe" DiskId="1" Guid="E1E8A9C9-77E9-4545-8FD8-2761207E2935">
+                                <File Id="rrenc.exe" Name="rrenc.exe" Source="I:\cdrtfe\proto\tools\xcd\rrenc.exe" />
+                            </Component>
+                            <Component Id="m2cdm.exe" DiskId="1" Guid="3FB09094-EAB6-40A0-B55B-7D92425E04F6">
+                                <File Id="m2cdm.exe" Name="m2cdm.exe" Source="I:\cdrtfe\proto\tools\xcd\m2cdm.exe" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="scripts" Name="scripts">
+                            <Component Id="cmdshellinit.cmd" Guid="AB1B7159-DA59-4286-9372-A50EC873670C">
+                                <File Id="cmdshellinit.cmde" Name="cmdshellinit.cmd" KeyPath="yes" Source="I:\cdrtfe\misc\scripts\cmdshellinit_portable.cmd" />
+                            </Component>
+                            <Component Id="cmdshell.cmd" Guid="5F5A749E-BD2B-4DEA-926A-F043E0B2030A">
+                                <File Id="cmdshell.cmd" Name="cmdshell.cmd" KeyPath="yes" Source="I:\cdrtfe\misc\scripts\cmdshell_portable.cmd" />
+                            </Component>
+                            <Component Id="makeiso.cmd" Guid="39FA4F3F-FC65-40BF-86AD-2A413AAFA33E">
+                                <File Id="makeiso.cmd" KeyPath="yes" Source="I:\cdrtfe\misc\scripts\makeiso.cmd" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                    <Directory Id="help" Name="help">
+                        <Component Id="cdrtfe_english.chm" Guid="505863CF-B55F-421D-AABF-EA8F91925A5B">
+                            <File Id="cdrtfe_english.chm" KeyPath="yes" Source="I:\cdrtfe\proto\help\cdrtfe_english.chm" />
                         </Component>
-                        <Component Id="CP10007" DiskId="1" Guid="CE827337-6B8E-4951-8593-49998F3D93FE">
-                            <File Id="CP10007" Name="CP10007" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP10007" />
+                        <Component Id="cdrtfe_french.chm" Guid="35FE7EB4-7963-4FC8-B1FB-43ECE451EAF7">
+                            <File Id="cdrtfe_french.chm" KeyPath="yes" Source="I:\cdrtfe\proto\help\cdrtfe_french.chm" />
                         </Component>
-                        <Component Id="CP10029" DiskId="1" Guid="FE753DF3-1EEB-4916-9CC5-874D93803C16">
-                            <File Id="CP10029" Name="CP10029" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP10029" />
+                        <Component Id="cdrtfe_german.chm" Guid="01C5EC95-55DF-4EF2-94C9-FDFAF5DC5346">
+                            <File Id="cdrtfe_german.chm" KeyPath="yes" Source="I:\cdrtfe\proto\help\cdrtfe_german.chm" />
                         </Component>
-                        <Component Id="CP10079" DiskId="1" Guid="95F1B589-7969-4FFB-A0E4-84DB8F05EBF3">
-                            <File Id="CP10079" Name="CP10079" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP10079" />
+                        <Component Id="cdrtfe_greek.chm" Guid="9325023F-ECE8-44AE-BEA7-E9CF778BE8A1">
+                            <File Id="cdrtfe_greek.chm" KeyPath="yes" Source="I:\cdrtfe\proto\help\cdrtfe_greek.chm" />
                         </Component>
-                        <Component Id="CP10081" DiskId="1" Guid="29BE006C-067C-4555-A214-03E029881293">
-                            <File Id="CP10081" Name="CP10081" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP10081" />
-                        </Component>
-                        <Component Id="CP1250" DiskId="1" Guid="C8BEF992-D479-41E2-B5E9-907B908F0622">
-                            <File Id="CP1250" Name="CP1250" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1250" />
-                        </Component>
-                        <Component Id="CP1251" DiskId="1" Guid="D444B9C4-1060-4436-924F-D7115241676C">
-                            <File Id="CP1251" Name="CP1251" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1251" />
-                        </Component>
-                        <Component Id="CP1252" DiskId="1" Guid="6098D106-E1BC-4CA3-8C33-4E168A2790E8">
-                            <File Id="CP1252" Name="CP1252" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1252" />
-                        </Component>
-                        <Component Id="CP1253" DiskId="1" Guid="851E1766-5322-484E-9749-75145D403760">
-                            <File Id="CP1253" Name="CP1253" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1253" />
-                        </Component>
-                        <Component Id="CP1254" DiskId="1" Guid="A0E409D0-A8C3-4C35-BD8F-5C6BE42D0465">
-                            <File Id="CP1254" Name="CP1254" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1254" />
-                        </Component>
-                        <Component Id="CP1255" DiskId="1" Guid="2B4EFAD7-127D-492E-BC4F-9C81B39BC6EC">
-                            <File Id="CP1255" Name="CP1255" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1255" />
-                        </Component>
-                        <Component Id="CP1256" DiskId="1" Guid="91392749-4596-4CBD-8D87-8AF333C5E9F7">
-                            <File Id="CP1256" Name="CP1256" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1256" />
-                        </Component>
-                        <Component Id="CP1257" DiskId="1" Guid="5724F913-8102-4BA5-A83E-36E1F75BD75B">
-                            <File Id="CP1257" Name="CP1257" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1257" />
-                        </Component>
-                        <Component Id="CP1258" DiskId="1" Guid="87793FDD-DE3F-4A4E-BE8A-C320A3B6683B">
-                            <File Id="CP1258" Name="CP1258" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP1258" />
-                        </Component>
-                        <Component Id="CP437" DiskId="1" Guid="F091EAB2-99C5-436B-8D6F-2395DD4D923A">
-                            <File Id="CP437" Name="CP437" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP437" />
-                        </Component>
-                        <Component Id="CP737" DiskId="1" Guid="47201C42-A9DB-42B9-AE98-AF0D6BEFA90D">
-                            <File Id="CP737" Name="CP737" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP737" />
-                        </Component>
-                        <Component Id="CP775" DiskId="1" Guid="965DBAAC-47D1-4482-B2DA-81EE4124EF8B">
-                            <File Id="CP775" Name="CP775" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP775" />
-                        </Component>
-                        <Component Id="CP850" DiskId="1" Guid="367842B3-F70B-4C3F-B70B-A436A435698C">
-                            <File Id="CP850" Name="CP850" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP850" />
-                        </Component>
-                        <Component Id="CP852" DiskId="1" Guid="148F283A-71DB-4BB5-8AF8-9B51DA12A011">
-                            <File Id="CP852" Name="CP852" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP852" />
-                        </Component>
-                        <Component Id="CP855" DiskId="1" Guid="44276788-AE04-4019-B974-F9AB0F1CAA82">
-                            <File Id="CP855" Name="CP855" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP855" />
-                        </Component>
-                        <Component Id="CP857" DiskId="1" Guid="A0DC10F4-1FE7-4AC7-9932-E4D0EAB21DAD">
-                            <File Id="CP857" Name="CP857" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP857" />
-                        </Component>
-                        <Component Id="CP860" DiskId="1" Guid="18E60E90-BB6C-449F-8407-ED81F932D8D6">
-                            <File Id="CP860" Name="CP860" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP860" />
-                        </Component>
-                        <Component Id="CP861" DiskId="1" Guid="EAFABE0C-4B30-45D5-94E1-2087D5D74DD2">
-                            <File Id="CP861" Name="CP861" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP861" />
-                        </Component>
-                        <Component Id="CP862" DiskId="1" Guid="8D65A39E-988D-431D-9A00-235AD63F92EE">
-                            <File Id="CP862" Name="CP862" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP862" />
-                        </Component>
-                        <Component Id="CP863" DiskId="1" Guid="C41CC106-6CB0-48A8-9C5B-F54E0DBD7006">
-                            <File Id="CP863" Name="CP863" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP863" />
-                        </Component>
-                        <Component Id="CP864" DiskId="1" Guid="069B82A7-28DB-431B-93DD-3C640CD16FAF">
-                            <File Id="CP864" Name="CP864" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP864" />
-                        </Component>
-                        <Component Id="CP865" DiskId="1" Guid="45214EBD-2B5D-4240-A29F-97A070FC208B">
-                            <File Id="CP865" Name="CP865" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP865" />
-                        </Component>
-                        <Component Id="CP866" DiskId="1" Guid="FC2711D3-CD8E-42BD-8FAB-294793A10976">
-                            <File Id="CP866" Name="CP866" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP866" />
-                        </Component>
-                        <Component Id="CP869" DiskId="1" Guid="625ED539-291F-4AF8-9048-DE39C2E280C5">
-                            <File Id="CP869" Name="CP869" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP869" />
-                        </Component>
-                        <Component Id="CP874" DiskId="1" Guid="15EA75C6-7A32-416E-BF70-F973E47E40CC">
-                            <File Id="CP874" Name="CP874" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\CP874" />
-                        </Component>
-                        <Component Id="iso8859_1" DiskId="1" Guid="A027EE3A-25AF-4CED-AE14-6F06369BC6F1">
-                            <File Id="iso8859_1" Name="iso8859-1" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-1" />
-                        </Component>
-                        <Component Id="iso8859_10" DiskId="1" Guid="423DF3BC-EAC7-4868-BCD6-3FA7C974E12B">
-                            <File Id="iso8859_10" Name="iso8859-10" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-10" />
-                        </Component>
-                        <Component Id="iso8859_11" DiskId="1" Guid="C4704375-FF3F-4601-9F98-69658D6645BC">
-                            <File Id="iso8859_11" Name="iso8859-11" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-11" />
-                        </Component>
-                        <Component Id="iso8859_13" DiskId="1" Guid="858D41A7-67A1-4777-90B3-832353F12841">
-                            <File Id="iso8859_13" Name="iso8859-13" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-13" />
-                        </Component>
-                        <Component Id="iso8859_14" DiskId="1" Guid="A0C4DED1-F2ED-4403-B0AF-276CCEA62DC7">
-                            <File Id="iso8859_14" Name="iso8859-14" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-14" />
-                        </Component>
-                        <Component Id="iso8859_15" DiskId="1" Guid="516EC4CE-397A-4226-A772-10DCD9A5CF00">
-                            <File Id="iso8859_15" Name="iso8859-15" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-15" />
-                        </Component>
-                        <Component Id="iso8859_16" DiskId="1" Guid="CDD3B574-9F66-442D-B1E6-2AF219EFFC35">
-                            <File Id="iso8859_16" Name="iso8859-16" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-16" />
-                        </Component>
-                        <Component Id="iso8859_2" DiskId="1" Guid="CE7A762C-2AAF-458A-82AA-550CAEF0AC1B">
-                            <File Id="iso8859_2" Name="iso8859-2" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-2" />
-                        </Component>
-                        <Component Id="iso8859_3" DiskId="1" Guid="1C9E6B0A-D24F-4E9A-AAEF-6FD1D2669CBA">
-                            <File Id="iso8859_3" Name="iso8859-3" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-3" />
-                        </Component>
-                        <Component Id="iso8859_4" DiskId="1" Guid="963CCBA9-A109-48DB-95D3-E79F4539DE69">
-                            <File Id="iso8859_4" Name="iso8859-4" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-4" />
-                        </Component>
-                        <Component Id="iso8859_5" DiskId="1" Guid="1D861FAE-13FD-46DC-8A3F-92DF1926A91E">
-                            <File Id="iso8859_5" Name="iso8859-5" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-5" />
-                        </Component>
-                        <Component Id="iso8859_6" DiskId="1" Guid="C85A6A22-D2C4-4A57-BD56-CEC36B507762">
-                            <File Id="iso8859_6" Name="iso8859-6" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-6" />
-                        </Component>
-                        <Component Id="iso8859_7" DiskId="1" Guid="F5F0FD6B-8D99-4327-9E21-2FE9BAA223D3">
-                            <File Id="iso8859_7" Name="iso8859-7" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-7" />
-                        </Component>
-                        <Component Id="iso8859_8" DiskId="1" Guid="9509FCC1-309F-450F-89FA-31265938E2E5">
-                            <File Id="iso8859_8" Name="iso8859-8" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-8" />
-                        </Component>
-                        <Component Id="iso8859_9" DiskId="1" Guid="F98392C2-10E7-466C-A4EB-0E7CC374CA42">
-                            <File Id="iso8859_9" Name="iso8859-9" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\iso8859-9" />
-                        </Component>
-                        <Component Id="KOI8_R" DiskId="1" Guid="69F43898-FCF1-4C92-8FB8-EB92453BE673">
-                            <File Id="KOI8_R" Name="KOI8-R" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\KOI8-R" />
-                        </Component>
-                        <Component Id="KOI8_U" DiskId="1" Guid="D6E78758-2EF8-465B-A763-BC921716432C">
-                            <File Id="KOI8_U" Name="KOI8-U" Source="I:\cdrtfe\proto\tools\cdrtools\siconv\KOI8-U" />
+                        <Component Id="cdrtfe_italian.chm" Guid="F977FF45-69EF-4863-8BC6-3B0850598FC9">
+                            <File Id="cdrtfe_italian.chm" KeyPath="yes" Source="I:\cdrtfe\proto\help\cdrtfe_italian.chm" />
                         </Component>
                     </Directory>
+                    <Directory Id="doc" Name="doc">
+                        <Component Id="changes.txt" Guid="8D1ABDA4-FBD3-439A-908F-A59E46665596">
+                            <File Id="changes.txt" KeyPath="yes" Source="I:\cdrtfe\cdrtfe\doc\changes\changes.txt" />
+                        </Component>
+                        <Component Id="m2f2extract_en.txt" Guid="38DE1877-A316-4AF8-8BAA-B3604DD3F6D2">
+                            <File Id="m2f2extract_en.txt" KeyPath="yes" Source="I:\delphi\m2f2extract\doc\m2f2extract_en.txt" />
+                        </Component>
+                        <Component Id="readme_en.txt" Guid="378F3149-15FD-4419-8306-C89201724018">
+                            <File Id="readme_en.txt" KeyPath="yes" Source="I:\cdrtfe\cdrtfe\doc\readme_en.txt" />
+                        </Component>
+                        <Component Id="readme_dvd_en.txt" Guid="470D2C4F-BA74-4F4F-9189-C7E21357ECCD">
+                            <File Id="readme_dvd_en.txt" KeyPath="yes" Source="I:\cdrtfe\cdrtfe\doc\readme_dvd_en.txt" />
+                        </Component>
+                        <Directory Id="license" Name="license">
+                            <Component Id="CDDL.Schily.txt" Guid="9E605BAC-D63B-49C8-9B80-F8ED6166E9AC">
+                                <File Id="CDDL.Schily.txt" KeyPath="yes" Source="I:\cdrtfe\cdrtfe\doc\license\CDDL.Schily.txt" />
+                            </Component>
+                            <Component Id="COPYING.txt" Guid="0DF6D807-6258-45D0-B504-139007A3E39C">
+                                <File Id="COPYING.txt" KeyPath="yes" Source="I:\cdrtfe\cdrtfe\doc\license\COPYING.txt" />
+                            </Component>
+                            <Component Id="license_tools.txt" Guid="2E5B5E2C-0FF1-4C78-9765-A617BF514208">
+                                <File Id="license_tools.txt" KeyPath="yes" Source="I:\cdrtfe\cdrtfe\doc\license\license_tools.txt" />
+                            </Component>
+                        </Directory>
+                    </Directory>
                 </Directory>
-                <Directory Id="cygwin" Name="cygwin">
-                    <Component Id="cygiconv_2.dll" DiskId="1" Guid="F26D25E3-B335-4A83-9F9D-6FF7271F4D95">
-                        <File Id="cygiconv_2.dll" Name="cygiconv-2.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygiconv-2.dll" />
-                    </Component>
-                    <Component Id="cygintl_3.dll" DiskId="1" Guid="37066C8B-30D7-4DC5-BB92-63784C1462F6">
-                        <File Id="cygintl_3.dll" Name="cygintl-3.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygintl-3.dll" />
-                    </Component>
-                    <Component Id="cygwin.ini" DiskId="1" Guid="5CD13A56-83BC-4711-83D2-060E711A1CED">
-                        <File Id="cygwin.ini" Name="cygwin.ini" Source="I:\cdrtfe\proto\tools\cygwin\cygwin.ini" />
-                    </Component>
-                    <Component Id="cygwin1.dll" DiskId="1" Guid="81E2371C-EC2A-4864-AAC2-FC732556DCB4">
-                        <File Id="cygwin1.dll" Name="cygwin1.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygwin1.dll" />
-                    </Component>
-                    <Component Id="cygpopt_0.dll" DiskId="1" Guid="75C77DBF-3BB5-4AD4-9453-7AB13E46D9AD">
-                        <File Id="cygpopt_0.dll" Name="cygpopt-0.dll" Source="I:\cdrtfe\proto\tools\cygwin\cygpopt-0.dll" />
-                    </Component>
-                    <Component Id="sh.exe" DiskId="1" Guid="94B133B2-2FEF-4849-B3EB-0162BF0289A9">
-                        <File Id="sh.exe" Name="sh.exe" Source="I:\cdrtfe\proto\tools\cygwin\sh.exe" />
-                    </Component>
-                </Directory>
-                <Directory Id="sound" Name="sound">
-                    <Component Id="flac.exe" DiskId="1" Guid="E89C25E9-B743-4E33-BBEC-77E5D6B9BE2C">
-                        <File Id="flac.exe" Name="flac.exe" Source="I:\cdrtfe\proto\tools\sound\flac.exe" />
-                    </Component>
-                    <Component Id="lame.exe" DiskId="1" Guid="92DA7E50-3F0A-46D8-8B82-55908E823DF3">
-                        <File Id="lame.exe" Name="lame.exe" Source="I:\cdrtfe\proto\tools\sound\lame.exe" />
-                    </Component>
-                    <Component Id="mpg123.exe" DiskId="1" Guid="32C0F1DF-88B0-446D-B224-0948DCBAF018">
-                        <File Id="mpg123.exe" Name="mpg123.exe" Source="I:\cdrtfe\proto\tools\sound\mpg123.exe" />
-                    </Component>
-                    <Component Id="oggdec.exe" DiskId="1" Guid="AB288197-2FD4-4C61-8DB2-9F782B06FC2E">
-                        <File Id="oggdec.exe" Name="oggdec.exe" Source="I:\cdrtfe\proto\tools\sound\oggdec.exe" />
-                    </Component>
-                    <Component Id="oggenc.exe" DiskId="1" Guid="4BB4CAC8-A5BC-427E-A00A-A8B72A6336D2">
-                        <File Id="oggenc.exe" Name="oggenc.exe" Source="I:\cdrtfe\proto\tools\sound\oggenc.exe" />
-                    </Component>
-                    <Component Id="wavegain.exe" DiskId="1" Guid="C91685FA-89A5-48C3-89BA-E9752DEC0971">
-                        <File Id="wavegain.exe" Name="wavegain.exe" Source="I:\cdrtfe\proto\tools\sound\wavegain.exe" />
-                    </Component>
-                </Directory>
-                <Directory Id="vcdimager" Name="vcdimager">
-                    <Component Id="vcdimager.exe" DiskId="1" Guid="FA3B0BC4-0925-4536-B23B-74575E99A69A">
-                        <File Id="vcdimager.exe" Name="vcdimager.exe" Source="I:\cdrtfe\proto\tools\vcdimager\vcdimager.exe" />
-                    </Component>
-                </Directory>
-                <Directory Id="helper" Name="helper">
-                    <Component Id="cygpathprefix.exe" DiskId="1" Guid="C6F0E3D7-A9D6-434E-BBCB-B91CAC6E1748">
-                        <File Id="cygpathprefix.exe" Name="cygpathprefix.exe" Source="I:\cdrtfe\proto\tools\helper\cygpathprefix.exe" />
-                    </Component>
-                </Directory>
-                <Directory Id="xcd" Name="xcd">
-                    <Component Id="d2fgui.exe" DiskId="1" Guid="356A135F-85A2-4630-92EB-A77B3E37BC3C">
-                        <File Id="d2fgui.exe" Name="d2fgui.exe" Source="I:\cdrtfe\proto\tools\xcd\d2fgui.exe" />
-                    </Component>
-                    <Component Id="dat2file.exe" DiskId="1" Guid="B2053AAA-EE2C-42EB-852F-17AC624EAC29">
-                        <File Id="dat2file.exe" Name="dat2file.exe" Source="I:\cdrtfe\proto\tools\xcd\dat2file.exe" />
-                    </Component>
-                    <Component Id="m2f2extract.exe" DiskId="1" Guid="08A84DC7-FAFB-4A8E-92DD-AF77F87FCD65">
-                        <File Id="m2f2extract.exe" Name="m2f2extract.exe" Source="I:\cdrtfe\proto\tools\xcd\m2f2extract.exe" />
-                    </Component>
-                    <Component Id="Mode2CDMaker.exe" DiskId="1" Guid="B2FA0FCB-CCFD-446D-AB83-35A3CD78FC3B">
-                        <File Id="Mode2CDMaker.exe" Name="Mode2CDMaker.exe" Source="I:\cdrtfe\proto\tools\xcd\Mode2CDMaker.exe" />
-                    </Component>
-                    <Component Id="rrdec.exe" DiskId="1" Guid="331A850A-E6B0-495B-B177-715775C06A75">
-                        <File Id="rrdec.exe" Name="rrdec.exe" Source="I:\cdrtfe\proto\tools\xcd\rrdec.exe" />
-                    </Component>
-                    <Component Id="rrenc.exe" DiskId="1" Guid="E1E8A9C9-77E9-4545-8FD8-2761207E2935">
-                        <File Id="rrenc.exe" Name="rrenc.exe" Source="I:\cdrtfe\proto\tools\xcd\rrenc.exe" />
-                    </Component>
-                    <Component Id="m2cdm.exe" DiskId="1" Guid="3FB09094-EAB6-40A0-B55B-7D92425E04F6">
-                        <File Id="m2cdm.exe" Name="m2cdm.exe" Source="I:\cdrtfe\proto\tools\xcd\m2cdm.exe" />
+            </Directory>
+            <Directory Id="ProgramMenuFolder" Name="Programs">
+                <Directory Id="ProgramMenuDir" Name="cdrtfe">
+                    <Component Id="ProgramMenuDir" Guid="$(var.CompProgMenuDir)">
+                        <RemoveFolder Id="ProgramMenuDir" On="uninstall" />
+                        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+                        <Shortcut Id="startmenucdrtfe" Directory="ProgramMenuDir" Name="cdrtfe" Target="[INSTALLDIR]\cdrtfe.exe" WorkingDirectory="INSTALLDIR" Icon="cdrtfe.ico" Advertise="no" />
+                        <Shortcut Id="startmenucdrtfedeb" Directory="ProgramMenuDir" Name="cdrtfe (debug mode)" Target="[INSTALLDIR]\cdrtfe.exe" Arguments="/debug" WorkingDirectory="INSTALLDIR" Icon="cdrtfe.ico" Advertise="no" />
+                        <Shortcut Id="startmenucmdshell" Directory="ProgramMenuDir" Name="CommandShell" Target="[INSTALLDIR]\tools\scripts\cmdshell.cmd" WorkingDirectory="scripts" Advertise="no" />
                     </Component>
                 </Directory>
             </Directory>
-
         </Directory>
-
-      </Directory>
-
-      <Directory Id="ProgramMenuFolder" Name="Programs">
-        <Directory Id="ProgramMenuDir" Name="cdrtfe">
-          <Component Id="ProgramMenuDir" Guid="$(var.CompProgMenuDir)">
-            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
-            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
-          </Component>
-        </Directory>
-      </Directory>
-
-    </Directory>
-
-    <Feature Id='Complete' Level='1' ConfigurableDirectory='INSTALLDIR'>
-      <ComponentRef Id='MainExecutable' />
-      <ComponentRef Id='ShellExt' />
-      <ComponentRef Id='cdrtfeHelp' />
-      <ComponentRef Id="_cdrtfe_lang.ini" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini" />
-      <ComponentRef Id="cdrtfe_lang.ini" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_1" />
-      <ComponentRef Id="cdrtfe_lang.ini_1" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_2" />
-      <ComponentRef Id="cdrtfe_lang.ini_2" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_3" />
-      <ComponentRef Id="cdrtfe_lang.ini_3" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_4" />
-      <ComponentRef Id="cdrtfe_lang.ini_4" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_5" />
-      <ComponentRef Id="cdrtfe_lang.ini_5" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_6" />
-      <ComponentRef Id="cdrtfe_lang.ini_6" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_7" />
-      <ComponentRef Id="cdrtfe_lang.ini_7" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_8" />
-      <ComponentRef Id="cdrtfe_lang.ini_8" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_9" />
-      <ComponentRef Id="cdrtfe_lang.ini_9" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_10" />
-      <ComponentRef Id="cdrtfe_lang.ini_10" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_11" />
-      <ComponentRef Id="cdrtfe_lang.ini_11" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_12" />
-      <ComponentRef Id="cdrtfe_lang.ini_12" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_13" />
-      <ComponentRef Id="cdrtfe_lang.ini_13" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_14" />
-      <ComponentRef Id="cdrtfe_lang.ini_14" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_15" />
-      <ComponentRef Id="cdrtfe_lang.ini_15" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_16" />
-      <ComponentRef Id="cdrtfe_lang.ini_16" />
-      <ComponentRef Id="cdrtfeShlEx_lang.ini_17" />
-      <ComponentRef Id="cdrtfe_lang.ini_17" />
-      <ComponentRef Id="cdda2wav.exe" />
-      <ComponentRef Id="cdrecord.exe" />
-      <ComponentRef Id="isoinfo.exe" />
-      <ComponentRef Id="mkisofs.exe" />
-      <ComponentRef Id="readcd.exe" />
-      <ComponentRef Id="CP10000" />
-      <ComponentRef Id="CP10006" />
-      <ComponentRef Id="CP10007" />
-      <ComponentRef Id="CP10029" />
-      <ComponentRef Id="CP10079" />
-      <ComponentRef Id="CP10081" />
-      <ComponentRef Id="CP1250" />
-      <ComponentRef Id="CP1251" />
-      <ComponentRef Id="CP1252" />
-      <ComponentRef Id="CP1253" />
-      <ComponentRef Id="CP1254" />
-      <ComponentRef Id="CP1255" />
-      <ComponentRef Id="CP1256" />
-      <ComponentRef Id="CP1257" />
-      <ComponentRef Id="CP1258" />
-      <ComponentRef Id="CP437" />
-      <ComponentRef Id="CP737" />
-      <ComponentRef Id="CP775" />
-      <ComponentRef Id="CP850" />
-      <ComponentRef Id="CP852" />
-      <ComponentRef Id="CP855" />
-      <ComponentRef Id="CP857" />
-      <ComponentRef Id="CP860" />
-      <ComponentRef Id="CP861" />
-      <ComponentRef Id="CP862" />
-      <ComponentRef Id="CP863" />
-      <ComponentRef Id="CP864" />
-      <ComponentRef Id="CP865" />
-      <ComponentRef Id="CP866" />
-      <ComponentRef Id="CP869" />
-      <ComponentRef Id="CP874" />
-      <ComponentRef Id="iso8859_1" />
-      <ComponentRef Id="iso8859_10" />
-      <ComponentRef Id="iso8859_11" />
-      <ComponentRef Id="iso8859_13" />
-      <ComponentRef Id="iso8859_14" />
-      <ComponentRef Id="iso8859_15" />
-      <ComponentRef Id="iso8859_16" />
-      <ComponentRef Id="iso8859_2" />
-      <ComponentRef Id="iso8859_3" />
-      <ComponentRef Id="iso8859_4" />
-      <ComponentRef Id="iso8859_5" />
-      <ComponentRef Id="iso8859_6" />
-      <ComponentRef Id="iso8859_7" />
-      <ComponentRef Id="iso8859_8" />
-      <ComponentRef Id="iso8859_9" />
-      <ComponentRef Id="KOI8_R" />
-      <ComponentRef Id="KOI8_U" />
-      <ComponentRef Id="cygiconv_2.dll" />
-      <ComponentRef Id="cygintl_3.dll" />
-      <ComponentRef Id="cygwin.ini" />
-      <ComponentRef Id="cygwin1.dll" />
-      <ComponentRef Id="cygpopt_0.dll" />
-      <ComponentRef Id="sh.exe" />
-      <ComponentRef Id="flac.exe" />
-      <ComponentRef Id="lame.exe" />
-      <ComponentRef Id="mpg123.exe" />
-      <ComponentRef Id="oggdec.exe" />
-      <ComponentRef Id="oggenc.exe" />
-      <ComponentRef Id="wavegain.exe" />
-      <ComponentRef Id="vcdimager.exe" />
-      <ComponentRef Id="cygpathprefix.exe" />
-      <ComponentRef Id="d2fgui.exe" />
-      <ComponentRef Id="dat2file.exe" />
-      <ComponentRef Id="m2f2extract.exe" />
-      <ComponentRef Id="Mode2CDMaker.exe" />
-      <ComponentRef Id="rrenc.exe" />
-      <ComponentRef Id="rrdec.exe" />
-      <ComponentRef Id="m2cdm.exe" />
-      <ComponentRef Id="ProgramMenuDir" />
-
-    </Feature>
-
-    <Icon Id="cdrtfe.ico" SourceFile="I:\cdrtfe\cdrtfe\res\icon_main\cdrtfe_icon2_1.ico" />
-
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
-    <Property Id="ALLUSERS">1</Property>
-    <UIRef Id="WixUI_InstallDir"/>
-    <WixVariable Id="WixUIBannerBmp" Value="I:\cdrtfe\setupscript\images\cdrtfe_wix_small.jpg" />
-    <WixVariable Id="WixUIDialogBmp" Value="I:\cdrtfe\setupscript\images\cdrtfe_wix.jpg" />
-    <WixVariable Id="WixUILicenseRtf" Value="I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf"/>
-
-  </Product>
+        <ComponentGroup Id="MainExecutable">
+            <ComponentRef Id="cdrtfe.exe" />
+            <ComponentRef Id="cdrtfe.jdbg" />
+            <ComponentRef Id="cdrtfedbg.dll" />
+            <ComponentRef Id="cdrtfeShlEx.dll" />
+            <ComponentRef Id="cdrtfeShlEx64.dll" />
+            <ComponentRef Id="RegistryEntriesCmdCdrtfe" />
+            <ComponentRef Id="RegistryEntriesCmdShell" />
+            <ComponentRef Id="RegKeyRemove1" />
+            <ComponentRef Id="RegKeyRemove2" />
+            <ComponentRef Id="RegKeyRemove3" />
+            <ComponentRef Id="RegKeyRemove4" />
+            <ComponentRef Id="RegKeyRemove5" />
+            <ComponentRef Id="RegKeyRemove6" />
+            <ComponentRef Id="RegKeyRemove7" />
+        </ComponentGroup>
+        <ComponentGroup Id="CompGroupHelp">
+            <ComponentRef Id="cdrtfe_english.chm" />
+            <ComponentRef Id="cdrtfe_french.chm" />
+            <ComponentRef Id="cdrtfe_german.chm" />
+            <ComponentRef Id="cdrtfe_greek.chm" />
+            <ComponentRef Id="cdrtfe_italian.chm" />
+        </ComponentGroup>
+        <ComponentGroup Id="CompCommandlinetools">
+            <ComponentRef Id="cdda2wav.exe" />
+            <ComponentRef Id="cdrecord.exe" />
+            <ComponentRef Id="isoinfo.exe" />
+            <ComponentRef Id="mkisofs.exe" />
+            <ComponentRef Id="readcd.exe" />
+            <ComponentRef Id="CP10000" />
+            <ComponentRef Id="CP10006" />
+            <ComponentRef Id="CP10007" />
+            <ComponentRef Id="CP10029" />
+            <ComponentRef Id="CP10079" />
+            <ComponentRef Id="CP10081" />
+            <ComponentRef Id="CP1250" />
+            <ComponentRef Id="CP1251" />
+            <ComponentRef Id="CP1252" />
+            <ComponentRef Id="CP1253" />
+            <ComponentRef Id="CP1254" />
+            <ComponentRef Id="CP1255" />
+            <ComponentRef Id="CP1256" />
+            <ComponentRef Id="CP1257" />
+            <ComponentRef Id="CP1258" />
+            <ComponentRef Id="CP437" />
+            <ComponentRef Id="CP737" />
+            <ComponentRef Id="CP775" />
+            <ComponentRef Id="CP850" />
+            <ComponentRef Id="CP852" />
+            <ComponentRef Id="CP855" />
+            <ComponentRef Id="CP857" />
+            <ComponentRef Id="CP860" />
+            <ComponentRef Id="CP861" />
+            <ComponentRef Id="CP862" />
+            <ComponentRef Id="CP863" />
+            <ComponentRef Id="CP864" />
+            <ComponentRef Id="CP865" />
+            <ComponentRef Id="CP866" />
+            <ComponentRef Id="CP869" />
+            <ComponentRef Id="CP874" />
+            <ComponentRef Id="iso8859_1" />
+            <ComponentRef Id="iso8859_10" />
+            <ComponentRef Id="iso8859_11" />
+            <ComponentRef Id="iso8859_13" />
+            <ComponentRef Id="iso8859_14" />
+            <ComponentRef Id="iso8859_15" />
+            <ComponentRef Id="iso8859_16" />
+            <ComponentRef Id="iso8859_2" />
+            <ComponentRef Id="iso8859_3" />
+            <ComponentRef Id="iso8859_4" />
+            <ComponentRef Id="iso8859_5" />
+            <ComponentRef Id="iso8859_6" />
+            <ComponentRef Id="iso8859_7" />
+            <ComponentRef Id="iso8859_8" />
+            <ComponentRef Id="iso8859_9" />
+            <ComponentRef Id="KOI8_R" />
+            <ComponentRef Id="KOI8_U" />
+            <ComponentRef Id="cygwin.ini" />
+            <ComponentRef Id="cygwin1.dll" />
+            <ComponentRef Id="sh.exe" />
+            <ComponentRef Id="flac.exe" />
+            <ComponentRef Id="lame.exe" />
+            <ComponentRef Id="mpg123.exe" />
+            <ComponentRef Id="oggdec.exe" />
+            <ComponentRef Id="oggenc.exe" />
+            <ComponentRef Id="wavegain.exe" />
+            <ComponentRef Id="vcdimager.exe" />
+            <ComponentRef Id="cygpathprefix.exe" />
+            <ComponentRef Id="d2fgui.exe" />
+            <ComponentRef Id="dat2file.exe" />
+            <ComponentRef Id="m2f2extract.exe" />
+            <ComponentRef Id="Mode2CDMaker.exe" />
+            <ComponentRef Id="rrenc.exe" />
+            <ComponentRef Id="rrdec.exe" />
+            <ComponentRef Id="cmdshellinit.cmd" />
+            <ComponentRef Id="cmdshell.cmd" />
+            <ComponentRef Id="makeiso.cmd" />
+        </ComponentGroup>
+        <ComponentGroup Id="CompTranslations">
+            <ComponentRef Id="_cdrtfe_lang.ini" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini" />
+            <ComponentRef Id="cdrtfe_lang.ini" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_1" />
+            <ComponentRef Id="cdrtfe_lang.ini_1" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_2" />
+            <ComponentRef Id="cdrtfe_lang.ini_2" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_3" />
+            <ComponentRef Id="cdrtfe_lang.ini_3" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_4" />
+            <ComponentRef Id="cdrtfe_lang.ini_4" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_5" />
+            <ComponentRef Id="cdrtfe_lang.ini_5" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_6" />
+            <ComponentRef Id="cdrtfe_lang.ini_6" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_7" />
+            <ComponentRef Id="cdrtfe_lang.ini_7" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_8" />
+            <ComponentRef Id="cdrtfe_lang.ini_8" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_9" />
+            <ComponentRef Id="cdrtfe_lang.ini_9" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_10" />
+            <ComponentRef Id="cdrtfe_lang.ini_10" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_11" />
+            <ComponentRef Id="cdrtfe_lang.ini_11" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_12" />
+            <ComponentRef Id="cdrtfe_lang.ini_12" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_13" />
+            <ComponentRef Id="cdrtfe_lang.ini_13" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_14" />
+            <ComponentRef Id="cdrtfe_lang.ini_14" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_15" />
+            <ComponentRef Id="cdrtfe_lang.ini_15" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_16" />
+            <ComponentRef Id="cdrtfe_lang.ini_16" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_17" />
+            <ComponentRef Id="cdrtfe_lang.ini_17" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_18" />
+            <ComponentRef Id="cdrtfe_lang.ini_18" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_19" />
+            <ComponentRef Id="cdrtfe_lang.ini_19" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_20" />
+            <ComponentRef Id="cdrtfe_lang.ini_20" />
+            <ComponentRef Id="cdrtfeShlEx_lang.ini_21" />
+            <ComponentRef Id="cdrtfe_lang.ini_21" />
+        </ComponentGroup>
+        <ComponentGroup Id="doc">
+            <ComponentRef Id="changes.txt" />
+            <ComponentRef Id="m2f2extract_en.txt" />
+            <ComponentRef Id="readme_en.txt" />
+            <ComponentRef Id="readme_dvd_en.txt" />
+            <ComponentRef Id="CDDL.Schily.txt" />
+            <ComponentRef Id="COPYING.txt" />
+            <ComponentRef Id="license_tools.txt" />
+        </ComponentGroup>
+        <Feature Id="cdrtfe" Level="1" ConfigurableDirectory="INSTALLDIR" Title="cdrtfe" Display="expand" Absent="disallow">
+            <ComponentGroupRef Id="MainExecutable" />
+            <ComponentRef Id="ProgramMenuDir" />
+            <ComponentRef Id="desktopshortcut" />
+            <Feature Id="translations" Level="1" Title="Multi language support" Description="Necessary for languages other than German.">
+                <ComponentGroupRef Id="CompTranslations" />
+            </Feature>
+            <ComponentGroupRef Id="CompGroupHelp" />
+            <ComponentGroupRef Id="doc" />
+        </Feature>
+        <Feature Id="commandlinetools" Level="1" Title="Commanline tools" Description="The commandline tools used by cdrtfe." Display="expand" Absent="disallow">
+            <ComponentGroupRef Id="CompCommandlinetools" />
+            <Feature Id="m2cdm" Level="2" Title="modified Mode2CDMaker" Description="Installs a modified version of Mode2CDMaker. Normally not necessary.">
+                <ComponentRef Id="m2cdm.exe" />
+                <ComponentRef Id="cdrtfe_tools.ini" />
+            </Feature>
+        </Feature>
+        <!--        <CustomAction Id="UnregisterShlEx" Directory="INSTALLDIR" ExeCommand="regsvr32.exe /s /u &quot;[INSTALLDIR]cdrtfeShlEx.dll&quot;" /> -->
+        <!--        <CustomAction Id="UnregisterShlEx64" Directory="INSTALLDIR" ExeCommand="regsvr32.exe /s /u &quot;[INSTALLDIR]cdrtfeShlEx64.dll&quot;" /> -->
+        <Icon Id="cdrtfe.ico" SourceFile="I:\cdrtfe\cdrtfe\res\icon_main\cdrtfe_icon2_1.ico" />
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+        <Property Id="ALLUSERS">1</Property>
+        <Property Id="ACTIVESHELLEX">
+            <RegistrySearch Id="ActiveShellEx" Root="HKLM" Key="Software\cdrtfe\Program" Name="Path" Type="raw" />
+        </Property>
+        <UIRef Id="WixUI_FeatureTree" />
+        <WixVariable Id="WixUIBannerBmp" Value="I:\cdrtfe\setupscript\images\cdrtfe_wix_small.jpg" />
+        <WixVariable Id="WixUIDialogBmp" Value="I:\cdrtfe\setupscript\images\cdrtfe_wix.jpg" />
+        <WixVariable Id="WixUILicenseRtf" Value="I:\cdrtfe\cdrtfe\doc\setup\info\license_en.rtf" />
+        <UI />
+    </Product>
 </Wix>
