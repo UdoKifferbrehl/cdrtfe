@@ -283,7 +283,6 @@ begin
   {Sonderbehandlung: Gibt es eine aktive cygwin1.dll?}
   if CheckForActiveCygwinDLL then
   begin
-    {$IFDEF WriteLogfile} AddLogCode(1262); {$ENDIF}
     if DLLIsLoaded('cygwin1.dll', Temp) then
     begin
       Path := ExtractFilePath(Temp) + ';' + OldPath;
@@ -295,6 +294,7 @@ begin
       {$ENDIF}
     end;
   end;
+  SetCygwinLocale;
 end;
 
 { CheckMkisofsImports ----------------------------------------------------------

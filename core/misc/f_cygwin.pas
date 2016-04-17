@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2016 Oliver Valencia
 
-  letzte Änderung  20.02.2016
+  letzte Änderung  17.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,13 +43,15 @@ function UseOwnCygwinDLLs: Boolean;
 procedure CleanRegistryPortable;
 procedure SetUseOwnCygwinDLLs(Value: Boolean);
 procedure InitCygwinPathPrefix;
+procedure SetCygwinLocale;
 
 implementation
 
 uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}   // debug: f_window,
      f_getdosoutput,
-     cl_cdrtfedata, f_strings, f_filesystem, f_locations, const_locations;
+     cl_cdrtfedata, f_strings, f_filesystem, f_locations, f_environment,
+     f_wininfo, const_locations, const_common;
 
 { 'statische' Variablen }
 var CygPathPrefix    : string;           // Cygwin-Mountpoint
@@ -395,6 +397,18 @@ begin
     Result := Ini.ReadBool(cCygOwnDLLSec, cCygCheckActive, False);
     Ini.Free;
   end;
+end;
+
+{ SetCygwinLocale --------------------------------------------------------------
+
+  setzt LC_ALL=LangCode als Umgebungsvariable. Nötig ab cygwin 1.7.            }
+
+procedure SetCygwinLocale;
+begin
+  SetEnvVarValue('LC_ALL', GetWindowsLanguage);
+  {$IFDEF WriteLogfile}
+  AddLog('Setting cygwin locale: LC_ALL=' + GetWindowsLanguage + CRLF + CRLF, 0);
+  {$ENDIF}
 end;
                 
 initialization
