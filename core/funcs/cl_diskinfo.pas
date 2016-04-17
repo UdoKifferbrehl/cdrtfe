@@ -2,9 +2,9 @@
 
   cl_diskinfo.pas: Zugriff auf Rohlingsinformationen und Medien-Überprüfung
 
-  Copyright (c) 2006-2014 Oliver Valencia
+  Copyright (c) 2006-2016 Oliver Valencia
 
-  letzte Änderung  05.02.2014
+  letzte Änderung  17.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -52,7 +52,7 @@ const cDiskTypeBlocks: array[0..6, 0..1] of string =
          ('DVD-R/DL (-R9) [7,96 GiByte]', '4171712'),
          ('DVD+R/DL (+R9) [7,96 GiByte]', '4173824'),
          ('BD-R(E) [23,3 GiByte]', '12219392'),
-         ('BD-RE DL [46,6 GiByte]', '24438784'));
+         ('BD-R(E)/DL [46,6 GiByte]', '24438784'));
 
 type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
                   DT_DVD_R, DT_DVD_RW, DT_DVD_RDL,
@@ -1477,6 +1477,19 @@ begin
     {$ENDIF}
   end;
   FSecFree := StrToIntDef(Temp, 0);
+  {Sonderbehandllung: Disk-Typ BD-R(E)/DL: nicht am Profil erkennbar, daher mit
+   FSecFree überprüfen}
+  if (FDiskType in [DT_BD_R, DT_BD_RE]) and (FSecFree > FSectors)then
+  begin
+    FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
+    case FDiskType of
+      DT_BD_R : FDiskType := DT_BD_R_DL;
+      DT_BD_RE: FDiskType := DT_BD_RE_DL;
+    end;
+    {$IFDEF DebugReadCDInfo}
+    Deb('This seems to be an BD-R(E)/DL.', 1);
+    {$ENDIF}
+  end;
   {Multiborderinfo ermitteln}
   // StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);  
   StartSec := GetSessionStartSec;
