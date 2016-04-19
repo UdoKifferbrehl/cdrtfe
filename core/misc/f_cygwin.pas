@@ -2,7 +2,7 @@
 
   Copyright (c) 2004-2016 Oliver Valencia
 
-  letzte Änderung  17.04.2016
+  letzte Änderung  19.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -404,10 +404,16 @@ end;
   setzt LC_ALL=LangCode als Umgebungsvariable. Nötig ab cygwin 1.7.            }
 
 procedure SetCygwinLocale;
+var LangCode: string;
+    ANSICP  : string;
+    Locale  : string;
 begin
-  SetEnvVarValue('LC_ALL', GetWindowsLanguage);
+  LangCode := GetWindowsLanguage;
+  ANSICP := 'CP' + IntToStr(GetACP());
+  Locale := LangCode + '.' + ANSICP;
+  SetEnvVarValue('LC_ALL', Locale);
   {$IFDEF WriteLogfile}
-  AddLog('Setting cygwin locale: LC_ALL=' + GetWindowsLanguage + CRLF + CRLF, 0);
+  AddLog('Setting cygwin locale: LC_ALL=' + Locale + CRLF + CRLF, 0);
   {$ENDIF}
 end;
                 
