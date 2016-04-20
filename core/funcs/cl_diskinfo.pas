@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2016 Oliver Valencia
 
-  letzte Änderung  17.04.2016
+  letzte Änderung  20.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -43,6 +43,7 @@ unit cl_diskinfo;
 interface
 
 uses Windows, Forms, StdCtrls, Controls, SysUtils,
+     {$IFDEF OverrideMinfo} Classes, {$ENDIF}
      cl_settings, cl_lang, f_largeint;
 
 const cDiskTypeBlocks: array[0..6, 0..1] of string =
@@ -1271,6 +1272,9 @@ function TDiskInfoM.GetMediumInfo(const vv: Boolean): string;
 var CmdCdrecord: string;
     CmdOption  : string;
     VLevel     : string;
+    {$IFDEF OverrideMinfo}
+    TempList   : TStringList;
+    {$ENDIF}
 begin
   {Medieninfo auslesen}
   CmdOption := '-minfo';
@@ -1283,6 +1287,12 @@ begin
   CmdCdrecord := CmdCdrecord + ' dev=' + SCSIIF(FDevice) + ' ' + CmdOption +
                  ' -silent -' + VLevel;
   Result := GetDosOutput(PChar(CmdCdrecord), True, False);
+  {$IFDEF OverrideMinfo}
+  TempList := TStringList.Create;
+  TempList.LoadFromFile('minfo-dummy.txt');
+  Result := TempList.Text;
+  TempList.Free;
+  {$ENDIF}  
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
   AddCRStringToList(Result, FormDebug.Memo1.Lines);
@@ -1579,7 +1589,7 @@ begin
   FForcedFormat  := False;
   FFormatCommand := '';  
 
-  {ATIP auslesen}
+  {Diskinfos mit cdrecord -minfo auslesen}
   FMediumInfo := GetMediumInfo(False);
 
   {Auswerten der Infos, wenn Medium eingelegt ist.}

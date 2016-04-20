@@ -2,9 +2,9 @@
 
   directives.inc: Symbol-Definitionen
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
 
-  letzte Änderung  04.12.2014
+  letzte Änderung  20.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -191,6 +191,11 @@
          // Erzwingt das Nicht-Erkennen des DVD-Rohlings. Zu Testzwecken.
          //   - betrifft: f_diskinfo.pas
 
+{$DEFINE xOverrideMinfo}
+         // liest die Datei minfo-dummy.txt als Ausgabe von cdrecord -v -minfo
+         // ein. Zu Testzwecken.
+         //   - betrifft: f_diskinfo.pas
+         
 {$DEFINE UseCurrentProfile}
          // Verwendet zur Erkennung des DVD-Typs die Angabe von cdrecord zum
          // Current Profile. Andernfalls wird die Angabe zum Booktype benutzt.
