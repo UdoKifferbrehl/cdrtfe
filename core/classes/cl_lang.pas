@@ -2,10 +2,10 @@
 
   cl_lang.pas: Unterstützung für verschiedene Sprachen
 
-  Copyright (c) 2004-2015 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.10.2015
+  letzte Änderung  20.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -300,7 +300,7 @@ begin
     Add('eburn09=Erste zu schreibende Adresse konnte nicht gelesen werden.\nFalls es sich um eine CD-RW handelt, muß diese erst gelöscht werden.');
     Add('eburn10=DVDs müssen im DAO-Modus geschrieben werden!');
     Add('eburn11=Sorry, noch keine Unterstützung für Multisession-/Multiborder-DVDs.');
-    Add('eburn12=Unbekanntes DVD-Medium, unbekannte Kapazität. Trotzdem fortfahren?');
+    Add('eburn12=Unbekanntes DVD/BD-Medium, unbekannte Kapazität. Trotzdem fortfahren?');
     Add('eburn13=Sie können auch die Art des Mediums angeben.');
     Add('eburn14=\n%s MiByte (%d Sektoren) zuviel.');
     Add('eburn15=\n%s MiByte werden benötigt.');
