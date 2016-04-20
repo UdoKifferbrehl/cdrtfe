@@ -1289,10 +1289,10 @@ begin
   Result := GetDosOutput(PChar(CmdCdrecord), True, False);
   {$IFDEF OverrideMinfo}
   TempList := TStringList.Create;
-  TempList.LoadFromFile('minfo-dummy.txt');
+  TempList.LoadFromFile(StartUpDir + '\minfo-dummy.txt');
   Result := TempList.Text;
   TempList.Free;
-  {$ENDIF}  
+  {$ENDIF}
   {$IFDEF DebugReadCDInfo}
   FormDebug.Memo1.Lines.Add(CRLF + CmdCdrecord);
   AddCRStringToList(Result, FormDebug.Memo1.Lines);
@@ -1484,6 +1484,15 @@ begin
                       ' gracetime=5 dev=' + SCSIIF(FDevice) + ' -v -format';
     {$IFDEF DebugReadCDInfo}
     Deb('This seems to be an empty (maiden) DVD+RW.', 1);
+    {$ENDIF}
+  end;
+  {Disk ist leer oder fortsetzbar, aber keine Angabe zum restlichen Speicher}
+  if not FDiskComplete and (Temp = '') then
+  begin
+    FDiskType := DT_Unknown;
+    {$IFDEF DebugReadCDInfo}
+    Deb('The disc is empty or appendable, but we have no size information.', 1);
+    Deb('Set disc type to DT_Unknown.', 1);
     {$ENDIF}
   end;
   FSecFree := StrToIntDef(Temp, 0);
