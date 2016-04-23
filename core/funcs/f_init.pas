@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  09.01.2016
+  letzte Änderung  23.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -48,7 +48,7 @@ uses {$IFDEF ShowDebugWindow} frm_debug, {$ENDIF}
      {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      cl_logwindow,
      f_filesystem, f_getdosoutput, f_wininfo, f_environment, f_strings, f_cygwin,
-     const_locations, f_locations, const_common, f_process, f_window;
+     const_locations, f_locations, const_common, f_process, f_window, f_helper;
 
 var FLang: TLang;
 
@@ -361,6 +361,7 @@ begin
     {Haben wir es mit der Mingw32-Version zu tun?}
     Mingw := not ImportsDll(StartUpDir + cCdrecordBin + cExtExe,
                             ExtractFileName(cCygwin1Dll));
+    SetIsMinGW(Mingw);
     {Ist die cygwin1.dll im cdrtfe-Verzeichnis oder Suchpfad?}
     CygwinOk := FileExists(StartUpDir + '\' + cCygwin1Dll) or
                 (FindInSearchPath(cCygwin1Dll) <> '');

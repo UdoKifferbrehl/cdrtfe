@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2016 Oliver Valencia
 
-  letzte Änderung  09.01.2016
+  letzte Änderung  23.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,14 +40,26 @@ function IsValidDVDSource(const Path: string): Boolean;
 function SCSIIF(const Dev: string): string;
 procedure ConvertXCDParamListToRrencInputList(Source, Dest: TStringList);
 procedure SetSCSIInterface(const SCSIIF: string);
+procedure SetIsMinGW(const Value: Boolean);
 
 implementation
 
-uses f_locations, const_locations;
+uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     f_locations, const_locations;
 
 const {$J+}
       SCSIInterface: string = '';
+      IsMinGW: Boolean = False;
       {$J-}
+
+{ SetIsMinGW -------------------------------------------------------------------
+
+  setzt die 'statische' Variable SCSIInterface.                                }
+
+procedure SetIsMinGW(const Value: Boolean);
+begin
+  IsMinGW := Value;
+end;
 
 { SetSCSIInterface -------------------------------------------------------------
 
@@ -118,20 +130,17 @@ end;
 function GetCurrentFolder(const CommandLine: string): string;
 var Temp: string;
 begin
-  Temp := StartUpDir; //'';
-//  {Workaround for mkisofs 2.01.01a28 and above: Zeichensatztabellen werden im
-//   aktuellen Verzeicnis gesucht, wenn cygwin nicht komplett installiert ist.}
-//  if Pos(cMkisofsBin, CommandLine) > 0 then
-//  begin
-//    Temp := ExtractFilePath(CommandLine);
-//    Delete(Temp, Length(Temp), 1);
-//    Temp := Temp {+ cSiconvDir};
-//  end;
-//  if not DirectoryExists(Temp) then Temp := '';
+  Temp := StartUpDir;
+  {Workaround für MinGW-Version von mkisofs: die Zeichensatztabellen werden nur
+   gefunden, wenn das aktuelle Verzeichnis <cdrtfe>\tools\cdrtools ist.}
+  if IsMinGW and (Pos(cMkisofsBin, CommandLine) > 0) then
+  begin
+    Temp := Temp + cToolDir + cCdrtoolsDir;
+  end;
   Result := Temp;
   {$IFDEF WriteLogfile}
-  // AddLogCode(1104);
-  // AddLog(Result + CRLF, 2);
+  AddLogCode(1104);
+  AddLog(Result, 12);
   {$ENDIF}
 end;
 
