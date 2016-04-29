@@ -2,10 +2,10 @@
 
   cdrtfe.dpr: Hauptprogramm
 
-  Copyright (c) 2004-2015 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  27.11.2015
+  letzte Änderung  29.04.2016
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free Software
@@ -38,6 +38,9 @@ program cdrtfe;
 {$SetPEOptFlags $0140} // enable DEP and ASLR
 
 uses
+  {$IFDEF UseSafeMM}
+  SafeMMInstall in '..\..\extcomp\SafeMM\SafeMMinstall.pas',
+  {$ENDIF}
   Forms,
   f_logfile in 'lib\misc\f_logfile.pas',
   frm_main in 'forms\frm_main.pas' {CdrtfeMainForm},

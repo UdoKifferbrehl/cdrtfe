@@ -29,6 +29,14 @@
          //    - betrifft: frm_about.pas
 
 
+(* ------------------------------------------------------------------- SafeMM *)
+
+{$DEFINE xUseSafeMM}
+         // verwendet den alternativer Memorymanager SafeMM
+         // für Debugging-Zwecke
+         //    - betrifft: cdrtfe.dpr
+
+
 (* -------------------------------------------------------------- MemoryLeaks *)
 
 {$IFDEF TestVersion}
