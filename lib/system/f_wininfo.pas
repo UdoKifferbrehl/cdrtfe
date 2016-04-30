@@ -3,7 +3,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.04.2016
+  letzte Änderung  30.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -90,79 +90,6 @@ begin
     end;
   finally
     Reg.Free;
-  end;
-end;
-
-{ HasAdminPrivileges -----------------------------------------------------------
-
-  gibt die Art der Admin-Rechte zurück:
-  Diese Funktion gibt unter XP entweder apLimited für eingeschränkte Rechte
-  oder apFullAdmin für Administratorrechte zurück. Ab Vista wird apAdmin
-  zurückgegeben, wenn es sich um einen Administrator handelt, das aktuelle
-  Programm aber nicht per UAC elevated gestartet wurde. Läuft das Programm mit
-  uneingeschränkten Adminrechten, so wird hier apFullAdmin zurückgegeben.
-  Quelle: http://www.delphipraxis.net/119831-vista-administratorkonto-oder-
-          reelle-elevated-adminrechte.html                                     }
-
-function HasAdminPrivileges: TAdminPrivileges;
-
-  function GetAdminSid: PSID;
-  const
-    SECURITY_NT_AUTHORITY: TSIDIdentifierAuthority =
-      (Value: (0, 0, 0, 0, 0, 5));
-    SECURITY_BUILTIN_DOMAIN_RID: DWORD = $00000020;
-    DOMAIN_ALIAS_RID_ADMINS: DWORD = $00000220;
-  begin
-    Result := nil;
-    AllocateAndInitializeSid(SECURITY_NT_AUTHORITY, 2,
-      SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS,
-      0, 0, 0, 0, 0, 0, Result);
-  end;
-
-const SE_GROUP_USE_FOR_DENY_ONLY = $00000010;
-
-var TokenHandle     : THandle;
-    ReturnLength    : DWORD;
-    TokenInformation: PTokenGroups;
-    AdminSid        : PSID;
-    Loop            : Integer;
-begin
-  Result := apLimited;
-  TokenHandle := 0;
-  if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, TokenHandle) then
-  try
-    ReturnLength := 0;
-    GetTokenInformation(TokenHandle, TokenGroups, nil, 0, ReturnLength);
-    TokenInformation := GetMemory(ReturnLength);
-    if Assigned(TokenInformation) then
-    try
-      if GetTokenInformation(TokenHandle, TokenGroups, TokenInformation,
-        ReturnLength, ReturnLength) then
-      begin
-        AdminSid := GetAdminSid;
-        for Loop := 0 to TokenInformation^.GroupCount - 1 do
-        begin
-          if EqualSid(TokenInformation^.Groups[Loop].Sid, AdminSid) then
-          begin
-            if (TokenInformation^.Groups[Loop].Attributes and
-              SE_GROUP_USE_FOR_DENY_ONLY) = SE_GROUP_USE_FOR_DENY_ONLY then
-            begin
-              Result := apAdmin;
-            end
-              else
-            begin
-              Result := apFullAdmin;
-            end;
-            Break;
-          end;
-        end;
-        FreeSid(AdminSid);
-      end;
-    finally
-      FreeMemory(TokenInformation);
-    end;
-  finally
-    CloseHandle(TokenHandle);
   end;
 end;
 
@@ -508,6 +435,83 @@ begin
     end;
   end;
   Result := LangCode;
+end;
+
+{ HasAdminPrivileges -----------------------------------------------------------
+
+  gibt die Art der Admin-Rechte zurück:
+  Diese Funktion gibt unter XP entweder apLimited für eingeschränkte Rechte
+  oder apFullAdmin für Administratorrechte zurück. Ab Vista wird apAdmin
+  zurückgegeben, wenn es sich um einen Administrator handelt, das aktuelle
+  Programm aber nicht per UAC elevated gestartet wurde. Läuft das Programm mit
+  uneingeschränkten Adminrechten, so wird hier apFullAdmin zurückgegeben.
+  Quelle: http://www.delphipraxis.net/119831-vista-administratorkonto-oder-
+          reelle-elevated-adminrechte.html                                     }
+
+{$R-}   // sicherstellen, daß Bereichsprüfung deaktiviert ist
+
+function HasAdminPrivileges: TAdminPrivileges;
+
+  function GetAdminSid: PSID;
+  const
+    SECURITY_NT_AUTHORITY: TSIDIdentifierAuthority =
+      (Value: (0, 0, 0, 0, 0, 5));
+    SECURITY_BUILTIN_DOMAIN_RID: DWORD = $00000020;
+    DOMAIN_ALIAS_RID_ADMINS: DWORD = $00000220;
+  begin
+    Result := nil;
+    AllocateAndInitializeSid(SECURITY_NT_AUTHORITY, 2,
+      SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS,
+      0, 0, 0, 0, 0, 0, Result);
+  end;
+
+const SE_GROUP_USE_FOR_DENY_ONLY = $00000010;
+
+var TokenHandle     : THandle;
+    ReturnLength    : DWORD;
+    TokenInformation: PTokenGroups;
+    AdminSid        : PSID;
+    Loop            : Integer;
+begin
+  Result := apLimited;
+  TokenHandle := 0;
+  if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, TokenHandle) then
+  try
+    ReturnLength := 0;
+    GetTokenInformation(TokenHandle, TokenGroups, nil, 0, ReturnLength);
+    TokenInformation := GetMemory(ReturnLength);
+    if Assigned(TokenInformation) then
+    try
+      if GetTokenInformation(TokenHandle, TokenGroups, TokenInformation,
+        ReturnLength, ReturnLength) then
+      begin
+        AdminSid := GetAdminSid;
+        for Loop := 0 to TokenInformation^.GroupCount - 1 do
+        begin
+          {mit Bereichsprüfung kann es hier aufgrund der Definition von
+           TokenInformation^.Groups zu Fehlermeldungen kommen.}
+          if EqualSid(TokenInformation^.Groups[Loop].Sid, AdminSid) then
+          begin
+            if (TokenInformation^.Groups[Loop].Attributes and
+              SE_GROUP_USE_FOR_DENY_ONLY) = SE_GROUP_USE_FOR_DENY_ONLY then
+            begin
+              Result := apAdmin;
+            end
+              else
+            begin
+              Result := apFullAdmin;
+            end;
+            Break;
+          end;
+        end;
+        FreeSid(AdminSid);
+      end;
+    finally
+      FreeMemory(TokenInformation);
+    end;
+  finally
+    CloseHandle(TokenHandle);
+  end;
 end;
 
 end.
