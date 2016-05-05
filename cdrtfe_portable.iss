@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  24.02.2016
+;  letzte Änderung  05.05.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -27,6 +27,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
+AppMutex=Global\cdrtfe,cdrtfe.exe,cdrtfe_test.exe
 DefaultDirName={src}\cdrtfe-{#MyAppVer}portable
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes

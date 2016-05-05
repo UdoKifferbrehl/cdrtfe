@@ -1,9 +1,9 @@
 { f_instance.pas: Instanzen-Management
 
-  Copyright (c) 2004-2008 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  02.10.2008
+  letzte Änderung  05.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -33,8 +33,9 @@ function IsFirstInstance(var hwndPrevInstance: HWnd; WType, WCaption: string): B
 
 implementation
 
-var MutexHandle   : THandle;
-    AlreadyRunning: Boolean;   // True = andere Instanz von cdrtfe läuft bereits
+var MutexHandle      : THandle;
+    GlobalMutexHandle: THandle;
+    AlreadyRunning   : Boolean;   // True = andere Instanz von cdrtfe läuft bereits
 
 { IsAlreadRunning --------------------------------------------------------------
 
@@ -76,9 +77,11 @@ end;
 initialization
   MutexHandle := CreateMutex(nil, True,
                              PChar(ExtractFileName(Application.ExeName)));
+  GlobalMutexHandle := CreateMutex(nil, True, PChar('Global\cdrtfe'));
   AlreadyRunning := GetLastError = ERROR_ALREADY_EXISTS;
 
 finalization
   if MutexHandle <> 0 then CloseHandle(MutexHandle);
+  if GlobalMutexHandle <> 0 then CloseHandle(GlobalMutexHandle);
 
 end.
