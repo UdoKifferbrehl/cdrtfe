@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2016 Oliver Valencia
 
-  letzte Änderung  20.04.2016
+  letzte Änderung  06.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -46,19 +46,22 @@ uses Windows, Forms, StdCtrls, Controls, SysUtils,
      {$IFDEF OverrideMinfo} Classes, {$ENDIF}
      cl_settings, cl_lang, f_largeint;
 
-const cDiskTypeBlocks: array[0..6, 0..1] of string =
+const cDiskTypeBlocks: array[0..8, 0..1] of string =
         ((' ', '1024'),                                    // Dummyeintrag
          ('DVD-R(W) [4,38 GiByte]', '2298496'),
          ('DVD+R(W) [4,38 GiByte]', '2295104'),
          ('DVD-R/DL (-R9) [7,96 GiByte]', '4171712'),
          ('DVD+R/DL (+R9) [7,96 GiByte]', '4173824'),
          ('BD-R(E) [23,3 GiByte]', '12219392'),
-         ('BD-R(E)/DL [46,6 GiByte]', '24438784'));
+         ('BD-R(E)/DL [46,6 GiByte]', '24438784'),
+         ('BD-R(E)/TL [93,2 GiByte]', '48878592'),
+         ('BD-R(E)/QL [119,2 GiByte]', '62500864'));
 
 type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
                   DT_DVD_R, DT_DVD_RW, DT_DVD_RDL,
                   DT_DVD_PlusR, DT_DVD_PlusRW, DT_DVD_PlusRDL,
                   DT_BD_ROM, DT_BD_R, DT_BD_RE, DT_BD_R_DL, DT_BD_RE_DL,
+                  DT_BD_R_TL, DT_BD_RE_TL, DT_BD_R_QL, DT_BD_RE_QL,
                   DT_Unknown,      // unbekannte Disk
                   DT_None,         // keine Disk eingelegt
                   DT_Manual,       // manuelle Auswahl durch User
@@ -1500,14 +1503,46 @@ begin
    FSecFree überprüfen}
   if (FDiskType in [DT_BD_R, DT_BD_RE]) and (FSecFree > FSectors)then
   begin
-    FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
-    case FDiskType of
-      DT_BD_R : FDiskType := DT_BD_R_DL;
-      DT_BD_RE: FDiskType := DT_BD_RE_DL;
+//    FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
+//    case FDiskType of
+//      DT_BD_R : FDiskType := DT_BD_R_DL;
+//      DT_BD_RE: FDiskType := DT_BD_RE_DL;
+//    end;
+//    {$IFDEF DebugReadCDInfo}
+//    Deb('This seems to be an BD-R(E)/DL.', 1);
+//    {$ENDIF}
+    if FSecFree > StrToInt(cDiskTypeBlocks[7, 1]) then
+    begin
+      FSectors := StrToInt(cDiskTypeBlocks[8, 1]);
+      case FDiskType of
+        DT_BD_R : FDiskType := DT_BD_R_QL;
+        DT_BD_RE: FDiskType := DT_BD_RE_QL;
+      end;
+      {$IFDEF DebugReadCDInfo}
+      Deb('This seems to be an BD-R(E)/QL.', 1);
+      {$ENDIF}
+    end else
+    if FSecFree > StrToInt(cDiskTypeBlocks[6, 1]) then
+    begin
+      FSectors := StrToInt(cDiskTypeBlocks[7, 1]);
+      case FDiskType of
+        DT_BD_R : FDiskType := DT_BD_R_TL;
+        DT_BD_RE: FDiskType := DT_BD_RE_TL;
+      end;
+      {$IFDEF DebugReadCDInfo}
+      Deb('This seems to be an BD-R(E)/TL.', 1);
+      {$ENDIF}
+    end else
+    begin
+      FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
+      case FDiskType of
+        DT_BD_R : FDiskType := DT_BD_R_DL;
+        DT_BD_RE: FDiskType := DT_BD_RE_DL;
+      end;
+      {$IFDEF DebugReadCDInfo}
+      Deb('This seems to be an BD-R(E)/DL.', 1);
+      {$ENDIF}
     end;
-    {$IFDEF DebugReadCDInfo}
-    Deb('This seems to be an BD-R(E)/DL.', 1);
-    {$ENDIF}
   end;
   {Multiborderinfo ermitteln}
   // StartSec := ExtractInfo(FMediumInfo, 'Last session start address', ':', LF);  

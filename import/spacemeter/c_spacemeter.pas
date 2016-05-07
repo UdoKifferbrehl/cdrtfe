@@ -2,9 +2,9 @@
 
   c_spacemeter.pas: Anzeigen des auf der Disk beanspruchten Speicherplatzes
 
-  Copyright (c) 2008-2011 Oliver Valencia
+  Copyright (c) 2008-2016 Oliver Valencia
 
-  letzte Änderung  19.06.2011
+  letzte Änderung  07.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -35,10 +35,11 @@ interface
 uses Windows, Classes, Controls, ComCtrls, ExtCtrls, Graphics, Menus,
      QProgBar, SysUtils;
 
-const cDiskTypeCount = 7;    // zählt von 0 an! counts from 0!
+const cDiskTypeCount = 9;    // zählt von 0 an! counts from 0!
 
       cSpaceMeterDiskSizes: array[0..cDiskTypeCount] of Integer =
-                              (650, 700, 800, 870, 4482, 8147, 23866, 47732);
+                              (650, 700, 800, 870, 4482, 8147, 23866, 47732,
+                               95466, 122072);
 
       {$J+}
       cPopupMenuStrings: array[0..cDiskTypeCount] of string =
@@ -49,17 +50,21 @@ const cDiskTypeCount = 7;    // zählt von 0 an! counts from 0!
                             'DVD 4.38 GiB',
                             'DVD/DL 7.96 GiB',
                             'BD 23.3 GiB',
-                            'BD DL 46,6 GiB');
+                            'BD DL 46,6 GiB',
+                            'BD TL 93,2 GiB',
+                            'BD QL 119,2 GiB');
 
-      cDiskTypeStrings: array[0..4] of string =
-                          ('CD', 'DVD', 'DVD/DL', 'BD', 'BD DL');
+      cDiskTypeStrings: array[0..6] of string =
+                          ('CD', 'DVD', 'DVD/DL', 'BD', 'BD DL',
+                           'BD TL', 'BD QL');
 
       cUnitMiB: string = 'MiB';
       cUnitMin: string = 'min';
       {$J-}
 
 type TSpaceMeterDiskType = (SMDT_CD650, SMDT_CD700, SMDT_CD800, SMDT_CD870,
-                            SMDT_DVD, SMDT_DVD_DL, SMDT_BD, SMDT_BD_DL);
+                            SMDT_DVD, SMDT_DVD_DL, SMDT_BD, SMDT_BD_DL,
+                            SMDT_BD_TL, SMDT_BD_QL);
 
      TSpaceMeterMode = (SMM_DataCD, SMM_XCD, SMM_AudioCD, SMM_NoDisk);
 
@@ -151,7 +156,9 @@ var TickCount : Integer;
     TickWidth : Double;
     Divisor   : Integer;
     OutText   : string;
+    DiskType  : TSpaceMeterDiskType;
 begin
+  DiskType := (Self.Parent as TSpaceMeter).FDiskType;
   Canvas.Font.Name := (Owner as TPanel).Font.Name;
   DiskText := '[' + FDiskType + '] ';
   if FSpaceMeterMode = SMM_AudioCD then
@@ -202,7 +209,8 @@ begin
           TickNumTxt := i * Divisor;
         end;                        
         OutText := IntToStr(TickNumTxt);
-        if FSpaceMeterMode = SMM_NoDisk then OutText := '';
+        if (FSpaceMeterMode = SMM_NoDisk) or
+           ((DiskType in [SMDT_BD_TL, SMDT_BD_QL]) and (i = 10)) then OutText := '';
         Canvas.LineTo(TickPos, Tick10);
         Canvas.TextOut(TickPos - Canvas.TextWidth(OutText) - 2, Tick{10 + 1}, OutText);
       end else
@@ -242,7 +250,7 @@ var List   : TStringList;
 begin
   List := TStringList.Create;
   List.Text := Value;
-  MSCount := List.Count - 8; {die letzen sieben Einträge sind Einheiten und }
+  MSCount := List.Count - 10; {die letzen neun Einträge sind Einheiten und }
   for i := 0 to MSCount {cDiskTypeCount} do                      {DiskTypen }
   begin
     cPopupMenuStrings[i] := List[i];
@@ -381,6 +389,8 @@ begin
     SMDT_DVD_DL: FScale.DiskType := cDiskTypeStrings[2];
     SMDT_BD    : FScale.DiskType := cDiskTypeStrings[3];
     SMDT_BD_DL : FScale.DiskType := cDiskTypeStrings[4];
+    SMDT_BD_TL : FScale.DiskType := cDiskTypeStrings[5];
+    SMDT_BD_QL : FScale.DiskType := cDiskTypeStrings[6];
   else
     FScale.DiskType := '';
   end;
@@ -428,6 +438,8 @@ begin
     SMDT_DVD_DL: Size := cSpaceMeterDiskSizes[Integer(SMDT_DVD_DL)];
     SMDT_BD    : Size := cSpaceMeterDiskSizes[Integer(SMDT_BD)];
     SMDT_BD_DL : Size := cSpaceMeterDiskSizes[Integer(SMDT_BD_DL)];
+    SMDT_BD_TL : Size := cSpaceMeterDiskSizes[Integer(SMDT_BD_TL)];
+    SMDT_BD_QL : Size := cSpaceMeterDiskSizes[Integer(SMDT_BD_QL)];
   else
     Size := Integer(SMDT_CD650);
   end;

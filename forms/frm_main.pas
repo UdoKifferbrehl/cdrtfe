@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  17.04.2016
+  letzte Änderung  06.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4357,6 +4357,14 @@ begin
         if DiskType in [DT_BD_R_DL, DT_BD_RE_DL] then
         begin
           SpaceMeter.DiskType := SMDT_BD_DL;
+        end;
+        if DiskType in [DT_BD_R_TL, DT_BD_RE_TL] then
+        begin
+          SpaceMeter.DiskType := SMDT_BD_TL;
+        end;
+        if DiskType in [DT_BD_R_QL, DT_BD_RE_QL] then
+        begin
+          SpaceMeter.DiskType := SMDT_BD_QL;
         end;
       end;
       {bei Datendisk belegten Speicher anzeigen}
