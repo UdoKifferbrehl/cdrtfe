@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.02.2016
+  letzte Änderung  10.04.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -72,12 +72,17 @@ implementation
   {$R ../resource/credits_ex.res}
 {$ENDIF}
 
-uses f_filesystem, f_window, const_common;
+uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
+     f_filesystem, f_window, const_common;
 
 const Cdrtfe_Name        = 'cdrtfe';
       Cdrtfe_Version     = 'cdrtfe 1.5.5'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Portable    = ' portable';
+      Cdrtfe_VerEx       = 'release'
+                           {$IFDEF UseSafeMM} + ' SafeMM' {$ENDIF}
+                           {$IFOPT R+} + ' {R+}' {$ENDIF}
+                           {$IFOPT Q+} + ' {Q+}' {$ENDIF};
       Cdrtfe_Description = 'cdrtools/Mode2CDMaker/VCDImager Frontend';
       Cdrtfe_Copyright   = 'Copyright © 2004-2016  O. Valencia';
       Cdrtfe_Copyright2  = 'Copyright © 2002-2004  O. Valencia, O. Kutsche';
@@ -180,5 +185,11 @@ begin
 end;
 
 initialization
+  {$IFDEF WriteLogfile}
+  AddLog('cdrtfe info:', 10);
+  AddLog('Version     : ' + Cdrtfe_Version, 2);
+  AddLog('File version: ' + GetFileVersionString(Application.ExeName), 2);
+  AddLog('VersionEx   : ' + Cdrtfe_VerEx, 12);
+  {$ENDIF}
 
 end.
