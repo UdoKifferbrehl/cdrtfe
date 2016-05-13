@@ -3,7 +3,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  05.05.2016
+  letzte Änderung  13.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -77,8 +77,8 @@ end;
 initialization
   MutexHandle := CreateMutex(nil, True,
                              PChar(ExtractFileName(Application.ExeName)));
-  GlobalMutexHandle := CreateMutex(nil, True, PChar('Global\cdrtfe'));
   AlreadyRunning := GetLastError = ERROR_ALREADY_EXISTS;
+  GlobalMutexHandle := CreateMutex(nil, True, PChar('Global\cdrtfe'));
 
 finalization
   if MutexHandle <> 0 then CloseHandle(MutexHandle);
