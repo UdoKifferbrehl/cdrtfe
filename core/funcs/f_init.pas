@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  23.04.2016
+  letzte Änderung  28.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -359,15 +359,17 @@ begin
     CdrtoolsOk := FileExists(StartUpDir + cCdrecordBin + cExtExe) and
                   FileExists(StartUpDir + cMkisofsBin + cExtExe);
     {Haben wir es mit der Mingw32-Version zu tun?}
+    {$IFDEF MinGWSupport}
     Mingw := not ImportsDll(StartUpDir + cCdrecordBin + cExtExe,
                             ExtractFileName(cCygwin1Dll));
     SetIsMinGW(Mingw);
+    {$ENDIF}
     {Ist die cygwin1.dll im cdrtfe-Verzeichnis oder Suchpfad?}
     CygwinOk := FileExists(StartUpDir + '\' + cCygwin1Dll) or
                 (FindInSearchPath(cCygwin1Dll) <> '');
     {Weitermachen, wenn cdrtools + cygwin oder Mingw32-cdrtools vorhanden sind.
      Für vcdimager spielt es keine Rolle.}
-    Ok := CdrtoolsOk and (CygwinOk or Mingw);
+    Ok := CdrtoolsOk and (CygwinOk {$IFDEF MinGWSupport}or Mingw{$ENDIF});
     {Weitere Tests für mkisofs}
     MkisofsOk := CheckMkisofsImports;
     Ok := Ok and MkisofsOk;
@@ -387,7 +389,10 @@ begin
     end else
     begin
       {Cygwin Path Prefix initialisieren}
-      if not Mingw then InitCygwinPathPrefix;
+      {$IFDEF MinGWSupport}
+      if not Mingw then
+      {$ENDIF}
+      InitCygwinPathPrefix;
       {Version und Lauffähigkeit von cdrecord/mkisofs prüfen.}
       Result := Result and CheckVersion(Settings, Lang);
       {Ist cdda2wav da? Wenn nicht, dann kein DAE.}
@@ -408,16 +413,21 @@ begin
        benötig (Win2k/WinXP).}
       ShNeeded := not PlatformWin2kXP;
       {wenn Mingw, dann darf ShOk nicht True sein.}
-      ShOk := FileExists(StartUpDir + cShBin + cExtExe) and not Mingw;
+      ShOk := FileExists(StartUpDir + cShBin + cExtExe)
+        {$IFDEF MinGWSupport} and not Mingw {$ENDIF};
       if not ShOk and ShNeeded then
       begin
+        {$IFDEF MinGWSupport}
         if not Mingw then
-          TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit02')) else
-          TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit07'));
+        {$ENDIF}
+          TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit02'))
+        {$IFDEF MinGWSupport} else
+          TLogWin.Inst.Add(Lang.GMS('g003') + CRLF + Lang.GMS('minit07'))
+        {$ENDIF};
       end;
       {sh.exe wird benutzt, wenn vorhanden (und nötig) ist, aber keinesfallse,
        wenn eine Mingw-Version verwendet wird.}
-      UseSh := (ShNeeded or ShOk) and not Mingw;
+      UseSh := (ShNeeded or ShOk) {$IFDEF MinGWSupport} and not Mingw {$ENDIF};
       {Ist der Mode2CDmaker da? Falls nicht, Menüpunkt XCD deaktivieren.}
       M2CDMOk := FileExists(StartUpDir + cMode2CDMakerBin + cExtExe);
       if not M2CDMOk then

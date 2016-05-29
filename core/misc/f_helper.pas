@@ -4,7 +4,7 @@
 
   Copyright (c) 2005-2016 Oliver Valencia
 
-  letzte Änderung  23.04.2016
+  letzte Änderung  28.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -40,7 +40,9 @@ function IsValidDVDSource(const Path: string): Boolean;
 function SCSIIF(const Dev: string): string;
 procedure ConvertXCDParamListToRrencInputList(Source, Dest: TStringList);
 procedure SetSCSIInterface(const SCSIIF: string);
+{$IFDEF MinGWSupport}
 procedure SetIsMinGW(const Value: Boolean);
+{$ENDIF}
 
 implementation
 
@@ -49,17 +51,21 @@ uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
 
 const {$J+}
       SCSIInterface: string = '';
+      {$IFDEF MinGWSupport}
       IsMinGW: Boolean = False;
+      {$ENDIF}
       {$J-}
 
 { SetIsMinGW -------------------------------------------------------------------
 
   setzt die 'statische' Variable SCSIInterface.                                }
 
+{$IFDEF MinGWSupport}
 procedure SetIsMinGW(const Value: Boolean);
 begin
   IsMinGW := Value;
 end;
+{$ENDIF}
 
 { SetSCSIInterface -------------------------------------------------------------
 
@@ -133,10 +139,12 @@ begin
   Temp := StartUpDir;
   {Workaround für MinGW-Version von mkisofs: die Zeichensatztabellen werden nur
    gefunden, wenn das aktuelle Verzeichnis <cdrtfe>\tools\cdrtools ist.}
+  {$IFDEF MinGWSupport}
   if IsMinGW and (Pos(cMkisofsBin, CommandLine) > 0) then
   begin
     Temp := Temp + cToolDir + cCdrtoolsDir;
   end;
+  {$ENDIF}
   Result := Temp;
   {$IFDEF WriteLogfile}
   AddLogCode(1104);

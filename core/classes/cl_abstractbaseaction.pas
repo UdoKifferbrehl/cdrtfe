@@ -2,10 +2,10 @@
 
   cl_abstractbaseaction.pas: abstrakte Basisklasse für Projekt
 
-  Copyright (c) 2004-2014 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  25.01.2014
+  letzte Änderung  28.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -150,13 +150,17 @@ end;
 
 function TCdrtfeAction.MakePathConform(const Path: string): string;
 begin
+  {$IFDEF MinGWSupport}
   if FSettings.FileFlags.Mingw then
   begin
     Result := Path;
   end else
   begin
+  {$ENDIF}
     Result := MakePathCygwinConform(Path);
+  {$IFDEF MinGWSupport}
   end;
+  {$ENDIF}
 end;
 
 { MakePathEntryMkisofsConform --------------------------------------------------
@@ -166,13 +170,17 @@ end;
 
 function TCdrtfeAction.MakePathEntryMkisofsConform(const Path: string): string;
 begin
+  {$IFDEF MinGWSupport}
   if FSettings.FileFlags.Mingw then
   begin
     Result := MakePathMingwMkisofsConform(Path);
   end else
   begin
+  {$ENDIF}
     Result := MakePathMkisofsConform(Path);
+  {$IFDEF MinGWSupport}
   end;
+  {$ENDIF}
 end;
 
 { CheckSpaceForImage -----------------------------------------------------------

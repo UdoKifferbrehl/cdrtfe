@@ -2,10 +2,10 @@
 
   cl_settings_fileflags.pas: Objekt für Flags bzgl. der Tools
 
-  Copyright (c) 2004-2011 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  11.12.2011
+  letzte Änderung  28.05.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -59,7 +59,9 @@ uses cl_abstractbase;
 
 type TFileFlags = class(TCdrtfeData)
      private
+       {$IFDEF MinGWSupport}
        FMingw      : Boolean;    // Mingw32-Port der cdrtools
+       {$ENDIF}
        FIniFileOk  : Boolean;
        FCygwinOk   : Boolean;    // cygwin1.dll
        FCdrtoolsOk : Boolean;    // cdrecord.exe, mkisofs.exe
@@ -92,7 +94,9 @@ type TFileFlags = class(TCdrtfeData)
        constructor Create;
        destructor Destroy; override;
        procedure Init; override;
+       {$IFDEF MinGWSupport}
        property Mingw      : Boolean read FMingw write FMingw;
+       {$ENDIF}
        property IniFileOk  : Boolean read FIniFileOk write FIniFileOk;
        property CygwinOk   : Boolean read FCygwinOk write FCygwinOk;
        property CdrtoolsOk : Boolean read FCdrtoolsOk write FCdrtoolsOk;
@@ -148,7 +152,9 @@ end;
 
 procedure TFileFLags.Init;
 begin
+  {$IFDEF MinGWSupport}
   FMingw       := False;
+  {$ENDIF}
   FIniFileOk   := True;
   FCygwinOk    := True;
   FCdrtoolsOk  := True;
