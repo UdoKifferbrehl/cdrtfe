@@ -46,7 +46,9 @@ uses Windows, Forms, StdCtrls, Controls, SysUtils,
      {$IFDEF OverrideMinfo} Classes, {$ENDIF}
      cl_settings, cl_lang, f_largeint;
 
-const cDiskTypeBlocks: array[0..8, 0..1] of string =
+const  cDiskTypeCount = 8;
+
+       cDiskTypeBlocks: array[0..cDiskTypeCount, 0..1] of string =
         ((' ', '1024'),                                    // Dummyeintrag
          ('DVD-R(W) [4,38 GiByte]', '2298496'),
          ('DVD+R(W) [4,38 GiByte]', '2295104'),
@@ -297,7 +299,7 @@ begin
     OnClick := ButtonCancelClick;
   end;
   {Liste füllen}
-  for i := 0 to 6 do ComboBox.Items.Add(cDiskTypeBlocks[i, 0]);
+  for i := 0 to cDiskTypeCount do ComboBox.Items.Add(cDiskTypeBlocks[i, 0]);
   ComboBox.ItemIndex := 0;
 end;
 
