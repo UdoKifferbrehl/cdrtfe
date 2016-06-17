@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  05.05.2016
+;  letzte Änderung  17.06.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -79,8 +79,6 @@ Name: desktopicon\common; Description: {cm:TaskAllUsers}; GroupDescription: {cm:
 Name: desktopicon\user; Description: {cm:TaskCurrentUser}; GroupDescription: {cm:AdditionalIcons}; Flags: exclusive unchecked;
 ; Quicklaunch icon
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
-; Copy cygwin files
-Name: copycyg; Description: {cm:CopyCygwin}; GroupDescription: {cm:SpecialTask}; Flags: unchecked
 
 [Files]
 ; Main program file
@@ -131,8 +129,6 @@ Source: I:\cdrtfe\proto\tools\vcdimager\vcdimager.exe; DestDir: {app}\tools\vcdi
 ; Commandline Scripts
 Source: I:\cdrtfe\misc\scripts\cmdshell.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellSet;
 Source: I:\cdrtfe\misc\scripts\cmdshellinit.cmd; DestDir: {app}\tools\scripts; Flags: ignoreversion; Components: tools\cdrt; AfterInstall: CmdShellInitSet;
-Source: I:\cdrtfe\misc\scripts\makeiso.cmd; DestDir: {app}\tools\scripts
-Source: I:\cdrtfe\misc\scripts\copycyg.bat; DestDir: {tmp}; Tasks: copycyg
 ; Readme cdrtfe
 Source: I:\cdrtfe\cdrtfe\doc\readme_de.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: de
 Source: I:\cdrtfe\cdrtfe\doc\readme_en.txt; DestDir: {app}\doc; Flags: ignoreversion; Languages: en fr it pl nl ptbr el sv kr
@@ -182,13 +178,11 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrtfe.
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cdrt.cmd"; ValueType: string; ValueName: ""; ValueData: "{app}\tools\scripts\cmdshell.cmd"; Flags: uninsdeletevalue uninsdeletekeyifempty; Components: tools\cdrt;
 
 [Run]
-Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
+;Filename: "{tmp}\copycyg.bat"; Parameters: """{app}"""; Tasks: copycyg
 Filename: "{app}\doc\changes.txt"; Flags: shellexec postinstall skipifsilent unchecked
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-Type: files; Name: "{app}\tools\cdrtools\*.dll"; Tasks: copycyg
-Type: files; Name: "{app}\tools\cdrtools\*.cmd"; Tasks: copycyg
 
 [UninstallRun]
 Filename: "{sys}\regsvr32.exe"; Parameters: "/u /s ""{app}""\cdrtfeShlEx.dll";
