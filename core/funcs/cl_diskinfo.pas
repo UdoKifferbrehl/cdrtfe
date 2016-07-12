@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2016 Oliver Valencia
 
-  letzte Änderung  06.05.2016
+  letzte Änderung  12.07.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -1406,7 +1406,8 @@ end;
 function TDiskInfoM.DVDSizeInfoFound: Boolean;
 begin
   Result := (Pos('free blocks:', FMediumInfo) > 0) or
-            (Pos('phys size:...', FMediumInfo) > 0);
+            (Pos('phys size:...', FMediumInfo) > 0) or
+            (Pos('0x00  Unformated or Blank Media', FMediumInfo) > 0);
   {$IFDEF DebugReadCDInfo}
   if not Result then Deb('No size information found.', 1);
   {$ENDIF}
@@ -1491,6 +1492,17 @@ begin
     Deb('This seems to be an empty (maiden) DVD+RW.', 1);
     {$ENDIF}
   end;
+  {Sonderbehandlung für leere Bluray-Disks ohne Angabe freier Sektoren.}
+  if (FDiskType in [DT_BD_R, DT_BD_RE]) and (Temp = '') and FDiskEmpty then
+  begin
+    Temp := Trim(ExtractInfo(FMediumInfo,
+                        'Format-type  Type', LF, 'Unformated or Blank Media'));
+    Temp := Copy(Temp, 0, Pos(' ', Temp) - 1);
+    {$IFDEF DebugReadCDInfo}
+    Deb('The disc is a BD-R(E) and it is empty.', 1);
+    Deb('However, no remaining writable size info. Use blank size info.', 1);
+    {$ENDIF}
+  end;
   {Disk ist leer oder fortsetzbar, aber keine Angabe zum restlichen Speicher}
   if not FDiskComplete and (Temp = '') then
   begin
@@ -1505,14 +1517,6 @@ begin
    FSecFree überprüfen}
   if (FDiskType in [DT_BD_R, DT_BD_RE]) and (FSecFree > FSectors)then
   begin
-//    FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
-//    case FDiskType of
-//      DT_BD_R : FDiskType := DT_BD_R_DL;
-//      DT_BD_RE: FDiskType := DT_BD_RE_DL;
-//    end;
-//    {$IFDEF DebugReadCDInfo}
-//    Deb('This seems to be an BD-R(E)/DL.', 1);
-//    {$ENDIF}
     if FSecFree > StrToInt(cDiskTypeBlocks[7, 1]) then
     begin
       FSectors := StrToInt(cDiskTypeBlocks[8, 1]);
