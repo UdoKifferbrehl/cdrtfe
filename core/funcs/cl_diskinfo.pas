@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2016 Oliver Valencia
 
-  letzte Änderung  12.07.2016
+  letzte Änderung  13.07.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -102,6 +102,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        FIsDVD        : Boolean;
        FIsBD         : Boolean;
        FDiskType     : TDiskType;
+       FDiskTypeMan  : TDiskType;
        FUseProfiles  : Boolean;
        FForcedFormat : Boolean;
        FFormatCommand: string;
@@ -131,6 +132,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        property IsDVD        : Boolean   read FIsDVD;
        property IsBD         : Boolean   read FIsBD;
        property DiskType     : TDiskType read FDiskType;
+       property DiskTypeMan  : TDiskType read FDiskTypeMan;
        property ForcedFormat : Boolean   read FForcedFormat; // für neue DVD+RWs
        property FormatCommand: string    read FFormatCommand;
        property SelectSess   : Boolean   write FSelectSess;
@@ -198,11 +200,13 @@ type TFormSelectDVD = class(TForm)
        procedure ButtonCancelClick(Sender: TObject);
      private
        FDiskType: TDiskType;
+       FDiskTypeMan: TDiskType;
        FBlocks: string;
        procedure Init;
      public
        property Lang: TLang write FLang;
        property DiskType: TDiskType read FDiskType write FDiskType;
+       property DiskTypeMan: TDiskType read FDiskTypeMan write FDiskTypeMan;
        property Blocks: string read FBlocks;
      end;
 
@@ -240,6 +244,7 @@ var i: Integer;
 begin
   FBlocks := '512';
   FDiskType := DT_Unknown;
+  FDiskTypeMan := DT_None;
   SetFont(Self);
   {Form}
   Caption := FLang.GMS('g004');
@@ -312,12 +317,26 @@ procedure TFormSelectDVD.ButtonClick(Sender: TObject);
 begin
   ModalResult := mrOk;
   FBlocks := cDiskTypeBlocks[ComboBox.ItemIndex, 1];
-  if ComboBox.ItemIndex > 0 then FDiskType := DT_Manual;
+  if ComboBox.ItemIndex > 0 then
+  begin
+    FDiskType := DT_Manual;
+    case ComboBox.ItemIndex of
+      1: FDiskTypeMan := DT_DVD_R;
+      2: FDiskTypeMan := DT_DVD_PlusR;
+      3: FDiskTypeMan := DT_DVD_RDL;
+      4: FDiskTypeMan := DT_DVD_PlusRDL;
+      5: FDiskTypeMan := DT_BD_R;
+      6: FDiskTypeMan := DT_BD_R_DL;
+      7: FDiskTypeMan := DT_BD_R_TL;
+      8: FDiskTypeMan := DT_BD_R_QL;
+    end;
+  end;
 end;
 
 procedure TFormSelectDVD.ButtonCancelClick(Sender: TObject);
 begin
   FDiskType := DT_ManualNone;
+  FDiskTypeMan := DT_None;
 end;
 
 { TFormSetDVD - public }
@@ -373,6 +392,7 @@ begin
   FIsDVD         := False;
   FIsBD          := False;
   FDiskType      := DT_CD;
+  FDiskTypeMan   := DT_None;
   FUseProfiles   := True;
   FForcedFormat  := False;
   FFormatCommand := '';
@@ -863,6 +883,7 @@ begin
           FormSelectDVD.ShowModal;
           Temp := FormSelectDVD.Blocks;
           FDiskType := FormSelectDVD.DiskType;
+          FDiskTypeMan := FormSelectDVD.DiskTypeMan;
         finally
           FormSelectDVD.Release;
         end;
@@ -1210,12 +1231,13 @@ procedure TDiskInfoM.WriteDiskInfoToLogfile;
 begin
   AddLog('DiskInfo:', 0);
   AddLog('=========', 2);
-  AddLog('Disk Type      : ' + EnumToStr(TypeInfo(TDiskType), FDiskType), 3);
-  AddLog('Sectors        : ' + IntToStr(FSectors), 3);
-  AddLog('Sectors Free   : ' + IntToStr(FSecFree), 3);
-  AddLog('Size (MiB)     : ' + FloatToStr(FSize), 3);
-  AddLog('SizeUsed (MiB) : ' + FloatToStr(FSizeUsed), 3);
-  AddLog('SizeFree (MiB) : ' + FloatToStr(FSizeFree), 3);
+  AddLog('Disk Type        : ' + EnumToStr(TypeInfo(TDiskType), FDiskType), 3);
+  AddLog('Disk Type Manual : ' + EnumToStr(TypeInfo(TDiskType), FDiskTypeMan), 3);
+  AddLog('Sectors          : ' + IntToStr(FSectors), 3);
+  AddLog('Sectors Free     : ' + IntToStr(FSecFree), 3);
+  AddLog('Size (MiB)       : ' + FloatToStr(FSize), 3);
+  AddLog('SizeUsed (MiB)   : ' + FloatToStr(FSizeUsed), 3);
+  AddLog('SizeFree (MiB)   : ' + FloatToStr(FSizeFree), 3);
   AddLog('', 2);
 end;
 {$ENDIF}
@@ -1451,9 +1473,8 @@ end;
 
 { GetDVDInfo -------------------------------------------------------------------
 
-  GetDVDInfo ermittelt die auf der DVD zur Verfügung stehende Kapazität. Derzeit
-  funktioniert dies nur mit cdrecord-ProDVD. Wenn ein anderes cdrecord verwendet
-  wird oder der DVD-Type unbekannt ist, kann der User manuell einen Typ angeben
+  GetDVDInfo ermittelt die auf der DVD zur Verfügung stehende Kapazität. Wenn
+  der DVD/BD-Typ unbekannt ist, kann der User manuell einen Typ angeben
   oder ohne Angabe fortfahren.                                                 }
 
 procedure TDiskInfoM.GetDVDInfo;
@@ -1481,6 +1502,26 @@ begin
   FDiskAppendable := Temp = 'incomplete/appendable';  
   {Anzahl freier Sektoren}
   Temp := ExtractInfo(FMediumInfo, 'Remaining writable size', ':', LF);
+  {Keine Angabe 'Remaining writable size', verwende 'free blocks'}
+  if (Temp = '') and not FDiskComplete then
+  begin
+    Temp := ExtractInfo(FMediumInfo, 'free blocks', ':', LF);
+    {$IFDEF DebugReadCDInfo}
+    Deb('No remaining writable size info. Use free blocks info.', 1);
+    {$ENDIF}
+  end;
+  {Sonderbehandlung für leere DVD/Bluray-Disks ohne Angabe freier Sektoren.}
+  if (Temp = '') and FDiskEmpty then
+  begin
+    Temp := Trim(ExtractInfo(FMediumInfo,
+                        'Format-type  Type', LF, 'Unformated or Blank Media'));
+    Temp := Copy(Temp, 0, Pos(' ', Temp) - 1);
+    {$IFDEF DebugReadCDInfo}
+    Deb('The disc is a DVD/BD-R(E) and it is empty.', 1);
+    Deb('However, no remaining writable size/free blocks info. ' +
+        'Use blank size info.', 1);
+    {$ENDIF}
+  end;
   {Sonderbehandlung für unformatierte DVD+RW}
   if (FDIskType = DT_DVD_PlusRW) and (Temp = '') and FDiskEmpty then
   begin
@@ -1490,17 +1531,6 @@ begin
                       ' gracetime=5 dev=' + SCSIIF(FDevice) + ' -v -format';
     {$IFDEF DebugReadCDInfo}
     Deb('This seems to be an empty (maiden) DVD+RW.', 1);
-    {$ENDIF}
-  end;
-  {Sonderbehandlung für leere Bluray-Disks ohne Angabe freier Sektoren.}
-  if (FDiskType in [DT_BD_R, DT_BD_RE]) and (Temp = '') and FDiskEmpty then
-  begin
-    Temp := Trim(ExtractInfo(FMediumInfo,
-                        'Format-type  Type', LF, 'Unformated or Blank Media'));
-    Temp := Copy(Temp, 0, Pos(' ', Temp) - 1);
-    {$IFDEF DebugReadCDInfo}
-    Deb('The disc is a BD-R(E) and it is empty.', 1);
-    Deb('However, no remaining writable size info. Use blank size info.', 1);
     {$ENDIF}
   end;
   {Disk ist leer oder fortsetzbar, aber keine Angabe zum restlichen Speicher}
@@ -1581,6 +1611,7 @@ begin
         FormSelectDVD.ShowModal;
         FSectors := StrToInt(FormSelectDVD.Blocks);
         FDiskType := FormSelectDVD.DiskType;
+        FDiskTypeMan := FormSelectDVD.DiskTypeMan;
       finally
         FormSelectDVD.Release;
       end;
