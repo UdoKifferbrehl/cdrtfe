@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  06.05.2016
+  letzte Änderung  13.07.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -4326,6 +4326,8 @@ begin
       end;
       DiskInfo.GetDiskInfo(DeviceID, (FSettings.General.Choice = cAudioCD));
       DiskType := DiskInfo.DiskType;
+      {Vom User festgelegter Disk-Typ bei unbekannten Medium.}
+      if DiskType = DT_Manual then DiskType := DiskInfo.DiskTypeMan;
       //Temp := EnumToStr(TypeInfo(TDiskType), DiskType);
       //TLogWin.Inst.Add('Disk.DiskType: ' + Temp);
       {SpaceMeter anpassen}
