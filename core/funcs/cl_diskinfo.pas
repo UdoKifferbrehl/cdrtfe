@@ -1495,11 +1495,19 @@ begin
     DT_BD_R, DT_BD_RE          : FSectors := StrToInt(cDiskTypeBlocks[5, 1]);
     DT_BD_R_DL, DT_BD_RE_DL    : FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
   end;
-  {Dvd leer? Fortsetzbar?}
+  {DVD/BD leer? Fortsetzbar?}
   Temp := ExtractInfo(FMediumInfo, 'disk status', ':', LF);
   FDiskEmpty := Temp = 'empty';
   FDiskComplete := Temp = 'complete';
-  FDiskAppendable := Temp = 'incomplete/appendable';  
+  FDiskAppendable := Temp = 'incomplete/appendable';
+  {Sonderfall: keine Disk-Status-Information: von leerer Disk ausgehen}
+  if Temp = '' then
+  begin
+    FDiskEmpty := True;
+    {$IFDEF DebugReadCDInfo}
+    Deb('No disk status info. Assume empty disc.', 1);
+    {$ENDIF}
+  end;
   {Anzahl freier Sektoren}
   Temp := ExtractInfo(FMediumInfo, 'Remaining writable size', ':', LF);
   {Keine Angabe 'Remaining writable size', verwende 'free blocks'}
