@@ -4,7 +4,7 @@
 
   Copyright (c) 2006-2016 Oliver Valencia
 
-  letzte Änderung  13.07.2016
+  letzte Änderung  18.07.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -108,6 +108,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        FFormatCommand: string;
        FSelectSess   : Boolean;
        FSessOverride : string;
+       FForce        : Boolean;
        function DiskInserted(const CDInfo: string): Boolean;
        function GetCDType(const CDInfo: string): TDiskType;
        function GetDVDType(const DVDInfo: string): TDiskType; virtual;
@@ -134,6 +135,7 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
        property DiskType     : TDiskType read FDiskType;
        property DiskTypeMan  : TDiskType read FDiskTypeMan;
        property ForcedFormat : Boolean   read FForcedFormat; // für neue DVD+RWs
+       property Force        : Boolean   read FForce;        // weitermachen bei unbekannter Disk
        property FormatCommand: string    read FFormatCommand;
        property SelectSess   : Boolean   write FSelectSess;
        property SessOverride : string    write FSessOverride;
@@ -157,11 +159,14 @@ type TDiskType = (DT_CD, DT_CD_R, DT_CD_RW, DT_DVD_ROM,
 
      TDiskInfoM = class(TDiskinfo)
      private
-       FMediumInfo    : string;
-       FDiskEmpty     : Boolean;
-       FDiskComplete  : Boolean;
-       FDiskAppendable: Boolean;
-       FSessionEmpty  : Boolean;
+       FMediumInfo      : string;
+       FDiskEmpty       : Boolean;
+       FDiskComplete    : Boolean;
+       FDiskAppendable  : Boolean;
+       FSessionEmpty    : Boolean;
+       FNoDVDStructure  : Boolean;
+       FNoDiskStatus    : Boolean;
+       FNoDiskType      : Boolean;
        function DVDSizeInfoFound: Boolean;
        function GetDVDType(const DVDInfo: string): TDiskType; override;
        function GetMediumInfo(const vv: Boolean): string;
@@ -396,6 +401,7 @@ begin
   FUseProfiles   := True;
   FForcedFormat  := False;
   FFormatCommand := '';
+  FForce         := False;
 end;
 
 { DiskInserted -----------------------------------------------------------------
@@ -1223,6 +1229,8 @@ begin
     Deb('Disk.Append. : False', 1);
   if FSessionEmpty then Deb('Disk.SessEmp.: True' + CRLF, 1) else
     Deb('Disk.SessEmp.: False' + CRLF, 1);
+  if FDiskStructErr then Deb('Disk.StructE.: True' + CRLF, 1) else
+    Deb('Disk.StructE.: False' + CRLF, 1);
 end;
 {$ENDIF}
 
@@ -1238,6 +1246,13 @@ begin
   AddLog('Size (MiB)       : ' + FloatToStr(FSize), 3);
   AddLog('SizeUsed (MiB)   : ' + FloatToStr(FSizeUsed), 3);
   AddLog('SizeFree (MiB)   : ' + FloatToStr(FSizeFree), 3);
+  AddLog('DiskEmpty        : ' + BoolToStr(FDiskEmpty, True), 3);
+  AddLog('DiskComplete     : ' + BoolToStr(FDiskComplete, True), 3);
+  AddLog('DiskAppendable   : ' + BoolToStr(FDiskAppendable, True), 3);
+  AddLog('SessionEmpty     : ' + BoolToStr(FSessionEmpty, True), 3);
+  AddLog('NoDVDStructure   : ' + BoolToStr(FNoDVDStructure, True), 3);
+  AddLog('NoDiskType       : ' + BoolToStr(FNoDiskType, True), 3);
+  AddLog('NoDiskStatus     : ' + BoolToStr(FNoDiskStatus, True), 3);
   AddLog('', 2);
 end;
 {$ENDIF}
@@ -1253,10 +1268,12 @@ begin
   FormDebug.Memo1.Lines.Add('  InitDiskInfo (TDiskInfoM)');
   {$ENDIF}
   FMediumInfo := '';
-  FDiskEmpty     := True;
-  FDiskComplete  := False;
-  FDiskAppendable:= True;
-  FSessionEmpty  := True;
+  FDiskEmpty       := True;
+  FDiskComplete    := False;
+  FDiskAppendable  := True;
+  FSessionEmpty    := True;
+  FNoDVDStructure  := False;
+  FNoDiskStatus    := False;
 end;
 
 { GetSessionData ---------------------------------------------------------------
@@ -1495,6 +1512,9 @@ begin
     DT_BD_R, DT_BD_RE          : FSectors := StrToInt(cDiskTypeBlocks[5, 1]);
     DT_BD_R_DL, DT_BD_RE_DL    : FSectors := StrToInt(cDiskTypeBlocks[6, 1]);
   end;
+  {Problemfälle}
+  FNoDVDStructure := Pos('Cannot read DVD structure.', FMediumInfo) > 0;
+  FNoDiskType := Pos('Cannot get disk type.', FMediumInfo) > 0;
   {DVD/BD leer? Fortsetzbar?}
   Temp := ExtractInfo(FMediumInfo, 'disk status', ':', LF);
   FDiskEmpty := Temp = 'empty';
@@ -1504,6 +1524,7 @@ begin
   if Temp = '' then
   begin
     FDiskEmpty := True;
+    FNoDiskStatus := True;
     {$IFDEF DebugReadCDInfo}
     Deb('No disk status info. Assume empty disc.', 1);
     {$ENDIF}
@@ -1740,23 +1761,6 @@ begin
     ShowMsgDlg(FLang.GMS('eburn01'), FLang.GMS('g001'), MB_cdrtfeError);
     Result := False;
   end;
-  {Fehler: nächste Schreibadresse kann nicht gelesen werden} (*
-  if FMsInfo = 'no_address' then
-  begin
-    if (FDiskType in [DT_CD_RW, DT_DVD_RW]) and
-       FSettings.Cdrecord.AutoErase then
-    begin
-      i := ShowMsgDlg(FLang.GMS('eburn09') + CRLF + CRLF + FLang.GMS('eburn16'),
-                      FLang.GMS('g001'), MB_cdrtfeWarningOC);
-      Result := i = ID_OK;
-      FSettings.Cdrecord.Erase := Result;
-      FMsInfo := '';
-    end else
-    begin
-      ShowMsgDlg(FLang.GMS('eburn09'), FLang.GMS('g001'), MB_cdrtfeError);
-      Result := False;
-    end;
-  end;                                                     *)
   {Fehler: fixierte CD eingelegt}
   if FDiskComplete and (Args.Choice <> cCDRW)then
   begin
@@ -1793,6 +1797,22 @@ begin
     begin
       ShowMsgDlg(FLang.GMS('eburn02'), FLang.GMS('g001'), MB_cdrtfeError);
       Result := False;
+    end;
+  end;
+  {Warnung: cdrecord konnte Disk nicht korrekt erkennen.}
+  if FNoDVDStructure or FNoDiskType then
+  begin
+    i := ShowMsgDlg(FLang.GMS('eburn22'), FLang.GMS('g004'),
+                    MB_cdrtfeWarningOC);
+    Result := i = ID_OK;
+    if Result then
+    begin
+      FForce := True;
+      {$IFDEF WriteLogfile}
+      AddLog('', 2);
+      AddLog('User selection: Continue on NoDVDStructure/NoDiskType warning.', 0);
+      AddLog('', 2);
+      {$ENDIF}
     end;
   end;
 

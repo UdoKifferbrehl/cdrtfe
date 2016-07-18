@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  07.05.2016
+  letzte Änderung  18.07.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -310,6 +310,7 @@ begin
     Add('eburn19=Bei DVD+R(W)s ist keine Simulation möglich.');
     Add('eburn20=Image kann nicht geschrieben werden.\nNicht genügend Speicher auf Laufwerk %s.');
     Add('eburn21=Es soll eine Multisession-Disk im Disk-at-Once-Modus (DAO) geschrieben werden.\nDies wird nicht von allen Laufwerken unterstützt und kann zu unerwünschenten\nErgebnissen führen. Trotzdem fortfahren?');
+    Add('eburn22=cdrecord konnte den Disk-Typ nicht bestimmen. Trotzdem fortfahren?');
     Add('mburn01=Alles bereit. Soll der Brennvorgang gestartet werden?');
     Add('mburn02=Brennvorgang starten?');
     Add('mburn03=In der Shell ausgeführte Befehlszeile:');

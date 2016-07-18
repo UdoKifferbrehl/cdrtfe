@@ -2,10 +2,10 @@
 
   cl_action_datacd.pas: Daten-Disk
 
-  Copyright (c) 2004-2013 Oliver Valencia
+  Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.03.2013
+  letzte Änderung  18.07.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -336,7 +336,7 @@ begin
       CmdC := CmdC + ' ' + CdrecordCustOpts[CdrecordCustOptsIndex];
     if Verbose     then CmdC := CmdC + ' -v';
     if Dummy       then CmdC := CmdC + ' -dummy';
-    if DMASpeedCheck and ForceSpeed then
+    if (DMASpeedCheck and ForceSpeed) or FDisk.Force then
                         CmdC := CmdC + ' -force';
     if TAO and WritingModeRequired
                    then CmdC := CmdC + ' -tao';
