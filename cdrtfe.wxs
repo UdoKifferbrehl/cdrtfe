@@ -23,6 +23,7 @@
             <!--After="InstallFinalize"-->
         </InstallExecuteSequence>
         <Condition Message="You need to be an administrator to install this product.">Privileged</Condition>
+        <Condition Message="This application is only supported on Windows XP or higher."><![CDATA[Installed OR (VersionNT > 500)]]></Condition>
         <Media Id="1" Cabinet="cdrtfe.cab" EmbedCab="yes" CompressionLevel="high" />
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Component Id="RegistryEntriesCmdCdrtfe" Guid="F3E1F558-9786-4AA0-9D29-1592D4A640F2">
@@ -267,19 +268,19 @@
                     <Directory Id="tools" Name="tools">
                         <Directory Id="cdrtools" Name="cdrtools">
                             <Component Id="cdda2wav.exe" DiskId="1" Guid="43C3CE9A-F88A-40B7-B857-7A2E76D57D41">
-                                <File Id="cdda2wav.exe" Name="cdda2wav.exe" Source="I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe" />
+                                <File Id="cdda2wav.exe" Name="cdda2wav.exe" Source="I:\cdrtfe\proto\tools\cdrtools\unpatched\cdda2wav.exe" />
                             </Component>
                             <Component Id="cdrecord.exe" DiskId="1" Guid="CCB4B154-096C-4333-8F62-E4534BC515D9">
-                                <File Id="cdrecord.exe" Name="cdrecord.exe" Source="I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe" />
+                                <File Id="cdrecord.exe" Name="cdrecord.exe" Source="I:\cdrtfe\proto\tools\cdrtools\unpatched\cdrecord.exe" />
                             </Component>
                             <Component Id="isoinfo.exe" DiskId="1" Guid="DE2237B6-F44C-4188-B332-AD89158B4EF7">
-                                <File Id="isoinfo.exe" Name="isoinfo.exe" Source="I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe" />
+                                <File Id="isoinfo.exe" Name="isoinfo.exe" Source="I:\cdrtfe\proto\tools\cdrtools\unpatched\isoinfo.exe" />
                             </Component>
                             <Component Id="mkisofs.exe" DiskId="1" Guid="3ED5A169-BEFF-49F2-9C34-53C77905C4B4">
-                                <File Id="mkisofs.exe" Name="mkisofs.exe" Source="I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe" />
+                                <File Id="mkisofs.exe" Name="mkisofs.exe" Source="I:\cdrtfe\proto\tools\cdrtools\unpatched\mkisofs.exe" />
                             </Component>
                             <Component Id="readcd.exe" DiskId="1" Guid="34761550-F755-4F51-A27F-E8318940F40D">
-                                <File Id="readcd.exe" Name="readcd.exe" Source="I:\cdrtfe\proto\tools\cdrtools\readcd.exe" />
+                                <File Id="readcd.exe" Name="readcd.exe" Source="I:\cdrtfe\proto\tools\cdrtools\unpatched\readcd.exe" />
                             </Component>
                             <Directory Id="lib" Name="lib">
                                 <Directory Id="siconv" Name="siconv">

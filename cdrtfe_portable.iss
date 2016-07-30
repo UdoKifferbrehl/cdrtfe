@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  05.05.2016
+;  letzte Änderung  30.07.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -55,11 +55,17 @@ WindowVisible=no
 AppCopyright={#MyAppCopyright}
 ShowUndisplayableLanguages=yes
 
-[Tasks]
+[Tasks]      
 
 
 [Files]
 Source: I:\cdrtfe\proto2\cdrtfe-{#MyAppVer}portable\*; DestDir: {app}; Flags: ignoreversion recursesubdirs;  
+; unpatched cdrtools
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Check: InstallUnpatchedCdrtools;
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Check: InstallUnpatchedCdrtools; 
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Check: InstallUnpatchedCdrtools;
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Check: InstallUnpatchedCdrtools;
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Check: InstallUnpatchedCdrtools; 
 
 
 [Messages]
@@ -93,6 +99,22 @@ InstallingLabel=Please wait while Setup extracts [name] on your computer.
 
 
 [Code]
+
+var UsePatchedToolsCheckBox: TNewCheckBox;
+
+procedure InitializeWizard;
+begin
+  UsePatchedToolsCheckBox := TNewCheckBox.Create(WizardForm);
+  UsePatchedToolsCheckBox.Parent := WizardForm.SelectDirPage;
+  UsePatchedToolsCheckBox.Top := WizardForm.DirEdit.Top + WizardForm.DirEdit.Height + 15;
+  UsePatchedToolsCheckBox.Width := WizardForm.SelectDirLabel.Width;
+  UsePatchedToolsCheckBox.Caption := 'Use patched cdrtools.';
+end;
+
+function InstallUnpatchedCdrtools: Boolean;
+begin
+  Result := not UsePatchedToolsCheckBox.Checked;
+end;
 
 
 [CustomMessages]

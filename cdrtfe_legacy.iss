@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  17.06.2016
+;  letzte Änderung  30.07.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -94,11 +94,11 @@ Source: I:\cdrtfe\proto\translations\_cdrtfe_lang.ini; DestDir: {app}\translatio
 ; Help files
 Source: I:\cdrtfe\proto\help\*; DestDir: {app}\help; Flags: ignoreversion;
 ; Tools: cdrtools
-Source: I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\.mkisofsrc; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\lib\siconv\*.*; DestDir: {app}\tools\cdrtools\lib\siconv; Flags: ignoreversion; Components: tools\cdrt
 ; Tools cygwin

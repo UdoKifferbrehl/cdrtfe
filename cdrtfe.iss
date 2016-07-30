@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  17.06.2016
+;  letzte Änderung  30.07.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -93,13 +93,19 @@ Source: I:\cdrtfe\proto\translations\_cdrtfe_lang.ini; DestDir: {app}\translatio
 ; Help files
 Source: I:\cdrtfe\proto\help\*; DestDir: {app}\help; Flags: ignoreversion;
 ; Tools: cdrtools
-Source: I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
+Source: I:\cdrtfe\proto\tools\cdrtools\unpatched\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\.mkisofsrc; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cdrtools\lib\siconv\*.*; DestDir: {app}\tools\cdrtools\lib\siconv; Flags: ignoreversion; Components: tools\cdrt
+; patched cdrtools
+Source: I:\cdrtfe\proto\tools\cdrtools\cdrecord.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt\patched
+Source: I:\cdrtfe\proto\tools\cdrtools\mkisofs.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt\patched
+Source: I:\cdrtfe\proto\tools\cdrtools\readcd.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt\patched
+Source: I:\cdrtfe\proto\tools\cdrtools\cdda2wav.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt\patched
+Source: I:\cdrtfe\proto\tools\cdrtools\isoinfo.exe; DestDir: {app}\tools\cdrtools; Flags: ignoreversion; Components: tools\cdrt\patched
 ; Tools cygwin
 Source: I:\cdrtfe\proto\tools\cygwin\sh.exe; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
 Source: I:\cdrtfe\proto\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt;
@@ -200,7 +206,8 @@ Name: prog\langsupport; Description: {cm:CompLang}; Flags: dontinheritcheck; Lan
 Name: src; Description: {cm:CompSrc};
 ; Tools
 Name: tools; Description: {cm:CompTools}; Flags: fixed; Types: custom;
-Name: tools\cdrt; Description: {cm:CompCdrt}; Flags: fixed; Types: custom;
+Name: tools\cdrt; Description: {cm:CompCdrt}; Flags: fixed checkablealone; Types: custom;
+Name: tools\cdrt\patched; Description: {cm:CompCdrtPatched}; Flags: dontinheritcheck; 
 Name: tools\m2cdm; Description: {cm:CompM2CDM}; Flags: fixed dontinheritcheck checkablealone; Types: custom;
 Name: tools\m2cdm\ex; Description: {cm:CompM2CDMex}; Flags: dontinheritcheck;
 Name: tools\rrenc; Description: {cm:CompRrenc}; Flags: fixed dontinheritcheck; Types: custom;
@@ -430,6 +437,7 @@ CompVCD=VCDImager
 ; German
 de.CompLang=Fremdsprachenunterstützung
 de.CompTools=Kommandozeilen-Tools
+de.CompCdrtPatched=gepatchte cdrtools
 de.CompM2CDMex=m2cdm (modifizierter Mode2CDMaker)
 de.CompRrenc=zusätzliche XCD-Fehlerkorrektur
 de.CompXCD=XCD-Tools (dat2file, d2fgui, M2F2Extract)
@@ -456,6 +464,7 @@ de.CopyCygwin=Cygwin-DLLs und Skripte kopieren (nur für Experten, nicht empfohle
 ; English
 en.CompLang=Multi language support (necessary for languages other than German)
 en.CompTools=Commandline tools
+en.CompCdrtPatched=patched cdrtools
 en.CompM2CDMex=m2cdm (modified Mode2CDMaker)
 en.CompRrenc=additional XCD error protection
 en.CompXCD=XCD extraction tools (dat2file, d2fgui, M2F2Extract)
@@ -482,6 +491,7 @@ en.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; French
 fr.CompLang=Prise en charge multilingue (nécessaire pour d'autres langues que l'allemand)
 fr.CompTools=Outils en ligne de commande
+fr.CompCdrtPatched=patched cdrtools
 fr.CompM2CDMex=m2cdm (Mode2CDMaker modifié)
 fr.CompRrenc=Correction d'erreur XCD supplémentaire
 fr.CompXCD=Outils d'extraction XCD (dat2file, d2fgui, M2F2Extract)
@@ -508,6 +518,7 @@ fr.CopyCygwin=Copier les dll cygwin et les scripts (pour expert seulement, non r
 ; Italian
 it.CompLang=Supporto multilingue (necessario per lingue diverse dal tedesco)
 it.CompTools=Strumenti a riga di comando
+it.CompCdrtPatched=patched cdrtools
 it.CompM2CDMex=m2cdm (Mode2CDMaker modificato)
 it.CompRrenc=protezione d'errore supplementare XCD
 it.CompXCD= strumenti di estrazione XCD (dat2file, d2fgui, M2F2Extract)
@@ -534,6 +545,7 @@ it.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; Polish
 pl.CompLang=Dodatkowe jêzyki (dla innych wersji jêzykowych ni¿ niemiecki)
 pl.CompTools=Narzêdzia wiersza poleceñ
+pl.CompCdrtPatched=patched cdrtools
 pl.CompM2CDMex=m2cdm (zmodyfikowany Mode2CDMaker)
 pl.CompRrenc=dodatkowa ochrona b³êdów XCD
 pl.CompXCD=Narzêdzia rozpakowania XCD (dat2file, d2fgui, M2F2Extract)
@@ -560,6 +572,7 @@ pl.CopyCygwin=Copy Cygwin DLLs and scripts (only for experts, not recommended)
 ; Dutch
 nl.CompLang=Meertalige ondersteuning (nodig voor andere talen dan Duits)
 nl.CompTools=Opdrachtregel-tools
+nl.CompCdrtPatched=patched cdrtools
 nl.CompM2CDMex=m2cdm (gewijzigde Mode2CDMaker)
 nl.CompRrenc=aanvullende XCD-foutbescherming
 nl.CompXCD=XCD-extractiegereedschap (dat2file, d2fgui, M2F2Extract)
@@ -586,6 +599,7 @@ nl.CopyCygwin=Cygwin dll's en scripts kopiëren (alleen voor experts, niet aanger
 ; Brazilian-portuguese
 ptbr.CompLang=Suporte a múltiplas linguagens (necessário para outras linguagens além do alemão)
 ptbr.CompTools=Ferramentas em linha de comando
+ptbr.CompCdrtPatched=patched cdrtools
 ptbr.CompM2CDMex=m2cdm (Mode2CDMaker modificado)
 ptbr.CompRrenc=Proteção adicional aos erros do XCD
 ptbr.CompXCD=Ferramentas de extração XCD (dat2file, d2fgui, M2F2Extract)
@@ -612,6 +626,7 @@ ptbr.CopyCygwin=Copiar os scripts e as DLLs do Cygwin (apenas para usuários avan
 ; Greek
 el.CompLang=ÐïëõãëùóóóéêÞ ÕðïóôÞñéîç (áðáñáßôçôç ãéá ãëþóóåò ðÝñáí ôçò ÃåñìáíéêÞò)
 el.CompTools=Åñãáëåßá ôçò ÃñáììÞò Åíôïëþí
+el.CompCdrtPatched=patched cdrtools
 el.CompM2CDMex=m2cdm (modified Mode2CDMaker)
 el.CompRrenc=ðñüóèåôç XCD ðñïóôáóßá ëÜèïõò
 el.CompXCD=XCD åñãáëåßá åîáãùãÞò (dat2file, d2fgui, M2F2Extract)
@@ -638,6 +653,7 @@ el.CopyCygwin=ÁíôéãñáöÞ ôùí Cygwin DLLs êáé ôùí scripts (ìüíï ãéá experts, äåí ó
 ; Swedish
 sv.CompLang=Språkstöd (Nödvändigt för andra språk än Tyska)
 sv.CompTools=Kommandoradsverktyg
+sv.CompCdrtPatched=patched cdrtools
 sv.CompM2CDMex=m2cdm (modifierad Mode2CDMaker)
 sv.CompRrenc=Extra XCD felskydd
 sv.CompXCD=XCD extraheringsverktyg (dat2file, d2fgui, M2F2Extract)
@@ -664,6 +680,7 @@ sv.CopyCygwin=Kopiera Cygwin DLL-filer och script (endast för experter, rekommen
 ; Korean
 kr.CompLang=´ÙÁß ¾ð¾î Áö¿ø (µ¶ÀÏ¾î ÀÌ¿ÜÀÇ ¾ð¾î¿¡ ´ëÇÑ ÇÊ¿äÇÑ)
 kr.CompTools=¸í·ÉÇà µµ±¸
+kr.CompCdrtPatched=patched cdrtools
 kr.CompM2CDMex=m2cdm (modified Mode2CDMaker)
 kr.CompRrenc=additional XCD error protection
 kr.CompXCD=XCD extraction tools (dat2file, d2fgui, M2F2Extract)
