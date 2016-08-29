@@ -2,7 +2,7 @@
 <!--
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4FD0D58143"?>-->
 <?define BaseId="BD41CB72-1BEF-441E-9CDD-9A4F"?>
-<?define ProductId="$(var.BaseId)01070000"?>
+<?define ProductId="$(var.BaseId)01080000"?>
 <?define UpgradeId="$(var.BaseId)11000000"?>
 <?define CompMain="$(var.BaseId)00000000"?>
 <?define CompShlEx="$(var.BaseId)00000001"?>
@@ -11,8 +11,8 @@
 <?define CompShortcut="$(var.BaseId)00000004"?>
 <?define CompProgMenuDir="$(var.BaseId)00000005"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Name="cdrtfe 1.5.5" Id="$(var.ProductId)" UpgradeCode="$(var.UpgradeId)" Language="1033" Codepage="1252" Version="1.5.5" Manufacturer="Oliver Valencia - Open Source Developer">
-        <Package Id="*" Keywords="Installer" Description="cdrtfe 1.5.5 Installer" Comments="cdrtfe is Open Source (GPL)" Manufacturer="Oliver Valencia - Open Source Developer" InstallerVersion="100" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
+    <Product Name="cdrtfe 1.5.6" Id="$(var.ProductId)" UpgradeCode="$(var.UpgradeId)" Language="1033" Codepage="1252" Version="1.5.6" Manufacturer="Oliver Valencia - Open Source Developer">
+        <Package Id="*" Keywords="Installer" Description="cdrtfe 1.5.6 Installer" Comments="cdrtfe is Open Source (GPL)" Manufacturer="Oliver Valencia - Open Source Developer" InstallerVersion="100" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
         <Upgrade Id="$(var.UpgradeId)">
             <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="1.6.0" IncludeMaximum="no" />
         </Upgrade>
@@ -442,6 +442,11 @@
                                 <File Id="sh.exe" Name="sh.exe" Source="I:\cdrtfe\proto\tools\cygwin\sh.exe" />
                             </Component>
                         </Directory>
+                        <Directory Id="etc" Name="etc">
+                            <Component Id="fstab" DiskId="1" Guid="CC01AB6A-FC06-4EAA-B84F-1AB729EEEFFC">
+                                <File Id="fstab" Name="fstab" Source="I:\cdrtfe\proto\tools\etc\fstab" />
+                            </Component>
+                        </Directory>
                         <Directory Id="sound" Name="sound">
                             <Component Id="flac.exe" DiskId="1" Guid="E89C25E9-B743-4E33-BBEC-77E5D6B9BE2C">
                                 <File Id="flac.exe" Name="flac.exe" Source="I:\cdrtfe\proto\tools\sound\flac.exe" />
@@ -643,6 +648,7 @@
             <ComponentRef Id="cygwin.ini" />
             <ComponentRef Id="cygwin1.dll" />
             <ComponentRef Id="sh.exe" />
+            <ComponentRef Id="fstab" />
             <ComponentRef Id="flac.exe" />
             <ComponentRef Id="lame.exe" />
             <ComponentRef Id="mpg123.exe" />

@@ -4,7 +4,7 @@
 ;
 ;  Copyright (c) 2006-2016 Oliver Valencia
 ;
-;  letzte Änderung  30.07.2016
+;  letzte Änderung  29.08.2016
 ;
 ;  Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
 ;  GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -12,7 +12,7 @@
 ;
 
 #define MyAppName "cdrtools Frontend"
-#define MyAppVer "1.5.5"
+#define MyAppVer "1.5.6"
 #define MyAppVerName "cdrtfe " + MyAppVer
 #define MyAppPublisher "Oliver Valencia"
 #define MyAppURL "http://cdrtfe.sourceforge.net"
@@ -103,7 +103,7 @@ Source: I:\cdrtfe\proto\tools\cdrtools\.mkisofsrc; DestDir: {app}\tools\cdrtools
 Source: I:\cdrtfe\proto\tools\cdrtools\lib\siconv\*.*; DestDir: {app}\tools\cdrtools\lib\siconv; Flags: ignoreversion; Components: tools\cdrt
 ; Tools cygwin
 Source: I:\cdrtfe\proto\tools\cygwin\sh.exe; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt
-Source: I:\cdrtfe\proto\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; MinVersion: 0, 5.1 
+;Source: I:\cdrtfe\proto\tools\cygwin\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; MinVersion: 0, 5.1 
 Source: I:\cdrtfe\proto\tools\cygwin\bak\1.5.25sc\cygwin1.dll; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; OnlyBelowVersion: 0, 5.1
 Source: I:\cdrtfe\proto\tools\cygwin\cygwin.ini; DestDir: {app}\tools\cygwin; Flags: ignoreversion; Components: tools\cdrt; Check: CygIniCheck; AfterInstall: CygIniSet
 ; Tools helper
