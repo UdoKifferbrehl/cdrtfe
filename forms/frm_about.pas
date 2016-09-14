@@ -5,7 +5,7 @@
   Copyright (c) 2004-2016 Oliver Valencia
   Copyright (c) 2002-2004 Oliver Valencia, Oliver Kutsche
 
-  letzte Änderung  10.04.2016
+  letzte Änderung  14.09.2016
 
   Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
   GNU General Public License weitergeben und/oder modifizieren. Weitere
@@ -76,7 +76,7 @@ uses {$IFDEF WriteLogfile} f_logfile, {$ENDIF}
      f_filesystem, f_window, const_common;
 
 const Cdrtfe_Name        = 'cdrtfe';
-      Cdrtfe_Version     = 'cdrtfe 1.5.5'
+      Cdrtfe_Version     = 'cdrtfe 1.5.6'
                            {$IFDEF TestVersion} + '-test' {$ENDIF};
       Cdrtfe_Portable    = ' portable';
       Cdrtfe_VerEx       = 'release'
